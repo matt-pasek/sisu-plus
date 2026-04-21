@@ -22,5 +22,5 @@ export function Spinner({ size = 16 }: { size?: number }) {
         strokeDashoffset="10"
       />
     </svg>
-  )
+  );
 }

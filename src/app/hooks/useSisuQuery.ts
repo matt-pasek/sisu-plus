@@ -1,7 +1,7 @@
-import { useQuery, type UseQueryOptions, type UseQueryResult } from '@tanstack/react-query'
-import { sisuRequest } from '@/app/api/client'
+import { useQuery, type UseQueryOptions, type UseQueryResult } from '@tanstack/react-query';
+import { sisuRequest } from '@/app/api/client';
 
-type SisuQueryOptions<T> = Omit<UseQueryOptions<T, Error>, 'queryFn'>
+type SisuQueryOptions<T> = Omit<UseQueryOptions<T, Error>, 'queryFn'>;
 
 export function useSisuQuery<T>(
   endpoint: string,
@@ -13,5 +13,5 @@ export function useSisuQuery<T>(
     queryFn: () => sisuRequest<T>(endpoint, params),
     retry: 1,
     ...options,
-  })
+  });
 }

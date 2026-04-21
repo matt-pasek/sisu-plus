@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from 'zod';
 
 const MetadataSchema = z.object({
   revision: z.number(),
@@ -7,12 +7,12 @@ const MetadataSchema = z.object({
   lastModifiedBy: z.string(),
   lastModifiedOn: z.string(),
   modificationOrdinal: z.number(),
-})
+});
 
 const ModuleSelectionSchema = z.object({
   moduleId: z.string(),
   parentModuleId: z.string().nullable(),
-})
+});
 
 const CourseUnitSelectionSchema = z.object({
   courseUnitId: z.string(),
@@ -22,12 +22,12 @@ const CourseUnitSelectionSchema = z.object({
   substituteFor: z.array(z.string()),
   plannedPeriods: z.array(z.string()),
   gradeRaiseAttempt: z.unknown().nullable(),
-})
+});
 
 const AssessmentItemSelectionSchema = z.object({
   assessmentItemId: z.string(),
   courseUnitId: z.string(),
-})
+});
 
 export const PlanSchema = z
   .object({
@@ -48,11 +48,11 @@ export const PlanSchema = z
     customStudyDrafts: z.array(z.unknown()),
     primary: z.boolean(),
   })
-  .passthrough()
+  .passthrough();
 
-export const PlansResponseSchema = z.array(PlanSchema)
+export const PlansResponseSchema = z.array(PlanSchema);
 
-export type Plan = z.infer<typeof PlanSchema>
-export type PlansResponse = z.infer<typeof PlansResponseSchema>
+export type Plan = z.infer<typeof PlanSchema>;
+export type PlansResponse = z.infer<typeof PlansResponseSchema>;
 
-export const PLANS_ENDPOINT = '/osuva/api/my-plans'
+export const PLANS_ENDPOINT = '/osuva/api/my-plans';

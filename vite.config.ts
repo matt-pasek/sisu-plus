@@ -1,22 +1,20 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import { resolve } from 'path'
-import { copyFileSync } from 'fs'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { resolve } from 'path';
+import { copyFileSync } from 'fs';
+import tailwindcss from '@tailwindcss/vite';
 
 function copyManifest() {
   return {
     name: 'copy-manifest',
     closeBundle() {
-      copyFileSync(
-        resolve(__dirname, 'manifest.json'),
-        resolve(__dirname, 'dist/manifest.json'),
-      )
+      copyFileSync(resolve(__dirname, 'manifest.json'), resolve(__dirname, 'dist/manifest.json'));
     },
-  }
+  };
 }
 
 export default defineConfig({
-  plugins: [react(), copyManifest()],
+  plugins: [react(), copyManifest(), tailwindcss()],
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
@@ -40,4 +38,4 @@ export default defineConfig({
       },
     },
   },
-})
+});

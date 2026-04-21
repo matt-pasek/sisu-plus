@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from 'zod';
 
 const MetadataSchema = z.object({
   revision: z.number(),
@@ -7,28 +7,28 @@ const MetadataSchema = z.object({
   lastModifiedBy: z.string(),
   lastModifiedOn: z.string(),
   modificationOrdinal: z.number(),
-})
+});
 
 const AcceptorPersonSchema = z.object({
   text: z.unknown(),
   personId: z.string(),
   roleUrn: z.string(),
   title: z.unknown(),
-})
+});
 
 const OrganisationSchema = z.object({
   organisationId: z.string(),
   educationalInstitutionUrn: z.string().nullable(),
   roleUrn: z.string(),
   share: z.number(),
-})
+});
 
 const GradeAverageSchema = z.object({
   gradeScaleId: z.string(),
   value: z.number().nullable(),
   totalIncludedCredits: z.number(),
   method: z.string(),
-})
+});
 
 export const AttainmentSchema = z
   .object({
@@ -75,11 +75,11 @@ export const AttainmentSchema = z
     type: z.string(),
     studentApplicationId: z.string().nullable(),
   })
-  .passthrough()
+  .passthrough();
 
-export const AttainmentsResponseSchema = z.array(AttainmentSchema)
+export const AttainmentsResponseSchema = z.array(AttainmentSchema);
 
-export type Attainment = z.infer<typeof AttainmentSchema>
-export type AttainmentsResponse = z.infer<typeof AttainmentsResponseSchema>
+export type Attainment = z.infer<typeof AttainmentSchema>;
+export type AttainmentsResponse = z.infer<typeof AttainmentsResponseSchema>;
 
-export const ATTAINMENTS_ENDPOINT = '/ori/api/my-attainments'
+export const ATTAINMENTS_ENDPOINT = '/ori/api/my-attainments';

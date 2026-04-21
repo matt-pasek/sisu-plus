@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from 'zod';
 
 const MetadataSchema = z.object({
   revision: z.number(),
@@ -7,18 +7,18 @@ const MetadataSchema = z.object({
   lastModifiedBy: z.string(),
   lastModifiedOn: z.string(),
   modificationOrdinal: z.number(),
-})
+});
 
 const StudySubGroupSchema = z.object({
   studySubGroupId: z.string(),
   enrolmentStudySubGroupPriority: z.string(),
   isInCalendar: z.boolean(),
-})
+});
 
 const StudyGroupSetSchema = z.object({
   studyGroupSetId: z.string(),
   targetStudySubGroupAmount: z.number().nullable(),
-})
+});
 
 export const EnrolmentSchema = z
   .object({
@@ -51,11 +51,11 @@ export const EnrolmentSchema = z
     cooperationNetworkStatus: z.unknown().nullable(),
     studentConsentForOutboundDataTransfer: z.unknown().nullable(),
   })
-  .passthrough()
+  .passthrough();
 
-export const EnrolmentsResponseSchema = z.array(EnrolmentSchema)
+export const EnrolmentsResponseSchema = z.array(EnrolmentSchema);
 
-export type Enrolment = z.infer<typeof EnrolmentSchema>
-export type EnrolmentsResponse = z.infer<typeof EnrolmentsResponseSchema>
+export type Enrolment = z.infer<typeof EnrolmentSchema>;
+export type EnrolmentsResponse = z.infer<typeof EnrolmentsResponseSchema>;
 
-export const ENROLMENTS_ENDPOINT = '/ilmo/api/my-enrolments'
+export const ENROLMENTS_ENDPOINT = '/ilmo/api/my-enrolments';

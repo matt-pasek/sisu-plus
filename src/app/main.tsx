@@ -1,8 +1,8 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { Dashboard } from '@/app/components/dashboard/Dashboard'
-import { ErrorBoundary } from '@/app/components/ui/ErrorBoundary'
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Dashboard } from '@/app/components/dashboard/Dashboard';
+import { ErrorBoundary } from '@/app/components/ui/ErrorBoundary';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -12,7 +12,7 @@ const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
     },
   },
-})
+});
 
 export function mountApp(container: HTMLElement) {
   createRoot(container).render(
@@ -23,5 +23,5 @@ export function mountApp(container: HTMLElement) {
         </ErrorBoundary>
       </QueryClientProvider>
     </StrictMode>,
-  )
+  );
 }

@@ -1,14 +1,14 @@
-import { create } from 'zustand'
+import { create } from 'zustand';
 
-type Theme = 'streamlined' | 'expressive'
-type ActivePanel = 'dashboard' | 'attainments' | 'plans'
+type Theme = 'streamlined' | 'expressive';
+type ActivePanel = 'dashboard' | 'attainments' | 'plans';
 
 interface UiState {
-  theme: Theme
-  activePanel: ActivePanel
-  setTheme: (theme: Theme) => void
-  setActivePanel: (panel: ActivePanel) => void
-  toggleTheme: () => void
+  theme: Theme;
+  activePanel: ActivePanel;
+  setTheme: (theme: Theme) => void;
+  setActivePanel: (panel: ActivePanel) => void;
+  toggleTheme: () => void;
 }
 
 export const useUiStore = create<UiState>((set) => ({
@@ -20,4 +20,4 @@ export const useUiStore = create<UiState>((set) => ({
     set((state) => ({
       theme: state.theme === 'streamlined' ? 'expressive' : 'streamlined',
     })),
-}))
+}));

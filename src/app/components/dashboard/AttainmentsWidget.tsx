@@ -1,5 +1,12 @@
 import type { Attainment } from '@/app/api/endpoints/attainments';
 
+type AttainmentRow = Attainment & {
+  courseUnitId?: string;
+  credits?: number;
+  gradeAverage?: { value?: string | number };
+  attainmentDate?: string;
+};
+
 interface Props {
   attainments: Attainment[];
 }
@@ -15,7 +22,7 @@ export function AttainmentsWidget({ attainments }: Props) {
 
   return (
     <div>
-      {attainments.map((a, i) => (
+      {(attainments as AttainmentRow[]).map((a, i) => (
         <div
           key={a.id ?? i}
           style={{

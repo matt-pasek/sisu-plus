@@ -1,17 +1,16 @@
 import { useSisuQuery } from '@/app/hooks/useSisuQuery';
 import { useUiStore } from '@/app/stores/uiStore';
-import { EnrolmentsResponseSchema, ENROLMENTS_ENDPOINT, type EnrolmentsResponse } from '@/app/api/endpoints/enrolments';
-import {
-  AttainmentsResponseSchema,
-  ATTAINMENTS_ENDPOINT,
-  type AttainmentsResponse,
-} from '@/app/api/endpoints/attainments';
+import { fetchEnrolments } from '@/app/api/endpoints/enrolments';
+import { fetchAttainments } from '@/app/api/endpoints/attainments';
+import { fetchPlans } from '@/app/api/endpoints/plans';
+import { fetchEducations } from '@/app/api/endpoints/educations';
 import { CourseCard, CourseCardSkeleton } from './CourseCard';
+import { ProgressWidget, ProgressWidgetSkeleton } from './ProgressWidget';
 import { AttainmentsWidget, AttainmentsWidgetSkeleton } from './AttainmentsWidget';
 import { ErrorBoundary } from '@/app/components/ui/ErrorBoundary';
 import { resolveAllEnrolments, ResolvedEnrolment } from '@/app/api/resolvers';
 import * as React from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 function Widget({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -60,16 +59,13 @@ function InlineError({ endpoint, error }: { endpoint: string; error: Error }) {
 export function Dashboard() {
   const { theme, toggleTheme } = useUiStore();
 
-  const enrolments = useSisuQuery<EnrolmentsResponse>(ENROLMENTS_ENDPOINT);
-  const attainments = useSisuQuery<AttainmentsResponse>(ATTAINMENTS_ENDPOINT);
+  const enrolments = useSisuQuery(['enrolments'], fetchEnrolments);
+  const attainments = useSisuQuery(['attainments'], fetchAttainments);
+  const plans = useSisuQuery(['plans'], fetchPlans);
+  const educations = useSisuQuery(['educations'], fetchEducations);
 
-  const enrolmentList = useMemo(() => {
-    return enrolments.data ? EnrolmentsResponseSchema.parse(enrolments.data) : [];
-  }, [enrolments.data]);
-
-  const attainmentList = useMemo(() => {
-    return attainments.data ? AttainmentsResponseSchema.parse(attainments.data) : [];
-  }, [attainments.data]);
+  const enrolmentList = enrolments.data ?? [];
+  const attainmentList = attainments.data ?? [];
 
   const [resolvedEnrolments, setResolvedEnrolments] = useState<ResolvedEnrolment[]>([]);
   const [isResolving, setIsResolving] = useState(false);
@@ -171,7 +167,7 @@ export function Dashboard() {
               {enrolments.isLoading || isResolving ? (
                 Array.from({ length: 4 }).map((_, i) => <CourseCardSkeleton key={i} />)
               ) : enrolments.isError ? (
-                <InlineError endpoint={ENROLMENTS_ENDPOINT} error={enrolments.error} />
+                <InlineError endpoint="enrolments" error={enrolments.error} />
               ) : resolvedEnrolments.length === 0 ? (
                 <div style={{ padding: 'var(--space-4)', color: 'var(--text-tertiary)', fontSize: '12px' }}>
                   No active enrolments
@@ -184,12 +180,25 @@ export function Dashboard() {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+          <Widget label="Progress">
+            <ErrorBoundary>
+              {plans.isLoading || educations.isLoading ? (
+                <ProgressWidgetSkeleton />
+              ) : plans.isError ? (
+                <InlineError endpoint="plans" error={plans.error} />
+              ) : educations.isError ? (
+                <InlineError endpoint="educations" error={educations.error} />
+              ) : (
+                <ProgressWidget plans={plans.data ?? []} educations={educations.data ?? []} />
+              )}
+            </ErrorBoundary>
+          </Widget>
           <Widget label="Recent Grades">
             <ErrorBoundary>
               {attainments.isLoading ? (
                 <AttainmentsWidgetSkeleton />
               ) : attainments.isError ? (
-                <InlineError endpoint={ATTAINMENTS_ENDPOINT} error={attainments.error} />
+                <InlineError endpoint="attainments" error={attainments.error} />
               ) : (
                 <AttainmentsWidget attainments={attainmentList} />
               )}

@@ -1,17 +1,11 @@
 import { useQuery, type UseQueryOptions, type UseQueryResult } from '@tanstack/react-query';
-import { sisuRequest } from '@/app/api/client';
 
-type SisuQueryOptions<T> = Omit<UseQueryOptions<T, Error>, 'queryFn'>;
+type Options<T> = Omit<UseQueryOptions<T, Error>, 'queryKey' | 'queryFn'>;
 
 export function useSisuQuery<T>(
-  endpoint: string,
-  params?: Record<string, string>,
-  options?: SisuQueryOptions<T>,
+  queryKey: unknown[],
+  queryFn: () => Promise<T>,
+  options?: Options<T>,
 ): UseQueryResult<T, Error> {
-  return useQuery<T, Error>({
-    queryKey: [endpoint, params],
-    queryFn: () => sisuRequest<T>(endpoint, params),
-    retry: 1,
-    ...options,
-  });
+  return useQuery<T, Error>({ queryKey, queryFn, retry: 1, ...options });
 }

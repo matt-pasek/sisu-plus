@@ -1,84 +1,47 @@
-import { z } from 'zod';
-import { sisuRequest } from './client';
+import { koriApi } from './client';
 import type { Enrolment } from './endpoints/enrolments';
 
-// TODO: expand these schemas as the API is better understood
-const courseUnitSchema = z
-  .object({
-    id: z.string(),
-    name: z
-      .object({
-        en: z.string().optional(),
-        fi: z.string().optional(),
-        sv: z.string().optional(),
-      })
-      .optional(),
-    credits: z.object({ min: z.number(), max: z.number() }).optional(),
-  })
-  .passthrough();
+type LocalizedString = { en?: string | null; fi?: string | null; sv?: string | null } | null | undefined;
 
-// TODO: expand these schemas as the API is better understood
-const assessmentItemSchema = z
-  .object({
-    id: z.string(),
-    courseUnitId: z.string(),
-  })
-  .passthrough();
-
-// TODO: expand these schemas as the API is better understood
-const realisationSchema = z
-  .object({
-    id: z.string(),
-    nameSpecifier: z
-      .object({
-        en: z.string().optional(),
-        fi: z.string().optional(),
-        sv: z.string().optional(),
-      })
-      .optional()
-      .nullable(),
-    activityPeriod: z.object({ startDate: z.string(), endDate: z.string() }).optional().nullable(),
-  })
-  .passthrough();
-
-type CourseUnitResult = { name: string; credits: number | null };
-type RealisationResult = { startDate: string | null; endDate: string | null; subtitle: string | null };
-
-const courseUnitCache = new Map<string, CourseUnitResult>();
-const assessmentItemCache = new Map<string, string>();
-const realisationCache = new Map<string, RealisationResult>();
-
-export interface ResolvedEnrolment {
-  id?: string;
-  courseCode: string;
-  courseName: string;
-  subtitle: string | null;
-  credits: number | null;
-  startDate: string | null;
-  endDate: string | null;
-  status?: string | null;
-}
-
-function extractCourseCode(id: string): string {
-  const match = id.match(/lut-([A-Z][A-Z0-9]*\d[A-Z0-9]*)/);
-  return match?.[1] ?? id;
-}
-
-function pickLabel(obj?: { en?: string; fi?: string; sv?: string } | null): string | null {
+function pickLabel(obj: LocalizedString): string | null {
   if (!obj) return null;
   return obj.en ?? obj.fi ?? obj.sv ?? null;
 }
 
-export async function resolveCourseUnit(courseUnitId: string): Promise<CourseUnitResult> {
+function extractCourseCode(id: string | undefined): string | null {
+  if (!id) return null;
+  const match = id.match(/[A-Z]{2,}\d[\w-]*/);
+  return match ? match[0] : null;
+}
+
+type CourseUnitResult = { name: string | null; credits: number | null };
+type RealisationResult = { startDate: string | null; endDate: string | null; subtitle: string | null };
+
+export type ResolvedEnrolment = {
+  id: string | undefined;
+  courseCode: string | null;
+  courseName: string | null;
+  subtitle: string | null;
+  credits: number | null;
+  startDate: string | null;
+  endDate: string | null;
+  status: string | undefined;
+};
+
+const courseUnitCache = new Map<string, CourseUnitResult>();
+const realisationCache = new Map<string, RealisationResult>();
+const assessmentItemCache = new Map<string, string>();
+
+async function resolveCourseUnit(courseUnitId: string): Promise<CourseUnitResult> {
   const cached = courseUnitCache.get(courseUnitId);
   if (cached) return cached;
 
   try {
-    const raw = await sisuRequest<unknown>(`/kori/api/course-units/${courseUnitId}`);
-    const parsed = courseUnitSchema.parse(raw);
+    const response = await koriApi.api.getCourseUnit(courseUnitId);
+    const unit = response.data as any;
     const result: CourseUnitResult = {
-      name: pickLabel(parsed.name as { en?: string; fi?: string; sv?: string }) ?? extractCourseCode(courseUnitId),
-      credits: parsed.credits?.min ?? null,
+      name: pickLabel(unit.name) ?? extractCourseCode(courseUnitId),
+      credits: unit.credits?.min ?? null,
     };
     courseUnitCache.set(courseUnitId, result);
     return result;
@@ -94,10 +57,10 @@ export async function resolveAssessmentItem(assessmentItemId: string): Promise<s
   if (cached) return cached;
 
   try {
-    const raw = await sisuRequest<unknown>(`/kori/api/assessment-items/${assessmentItemId}`);
-    const parsed = assessmentItemSchema.parse(raw);
-    assessmentItemCache.set(assessmentItemId, parsed.courseUnitId);
-    return parsed.courseUnitId;
+    const response = await koriApi.api.getAssessmentItem(assessmentItemId);
+    const item = response.data as any;
+    assessmentItemCache.set(assessmentItemId, item.courseUnitId);
+    return item.courseUnitId;
   } catch {
     assessmentItemCache.set(assessmentItemId, assessmentItemId);
     return assessmentItemId;
@@ -109,12 +72,12 @@ async function resolveRealisation(courseUnitRealisationId: string): Promise<Real
   if (cached) return cached;
 
   try {
-    const raw = await sisuRequest<unknown>(`/kori/api/course-unit-realisations/${courseUnitRealisationId}`);
-    const parsed = realisationSchema.parse(raw);
+    const response = await koriApi.api.getCourseUnitRealisation(courseUnitRealisationId);
+    const realisation = response.data as any;
     const result: RealisationResult = {
-      startDate: parsed.activityPeriod?.startDate ?? null,
-      endDate: parsed.activityPeriod?.endDate ?? null,
-      subtitle: pickLabel(parsed.nameSpecifier as { en?: string; fi?: string; sv?: string } | null),
+      startDate: realisation.activityPeriod?.startDate ?? null,
+      endDate: realisation.activityPeriod?.endDate ?? null,
+      subtitle: pickLabel(realisation.nameSpecifier),
     };
     realisationCache.set(courseUnitRealisationId, result);
     return result;

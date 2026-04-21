@@ -1,21 +1,10 @@
-import type { Enrolment } from '@/app/api/endpoints/enrolments'
+import {ResolvedEnrolment} from "@/app/api/resolvers";
 
 interface Props {
-  enrolment: Enrolment
-}
-
-function resolveLabel(
-  obj: { fi?: string; en?: string; sv?: string } | undefined,
-): string {
-  return obj?.en ?? obj?.fi ?? obj?.sv ?? '—'
+  enrolment: ResolvedEnrolment
 }
 
 export function CourseCard({ enrolment }: Props) {
-  const name = resolveLabel(enrolment.courseUnitRealisationName)
-  const start = enrolment.activityPeriod?.startDate ?? enrolment.enrolmentRight?.validityPeriod?.startDate
-  const end = enrolment.activityPeriod?.endDate ?? enrolment.enrolmentRight?.validityPeriod?.endDate
-  const state = enrolment.processingState ?? enrolment.state
-
   return (
     <div style={{
       padding: 'var(--space-3) var(--space-4)',
@@ -24,24 +13,39 @@ export function CourseCard({ enrolment }: Props) {
       alignItems: 'baseline',
       gap: 'var(--space-3)',
     }}>
-      <span style={{
-        flex: 1,
-        color: 'var(--text-primary)',
-        fontSize: '13px',
-        fontFamily: 'var(--font-body)',
+      <div style={{
+        display: 'flex',
+        gap: 'var(--space-1)',
+        flexDirection: 'column',
       }}>
-        {name}
-      </span>
+        <span style={{
+          flex: 1,
+          color: 'var(--text-primary)',
+          fontSize: '13px',
+          fontFamily: 'var(--font-body)',
+        }}>
+          {enrolment.courseName}
+        </span>
+        <span style={{
+          flex: 1,
+          color: 'var(--text-primary)',
+          fontSize: '11px',
+          fontFamily: 'var(--font-body)',
+        }}>
+          {enrolment.courseCode} ({enrolment.credits}cr)
+        </span>
+      </div>
       <span style={{
         fontFamily: 'var(--font-mono)',
         fontSize: '11px',
         color: 'var(--text-tertiary)',
         whiteSpace: 'nowrap',
+        marginLeft: 'auto'
       }}>
-        {start ? start.slice(0, 10) : ''}
-        {end ? ` → ${end.slice(0, 10)}` : ''}
+        {enrolment.startDate}
+        {` → ${enrolment.endDate}`}
       </span>
-      {state && (
+      {enrolment.status && (
         <span style={{
           fontFamily: 'var(--font-mono)',
           fontSize: '10px',
@@ -49,7 +53,7 @@ export function CourseCard({ enrolment }: Props) {
           textTransform: 'uppercase',
           letterSpacing: '0.04em',
         }}>
-          {state}
+          {enrolment.status}
         </span>
       )}
     </div>
@@ -64,7 +68,7 @@ export function CourseCardSkeleton() {
       display: 'flex',
       gap: 'var(--space-3)',
     }}>
-      <div className="skeleton" style={{ flex: 1, height: '16px', maxWidth: '280px' }} />
+        <div className="skeleton" style={{ flex: 1, height: '16px', maxWidth: '280px' }} />
       <div className="skeleton" style={{ width: '120px', height: '16px' }} />
     </div>
   )

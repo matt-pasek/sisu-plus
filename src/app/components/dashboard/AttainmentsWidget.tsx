@@ -4,30 +4,8 @@ interface Props {
   attainments: Attainment[]
 }
 
-function resolveLabel(
-  obj: { fi?: string; en?: string; sv?: string } | undefined,
-): string {
-  return obj?.en ?? obj?.fi ?? obj?.sv ?? '—'
-}
-
-function gradeLabel(attainment: Attainment): string {
-  const grade = attainment.grade
-  if (!grade) return '—'
-  if (grade.numericCorrespondence != null) return String(grade.numericCorrespondence)
-  return grade.localId ?? '—'
-}
-
 export function AttainmentsWidget({ attainments }: Props) {
-  const recent = attainments
-    .filter((a) => a.primary !== false)
-    .sort((a, b) => {
-      const da = a.attainmentDate ?? ''
-      const db = b.attainmentDate ?? ''
-      return db.localeCompare(da)
-    })
-    .slice(0, 8)
-
-  if (recent.length === 0) {
+  if (attainments.length === 0) {
     return (
       <div style={{ padding: 'var(--space-4)', color: 'var(--text-tertiary)', fontSize: '12px' }}>
         No attainments found
@@ -37,7 +15,7 @@ export function AttainmentsWidget({ attainments }: Props) {
 
   return (
     <div>
-      {recent.map((a, i) => (
+      {attainments.map((a, i) => (
         <div
           key={a.id ?? i}
           style={{
@@ -54,7 +32,7 @@ export function AttainmentsWidget({ attainments }: Props) {
             fontSize: '13px',
             fontFamily: 'var(--font-body)',
           }}>
-            {resolveLabel(a.name)}
+            {a.courseUnitId}
           </span>
           <span style={{
             fontFamily: 'var(--font-mono)',
@@ -71,7 +49,7 @@ export function AttainmentsWidget({ attainments }: Props) {
             minWidth: '16px',
             textAlign: 'right',
           }}>
-            {gradeLabel(a)}
+            {a.gradeAverage?.value}
           </span>
           <span style={{
             fontFamily: 'var(--font-mono)',

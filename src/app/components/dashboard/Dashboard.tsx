@@ -10,20 +10,12 @@ import {
   ATTAINMENTS_ENDPOINT,
   type AttainmentsResponse,
 } from '@/app/api/endpoints/attainments'
-import {
-  PlansResponseSchema,
-  PLANS_ENDPOINT,
-  type PlansResponse,
-} from '@/app/api/endpoints/plans'
-import {
-  EducationsResponseSchema,
-  EDUCATIONS_ENDPOINT,
-  type EducationsResponse,
-} from '@/app/api/endpoints/educations'
 import { CourseCard, CourseCardSkeleton } from './CourseCard'
-import { ProgressWidget, ProgressWidgetSkeleton } from './ProgressWidget'
 import { AttainmentsWidget, AttainmentsWidgetSkeleton } from './AttainmentsWidget'
 import { ErrorBoundary } from '@/app/components/ui/ErrorBoundary'
+import {resolveAllEnrolments, ResolvedEnrolment} from "@/app/api/resolvers";
+import * as React from "react";
+import {useEffect, useMemo, useState} from "react";
 
 function Widget({
   label,
@@ -75,31 +67,52 @@ export function Dashboard() {
 
   const enrolments = useSisuQuery<EnrolmentsResponse>(ENROLMENTS_ENDPOINT)
   const attainments = useSisuQuery<AttainmentsResponse>(ATTAINMENTS_ENDPOINT)
-  const plans = useSisuQuery<PlansResponse>(PLANS_ENDPOINT)
-  const educations = useSisuQuery<EducationsResponse>(EDUCATIONS_ENDPOINT)
 
-  const enrolmentList = enrolments.data
-    ? EnrolmentsResponseSchema.parse(enrolments.data)
-    : []
+  const enrolmentList = useMemo(() => {
+    return enrolments.data
+      ? EnrolmentsResponseSchema.parse(enrolments.data)
+      : []
+  }, [enrolments.data]);
 
-  const active = enrolmentList.filter(
-    (e) => !e.state || ['ENROLLED', 'PROCESSING', 'IN_PROGRESS'].includes((e.state ?? '').toUpperCase()),
-  )
-  const future = enrolmentList.filter(
-    (e) => e.state && ['PENDING', 'UPCOMING'].includes((e.state ?? '').toUpperCase()),
-  )
+  const attainmentList = useMemo(() => {
+    return attainments.data
+      ? AttainmentsResponseSchema.parse(attainments.data)
+      : []
+  }, [attainments.data]);
 
-  const attainmentList = attainments.data
-    ? AttainmentsResponseSchema.parse(attainments.data)
-    : []
+  const [resolvedEnrolments, setResolvedEnrolments] = useState<ResolvedEnrolment[]>([]);
+  const [isResolving, setIsResolving] = useState(false);
 
-  const planList = plans.data
-    ? PlansResponseSchema.parse(plans.data)
-    : []
+  useEffect(() => {
+    let isActive = true;
 
-  const educationList = educations.data
-    ? EducationsResponseSchema.parse(educations.data)
-    : []
+    if (enrolmentList.length === 0) {
+      setResolvedEnrolments([]);
+      return;
+    }
+
+    const fetchResolutions = async () => {
+      setIsResolving(true);
+      try {
+        const result = await resolveAllEnrolments(enrolmentList);
+        if (isActive) {
+          setResolvedEnrolments(result);
+        }
+      } catch (error) {
+        console.error("Failed to resolve enrolments:", error);
+      } finally {
+        if (isActive) {
+          setIsResolving(false);
+        }
+      }
+    };
+
+    fetchResolutions();
+
+    return () => {
+      isActive = false;
+    };
+  }, [enrolmentList]);
 
   return (
     <div style={{
@@ -155,54 +168,24 @@ export function Dashboard() {
         className="sisu-grid"
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-          <Widget label="Active Courses">
+          <Widget label="Enrolments">
             <ErrorBoundary>
-              {enrolments.isLoading ? (
+              {enrolments.isLoading || isResolving ? (
                 Array.from({ length: 4 }).map((_, i) => <CourseCardSkeleton key={i} />)
               ) : enrolments.isError ? (
                 <InlineError endpoint={ENROLMENTS_ENDPOINT} error={enrolments.error} />
-              ) : active.length === 0 ? (
+              ) : resolvedEnrolments.length === 0 ? (
                 <div style={{ padding: 'var(--space-4)', color: 'var(--text-tertiary)', fontSize: '12px' }}>
                   No active enrolments
                 </div>
               ) : (
-                active.map((e, i) => <CourseCard key={e.id ?? i} enrolment={e} />)
-              )}
-            </ErrorBoundary>
-          </Widget>
-
-          <Widget label="Upcoming Enrolments">
-            <ErrorBoundary>
-              {enrolments.isLoading ? (
-                Array.from({ length: 2 }).map((_, i) => <CourseCardSkeleton key={i} />)
-              ) : enrolments.isError ? (
-                <InlineError endpoint={ENROLMENTS_ENDPOINT} error={enrolments.error} />
-              ) : future.length === 0 ? (
-                <div style={{ padding: 'var(--space-4)', color: 'var(--text-tertiary)', fontSize: '12px' }}>
-                  No upcoming enrolments
-                </div>
-              ) : (
-                future.map((e, i) => <CourseCard key={e.id ?? i} enrolment={e} />)
+                resolvedEnrolments.map((e, i) => <CourseCard key={e.id ?? i} enrolment={e} />)
               )}
             </ErrorBoundary>
           </Widget>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-          <Widget label="Credit Progress">
-            <ErrorBoundary>
-              {plans.isLoading || educations.isLoading ? (
-                <ProgressWidgetSkeleton />
-              ) : plans.isError ? (
-                <InlineError endpoint={PLANS_ENDPOINT} error={plans.error} />
-              ) : educations.isError ? (
-                <InlineError endpoint={EDUCATIONS_ENDPOINT} error={educations.error} />
-              ) : (
-                <ProgressWidget plans={planList} educations={educationList} />
-              )}
-            </ErrorBoundary>
-          </Widget>
-
           <Widget label="Recent Grades">
             <ErrorBoundary>
               {attainments.isLoading ? (

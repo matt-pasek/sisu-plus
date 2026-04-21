@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Sisu+",
+  "version": "0.1.0",
+  "description": "A better UI for LUT Sisu",
+  "permissions": ["storage", "webRequest"],
+  "host_permissions": ["https://sisu.lut.fi/*"],
+  "background": {
+    "service_worker": "background/service-worker.js",
+    "type": "module"
+  },
+  "content_scripts": [{
+    "matches": ["https://sisu.lut.fi/student/frontpage*"],
+    "js": ["content/index.js"],
+    "run_at": "document_idle"
+  }],
+  "web_accessible_resources": [{
+    "resources": ["assets/*"],
+    "matches": ["https://sisu.lut.fi/*"]
+  }]
+}

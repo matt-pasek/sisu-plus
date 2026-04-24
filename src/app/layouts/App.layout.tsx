@@ -1,6 +1,7 @@
 import { Outlet, useNavigation } from 'react-router';
 import { SpinnerLoader } from '@/app/components/ui/SpinnerLoader.comp';
 import React from 'react';
+import { Navbar } from '@/app/components/ui/Navbar.comp';
 
 export const AppLayout: React.FC = () => {
   const navigation = useNavigation();
@@ -9,6 +10,7 @@ export const AppLayout: React.FC = () => {
   return (
     <div>
       {isNavigating && <SpinnerLoader />}
+      <Navbar />
       <Outlet />
     </div>
   );

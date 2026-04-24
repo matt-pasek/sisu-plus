@@ -1,4 +1,3 @@
-import { useUiStore } from '@/app/stores/uiStore';
 import { useSisuQuery } from '@/app/hooks/useSisuQuery';
 import { fetchEnrolments } from '@/app/api/endpoints/enrolments';
 import { fetchAttainments } from '@/app/api/endpoints/attainments';
@@ -13,8 +12,6 @@ import { ProgressWidget, ProgressWidgetSkeleton } from '@/app/views/dashboard/co
 import { AttainmentsWidget, AttainmentsWidgetSkeleton } from '@/app/views/dashboard/components/AttainmentsWidget';
 
 const DashboardView: React.FC = () => {
-  const { theme, toggleTheme } = useUiStore();
-
   const enrolments = useSisuQuery(['enrolments'], fetchEnrolments);
   const attainments = useSisuQuery(['attainments'], fetchAttainments);
   const plans = useSisuQuery(['plans'], fetchPlans);
@@ -66,49 +63,6 @@ const DashboardView: React.FC = () => {
         minHeight: '100vh',
       }}
     >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: 'var(--space-6)',
-          paddingBottom: 'var(--space-4)',
-          borderBottom: '1px solid var(--border)',
-        }}
-      >
-        <span
-          style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '15px',
-            fontWeight: 500,
-            letterSpacing: '0.06em',
-            color: 'var(--text-primary)',
-          }}
-        >
-          SISU+
-        </span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
-          <button
-            onClick={toggleTheme}
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: '10px',
-              letterSpacing: '0.06em',
-              color: 'var(--text-tertiary)',
-              background: 'none',
-              border: '1px solid var(--border)',
-              borderRadius: 'var(--radius-sm)',
-              padding: '3px 8px',
-              cursor: 'pointer',
-              textTransform: 'uppercase',
-              transition: 'color var(--transition-fast), border-color var(--transition-fast)',
-            }}
-          >
-            {theme}
-          </button>
-        </div>
-      </div>
-
       <div
         style={{
           display: 'grid',

@@ -4,6 +4,10 @@
   --color-background: #0d0d11;
   --color-container: #15151c;
   --color-offwhite: #ddddf0;
+  --color-border: #222228;
+  --color-lightGrey: #7878a0;
+  --color-darkishGrey: #454565;
+  --color-accent: #419648;
 }
 
 #app {

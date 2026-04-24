@@ -8,6 +8,8 @@
   --color-lightGrey: #7878a0;
   --color-darkishGrey: #454565;
   --color-accent: #419648;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', system-ui, Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
 #app {

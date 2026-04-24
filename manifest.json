@@ -11,9 +11,9 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://sisu.lut.fi/student/frontpage*"],
+      "matches": ["https://sisu.lut.fi/*"],
       "js": ["content/index.js"],
-      "run_at": "document_idle"
+      "run_at": "document_start"
     }
   ],
   "web_accessible_resources": [

@@ -1,62 +1,18 @@
-import { useSisuQuery } from '@/app/hooks/useSisuQuery';
 import { useUiStore } from '@/app/stores/uiStore';
+import { useSisuQuery } from '@/app/hooks/useSisuQuery';
 import { fetchEnrolments } from '@/app/api/endpoints/enrolments';
 import { fetchAttainments } from '@/app/api/endpoints/attainments';
 import { fetchPlans } from '@/app/api/endpoints/plans';
 import { fetchEducations } from '@/app/api/endpoints/educations';
-import { CourseCard, CourseCardSkeleton } from './CourseCard';
-import { ProgressWidget, ProgressWidgetSkeleton } from './ProgressWidget';
-import { AttainmentsWidget, AttainmentsWidgetSkeleton } from './AttainmentsWidget';
-import { ErrorBoundary } from '@/app/components/ui/ErrorBoundary';
+import React, { useEffect, useState } from 'react';
 import { resolveAllEnrolments, ResolvedEnrolment } from '@/app/api/resolvers';
-import * as React from 'react';
-import { useEffect, useState } from 'react';
+import { Widget } from '@/app/views/dashboard/components/Widget.comp';
+import { CourseCard, CourseCardSkeleton } from '@/app/views/dashboard/components/CourseCard';
+import { InlineError } from '@/app/components/InlineError.comp';
+import { ProgressWidget, ProgressWidgetSkeleton } from '@/app/views/dashboard/components/ProgressWidget';
+import { AttainmentsWidget, AttainmentsWidgetSkeleton } from '@/app/views/dashboard/components/AttainmentsWidget';
 
-function Widget({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div
-      style={{
-        border: '1px solid var(--border)',
-        borderRadius: 'var(--radius-md)',
-        background: 'var(--bg-surface)',
-        overflow: 'hidden',
-      }}
-    >
-      <div
-        style={{
-          padding: 'var(--space-2) var(--space-4)',
-          borderBottom: '1px solid var(--border)',
-          fontFamily: 'var(--font-mono)',
-          fontSize: '10px',
-          letterSpacing: '0.08em',
-          color: 'var(--text-tertiary)',
-          textTransform: 'uppercase',
-        }}
-      >
-        {label}
-      </div>
-      {children}
-    </div>
-  );
-}
-
-function InlineError({ endpoint, error }: { endpoint: string; error: Error }) {
-  return (
-    <div
-      style={{
-        padding: 'var(--space-4)',
-        fontFamily: 'var(--font-mono)',
-        fontSize: '11px',
-        color: 'var(--text-tertiary)',
-      }}
-    >
-      <span style={{ color: '#f87171' }}>ERR</span> <span style={{ color: 'var(--text-secondary)' }}>{endpoint}</span>{' '}
-      {error.message}
-    </div>
-  );
-}
-
-export function Dashboard() {
+const DashboardView: React.FC = () => {
   const { theme, toggleTheme } = useUiStore();
 
   const enrolments = useSisuQuery(['enrolments'], fetchEnrolments);
@@ -163,46 +119,40 @@ export function Dashboard() {
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
           <Widget label="Enrolments">
-            <ErrorBoundary>
-              {enrolments.isLoading || isResolving ? (
-                Array.from({ length: 4 }).map((_, i) => <CourseCardSkeleton key={i} />)
-              ) : enrolments.isError ? (
-                <InlineError endpoint="enrolments" error={enrolments.error} />
-              ) : resolvedEnrolments.length === 0 ? (
-                <div style={{ padding: 'var(--space-4)', color: 'var(--text-tertiary)', fontSize: '12px' }}>
-                  No active enrolments
-                </div>
-              ) : (
-                resolvedEnrolments.map((e, i) => <CourseCard key={e.id ?? i} enrolment={e} />)
-              )}
-            </ErrorBoundary>
+            {enrolments.isLoading || isResolving ? (
+              Array.from({ length: 4 }).map((_, i) => <CourseCardSkeleton key={i} />)
+            ) : enrolments.isError ? (
+              <InlineError endpoint="enrolments" error={enrolments.error} />
+            ) : resolvedEnrolments.length === 0 ? (
+              <div style={{ padding: 'var(--space-4)', color: 'var(--text-tertiary)', fontSize: '12px' }}>
+                No active enrolments
+              </div>
+            ) : (
+              resolvedEnrolments.map((e, i) => <CourseCard key={e.id ?? i} enrolment={e} />)
+            )}
           </Widget>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
           <Widget label="Progress">
-            <ErrorBoundary>
-              {plans.isLoading || educations.isLoading ? (
-                <ProgressWidgetSkeleton />
-              ) : plans.isError ? (
-                <InlineError endpoint="plans" error={plans.error} />
-              ) : educations.isError ? (
-                <InlineError endpoint="educations" error={educations.error} />
-              ) : (
-                <ProgressWidget plans={plans.data ?? []} educations={educations.data ?? []} />
-              )}
-            </ErrorBoundary>
+            {plans.isLoading || educations.isLoading ? (
+              <ProgressWidgetSkeleton />
+            ) : plans.isError ? (
+              <InlineError endpoint="plans" error={plans.error} />
+            ) : educations.isError ? (
+              <InlineError endpoint="educations" error={educations.error} />
+            ) : (
+              <ProgressWidget plans={plans.data ?? []} educations={educations.data ?? []} />
+            )}
           </Widget>
           <Widget label="Recent Grades">
-            <ErrorBoundary>
-              {attainments.isLoading ? (
-                <AttainmentsWidgetSkeleton />
-              ) : attainments.isError ? (
-                <InlineError endpoint="attainments" error={attainments.error} />
-              ) : (
-                <AttainmentsWidget attainments={attainmentList} />
-              )}
-            </ErrorBoundary>
+            {attainments.isLoading ? (
+              <AttainmentsWidgetSkeleton />
+            ) : attainments.isError ? (
+              <InlineError endpoint="attainments" error={attainments.error} />
+            ) : (
+              <AttainmentsWidget attainments={attainmentList} />
+            )}
           </Widget>
         </div>
       </div>
@@ -216,4 +166,6 @@ export function Dashboard() {
       `}</style>
     </div>
   );
-}
+};
+
+export default DashboardView;

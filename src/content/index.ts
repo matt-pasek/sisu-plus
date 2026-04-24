@@ -16,6 +16,7 @@ function mount() {
 
   const appRoot = document.createElement('div');
   appRoot.id = 'app';
+  appRoot.classList.add('bg-background');
   shadow.appendChild(appRoot);
 
   mountApp(appRoot);

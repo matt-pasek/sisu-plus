@@ -1,1 +1,12 @@
 @import 'tailwindcss';
+
+@theme {
+  --color-background: #0d0d11;
+  --color-container: #15151c;
+  --color-offwhite: #ddddf0;
+}
+
+#app {
+  min-height: 100dvh;
+  margin: -8px;
+}

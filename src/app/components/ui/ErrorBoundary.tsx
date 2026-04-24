@@ -1,44 +1,28 @@
-import { Component, type ErrorInfo, type ReactNode } from 'react';
+import React from 'react';
+import { isRouteErrorResponse, useRouteError } from 'react-router';
 
-interface Props {
-  children: ReactNode;
-  fallback?: ReactNode;
-}
+export const RootErrorBoundary: React.FC = () => {
+  let error = useRouteError();
 
-interface State {
-  error: Error | null;
-}
-
-export class ErrorBoundary extends Component<Props, State> {
-  state: State = { error: null };
-
-  static getDerivedStateFromError(error: Error): State {
-    return { error };
+  if (isRouteErrorResponse(error)) {
+    return (
+      <>
+        <h1>
+          {error.status} {error.statusText}
+        </h1>
+        <p>{error.data}</p>
+      </>
+    );
+  } else if (error instanceof Error) {
+    return (
+      <div>
+        <h1>Error</h1>
+        <p>{error.message}</p>
+        <p>The stack trace is:</p>
+        <pre>{error.stack}</pre>
+      </div>
+    );
+  } else {
+    return <h1>Unknown Error</h1>;
   }
-
-  componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error('[Sisu+] ErrorBoundary caught:', error, info);
-  }
-
-  render() {
-    if (this.state.error) {
-      return (
-        this.props.fallback ?? (
-          <div
-            style={{
-              padding: 'var(--space-4)',
-              border: '1px solid var(--border)',
-              borderRadius: 'var(--radius-md)',
-              color: 'var(--text-secondary)',
-              fontFamily: 'var(--font-mono)',
-              fontSize: '12px',
-            }}
-          >
-            <span style={{ color: '#f87171' }}>ERROR</span> {this.state.error.message}
-          </div>
-        )
-      );
-    }
-    return this.props.children;
-  }
-}
+};

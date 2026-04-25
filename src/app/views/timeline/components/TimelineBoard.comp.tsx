@@ -1,7 +1,9 @@
 import React from 'react';
+import { useDroppable } from '@dnd-kit/react';
 import type { PeriodCreditSummary, SemesterCreditSummary } from '@/app/api/dataPoints/getCreditsByPeriod';
 import type { TimelineCourse } from '@/app/api/dataPoints/getTimelineCourses';
-import { TimelineCourseCard } from '@/app/views/timeline/components/TimelineCourseCard.comp';
+import { DraggableTimelineCourseCard } from '@/app/views/timeline/components/TimelineCourseCard.comp';
+import { TIMELINE_COURSE_DRAG_TYPE } from '@/app/views/timeline/components/timelineDnd';
 import {
   formatCredits,
   formatPeriodRange,
@@ -11,10 +13,16 @@ import {
   isCurrentPeriod,
   isCurrentSemester,
 } from '@/app/views/timeline/components/timelineUtils';
+import type { TimelineValidationWarning } from '@/app/views/timeline/components/timelineValidation';
 
 interface Props {
+  draftCourseIds?: Set<string>;
+  highlightedPeriodLocators?: Set<string>;
+  isDragging?: boolean;
+  onDismissValidationWarning?: (warningId: string) => void;
   semesters: SemesterCreditSummary[];
   moduleIds: string[];
+  validationWarnings?: Map<string, TimelineValidationWarning[]>;
 }
 
 interface VisiblePeriod {
@@ -30,6 +38,49 @@ interface CourseBlock {
 }
 
 const PERIOD_WIDTH = 210;
+
+const PeriodDropCell: React.FC<{
+  index: number;
+  hasHighlightedDropPeriods: boolean;
+  isHighlighted: boolean;
+  isDragging: boolean;
+  period: PeriodCreditSummary;
+  rowCount: number;
+}> = ({ index, hasHighlightedDropPeriods, isHighlighted, isDragging, period, rowCount }) => {
+  const { ref, isDropTarget } = useDroppable({
+    id: `period:${period.periodLocator}`,
+    accept: TIMELINE_COURSE_DRAG_TYPE,
+    data: { kind: 'timeline-period', periodLocator: period.periodLocator },
+  });
+
+  return (
+    <div
+      ref={ref}
+      className={`relative overflow-hidden rounded-lg border border-dashed transition-[border-color,background-color,box-shadow,scale] duration-200 ease-out ${
+        isDropTarget
+          ? 'z-30 scale-[1.01] border-accent bg-accent/10 shadow-[0_0_0_1px_rgba(65,150,72,0.28),inset_0_0_24px_rgba(65,150,72,0.06)]'
+          : isDragging && hasHighlightedDropPeriods && isHighlighted
+            ? 'z-20 border-accent/60 bg-accent/10 shadow-[inset_0_0_0_1px_rgba(65,150,72,0.16)]'
+            : isDragging && hasHighlightedDropPeriods
+              ? 'border-border bg-background/20 opacity-45'
+              : isDragging
+                ? 'border-border2 bg-container/25 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.02)]'
+                : 'border-border bg-background/30'
+      }`}
+      style={{ gridColumn: index + 1, gridRow: `1 / span ${rowCount}` }}
+    >
+      <div
+        className={`pointer-events-none absolute inset-x-3 top-2 z-40 rounded-md border border-accent/60 bg-accent px-2 py-1.5 text-center text-xs font-semibold text-offwhite shadow-[0_8px_20px_rgba(0,0,0,0.28)] transition-[opacity,scale,filter] duration-200 ease-[cubic-bezier(0.2,0,0,1)] ${
+          isDropTarget || (isDragging && isHighlighted)
+            ? 'blur-0 scale-100 opacity-100'
+            : 'scale-[0.25] opacity-0 blur-[4px]'
+        }`}
+      >
+        {isDropTarget ? 'Drop here' : 'Offered here'}
+      </div>
+    </div>
+  );
+};
 
 function getTotalCredits(
   summary: Pick<PeriodCreditSummary | SemesterCreditSummary, 'plannedCredits' | 'completedCredits'>,
@@ -107,15 +158,40 @@ function getCourseBlocks(semesters: SemesterCreditSummary[], periods: VisiblePer
   });
 }
 
-export const TimelineBoard: React.FC<Props> = ({ semesters, moduleIds }) => (
-  <TimelineBoardContent semesters={semesters} moduleIds={moduleIds} />
+export const TimelineBoard: React.FC<Props> = ({
+  draftCourseIds = new Set(),
+  highlightedPeriodLocators = new Set(),
+  isDragging = false,
+  onDismissValidationWarning,
+  semesters,
+  moduleIds,
+  validationWarnings = new Map(),
+}) => (
+  <TimelineBoardContent
+    draftCourseIds={draftCourseIds}
+    highlightedPeriodLocators={highlightedPeriodLocators}
+    isDragging={isDragging}
+    onDismissValidationWarning={onDismissValidationWarning}
+    semesters={semesters}
+    moduleIds={moduleIds}
+    validationWarnings={validationWarnings}
+  />
 );
 
-const TimelineBoardContent: React.FC<Props> = ({ semesters, moduleIds }) => {
+const TimelineBoardContent: React.FC<Props> = ({
+  draftCourseIds = new Set(),
+  highlightedPeriodLocators = new Set(),
+  isDragging = false,
+  onDismissValidationWarning,
+  semesters,
+  moduleIds,
+  validationWarnings = new Map(),
+}) => {
   const visiblePeriods = semesters.flatMap((semester) => semester.periods.map((period) => ({ period, semester })));
   const courseBlocks = getCourseBlocks(semesters, visiblePeriods);
   const rowCount = Math.max(courseBlocks.length > 0 ? Math.max(...courseBlocks.map((block) => block.row)) + 1 : 1, 3);
   const gridTemplateColumns = `repeat(${visiblePeriods.length}, ${PERIOD_WIDTH}px)`;
+  const hasHighlightedDropPeriods = highlightedPeriodLocators.size > 0;
   let periodOffset = 0;
 
   return (
@@ -188,20 +264,28 @@ const TimelineBoardContent: React.FC<Props> = ({ semesters, moduleIds }) => {
               }}
             >
               {visiblePeriods.map(({ period }, index) => (
-                <div
+                <PeriodDropCell
                   key={`${period.periodLocator}:background`}
-                  className="rounded-lg border border-dashed border-border bg-background/30"
-                  style={{ gridColumn: index + 1, gridRow: `1 / span ${rowCount}` }}
+                  index={index}
+                  hasHighlightedDropPeriods={hasHighlightedDropPeriods}
+                  isHighlighted={highlightedPeriodLocators.has(period.periodLocator)}
+                  isDragging={isDragging}
+                  period={period}
+                  rowCount={rowCount}
                 />
               ))}
 
               {courseBlocks.length > 0 ? (
                 courseBlocks.map((block) => (
-                  <TimelineCourseCard
+                  <DraggableTimelineCourseCard
                     key={getCourseKey(block.course)}
                     course={block.course}
                     color={getModuleColor(block.course.moduleId, moduleIds)}
+                    disabled={block.course.isPassed}
+                    isDraft={draftCourseIds.has(block.course.courseUnitId)}
                     className="z-10 min-h-[74px]"
+                    onDismissValidationWarning={onDismissValidationWarning}
+                    validationWarnings={validationWarnings.get(block.course.courseUnitId)}
                     style={{
                       gridColumn: `${block.startColumn + 1} / ${block.endColumn + 1}`,
                       gridRow: block.row + 1,

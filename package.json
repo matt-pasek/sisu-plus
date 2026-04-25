@@ -23,6 +23,7 @@
     "generate:apis": "bun run scripts/generate-apis.ts"
   },
   "dependencies": {
+    "@dnd-kit/react": "^0.4.0",
     "@tailwindcss/vite": "^4.2.4",
     "@tanstack/react-query": "^5.62.0",
     "@ts-ics/schema-zod": "^2.4.4",

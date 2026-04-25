@@ -1,7 +1,7 @@
 import { koriApi } from '@/app/api/client';
 import { pickLabel } from '@/app/api/resolvers/helpers/pickLabel';
 
-type RealisationResult = { startDate: string | null; endDate: string | null; name: string | null };
+export type RealisationResult = { startDate: string | null; endDate: string | null; name: string | null };
 
 const realisationCache = new Map<string, RealisationResult>();
 

@@ -2,14 +2,17 @@ import { fetchAttainments } from '@/app/api/endpoints/attainments';
 import { fetchEnrolments } from '@/app/api/endpoints/enrolments';
 import { fetchPlans } from '@/app/api/endpoints/plans';
 import { getStudyPeriodMap, type StudyPeriodInfo } from '@/app/api/dataPoints/getStudyPeriodMap';
+import { resolveCourseRealisations } from '@/app/api/resolvers/resolveCourseRealisations';
 import { resolveCourseUnit } from '@/app/api/resolvers/resolveCourseUnit';
 import { resolveModule } from '@/app/api/resolvers/resolveModule';
 import { buildCuToTopModuleMap } from '@/app/api/resolvers/helpers/buildCuToTopModuleMap';
 import { useSisuQuery } from '@/app/hooks/useSisuQuery';
 import type { CourseUnitAttainmentRestricted } from '@/app/api/generated/OriApi';
+import type { RealisationResult } from '@/app/api/resolvers/resolveRealization';
 
 export interface TimelineCourse {
   courseUnitId: string;
+  courseUnitGroupId: string | null;
   courseCode: string | null;
   courseName: string | null;
   credits: number | null;
@@ -22,6 +25,7 @@ export interface TimelineCourse {
   grade: number | string | null;
   isEnrolled: boolean;
   parentModuleId: string | null;
+  teachingPeriodLocators: string[];
 }
 
 function isPassingCourseUnitAttainment(attainment: unknown): attainment is CourseUnitAttainmentRestricted {
@@ -42,6 +46,32 @@ function getGrade(attainment: CourseUnitAttainmentRestricted | undefined): numbe
 function findPeriodForDate(periods: StudyPeriodInfo[], date: string | undefined): StudyPeriodInfo | null {
   if (!date) return null;
   return periods.find((period) => date >= period.startDate && date < period.endDate) ?? null;
+}
+
+function rangesOverlap(
+  firstStart: string | null,
+  firstEnd: string | null,
+  secondStart: string,
+  secondEnd: string,
+): boolean {
+  if (!firstStart || !firstEnd) return false;
+  return firstStart < secondEnd && firstEnd > secondStart;
+}
+
+function getTeachingPeriodLocators(realisations: RealisationResult[], periods: StudyPeriodInfo[]): string[] {
+  const offeredPeriodNames = new Set(
+    periods
+      .filter((period) =>
+        realisations.some((realisation) =>
+          rangesOverlap(realisation.startDate, realisation.endDate, period.startDate, period.endDate),
+        ),
+      )
+      .map((period) => period.name),
+  );
+
+  if (offeredPeriodNames.size === 0) return [];
+
+  return [...new Set(periods.filter((period) => offeredPeriodNames.has(period.name)).map((period) => period.locator))];
 }
 
 export const getTimelineCourses = (planId?: string): { timelineCourses: TimelineCourse[]; isLoading: boolean } => {
@@ -66,11 +96,18 @@ export const getTimelineCourses = (planId?: string): { timelineCourses: Timeline
       const courseUnitEntries = await Promise.all(
         courseUnitIds.map(async (courseUnitId) => [courseUnitId, await resolveCourseUnit(courseUnitId)] as const),
       );
+      const realisationEntries = await Promise.all(
+        courseUnitEntries.map(
+          async ([courseUnitId, courseUnit]) =>
+            [courseUnitId, await resolveCourseRealisations(courseUnit.assessmentItemIds)] as const,
+        ),
+      );
       const moduleEntries = await Promise.all(
         topModuleIds.map(async (moduleId) => [moduleId, await resolveModule(moduleId)] as const),
       );
 
       const courseUnitsById = new Map(courseUnitEntries);
+      const realisationsByCourseUnitId = new Map(realisationEntries);
       const modulesById = new Map(moduleEntries);
       const studyPeriods = [...studyPeriodMap.values()];
 
@@ -96,9 +133,14 @@ export const getTimelineCourses = (planId?: string): { timelineCourses: Timeline
           .map((periodLocator) => studyPeriodMap.get(periodLocator))
           .filter((period): period is StudyPeriodInfo => period != null);
         const completionPeriod = findPeriodForDate(studyPeriods, attainment?.attainmentDate);
+        const realisationPeriodLocators = getTeachingPeriodLocators(
+          realisationsByCourseUnitId.get(selection.courseUnitId) ?? [],
+          studyPeriods,
+        );
 
         return {
           courseUnitId: selection.courseUnitId,
+          courseUnitGroupId: courseUnit?.groupId ?? null,
           courseCode: courseUnit?.code ?? null,
           courseName: courseUnit?.name ?? null,
           credits: courseUnit?.credits ?? null,
@@ -111,6 +153,10 @@ export const getTimelineCourses = (planId?: string): { timelineCourses: Timeline
           grade: getGrade(attainment),
           isEnrolled: enrolledCourseUnits.has(selection.courseUnitId),
           parentModuleId: selection.parentModuleId ?? null,
+          teachingPeriodLocators:
+            realisationPeriodLocators.length > 0
+              ? realisationPeriodLocators
+              : (courseUnit?.teachingPeriodLocators ?? []),
         };
       });
     },

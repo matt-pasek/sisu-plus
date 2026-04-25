@@ -1,7 +1,6 @@
 import { Enrolment } from '@/app/api/generated/IlmoApi';
 import { resolveRealisation } from '@/app/api/resolvers/resolveRealization';
 import { resolveCourseUnit } from '@/app/api/resolvers/resolveCourseUnit';
-import { extractCourseCode } from '@/app/api/resolvers/helpers/extractCourseCode';
 
 export type ResolvedEnrolment = {
   id: string | undefined;
@@ -25,7 +24,7 @@ export const resolveEnrolment = async (enrolment: Enrolment): Promise<ResolvedEn
   return {
     id: enrolment.id,
     courseUnitId: enrolment.courseUnitId,
-    courseCode: extractCourseCode(enrolment.assessmentItemId),
+    courseCode: courseUnit.code,
     courseName: courseUnit.name,
     name: realisation.name,
     credits: courseUnit.credits,

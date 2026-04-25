@@ -22,6 +22,12 @@ function getCourseCredits(course: TimelineCourse): number {
   return course.credits ?? 0;
 }
 
+function addCourseOnce(summary: PeriodCreditSummary, course: TimelineCourse): void {
+  if (!summary.courses.some((existing) => existing.courseUnitId === course.courseUnitId)) {
+    summary.courses.push(course);
+  }
+}
+
 export function getCreditsByPeriod(courses: TimelineCourse[], studyPeriodMap: StudyPeriodMap): PeriodCreditSummary[] {
   const summariesByLocator = new Map<string, PeriodCreditSummary>();
 
@@ -36,14 +42,33 @@ export function getCreditsByPeriod(courses: TimelineCourse[], studyPeriodMap: St
   }
 
   for (const course of courses) {
-    for (const period of course.plannedPeriods) {
-      const summary = summariesByLocator.get(period.locator);
-      if (!summary) continue;
+    const plannedSummaries = course.plannedPeriods
+      .map((period) => summariesByLocator.get(period.locator))
+      .filter((summary): summary is PeriodCreditSummary => summary != null);
+    const credits = getCourseCredits(course);
 
-      const credits = getCourseCredits(course);
-      summary.plannedCredits += credits;
-      if (course.isPassed) summary.completedCredits += credits;
-      summary.courses.push(course);
+    if (plannedSummaries.length > 0) {
+      const creditsPerPeriod = credits / plannedSummaries.length;
+      for (const summary of plannedSummaries) {
+        if (course.isPassed) {
+          summary.completedCredits += creditsPerPeriod;
+        } else {
+          summary.plannedCredits += creditsPerPeriod;
+        }
+        addCourseOnce(summary, course);
+      }
+      continue;
+    }
+
+    if (course.isPassed && course.completionPeriod) {
+      const completionSummary = course.completionPeriod
+        ? summariesByLocator.get(course.completionPeriod.locator)
+        : undefined;
+
+      if (completionSummary) {
+        completionSummary.completedCredits += credits;
+        addCourseOnce(completionSummary, course);
+      }
     }
   }
 
@@ -58,8 +83,6 @@ export function getCreditsBySemester(periods: PeriodCreditSummary[]): SemesterCr
     const existing = summariesBySemester.get(key);
 
     if (existing) {
-      existing.plannedCredits += periodSummary.plannedCredits;
-      existing.completedCredits += periodSummary.completedCredits;
       existing.periods.push(periodSummary);
       existing.courses.push(...periodSummary.courses);
       continue;
@@ -68,14 +91,25 @@ export function getCreditsBySemester(periods: PeriodCreditSummary[]): SemesterCr
     summariesBySemester.set(key, {
       studyYear: periodSummary.period.studyYear,
       termName: periodSummary.period.termName,
-      plannedCredits: periodSummary.plannedCredits,
-      completedCredits: periodSummary.completedCredits,
+      plannedCredits: 0,
+      completedCredits: 0,
       periods: [periodSummary],
       courses: [...periodSummary.courses],
     });
   }
 
-  return [...summariesBySemester.values()].sort((a, b) => {
+  const summaries = [...summariesBySemester.values()].map((semester) => {
+    const coursesById = new Map(semester.courses.map((course) => [course.courseUnitId, course]));
+
+    return {
+      ...semester,
+      plannedCredits: semester.periods.reduce((sum, period) => sum + period.plannedCredits, 0),
+      completedCredits: semester.periods.reduce((sum, period) => sum + period.completedCredits, 0),
+      courses: [...coursesById.values()],
+    };
+  });
+
+  return summaries.sort((a, b) => {
     if (a.studyYear !== b.studyYear) return a.studyYear - b.studyYear;
     const firstPeriodA = a.periods[0]?.period.startDate ?? '';
     const firstPeriodB = b.periods[0]?.period.startDate ?? '';

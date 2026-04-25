@@ -2,7 +2,9 @@ import React from 'react';
 import { NavLink } from 'react-router';
 import { getCreditsByModule } from '@/app/api/dataPoints/getCreditsByModule';
 import { getUserDetails } from '@/app/api/dataPoints/getUserDetails';
+import { fetchPlans } from '@/app/api/endpoints/plans';
 import { AccountDropdown } from '@/app/components/ui/AccountDropdown.comp';
+import { useSisuQuery } from '@/app/hooks/useSisuQuery';
 
 const NaviLink: React.FC<{ to: string; name: string }> = ({ to, name }) => (
   <NavLink
@@ -18,6 +20,8 @@ const NaviLink: React.FC<{ to: string; name: string }> = ({ to, name }) => (
 export const Navbar: React.FC = () => {
   const { modules, totalTarget, isLoading } = getCreditsByModule();
   const { loadingDetails, userDetails } = getUserDetails();
+  const plansQuery = useSisuQuery(['plans'], fetchPlans);
+  const planId = plansQuery.data?.find((plan) => plan.primary)?.id ?? plansQuery.data?.[0]?.id;
 
   return (
     <nav className="sticky z-50 flex w-full gap-5 border-b border-solid border-border bg-container px-6 py-2">
@@ -27,7 +31,7 @@ export const Navbar: React.FC = () => {
       </div>
       <div className="flex items-center gap-2 text-sm font-medium">
         <NaviLink to={'/student/frontpage'} name="Dashboard" />
-        <NaviLink to={'/student/plan'} name="Timeline" />
+        <NaviLink to={planId ? `/student/plan/${planId}/timing` : '/student/plan'} name="Timeline" />
         <NaviLink to={'/student/structure'} name="Structure" />
         <NaviLink to={'/student/enrolments'} name="Registration" />
       </div>

@@ -5,7 +5,6 @@ import { getStudyPeriodMap, type StudyPeriodInfo } from '@/app/api/dataPoints/ge
 import { resolveCourseUnit } from '@/app/api/resolvers/resolveCourseUnit';
 import { resolveModule } from '@/app/api/resolvers/resolveModule';
 import { buildCuToTopModuleMap } from '@/app/api/resolvers/helpers/buildCuToTopModuleMap';
-import { extractCourseCode } from '@/app/api/resolvers/helpers/extractCourseCode';
 import { useSisuQuery } from '@/app/hooks/useSisuQuery';
 import type { CourseUnitAttainmentRestricted } from '@/app/api/generated/OriApi';
 
@@ -17,6 +16,8 @@ export interface TimelineCourse {
   moduleId: string | null;
   moduleName: string | null;
   plannedPeriods: StudyPeriodInfo[];
+  completionPeriod: StudyPeriodInfo | null;
+  attainmentDate: string | null;
   isPassed: boolean;
   grade: number | string | null;
   isEnrolled: boolean;
@@ -38,16 +39,24 @@ function getGrade(attainment: CourseUnitAttainmentRestricted | undefined): numbe
   return attainment.gradeId >= 1 && attainment.gradeId <= 5 ? attainment.gradeId : null;
 }
 
-export const getTimelineCourses = (): { timelineCourses: TimelineCourse[]; isLoading: boolean } => {
+function findPeriodForDate(periods: StudyPeriodInfo[], date: string | undefined): StudyPeriodInfo | null {
+  if (!date) return null;
+  return periods.find((period) => date >= period.startDate && date < period.endDate) ?? null;
+}
+
+export const getTimelineCourses = (planId?: string): { timelineCourses: TimelineCourse[]; isLoading: boolean } => {
   const plansQuery = useSisuQuery(['plans'], fetchPlans);
   const attainmentsQuery = useSisuQuery(['attainments'], fetchAttainments);
   const enrolmentsQuery = useSisuQuery(['enrolments'], fetchEnrolments);
   const { studyPeriodMap, isLoading: studyPeriodMapLoading } = getStudyPeriodMap();
 
   const { data: timelineCourses, isLoading } = useSisuQuery(
-    ['timeline-courses'],
+    ['timeline-courses', planId],
     async () => {
-      const plan = plansQuery.data![0];
+      const plan =
+        plansQuery.data!.find((candidate) => candidate.id === planId) ??
+        plansQuery.data!.find((candidate) => candidate.primary) ??
+        plansQuery.data![0];
       if (!plan) return [];
 
       const cuToTopModule = buildCuToTopModuleMap(plan);
@@ -63,6 +72,7 @@ export const getTimelineCourses = (): { timelineCourses: TimelineCourse[]; isLoa
 
       const courseUnitsById = new Map(courseUnitEntries);
       const modulesById = new Map(moduleEntries);
+      const studyPeriods = [...studyPeriodMap.values()];
 
       const passedByUnit = new Map<string, CourseUnitAttainmentRestricted>();
       for (const attainment of attainmentsQuery.data ?? []) {
@@ -82,17 +92,21 @@ export const getTimelineCourses = (): { timelineCourses: TimelineCourse[]; isLoa
         const moduleId = cuToTopModule.get(selection.courseUnitId) ?? null;
         const module = moduleId ? modulesById.get(moduleId) : undefined;
         const attainment = passedByUnit.get(selection.courseUnitId);
+        const plannedPeriods = (selection.plannedPeriods ?? [])
+          .map((periodLocator) => studyPeriodMap.get(periodLocator))
+          .filter((period): period is StudyPeriodInfo => period != null);
+        const completionPeriod = findPeriodForDate(studyPeriods, attainment?.attainmentDate);
 
         return {
           courseUnitId: selection.courseUnitId,
-          courseCode: extractCourseCode(selection.courseUnitId),
+          courseCode: courseUnit?.code ?? null,
           courseName: courseUnit?.name ?? null,
           credits: courseUnit?.credits ?? null,
           moduleId,
           moduleName: module?.name ?? null,
-          plannedPeriods: (selection.plannedPeriods ?? [])
-            .map((periodLocator) => studyPeriodMap.get(periodLocator))
-            .filter((period): period is StudyPeriodInfo => period != null),
+          plannedPeriods,
+          completionPeriod,
+          attainmentDate: attainment?.attainmentDate ?? null,
           isPassed: attainment != null,
           grade: getGrade(attainment),
           isEnrolled: enrolledCourseUnits.has(selection.courseUnitId),

@@ -31,7 +31,7 @@ export const Button: React.FC<Props> = ({ children, icon, onClick, disabled, var
       disabled={disabled}
       className={`flex cursor-pointer justify-center gap-1 rounded-lg border border-solid px-3 py-2 text-xs font-medium transition-[background-color,border-color,color,transform,opacity] duration-200 select-none active:scale-[0.96] ${disabledClass} ${variantClass}`}
     >
-      {icon}
+      <div className="flex items-center justify-center">{icon}</div>
       {children}
     </button>
   );

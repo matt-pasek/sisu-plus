@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "description": "A better UI for LUT Sisu",
   "permissions": ["storage", "webRequest"],
-  "host_permissions": ["https://sisu.lut.fi/*"],
+  "host_permissions": ["https://sisu.lut.fi/*", "https://moodle.lut.fi/*"],
   "background": {
     "service_worker": "background/service-worker.js",
     "type": "module"

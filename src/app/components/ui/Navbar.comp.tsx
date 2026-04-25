@@ -5,7 +5,7 @@ const NaviLink: React.FC<{ to: string; name: string }> = ({ to, name }) => (
   <NavLink
     to={to}
     className={({ isActive }) =>
-      `rounded-md bg-offwhite/0 px-2 py-1 text-lightGrey transition-all duration-200 hover:bg-offwhite/10 hover:text-offwhite ${isActive ? 'bg-offwhite/10 text-offwhite' : ''}`
+      `rounded-md px-3 py-1 text-sm text-lightGrey transition-all duration-200 hover:bg-offwhite/5 hover:text-offwhite ${isActive ? 'bg-offwhite/5 text-offwhite' : ''}`
     }
   >
     {name}
@@ -14,7 +14,7 @@ const NaviLink: React.FC<{ to: string; name: string }> = ({ to, name }) => (
 
 export const Navbar: React.FC = () => {
   return (
-    <nav className="sticky z-50 flex w-screen gap-5 border-b-2 border-solid border-border bg-container px-6 py-3">
+    <nav className="sticky z-50 flex w-screen gap-5 border-b-2 border-solid border-border bg-container px-6 py-2">
       <div className="flex items-center gap-1 text-lg font-medium">
         <div className="size-2 rounded-full bg-accent" />
         SISU <span className="mb-1 text-xl text-accent">+</span>

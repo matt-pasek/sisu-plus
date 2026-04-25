@@ -1,34 +1,19 @@
-import * as React from 'react';
+import React, { PropsWithChildren } from 'react';
+import { InlineLoader } from '@/app/components/ui/InlineLoader.comp';
 
-interface Props {
-  label: string;
-  children: React.ReactNode;
+interface Props extends PropsWithChildren {
+  loading?: boolean;
+  header?: React.ReactNode;
+  showHeaderDivider?: boolean;
 }
 
-export const Widget: React.FC<Props> = ({ label, children }) => {
+export const Widget: React.FC<Props> = ({ header, showHeaderDivider = true, children, loading = false }) => {
   return (
-    <div
-      style={{
-        border: '1px solid var(--border)',
-        borderRadius: 'var(--radius-md)',
-        background: 'var(--bg-surface)',
-        overflow: 'hidden',
-      }}
-    >
-      <div
-        style={{
-          padding: 'var(--space-2) var(--space-4)',
-          borderBottom: '1px solid var(--border)',
-          fontFamily: 'var(--font-mono)',
-          fontSize: '10px',
-          letterSpacing: '0.08em',
-          color: 'var(--text-tertiary)',
-          textTransform: 'uppercase',
-        }}
-      >
-        {label}
-      </div>
-      {children}
+    <div className="flex max-h-full w-full flex-col rounded-lg border border-solid border-border bg-container py-3">
+      {header && (
+        <div className={`px-4 pb-3 ${showHeaderDivider && 'border-b border-solid border-border'}`}>{header}</div>
+      )}
+      <div className="h-full flex-1 overflow-y-auto p-4 pb-0">{loading ? <InlineLoader /> : children}</div>
     </div>
   );
 };

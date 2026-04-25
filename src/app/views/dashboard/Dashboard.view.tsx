@@ -1,123 +1,152 @@
-import { useSisuQuery } from '@/app/hooks/useSisuQuery';
-import { fetchEnrolments } from '@/app/api/endpoints/enrolments';
-import { fetchAttainments } from '@/app/api/endpoints/attainments';
-import { fetchPlans } from '@/app/api/endpoints/plans';
-import { fetchEducations } from '@/app/api/endpoints/educations';
-import React, { useEffect, useState } from 'react';
-import { resolveAllEnrolments, ResolvedEnrolment } from '@/app/api/resolvers';
+import React from 'react';
 import { Widget } from '@/app/views/dashboard/components/Widget.comp';
-import { CourseCard, CourseCardSkeleton } from '@/app/views/dashboard/components/CourseCard';
-import { InlineError } from '@/app/components/InlineError.comp';
-import { ProgressWidget, ProgressWidgetSkeleton } from '@/app/views/dashboard/components/ProgressWidget';
-import { AttainmentsWidget, AttainmentsWidgetSkeleton } from '@/app/views/dashboard/components/AttainmentsWidget';
+import { getDashboardStats } from '@/app/api/dataPoints/getDashboardStats';
+import { getActiveCourses } from '@/app/api/dataPoints/getActiveCourses';
+import { getCreditsByModule } from '@/app/api/dataPoints/getCreditsByModule';
+import { Button } from '@/app/components/ui/Button.comp';
+import { getMoodleDeadlines } from '@/app/api/dataPoints/getMoodleDeadlines';
+import { MoodleDeadlinesContent } from '@/app/views/dashboard/components/MoodleDeadlinesContent.comp';
+import { daysUntil } from '@/app/helpers/daysUntilToday';
+import { SemesterStatsContent } from '@/app/views/dashboard/components/SemesterStatsContent.comp';
+import { BAR_COLORS, DegreeCompletionContent } from '@/app/views/dashboard/components/DegreeCompletionContent.comp';
+import { ActiveCoursesContent } from '@/app/views/dashboard/components/ActiveCoursesContent.comp';
+
+function getCurrentPeriodLabel(): string {
+  const m = new Date().getMonth() + 1;
+  const y = new Date().getFullYear();
+  if (m >= 9) return `Autumn ${y} · ${m >= 11 ? '2nd' : '1st'} Period ongoing`;
+  if (m >= 6) return `Summer ${y}`;
+  if (m >= 3) return `Spring ${y} · 4th Period ongoing`;
+  return `Spring ${y} · 3rd Period ongoing`;
+}
+
+function getCurrentSemester(): string {
+  const m = new Date().getMonth() + 1;
+  const y = new Date().getFullYear();
+  if (m >= 9) return `Autumn ${y}`;
+  if (m >= 6) return `Summer ${y}`;
+  return `Spring ${y}`;
+}
+
+function formatStudyRightEnd(endDate: string | null): { year: string; until: string } | null {
+  if (!endDate) return null;
+  const d = new Date(endDate);
+  d.setDate(d.getDate() - 1);
+  return {
+    year: d.getFullYear().toString(),
+    until: `until ${d.toLocaleString('en-US', { month: 'long' })}`,
+  };
+}
 
 const DashboardView: React.FC = () => {
-  const enrolments = useSisuQuery(['enrolments'], fetchEnrolments);
-  const attainments = useSisuQuery(['attainments'], fetchAttainments);
-  const plans = useSisuQuery(['plans'], fetchPlans);
-  const educations = useSisuQuery(['educations'], fetchEducations);
+  const { deadlines, deadlinesLoading } = getMoodleDeadlines();
+  const { creditsDone, gradeAverage, gradedCount, studyRightEndDate, isLoading: statsLoading } = getDashboardStats();
+  const { activeCourses, isLoading: coursesLoading } = getActiveCourses();
+  const { modules, totalTarget, isLoading: modulesLoading } = getCreditsByModule();
+  const studyRightEnd = formatStudyRightEnd(studyRightEndDate);
+  const semesterCredits = activeCourses.reduce((s, c) => s + (c.credits ?? 0), 0);
 
-  const enrolmentList = enrolments.data ?? [];
-  const attainmentList = attainments.data ?? [];
-
-  const [resolvedEnrolments, setResolvedEnrolments] = useState<ResolvedEnrolment[]>([]);
-  const [isResolving, setIsResolving] = useState(false);
-
-  useEffect(() => {
-    let isActive = true;
-
-    if (enrolmentList.length === 0) {
-      setResolvedEnrolments([]);
-      return;
-    }
-
-    const fetchResolutions = async () => {
-      setIsResolving(true);
-      try {
-        const result = await resolveAllEnrolments(enrolmentList);
-        if (isActive) {
-          setResolvedEnrolments(result);
-        }
-      } catch (error) {
-        console.error('Failed to resolve enrolments:', error);
-      } finally {
-        if (isActive) {
-          setIsResolving(false);
-        }
-      }
-    };
-
-    fetchResolutions();
-
-    return () => {
-      isActive = false;
-    };
-  }, [enrolmentList]);
+  const moduleColorMap = new Map(modules.map((m, i) => [m.moduleId, BAR_COLORS[i % BAR_COLORS.length]]));
+  const moduleNameMap = new Map(modules.map((m) => [m.moduleId, m.name]));
+  const upcomingDeadlines = deadlines?.events
+    ? Object.values(deadlines.events).filter((ev) => ev.end?.date && daysUntil(ev.end?.date) <= 5).length
+    : 0;
 
   return (
-    <div
-      style={{
-        maxWidth: '1200px',
-        margin: '0 auto',
-        padding: 'var(--space-6) var(--space-6)',
-        minHeight: '100vh',
-      }}
-    >
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr',
-          gap: 'var(--space-4)',
-        }}
-        className="sisu-grid"
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-          <Widget label="Enrolments">
-            {enrolments.isLoading || isResolving ? (
-              Array.from({ length: 4 }).map((_, i) => <CourseCardSkeleton key={i} />)
-            ) : enrolments.isError ? (
-              <InlineError endpoint="enrolments" error={enrolments.error} />
-            ) : resolvedEnrolments.length === 0 ? (
-              <div style={{ padding: 'var(--space-4)', color: 'var(--text-tertiary)', fontSize: '12px' }}>
-                No active enrolments
-              </div>
-            ) : (
-              resolvedEnrolments.map((e, i) => <CourseCard key={e.id ?? i} enrolment={e} />)
-            )}
+    <div className="flex flex-col gap-5 pb-8">
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-offwhite">Dashboard</h1>
+          <p className="mt-0.5 text-sm text-lightGrey">{getCurrentPeriodLabel()}</p>
+        </div>
+
+        <Button
+          disabled
+          icon={
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="size-4"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"
+              />
+            </svg>
+          }
+        >
+          Customize Dashboard
+        </Button>
+      </div>
+
+      <div className="grid h-[800px] w-full grid-cols-10 grid-rows-10 gap-4">
+        <div className="col-span-7 row-span-4 flex flex-col gap-3">
+          <Widget loading={statsLoading || modulesLoading}>
+            <DegreeCompletionContent
+              totalTarget={totalTarget}
+              studyRightEnd={studyRightEnd}
+              gradedCount={gradedCount}
+              gradeAverage={gradeAverage}
+              creditsDone={creditsDone}
+              modules={modules}
+            />
           </Widget>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-          <Widget label="Progress">
-            {plans.isLoading || educations.isLoading ? (
-              <ProgressWidgetSkeleton />
-            ) : plans.isError ? (
-              <InlineError endpoint="plans" error={plans.error} />
-            ) : educations.isError ? (
-              <InlineError endpoint="educations" error={educations.error} />
-            ) : (
-              <ProgressWidget plans={plans.data ?? []} educations={educations.data ?? []} />
-            )}
+        <div className="col-span-3 row-span-5 flex flex-col gap-3">
+          <Widget
+            header={
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-offwhite">Moodle Deadlines</span>
+                <span className="rounded bg-red-500/15 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-red-400">
+                  LIVE
+                </span>
+              </div>
+            }
+            loading={deadlinesLoading}
+          >
+            <MoodleDeadlinesContent deadlines={deadlines} />
           </Widget>
-          <Widget label="Recent Grades">
-            {attainments.isLoading ? (
-              <AttainmentsWidgetSkeleton />
-            ) : attainments.isError ? (
-              <InlineError endpoint="attainments" error={attainments.error} />
-            ) : (
-              <AttainmentsWidget attainments={attainmentList} />
-            )}
+        </div>
+
+        <div className="col-span-7 row-span-4 flex flex-col gap-3">
+          <Widget
+            header={
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-offwhite">Active Courses</span>
+                <span className="flex items-center gap-1.5 rounded-full bg-accent/10 px-2.5 py-1 text-xs font-medium text-accent">
+                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent" />
+                  {getCurrentSemester()}
+                </span>
+              </div>
+            }
+            loading={coursesLoading}
+          >
+            <ActiveCoursesContent
+              activeCourses={activeCourses}
+              moduleColorMap={moduleColorMap}
+              moduleNameMap={moduleNameMap}
+            />
+          </Widget>
+        </div>
+
+        <div className="col-span-3 row-span-4 flex flex-col gap-3">
+          <Widget
+            header={<span className="text-sm font-medium text-offwhite">This Semester</span>}
+            loading={statsLoading || coursesLoading}
+          >
+            <SemesterStatsContent
+              semesterCredits={semesterCredits}
+              activeCoursesCount={activeCourses.length}
+              upcomingDeadlines={upcomingDeadlines}
+            />
           </Widget>
         </div>
       </div>
-
-      <style>{`
-        @media (min-width: 768px) {
-          .sisu-grid {
-            grid-template-columns: 3fr 2fr !important;
-          }
-        }
-      `}</style>
     </div>
   );
 };

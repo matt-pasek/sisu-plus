@@ -1,5 +1,5 @@
-import MetaBalls from '@/app/components/MetaBalls.comp';
 import React, { useEffect } from 'react';
+import { InlineLoader } from '@/app/components/ui/InlineLoader.comp';
 
 export const SpinnerLoader: React.FC = () => {
   useEffect(() => {
@@ -13,14 +13,7 @@ export const SpinnerLoader: React.FC = () => {
   return (
     <div className="absolute z-10 flex h-screen w-screen items-center justify-center bg-background">
       <div className="size-1/3">
-        <MetaBalls
-          color="#ffffff"
-          ballCount={20}
-          animationSize={35}
-          enableTransparency={true}
-          clumpFactor={1}
-          speed={0.3}
-        />
+        <InlineLoader />
       </div>
     </div>
   );

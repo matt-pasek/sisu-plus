@@ -9,7 +9,7 @@ interface Props extends PropsWithChildren {
 
 export const Button: React.FC<Props> = ({ children, icon, onClick, disabled, variant = 'primary' }) => {
   const disabledClass = disabled
-    ? 'cursor-not-allowed border-border bg-container text-lightGrey/90 hover:bg-container!'
+    ? 'cursor-not-allowed border-border bg-container text-lightGrey/90! hover:bg-container!'
     : '';
 
   let variantClass = '';

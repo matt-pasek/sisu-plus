@@ -80,7 +80,10 @@ export function ControlCenter() {
 
               <div className="flex flex-col gap-2">
                 <p className="text-xs text-offwhite/50 uppercase">Moodle Sync</p>
-                <p className="font-mono text-xs text-offwhite/20">Coming soon</p>
+                <input
+                  value={prefs.moodleToken ?? ''}
+                  onChange={(val) => setPrefs({ moodleToken: val.target.value })}
+                />
               </div>
             </div>
           </motion.div>

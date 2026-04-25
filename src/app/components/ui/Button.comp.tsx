@@ -9,7 +9,7 @@ interface Props extends PropsWithChildren {
 
 export const Button: React.FC<Props> = ({ children, icon, onClick, disabled, variant = 'primary' }) => {
   const disabledClass = disabled
-    ? 'cursor-not-allowed border-border bg-container text-lightGrey/90! hover:bg-container!'
+    ? 'cursor-not-allowed! border-border bg-container text-lightGrey/90! hover:bg-container!'
     : '';
 
   let variantClass = '';
@@ -29,7 +29,7 @@ export const Button: React.FC<Props> = ({ children, icon, onClick, disabled, var
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`flex items-center gap-1 rounded-lg border border-solid px-3 py-2 text-xs font-medium transition-all duration-200 ${disabledClass} ${variantClass}`}
+      className={`flex cursor-pointer justify-center gap-1 rounded-lg border border-solid px-3 py-2 text-xs font-medium transition-[background-color,border-color,color,transform,opacity] duration-200 select-none active:scale-[0.96] ${disabledClass} ${variantClass}`}
     >
       {icon}
       {children}

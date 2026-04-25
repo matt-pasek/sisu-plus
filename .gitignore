@@ -1,6 +1,7 @@
 dist
 node_modules
 
-.claude
+.claude/*
 .idea
 /src/app/api/generated/*
+.collab/

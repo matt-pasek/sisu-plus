@@ -11,7 +11,7 @@ export const AppLayout: React.FC = () => {
     <div>
       {isNavigating && <SpinnerLoader />}
       <Navbar />
-      <div className="mx-auto w-8/12 pt-6">
+      <div className="mx-auto w-full max-w-6xl px-6 pt-6">
         <Outlet />
       </div>
     </div>

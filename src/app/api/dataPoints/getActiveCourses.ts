@@ -3,48 +3,13 @@ import { fetchEnrolments } from '@/app/api/endpoints/enrolments';
 import { fetchPlans } from '@/app/api/endpoints/plans';
 import { fetchAttainments } from '@/app/api/endpoints/attainments';
 import { resolveAllEnrolments } from '@/app/api/resolvers/resolveEnrolment';
+import { buildCuToTopModuleMap } from '@/app/api/resolvers/helpers/buildCuToTopModuleMap';
 import type { CourseUnitAttainmentRestricted } from '@/app/api/generated/OriApi';
 
 function getSemesterStart(): string {
   const now = new Date();
   const year = now.getFullYear();
   return now.getMonth() + 1 >= 9 ? `${year}-08-01` : `${year}-01-01`;
-}
-
-type PlanShape = {
-  rootId: string;
-  moduleSelections: { moduleId: string; parentModuleId?: string }[];
-  courseUnitSelections: { courseUnitId: string; parentModuleId?: string }[];
-};
-
-function buildCuToTopModuleMap(plan: PlanShape): Map<string, string> {
-  const moduleToParent = new Map<string, string>();
-  for (const ms of plan.moduleSelections) {
-    if (ms.parentModuleId) moduleToParent.set(ms.moduleId, ms.parentModuleId);
-  }
-
-  let topLevelIds = plan.moduleSelections.filter((ms) => ms.parentModuleId === plan.rootId).map((ms) => ms.moduleId);
-
-  if (topLevelIds.length === 1) {
-    const children = plan.moduleSelections
-      .filter((ms) => ms.parentModuleId === topLevelIds[0])
-      .map((ms) => ms.moduleId);
-    if (children.length > 0) topLevelIds = children;
-  }
-
-  const topLevelSet = new Set(topLevelIds);
-  const cuToTopModule = new Map<string, string>();
-  for (const cs of plan.courseUnitSelections) {
-    if (!cs.parentModuleId) continue;
-    let current = cs.parentModuleId;
-    let depth = 0;
-    while (current && !topLevelSet.has(current) && depth < 10) {
-      current = moduleToParent.get(current) ?? '';
-      depth++;
-    }
-    if (topLevelSet.has(current)) cuToTopModule.set(cs.courseUnitId, current);
-  }
-  return cuToTopModule;
 }
 
 export interface ActiveCourse {

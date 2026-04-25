@@ -39,7 +39,7 @@ function formatStudyRightEnd(endDate: string | null): { year: string; until: str
 }
 
 const DashboardView: React.FC = () => {
-  const { deadlines, deadlinesLoading } = getMoodleDeadlines();
+  const { deadlines, deadlinesLoading, missingToken } = getMoodleDeadlines();
   const { creditsDone, gradeAverage, gradedCount, studyRightEndDate, isLoading: statsLoading } = getDashboardStats();
   const { activeCourses, isLoading: coursesLoading } = getActiveCourses();
   const { modules, totalTarget, isLoading: modulesLoading } = getCreditsByModule();
@@ -57,7 +57,7 @@ const DashboardView: React.FC = () => {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-offwhite">Dashboard</h1>
-          <p className="mt-0.5 text-sm text-lightGrey">{getCurrentPeriodLabel()}</p>
+          <p className="mt-0.5 text-sm text-balance text-lightGrey">{getCurrentPeriodLabel()}</p>
         </div>
 
         <Button
@@ -102,14 +102,43 @@ const DashboardView: React.FC = () => {
             header={
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-offwhite">Moodle Deadlines</span>
-                <span className="rounded bg-red-500/15 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-red-400">
-                  LIVE
-                </span>
+                {!missingToken && (
+                  <span className="rounded bg-red-500/15 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-red-400">
+                    LIVE
+                  </span>
+                )}
               </div>
             }
             loading={deadlinesLoading}
           >
-            <MoodleDeadlinesContent deadlines={deadlines} />
+            {missingToken ? (
+              <div className="flex flex-col gap-3">
+                <div className="flex gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-8">
+                    <path
+                      fillRule="evenodd"
+                      d="M2.25 6a3 3 0 0 1 3-3h13.5a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3V6Zm3.97.97a.75.75 0 0 1 1.06 0l2.25 2.25a.75.75 0 0 1 0 1.06l-2.25 2.25a.75.75 0 0 1-1.06-1.06l1.72-1.72-1.72-1.72a.75.75 0 0 1 0-1.06Zm4.28 4.28a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+
+                  <div className="text-offwhite">
+                    <p className="text-sm font-medium">Configuration missing</p>
+                    <p className="text-xs font-light">You need to first configure Moodle calendar.</p>
+                  </div>
+                </div>
+                <p className="text-xs font-light text-lightGrey">
+                  Head over to Moodle and export calendar URL with options: All Events and choose Custom Date Range -
+                  how long you want to track deadlines.
+                </p>
+                <p className="text-xs font-light">Paste it in SISU+ Control panel.</p>
+                <Button onClick={() => window.open('https://moodle.lut.fi/calendar/export.php?')}>
+                  Head over to Moodle
+                </Button>
+              </div>
+            ) : (
+              <MoodleDeadlinesContent deadlines={deadlines} />
+            )}
           </Widget>
         </div>
 

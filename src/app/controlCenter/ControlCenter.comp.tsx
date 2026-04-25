@@ -49,13 +49,13 @@ export function ControlCenter() {
 
   return (
     <motion.div
-      className="fixed right-4 bottom-4 z-50 overflow-hidden bg-[#0B0519] text-white shadow-2xl"
+      className="fixed right-4 bottom-4 z-50 overflow-hidden bg-[#0d0d11] text-white shadow-2xl"
       animate={{
         width: isOpen || isHovered ? 320 : size,
         height: isOpen ? 300 : size,
         borderRadius: isOpen ? 12 : size,
       }}
-      transition={{ type: 'spring', bounce: 0.1, duration: 0.6 }}
+      transition={{ type: 'spring', bounce: 0, duration: 0.6 }}
     >
       <AnimatePresence>
         {isOpen && (

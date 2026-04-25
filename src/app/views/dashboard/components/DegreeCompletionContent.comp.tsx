@@ -10,13 +10,13 @@ const CircularProgress: React.FC<{ done: number; total: number }> = ({ done, tot
   return (
     <div className="relative shrink-0" style={{ width: 110, height: 110 }}>
       <svg width="110" height="110" style={{ transform: 'rotate(-90deg)' }}>
-        <circle cx="55" cy="55" r={r} fill="none" stroke="#222228" strokeWidth="8" />
+        <circle cx="55" cy="55" r={r} fill="none" stroke="var(--color-container2)" strokeWidth="8" />
         <circle
           cx="55"
           cy="55"
           r={r}
           fill="none"
-          stroke="#419648"
+          stroke="var(--color-accent)"
           strokeWidth="8"
           strokeDasharray={`${dash} ${circ - dash}`}
           strokeLinecap="round"
@@ -32,7 +32,7 @@ const CircularProgress: React.FC<{ done: number; total: number }> = ({ done, tot
 const StatItem: React.FC<{ label: string; value: React.ReactNode; sub: string }> = ({ label, value, sub }) => (
   <div className="flex flex-1 flex-col gap-0.5 rounded-xl bg-container2 px-4 py-2">
     <span className="text-xs text-lightGrey">{label}</span>
-    <span className="text-xl leading-none font-semibold text-offwhite">{value}</span>
+    <span className="text-xl leading-none font-semibold text-offwhite tabular-nums">{value}</span>
     <span className="text-xs text-lightGrey">{sub}</span>
   </div>
 );
@@ -49,7 +49,7 @@ const ModuleBar: React.FC<{ name: string; done: number; target: number; color: s
       <span className="text-xs text-lightGrey">{name}</span>
 
       <div className="flex items-center gap-3">
-        <div className="h-1 flex-1 overflow-hidden rounded-full bg-border2">
+        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-border2">
           <div
             className="h-full rounded-full transition-all duration-700"
             style={{ width: `${pct * 100}%`, backgroundColor: color }}
@@ -82,7 +82,7 @@ export const DegreeCompletionContent: React.FC<Props> = ({
   totalTarget,
   modules,
 }) => (
-  <div className="flex h-full items-center gap-8 overflow-hidden">
+  <div className="flex h-full items-center gap-5 overflow-hidden">
     <div className="flex flex-col items-center gap-2">
       <CircularProgress done={creditsDone} total={totalTarget} />
       <p className="text-sm">Degree Completion</p>

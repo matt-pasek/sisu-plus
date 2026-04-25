@@ -30,11 +30,11 @@ export const MoodleDeadlinesContent: React.FC<Props> = ({ deadlines }) => {
       return (
         <div
           key={ev.uid}
-          className={`flex flex-col gap-1 rounded border border-solid px-2 py-1 ${dateStyle.container}`}
+          className={`flex flex-col gap-1.5 rounded-lg border border-solid px-2 py-1 ${dateStyle.container}`}
         >
           <div className="flex justify-between gap-2">
             <span className="line-clamp-1 text-xs font-medium text-ellipsis text-offwhite">{ev.summary}</span>
-            <span className={`text-xs font-medium ${dateStyle.date}`}>{days}d</span>
+            <span className={`font-mono text-xs font-medium tabular-nums ${dateStyle.date}`}>{days}d</span>
           </div>
           <span className="text-xs font-light text-offwhite">
             {ev.categories ? ev.categories[0].split(' ')[0] : ''}
@@ -49,9 +49,14 @@ export const MoodleDeadlinesContent: React.FC<Props> = ({ deadlines }) => {
   return (
     <div className="flex h-full flex-col">
       <div className="flex flex-1 flex-col gap-2 overflow-y-auto pb-2">{body}</div>
-      <p className="shrink-0 border-t border-border pt-2 text-center text-xs font-light text-darkishGrey">
+      <a
+        href="https://moodle.lut.fi"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="shrink-0 cursor-pointer border-t border-border pt-2 text-center text-xs font-light text-darkishGrey transition-colors duration-100 hover:text-lightGrey"
+      >
         Open Moodle
-      </p>
+      </a>
     </div>
   );
 };

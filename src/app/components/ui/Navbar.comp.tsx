@@ -1,6 +1,8 @@
 import React from 'react';
 import { NavLink } from 'react-router';
 import { getCreditsByModule } from '@/app/api/dataPoints/getCreditsByModule';
+import { getUserDetails } from '@/app/api/dataPoints/getUserDetails';
+import { AccountDropdown } from '@/app/components/ui/AccountDropdown.comp';
 
 const NaviLink: React.FC<{ to: string; name: string }> = ({ to, name }) => (
   <NavLink
@@ -15,8 +17,10 @@ const NaviLink: React.FC<{ to: string; name: string }> = ({ to, name }) => (
 
 export const Navbar: React.FC = () => {
   const { modules, totalTarget, isLoading } = getCreditsByModule();
+  const { loadingDetails, userDetails } = getUserDetails();
+
   return (
-    <nav className="sticky z-50 flex w-screen gap-5 border-b-2 border-solid border-border bg-container px-6 py-2">
+    <nav className="sticky z-50 flex w-full gap-5 border-b border-solid border-border bg-container px-6 py-2">
       <div className="flex items-center gap-1 text-lg font-medium">
         <div className="size-2 rounded-full bg-accent" />
         SISU <span className="mb-1 text-xl text-accent">+</span>
@@ -29,11 +33,11 @@ export const Navbar: React.FC = () => {
       </div>
       <div className="ml-auto flex items-center gap-3 text-sm font-medium">
         {!isLoading && (
-          <span className="rounded-xl bg-lighterGreen/20 px-2 py-0.5 text-xs font-light text-lighterGreen transition-colors">
+          <span className="rounded-xl bg-lighterGreen/20 px-2 py-0.5 text-xs font-light text-lighterGreen tabular-nums transition-colors">
             {modules.map((m) => m.done).reduce((a, b) => a + b, 0)} / {totalTarget} cr
           </span>
         )}
-        <span className="transition-colors hover:text-white/80">Mateusz Pasek</span>
+        {!loadingDetails && userDetails && <AccountDropdown userDetails={userDetails} />}
       </div>
     </nav>
   );

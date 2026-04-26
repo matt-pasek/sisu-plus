@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { SisuPrefs, DEFAULT_PREFS } from '@/app/types/prefs';
 
-export function useChromeStorage(): [SisuPrefs, (patch: Partial<SisuPrefs>) => void] {
+export function useChromeStorage(): [SisuPrefs, (patch: Partial<SisuPrefs>) => void, boolean] {
   const [prefs, setPrefs] = useState<SisuPrefs>(DEFAULT_PREFS);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     chrome.storage.sync.get(DEFAULT_PREFS, (stored) => {
       setPrefs(stored as SisuPrefs);
+      setIsLoaded(true);
     });
 
     const listener = (changes: { [key: string]: chrome.storage.StorageChange }) => {
@@ -27,5 +29,5 @@ export function useChromeStorage(): [SisuPrefs, (patch: Partial<SisuPrefs>) => v
     chrome.storage.sync.set(patch);
   }
 
-  return [prefs, setStoragePrefs];
+  return [prefs, setStoragePrefs, isLoaded];
 }

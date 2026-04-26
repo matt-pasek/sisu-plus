@@ -30,6 +30,58 @@ const privacyPoints = [
   'Does not run a separate student-data backend.',
 ];
 
+const policySections = [
+  {
+    title: 'Data handled by the extension',
+    body: [
+      "Sisu+ may access data from the user's active Sisu session, including study plans, courses, credits, enrolments, progress information, and related study planning data available to the logged-in user on https://sisu.lut.fi.",
+      'Sisu+ may temporarily read Sisu authorization headers and required session cookies in order to request Sisu API data on behalf of the logged-in user.',
+      'If the user enables Moodle deadline integration, Sisu+ stores the Moodle calendar URL provided by the user and uses it to fetch calendar and deadline data.',
+      'Sisu+ stores extension preferences, settings, enabled or disabled state, and Moodle configuration in Chrome storage.',
+    ],
+  },
+  {
+    title: 'How data is used',
+    body: [
+      'The data is used only to provide Sisu+ features inside the browser, including dashboard views, study progress, timeline planning, course information, and optional Moodle deadline display.',
+    ],
+  },
+  {
+    title: 'Data sharing',
+    body: [
+      'Sisu+ does not sell user data.',
+      'Sisu+ does not use user data for advertising.',
+      "Sisu+ does not send user data to the developer's own servers.",
+      "Sisu+ communicates with Sisu and Moodle only as needed to provide the extension's user-facing features.",
+    ],
+  },
+  {
+    title: 'Data storage',
+    body: [
+      "Sisu+ stores settings and temporary session information using Chrome's extension storage APIs. Authentication and session data is used only to access Sisu data for the current browser session.",
+    ],
+  },
+  {
+    title: 'Remote code',
+    body: ['Sisu+ does not execute remote JavaScript or remote code.'],
+  },
+  {
+    title: 'Contact',
+    body: ['For questions about this privacy policy, contact contact@matt-pasek.dev.'],
+  },
+];
+
+const chromeStoreUrl = import.meta.env.VITE_CHROME_WEB_STORE_URL?.trim();
+const chromeStoreLinkProps = chromeStoreUrl
+  ? {
+      href: chromeStoreUrl,
+      target: '_blank',
+      rel: 'noreferrer',
+    }
+  : {
+      href: '#install',
+    };
+
 function Logo() {
   return (
     <div className="flex items-center gap-2 font-semibold text-offwhite">
@@ -94,7 +146,7 @@ export function LandingPage() {
           <a href="#privacy">Privacy</a>
           <a href="#roadmap">Roadmap</a>
         </div>
-        <a className="landing-nav-cta" href="#install">
+        <a className="landing-nav-cta" {...chromeStoreLinkProps}>
           Add to Chrome
         </a>
       </nav>
@@ -115,7 +167,7 @@ export function LandingPage() {
             integration, and more. For students, by student.
           </p>
           <div className="landing-actions">
-            <a className="landing-primary" href="#install">
+            <a className="landing-primary" {...chromeStoreLinkProps}>
               Add to Chrome - free
             </a>
             <a className="landing-secondary" href="https://github.com/matt-pasek/sisu-plus">
@@ -269,12 +321,67 @@ export function LandingPage() {
           </p>
         </div>
         <div className="landing-footer-links">
+          <a href="/privacy">Privacy policy</a>
           <a href="https://github.com/matt-pasek/sisu-plus">Source code</a>
           <a href="mailto:contact@matt-pasek.dev">Contact</a>
           <a href="https://github.com/matt-pasek">
             <GithubIcon />
             My GitHub
           </a>
+        </div>
+      </footer>
+    </main>
+  );
+}
+
+export function PrivacyPolicyPage() {
+  return (
+    <main className="landing-page privacy-page">
+      <nav className="landing-nav">
+        <Logo />
+        <div className="landing-nav-links">
+          <a href="/">Home</a>
+          <a href="/#features">Features</a>
+          <a href="/#install">Install</a>
+        </div>
+        <a className="landing-nav-cta" href="/">
+          Back to Sisu+
+        </a>
+      </nav>
+
+      <section className="privacy-document">
+        <p className="landing-kicker">Privacy policy</p>
+        <h1>Privacy Policy for Sisu+</h1>
+        <p className="privacy-effective-date">Effective date: April 26, 2026</p>
+        <p className="privacy-intro">
+          Sisu+ is a browser extension that improves the LUT Sisu student planning experience.
+        </p>
+
+        <div className="privacy-section-list">
+          {policySections.map((section) => (
+            <section key={section.title} className="privacy-policy-section">
+              <h2>{section.title}</h2>
+              {section.body.map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
+              ))}
+            </section>
+          ))}
+        </div>
+      </section>
+
+      <footer className="landing-footer">
+        <div className="landing-footer-left">
+          <Logo />
+          <p>
+            &copy; {new Date().getFullYear()} Mateusz Pasek. All rights reserved.
+            <br />
+            <span>Not affiliated with LUT University or Funidata Oy.</span>
+          </p>
+        </div>
+        <div className="landing-footer-links">
+          <a href="/">Home</a>
+          <a href="https://github.com/matt-pasek/sisu-plus">Source code</a>
+          <a href="mailto:contact@matt-pasek.dev">Contact</a>
         </div>
       </footer>
     </main>

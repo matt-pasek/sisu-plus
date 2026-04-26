@@ -903,6 +903,70 @@ a {
   gap: 0.4rem;
 }
 
+.privacy-page {
+  background: radial-gradient(circle at 50% -10%, rgba(82, 201, 137, 0.12), transparent 34rem), var(--color-background);
+}
+
+.privacy-document {
+  width: min(860px, calc(100% - 2.5rem));
+  margin: 0 auto;
+  padding: 10rem 0 5rem;
+}
+
+.privacy-document h1 {
+  margin: 0;
+  color: var(--color-offwhite);
+  font-size: clamp(2.5rem, 6vw, 5.2rem);
+  line-height: 0.98;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-wrap: balance;
+}
+
+.privacy-effective-date,
+.privacy-intro {
+  color: rgba(221, 221, 240, 0.62);
+  line-height: 1.75;
+}
+
+.privacy-effective-date {
+  margin: 1rem 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+}
+
+.privacy-intro {
+  margin: 1.4rem 0 0;
+  font-size: 1.05rem;
+}
+
+.privacy-section-list {
+  display: grid;
+  gap: 1rem;
+  margin-top: 2.5rem;
+}
+
+.privacy-policy-section {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.035);
+  padding: clamp(1.25rem, 2.4vw, 1.75rem);
+  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.18);
+}
+
+.privacy-policy-section h2 {
+  margin: 0;
+  color: var(--color-offwhite);
+  font-size: 1.18rem;
+  font-weight: 650;
+}
+
+.privacy-policy-section p {
+  margin: 0.85rem 0 0;
+  color: rgba(221, 221, 240, 0.62);
+  line-height: 1.7;
+}
+
 @media (max-width: 1100px) {
   .landing-preview-stage {
     --landing-preview-scale: 0.78;
@@ -1071,6 +1135,11 @@ a {
 
   .landing-footer-links {
     flex-wrap: wrap;
+  }
+
+  .privacy-document {
+    width: min(100% - 1.7rem, 860px);
+    padding: 7.5rem 0 4rem;
   }
 }
 

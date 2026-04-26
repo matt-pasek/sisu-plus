@@ -1,8 +1,8 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Dashboard } from '@/app/components/dashboard/Dashboard';
-import { ErrorBoundary } from '@/app/components/ui/ErrorBoundary';
+import { RouterProvider } from 'react-router/dom';
+import { router } from '@/app/router';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -18,9 +18,7 @@ export function mountApp(container: HTMLElement) {
   createRoot(container).render(
     <StrictMode>
       <QueryClientProvider client={queryClient}>
-        <ErrorBoundary>
-          <Dashboard />
-        </ErrorBoundary>
+        <RouterProvider router={router} />
       </QueryClientProvider>
     </StrictMode>,
   );

@@ -33,4 +33,21 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     chrome.storage.session.get(['sisuToken']).then(sendResponse);
     return true;
   }
+
+  if (message.type === 'GET_MOODLE') {
+    chrome.storage.sync.get('moodleToken').then(({ moodleToken }) => {
+      fetch(moodleToken)
+        .then((res) => {
+          if (!res.ok) throw new Error('Fetch failed');
+          return res.text();
+        })
+        .then((textData) => {
+          sendResponse(textData);
+        })
+        .catch((err) => {
+          sendResponse({ err });
+        });
+    });
+    return true;
+  }
 });

@@ -1,6 +1,7 @@
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 6.5rem;
+  overflow-x: hidden;
   background: #0d0d11;
 }
 
@@ -19,6 +20,9 @@ a {
 
 .landing-page {
   min-height: 100dvh;
+  width: 100dvw;
+  max-width: 100%;
+  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -1091,6 +1095,13 @@ a {
   .landing-universities {
     width: min(100% - 1.7rem, 1120px);
     padding-block: 4.5rem;
+  }
+
+  .landing-universities::before {
+    top: 2rem;
+    right: -2rem;
+    width: min(100%, 28rem);
+    height: 16rem;
   }
 
   .landing-university-heading h2 {

@@ -1,0 +1,1477 @@
+<!doctype html>
+<html>
+  <head>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --green: #1de99b;
+        --green-dim: rgba(29, 233, 155, 0.12);
+        --bg: #060d0e;
+        --surface: rgba(255, 255, 255, 0.03);
+        --border: rgba(255, 255, 255, 0.07);
+        --text: rgba(255, 255, 255, 0.85);
+        --muted: rgba(255, 255, 255, 0.35);
+      }
+
+      body {
+        font-family: 'DM Sans', sans-serif;
+        background: var(--bg);
+        color: #fff;
+        overflow-x: hidden;
+      }
+
+      canvas#aurora {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .page {
+        position: relative;
+        z-index: 1;
+      }
+
+      /* NAV */
+      nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 28px;
+        margin: 16px 20px 0;
+        background: rgba(255, 255, 255, 0.04);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        position: sticky;
+        top: 12px;
+        z-index: 100;
+      }
+
+      .nav-logo {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        font-family: 'Syne', sans-serif;
+        font-weight: 700;
+        font-size: 17px;
+      }
+
+      .logo-mark {
+        width: 30px;
+        height: 30px;
+        background: linear-gradient(135deg, #1de99b, #0aab6e);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 800;
+        color: #060d0e;
+        font-family: 'Syne', sans-serif;
+      }
+
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 28px;
+      }
+      .nav-links a {
+        color: var(--muted);
+        text-decoration: none;
+        font-size: 14px;
+        transition: color 0.2s;
+      }
+      .nav-links a:hover {
+        color: #fff;
+      }
+
+      .nav-cta {
+        background: #fff;
+        color: #060d0e !important;
+        padding: 7px 18px;
+        border-radius: 10px;
+        font-weight: 500 !important;
+        font-size: 13px !important;
+      }
+
+      /* HERO */
+      .hero {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 90px 24px 0;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 100px;
+        padding: 4px 14px 4px 5px;
+        margin-bottom: 32px;
+        animation: fadeUp 0.6s ease both;
+      }
+      .badge-pill {
+        background: var(--green);
+        color: #060d0e;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        padding: 3px 9px;
+        border-radius: 100px;
+        font-family: 'Syne', sans-serif;
+      }
+      .badge span {
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      h1 {
+        font-family: 'Syne', sans-serif;
+        font-size: clamp(38px, 5.5vw, 68px);
+        font-weight: 800;
+        line-height: 1.05;
+        letter-spacing: -1.5px;
+        max-width: 760px;
+        animation: fadeUp 0.6s 0.1s ease both;
+      }
+      h1 em {
+        font-style: normal;
+        background: linear-gradient(135deg, #1de99b 0%, #7effd4 60%, #1de99b 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .hero-sub {
+        margin-top: 18px;
+        font-size: 16px;
+        font-weight: 300;
+        color: rgba(255, 255, 255, 0.45);
+        max-width: 460px;
+        line-height: 1.7;
+        animation: fadeUp 0.6s 0.2s ease both;
+      }
+
+      .hero-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 32px;
+        animation: fadeUp 0.6s 0.3s ease both;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .btn-primary {
+        background: var(--green);
+        color: #060d0e;
+        border: none;
+        padding: 12px 26px;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        font-family: 'DM Sans', sans-serif;
+        cursor: pointer;
+        box-shadow: 0 0 32px rgba(29, 233, 155, 0.28);
+        transition:
+          transform 0.15s,
+          box-shadow 0.15s;
+      }
+      .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 0 48px rgba(29, 233, 155, 0.42);
+      }
+
+      .btn-secondary {
+        background: rgba(255, 255, 255, 0.06);
+        color: rgba(255, 255, 255, 0.75);
+        border: 1px solid var(--border);
+        padding: 12px 26px;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 400;
+        font-family: 'DM Sans', sans-serif;
+        cursor: pointer;
+        backdrop-filter: blur(10px);
+        transition: background 0.2s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+      }
+      .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      .btn-ghost {
+        background: transparent;
+        color: var(--muted);
+        border: 1px solid var(--border);
+        padding: 12px 26px;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 400;
+        font-family: 'DM Sans', sans-serif;
+        cursor: pointer;
+        transition:
+          color 0.2s,
+          border-color 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+      }
+      .btn-ghost:hover {
+        color: #fff;
+        border-color: rgba(255, 255, 255, 0.2);
+      }
+
+      /* GH icon */
+      .gh-icon {
+        width: 16px;
+        height: 16px;
+        fill: currentColor;
+      }
+
+      /* BROWSER */
+      .browser-wrap {
+        margin-top: 56px;
+        width: 100%;
+        max-width: 940px;
+        animation: fadeUp 0.8s 0.45s ease both;
+        position: relative;
+      }
+      .browser-wrap::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 100px;
+        background: linear-gradient(to bottom, transparent, var(--bg));
+        border-radius: 0 0 16px 16px;
+        pointer-events: none;
+        z-index: 2;
+      }
+      .browser {
+        background: #0c1a1c;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        overflow: hidden;
+        box-shadow:
+          0 0 0 1px rgba(29, 233, 155, 0.08),
+          0 40px 120px rgba(0, 0, 0, 0.8),
+          0 0 80px rgba(29, 233, 155, 0.07);
+      }
+      .browser-bar {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 11px 14px;
+        background: rgba(0, 0, 0, 0.3);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      }
+      .dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+      }
+      .dot-r {
+        background: #ff5f57;
+      }
+      .dot-y {
+        background: #febc2e;
+      }
+      .dot-g {
+        background: #28c840;
+      }
+      .browser-url {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 5px;
+        padding: 3px 10px;
+        font-size: 10px;
+        color: rgba(255, 255, 255, 0.25);
+        text-align: center;
+        font-family: 'DM Sans', sans-serif;
+      }
+
+      .mini-nav {
+        display: flex;
+        align-items: center;
+        padding: 9px 14px;
+        background: #0b1416;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      }
+      .mini-logo {
+        font-size: 11px;
+        font-weight: 700;
+        color: #fff;
+        margin-right: 18px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-family: 'Syne', sans-serif;
+      }
+      .mini-logo-dot {
+        width: 7px;
+        height: 7px;
+        background: var(--green);
+        border-radius: 50%;
+      }
+      .mini-tabs {
+        display: flex;
+        gap: 1px;
+      }
+      .mini-tab {
+        padding: 3px 9px;
+        border-radius: 5px;
+        font-size: 9px;
+        color: rgba(255, 255, 255, 0.35);
+        font-family: 'DM Sans', sans-serif;
+      }
+      .mini-tab.active {
+        background: var(--green-dim);
+        color: var(--green);
+      }
+
+      .mini-body {
+        display: grid;
+        grid-template-columns: 1fr 240px;
+        gap: 10px;
+        padding: 12px;
+        background: #0d1a1c;
+      }
+      .mini-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 9px;
+        padding: 10px;
+      }
+      .mini-card-title {
+        font-size: 8px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 8px;
+        font-family: 'Syne', sans-serif;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .mini-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 7px;
+        margin-bottom: 10px;
+      }
+      .mini-stat {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        padding: 7px;
+      }
+      .mini-stat-label {
+        font-size: 7px;
+        color: var(--muted);
+        margin-bottom: 2px;
+      }
+      .mini-stat-val {
+        font-size: 13px;
+        font-weight: 700;
+        font-family: 'Syne', sans-serif;
+      }
+      .g {
+        color: var(--green);
+      }
+      .a {
+        color: #f0a500;
+      }
+      .w {
+        color: #fff;
+      }
+
+      .mini-ring-wrap {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 10px;
+      }
+      .ring-pct {
+        font-size: 16px;
+        font-weight: 700;
+        font-family: 'Syne', sans-serif;
+      }
+      .ring-sub {
+        font-size: 7px;
+        color: var(--muted);
+        margin-top: 1px;
+      }
+
+      .mini-bar-bg {
+        height: 3px;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 2px;
+        overflow: hidden;
+      }
+      .mini-bar-fill {
+        height: 100%;
+        border-radius: 2px;
+      }
+      .mini-progress-list {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .mini-progress-label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 7px;
+        color: var(--muted);
+        margin-bottom: 2px;
+      }
+
+      .mini-courses {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin-top: 2px;
+      }
+      .mini-course {
+        display: flex;
+        align-items: center;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 5px;
+        padding: 5px 7px;
+      }
+      .mini-course-dot {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        margin-right: 6px;
+        flex-shrink: 0;
+      }
+      .mini-course-name {
+        font-size: 8px;
+        color: rgba(255, 255, 255, 0.65);
+        flex: 1;
+      }
+      .mini-course-tag {
+        font-size: 7px;
+        padding: 1px 5px;
+        border-radius: 3px;
+        color: var(--muted);
+        background: rgba(255, 255, 255, 0.05);
+      }
+      .mini-course-cr {
+        font-size: 7px;
+        color: var(--muted);
+        margin-left: 4px;
+      }
+
+      .mini-right {
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+      }
+      .mini-semester {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 5px;
+      }
+      .mini-sem-val {
+        font-size: 15px;
+        font-weight: 700;
+        font-family: 'Syne', sans-serif;
+      }
+      .mini-sem-label {
+        font-size: 6px;
+        color: var(--muted);
+        margin-top: 1px;
+      }
+
+      /* SECTION SHARED */
+      section {
+        padding: 100px 24px;
+        max-width: 960px;
+        margin: 0 auto;
+      }
+      .section-label {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--green);
+        font-family: 'Syne', sans-serif;
+        margin-bottom: 14px;
+      }
+      .section-title {
+        font-family: 'Syne', sans-serif;
+        font-size: clamp(28px, 3.5vw, 42px);
+        font-weight: 800;
+        letter-spacing: -0.8px;
+        line-height: 1.1;
+        margin-bottom: 16px;
+      }
+      .section-sub {
+        font-size: 16px;
+        color: rgba(255, 255, 255, 0.4);
+        font-weight: 300;
+        line-height: 1.7;
+        max-width: 480px;
+      }
+
+      /* UNIVERSITIES */
+      .uni-section {
+        padding: 80px 24px;
+        max-width: 960px;
+        margin: 0 auto;
+      }
+
+      .uni-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
+        margin-top: 48px;
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        overflow: hidden;
+        background: var(--surface);
+      }
+
+      .uni-left {
+        padding: 40px;
+        border-right: 1px solid var(--border);
+      }
+
+      .uni-supported-label {
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--green);
+        font-family: 'Syne', sans-serif;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .uni-supported-label::before {
+        content: '';
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--green);
+        box-shadow: 0 0 8px var(--green);
+        animation: pulse 2s ease infinite;
+      }
+
+      .uni-card {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 16px 18px;
+        background: rgba(29, 233, 155, 0.05);
+        border: 1px solid rgba(29, 233, 155, 0.15);
+        border-radius: 12px;
+        margin-bottom: 10px;
+      }
+      .uni-logo {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, rgba(29, 233, 155, 0.2), rgba(29, 233, 155, 0.05));
+        border: 1px solid rgba(29, 233, 155, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Syne', sans-serif;
+        font-weight: 800;
+        font-size: 13px;
+        color: var(--green);
+        flex-shrink: 0;
+      }
+      .uni-info {
+      }
+      .uni-name {
+        font-size: 14px;
+        font-weight: 500;
+        color: #fff;
+      }
+      .uni-detail {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 1px;
+      }
+      .uni-check {
+        margin-left: auto;
+        width: 20px;
+        height: 20px;
+        background: rgba(29, 233, 155, 0.12);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--green);
+        font-size: 11px;
+      }
+
+      .uni-right {
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .uni-cta-title {
+        font-family: 'Syne', sans-serif;
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        margin-bottom: 10px;
+      }
+      .uni-cta-sub {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.4);
+        font-weight: 300;
+        line-height: 1.65;
+        margin-bottom: 24px;
+      }
+      .uni-cta-sub strong {
+        color: rgba(255, 255, 255, 0.7);
+        font-weight: 400;
+      }
+
+      .uni-how {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 28px;
+      }
+      .uni-step {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+      }
+      .uni-step-num {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        border: 1px solid var(--border);
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        color: var(--muted);
+        font-family: 'Syne', sans-serif;
+        margin-top: 1px;
+      }
+      .uni-step-text {
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.5);
+        line-height: 1.5;
+      }
+      .uni-step-text strong {
+        color: rgba(255, 255, 255, 0.8);
+        font-weight: 500;
+      }
+
+      .btn-email {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--green);
+        color: #060d0e;
+        border: none;
+        padding: 11px 22px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        font-family: 'DM Sans', sans-serif;
+        cursor: pointer;
+        width: fit-content;
+        box-shadow: 0 0 24px rgba(29, 233, 155, 0.2);
+        transition: box-shadow 0.2s;
+      }
+      .btn-email:hover {
+        box-shadow: 0 0 36px rgba(29, 233, 155, 0.38);
+      }
+
+      /* ROADMAP */
+      .roadmap-section {
+        padding: 80px 24px 100px;
+        max-width: 960px;
+        margin: 0 auto;
+      }
+
+      .roadmap-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1px;
+        background: var(--border);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        overflow: hidden;
+        margin-top: 48px;
+      }
+
+      .rm-col {
+        background: var(--bg);
+        padding: 24px 20px;
+        position: relative;
+      }
+      .rm-col:first-child {
+        background: rgba(29, 233, 155, 0.03);
+      }
+
+      .rm-version {
+        font-family: 'Syne', sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        margin-bottom: 4px;
+      }
+      .rm-version.current {
+        color: var(--green);
+      }
+      .rm-version.future {
+        color: var(--muted);
+      }
+
+      .rm-name {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.35);
+        margin-bottom: 20px;
+        font-weight: 300;
+      }
+
+      .rm-items {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .rm-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        font-size: 12px;
+        line-height: 1.4;
+      }
+      .rm-item-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        margin-top: 4px;
+      }
+      .rm-item-dot.done {
+        background: var(--green);
+        box-shadow: 0 0 6px rgba(29, 233, 155, 0.5);
+      }
+      .rm-item-dot.todo {
+        background: rgba(255, 255, 255, 0.15);
+      }
+      .rm-item-dot.future {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .rm-item-text {
+        color: rgba(255, 255, 255, 0.55);
+      }
+      .rm-item-text.done {
+        color: rgba(255, 255, 255, 0.8);
+      }
+      .rm-item-text.future {
+        color: rgba(255, 255, 255, 0.25);
+      }
+
+      .rm-status {
+        display: inline-block;
+        margin-bottom: 14px;
+        font-size: 9px;
+        padding: 2px 8px;
+        border-radius: 100px;
+        font-family: 'Syne', sans-serif;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+      }
+      .rm-status.shipping {
+        background: rgba(29, 233, 155, 0.12);
+        color: var(--green);
+      }
+      .rm-status.next {
+        background: rgba(255, 255, 255, 0.06);
+        color: rgba(255, 255, 255, 0.35);
+      }
+
+      /* FOOTER */
+      footer {
+        border-top: 1px solid var(--border);
+        padding: 40px 36px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+
+      .footer-left {
+      }
+      .footer-logo {
+        font-family: 'Syne', sans-serif;
+        font-weight: 700;
+        font-size: 15px;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+      }
+      .footer-copy {
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .footer-links {
+        display: flex;
+        gap: 24px;
+      }
+      .footer-links a {
+        font-size: 13px;
+        color: var(--muted);
+        text-decoration: none;
+        transition: color 0.2s;
+      }
+      .footer-links a:hover {
+        color: #fff;
+      }
+
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(18px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.4;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="aurora"></canvas>
+
+    <div class="page">
+      <!-- NAV -->
+      <nav>
+        <div class="nav-logo">
+          <div class="logo-mark">S+</div>
+          Sisu<span style="color: var(--green)">+</span>
+        </div>
+        <div class="nav-links">
+          <a href="#">Features</a>
+          <a href="#">Roadmap</a>
+          <a href="#">About</a>
+          <a href="#" class="nav-cta">Add to Chrome</a>
+        </div>
+      </nav>
+
+      <!-- HERO -->
+      <section class="hero" style="padding-top: 90px; padding-bottom: 0; max-width: 100%">
+        <div class="badge">
+          <span class="badge-pill">NEW</span>
+          <span>v1.0.0 just shipped</span>
+        </div>
+
+        <h1>The Sisu you deserve,<br /><em>finally.</em></h1>
+
+        <p class="hero-sub">
+          A browser extension that reimagines the LUT Sisu portal. Cleaner views, Moodle deadlines, smarter timeline —
+          built by a student, for students.
+        </p>
+
+        <div class="hero-actions">
+          <button class="btn-primary">Add to Chrome — it's free</button>
+          <a href="https://github.com" class="btn-secondary">
+            <svg class="gh-icon" viewBox="0 0 24 24">
+              <path
+                d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+              />
+            </svg>
+            Source code
+          </a>
+          <button class="btn-ghost">See what's new →</button>
+        </div>
+
+        <!-- BROWSER -->
+        <div class="browser-wrap" style="margin-top: 52px">
+          <div
+            style="
+              position: absolute;
+              inset: -1px;
+              border-radius: 17px;
+              background: linear-gradient(
+                135deg,
+                rgba(29, 233, 155, 0.25),
+                rgba(29, 233, 155, 0.04) 50%,
+                rgba(255, 255, 255, 0.04)
+              );
+              z-index: -1;
+            "
+          ></div>
+          <div class="browser">
+            <div class="browser-bar">
+              <div class="dot dot-r"></div>
+              <div class="dot dot-y"></div>
+              <div class="dot dot-g"></div>
+              <div class="browser-url">sisu.lut.fi/student/frontpage</div>
+              <div style="width: 44px"></div>
+            </div>
+            <div style="background: #0b1416">
+              <div class="mini-nav">
+                <div class="mini-logo">
+                  <div class="mini-logo-dot"></div>
+                  SISU<span style="color: var(--green)">+</span>
+                </div>
+                <div class="mini-tabs">
+                  <div class="mini-tab active">Dashboard</div>
+                  <div class="mini-tab">Timeline</div>
+                  <div class="mini-tab">Structure</div>
+                  <div class="mini-tab">Registration</div>
+                </div>
+                <div style="margin-left: auto; font-size: 8px; color: var(--muted); font-family: 'DM Sans', sans-serif">
+                  52 / 180 cr
+                </div>
+              </div>
+              <div class="mini-body">
+                <div>
+                  <div class="mini-stats">
+                    <div class="mini-stat">
+                      <div class="mini-stat-label">Credits done</div>
+                      <div class="mini-stat-val g">52</div>
+                      <div style="font-size: 6px; color: var(--muted)">of 180 cr</div>
+                    </div>
+                    <div class="mini-stat">
+                      <div class="mini-stat-label">Avg. grade</div>
+                      <div class="mini-stat-val w">4.1</div>
+                      <div style="font-size: 6px; color: var(--muted)">13 graded</div>
+                    </div>
+                    <div class="mini-stat">
+                      <div class="mini-stat-label">Study right</div>
+                      <div class="mini-stat-val a">2032</div>
+                      <div style="font-size: 6px; color: var(--muted)">until July</div>
+                    </div>
+                  </div>
+                  <div class="mini-card" style="margin-bottom: 8px">
+                    <div class="mini-ring-wrap">
+                      <svg width="40" height="40" viewBox="0 0 40 40">
+                        <circle cx="20" cy="20" r="15" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="3.5" />
+                        <circle
+                          cx="20"
+                          cy="20"
+                          r="15"
+                          fill="none"
+                          stroke="#1de99b"
+                          stroke-width="3.5"
+                          stroke-dasharray="94.2"
+                          stroke-dashoffset="66.9"
+                          stroke-linecap="round"
+                          transform="rotate(-90 20 20)"
+                        />
+                      </svg>
+                      <div>
+                        <div class="ring-pct">29%</div>
+                        <div class="ring-sub">Degree completion</div>
+                      </div>
+                    </div>
+                    <div class="mini-progress-list">
+                      <div>
+                        <div class="mini-progress-label"><span>General Studies</span><span>25/31</span></div>
+                        <div class="mini-bar-bg">
+                          <div class="mini-bar-fill" style="width: 80%; background: #4a9eff"></div>
+                        </div>
+                      </div>
+                      <div>
+                        <div class="mini-progress-label"><span>Language Studies</span><span>6/19</span></div>
+                        <div class="mini-bar-bg">
+                          <div class="mini-bar-fill" style="width: 31%; background: var(--green)"></div>
+                        </div>
+                      </div>
+                      <div>
+                        <div class="mini-progress-label"><span>Specialisation</span><span>9/103</span></div>
+                        <div class="mini-bar-bg">
+                          <div class="mini-bar-fill" style="width: 8%; background: #f0a500"></div>
+                        </div>
+                      </div>
+                      <div>
+                        <div class="mini-progress-label"><span>Minor Studies</span><span>6/31</span></div>
+                        <div class="mini-bar-bg">
+                          <div class="mini-bar-fill" style="width: 19%; background: #b76ef0"></div>
+                        </div>
+                      </div>
+                      <div>
+                        <div class="mini-progress-label"><span>Elective</span><span>6/9</span></div>
+                        <div class="mini-bar-bg">
+                          <div class="mini-bar-fill" style="width: 66%; background: #ff6b6b"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="mini-card">
+                    <div class="mini-card-title">Active courses · Spring 2026</div>
+                    <div class="mini-courses">
+                      <div class="mini-course">
+                        <div class="mini-course-dot" style="background: #ff6b6b"></div>
+                        <div class="mini-course-name">International Student's Peer Tutoring</div>
+                        <div class="mini-course-tag">Elective</div>
+                        <div class="mini-course-cr">3 cr</div>
+                      </div>
+                      <div class="mini-course">
+                        <div class="mini-course-dot" style="background: #f0a500"></div>
+                        <div class="mini-course-name">Discrete Mathematics</div>
+                        <div class="mini-course-tag">Int. Spec.</div>
+                        <div class="mini-course-cr">3 cr</div>
+                      </div>
+                      <div class="mini-course">
+                        <div class="mini-course-dot" style="background: #4a9eff"></div>
+                        <div class="mini-course-name">Statistics</div>
+                        <div class="mini-course-tag">General</div>
+                        <div class="mini-course-cr">3 cr</div>
+                      </div>
+                      <div class="mini-course">
+                        <div class="mini-course-dot" style="background: #4a9eff"></div>
+                        <div class="mini-course-name">Intro to DD Studies in SSE</div>
+                        <div class="mini-course-tag">General</div>
+                        <div class="mini-course-cr">1 cr</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="mini-right">
+                  <div class="mini-card">
+                    <div class="mini-card-title">This semester</div>
+                    <div class="mini-semester">
+                      <div>
+                        <div class="mini-sem-val g">13</div>
+                        <div class="mini-sem-label">enrolled</div>
+                      </div>
+                      <div>
+                        <div class="mini-sem-val w">49</div>
+                        <div class="mini-sem-label">credits</div>
+                      </div>
+                      <div>
+                        <div class="mini-sem-val a">0</div>
+                        <div class="mini-sem-label">deadlines</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="mini-card" style="flex: 1">
+                    <div class="mini-card-title">
+                      Moodle deadlines
+                      <span
+                        style="
+                          font-size: 7px;
+                          color: var(--green);
+                          background: rgba(29, 233, 155, 0.1);
+                          padding: 1px 5px;
+                          border-radius: 3px;
+                        "
+                        >LIVE</span
+                      >
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 4px">
+                      <div
+                        style="
+                          background: var(--surface);
+                          border: 1px solid var(--border);
+                          border-radius: 5px;
+                          padding: 6px 7px;
+                        "
+                      >
+                        <div style="font-size: 7px; color: rgba(255, 255, 255, 0.55)">Discrete Math — Assignment 4</div>
+                        <div style="font-size: 6px; color: #f0a500; margin-top: 1px">Due Apr 28</div>
+                      </div>
+                      <div
+                        style="
+                          background: var(--surface);
+                          border: 1px solid var(--border);
+                          border-radius: 5px;
+                          padding: 6px 7px;
+                        "
+                      >
+                        <div style="font-size: 7px; color: rgba(255, 255, 255, 0.55)">Statistics — Exercise set 5</div>
+                        <div style="font-size: 6px; color: var(--muted); margin-top: 1px">Due May 3</div>
+                      </div>
+                      <div
+                        style="
+                          background: var(--surface);
+                          border: 1px solid var(--border);
+                          border-radius: 5px;
+                          padding: 6px 7px;
+                        "
+                      >
+                        <div style="font-size: 7px; color: rgba(255, 255, 255, 0.55)">Software Engineering — Lab 2</div>
+                        <div style="font-size: 6px; color: var(--muted); margin-top: 1px">Due May 10</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ROADMAP -->
+      <div class="roadmap-section">
+        <div class="section-label">What's coming</div>
+        <div class="section-title">Built in the open,<br />shipped fast.</div>
+        <p class="section-sub">Here's where Sisu+ is headed. Every version shaped by real student feedback.</p>
+
+        <div class="roadmap-grid">
+          <div class="rm-col">
+            <div class="rm-version current">v1.0.0</div>
+            <div class="rm-name">Initial release</div>
+            <div class="rm-status shipping">Shipping now</div>
+            <div class="rm-items">
+              <div class="rm-item">
+                <div class="rm-item-dot done"></div>
+                <div class="rm-item-text done">Dashboard + Moodle deadlines</div>
+              </div>
+              <div class="rm-item">
+                <div class="rm-item-dot done"></div>
+                <div class="rm-item-text done">Timeline read + write</div>
+              </div>
+              <div class="rm-item">
+                <div class="rm-item-dot todo"></div>
+                <div class="rm-item-text">Auth injection</div>
+              </div>
+              <div class="rm-item">
+                <div class="rm-item-dot todo"></div>
+                <div class="rm-item-text">Structure of studies (read)</div>
+              </div>
+              <div class="rm-item">
+                <div class="rm-item-dot todo"></div>
+                <div class="rm-item-text">Registration redesign</div>
+              </div>
+              <div class="rm-item">
+                <div class="rm-item-dot todo"></div>
+                <div class="rm-item-text">GH Actions releases</div>
+              </div>
+            </div>
+          </div>
+          <div class="rm-col">
+            <div class="rm-version future">v1.3.0</div>
+            <div class="rm-name">Dashboard revamp + calendar</div>
+            <div class="rm-status next">Up next</div>
+            <div class="rm-items">
+              <div class="rm-item">
+                <div class="rm-item-dot todo"></div>
+                <div class="rm-item-text">Dashboard edit mode + widgets</div>
+              </div>
+              <div class="rm-item">
+                <div class="rm-item-dot todo"></div>
+                <div class="rm-item-text">Study calendar view</div>
+              </div>
+              <div class="rm-item">
+                <div class="rm-item-dot todo"></div>
+                <div class="rm-item-text">Structure write support</div>
+              </div>
+              <div class="rm-item">
+                <div class="rm-item-dot todo"></div>
+                <div class="rm-item-text">Bug fixes + polish</div>
+              </div>
+            </div>
+          </div>
+          <div class="rm-col">
+            <div class="rm-version future">v1.4.0</div>
+            <div class="rm-name">Notifications + dialogs</div>
+            <div class="rm-status next">Planned</div>
+            <div class="rm-items">
+              <div class="rm-item">
+                <div class="rm-item-dot future"></div>
+                <div class="rm-item-text future">Notifications panel</div>
+              </div>
+              <div class="rm-item">
+                <div class="rm-item-dot future"></div>
+                <div class="rm-item-text future">Full course info dialogs</div>
+              </div>
+              <div class="rm-item">
+                <div class="rm-item-dot future"></div>
+                <div class="rm-item-text future">My profile view</div>
+              </div>
+            </div>
+          </div>
+          <div class="rm-col">
+            <div class="rm-version future">v1.5.0</div>
+            <div class="rm-name">Mobile + multi-university</div>
+            <div class="rm-status next">Future</div>
+            <div class="rm-items">
+              <div class="rm-item">
+                <div class="rm-item-dot future"></div>
+                <div class="rm-item-text future">Full mobile app</div>
+              </div>
+              <div class="rm-item">
+                <div class="rm-item-dot future"></div>
+                <div class="rm-item-text future">Multi-university support</div>
+              </div>
+              <div class="rm-item">
+                <div class="rm-item-dot future"></div>
+                <div class="rm-item-text future">Shaped by your feedback</div>
+              </div>
+              <div class="rm-item" style="margin-top: 4px">
+                <div class="rm-item-dot future" style="opacity: 0"></div>
+                <div style="font-size: 11px; color: rgba(255, 255, 255, 0.18); font-style: italic">
+                  More ideas welcome :)
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- UNIVERSITIES -->
+      <div class="uni-section">
+        <div class="section-label">Where it works</div>
+        <div class="section-title">Your university,<br />your Sisu+.</div>
+
+        <div class="uni-grid">
+          <div class="uni-left">
+            <div class="uni-supported-label">Live now</div>
+
+            <div class="uni-card">
+              <div class="uni-logo">LUT</div>
+              <div class="uni-info">
+                <div class="uni-name">LUT University</div>
+                <div class="uni-detail">Lappeenranta-Lahti University of Technology</div>
+              </div>
+              <div class="uni-check">✓</div>
+            </div>
+
+            <div
+              style="
+                margin-top: 20px;
+                padding: 16px 18px;
+                border: 1px dashed rgba(255, 255, 255, 0.1);
+                border-radius: 12px;
+                background: rgba(255, 255, 255, 0.02);
+              "
+            >
+              <div style="font-size: 12px; color: var(--muted); margin-bottom: 6px">Sisu is used across Finland</div>
+              <div style="display: flex; flex-wrap: wrap; gap: 6px">
+                <span
+                  style="
+                    font-size: 11px;
+                    padding: 3px 10px;
+                    border-radius: 6px;
+                    background: rgba(255, 255, 255, 0.04);
+                    color: rgba(255, 255, 255, 0.25);
+                    border: 1px solid rgba(255, 255, 255, 0.06);
+                  "
+                  >Aalto University</span
+                >
+                <span
+                  style="
+                    font-size: 11px;
+                    padding: 3px 10px;
+                    border-radius: 6px;
+                    background: rgba(255, 255, 255, 0.04);
+                    color: rgba(255, 255, 255, 0.25);
+                    border: 1px solid rgba(255, 255, 255, 0.06);
+                  "
+                  >University of Tampere</span
+                >
+                <span
+                  style="
+                    font-size: 11px;
+                    padding: 3px 10px;
+                    border-radius: 6px;
+                    background: rgba(255, 255, 255, 0.04);
+                    color: rgba(255, 255, 255, 0.25);
+                    border: 1px solid rgba(255, 255, 255, 0.06);
+                  "
+                  >University of Oulu</span
+                >
+                <span
+                  style="
+                    font-size: 11px;
+                    padding: 3px 10px;
+                    border-radius: 6px;
+                    background: rgba(255, 255, 255, 0.04);
+                    color: rgba(255, 255, 255, 0.25);
+                    border: 1px solid rgba(255, 255, 255, 0.06);
+                  "
+                  >JYU</span
+                >
+                <span
+                  style="
+                    font-size: 11px;
+                    padding: 3px 10px;
+                    border-radius: 6px;
+                    background: rgba(255, 255, 255, 0.04);
+                    color: rgba(255, 255, 255, 0.25);
+                    border: 1px solid rgba(255, 255, 255, 0.06);
+                  "
+                  >+ more</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="uni-right">
+            <div class="uni-cta-title">Don't see yours?</div>
+            <p class="uni-cta-sub">
+              Sisu+ is built to support any Finnish university running Sisu. If your university isn't listed,
+              <strong>shoot me an email</strong> — I'll add support and you'll be the one to bring it to your campus.
+            </p>
+
+            <div class="uni-how">
+              <div class="uni-step">
+                <div class="uni-step-num">1</div>
+                <div class="uni-step-text"><strong>Email me</strong> with your university name and Sisu URL</div>
+              </div>
+              <div class="uni-step">
+                <div class="uni-step-num">2</div>
+                <div class="uni-step-text">I add it to the manifest and ship a patch update</div>
+              </div>
+              <div class="uni-step">
+                <div class="uni-step-num">3</div>
+                <div class="uni-step-text">You get Sisu+ and your colleagues do too</div>
+              </div>
+            </div>
+
+            <button class="btn-email">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                <polyline points="22,6 12,12 2,6" />
+              </svg>
+              Email me to add your university
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- FOOTER -->
+      <footer>
+        <div class="footer-left">
+          <div class="footer-logo">
+            <div class="logo-mark" style="width: 24px; height: 24px; font-size: 10px; border-radius: 6px">S+</div>
+            Sisu<span style="color: var(--green)">+</span>
+          </div>
+          <div class="footer-copy">
+            © 2026 Mateusz Pasek. All rights reserved.<br />
+            <span style="color: rgba(255, 255, 255, 0.2)">Not affiliated with LUT University or Funidata Oy.</span>
+          </div>
+        </div>
+        <div class="footer-links">
+          <a href="#">Privacy</a>
+          <a href="#">Source code</a>
+          <a href="#">Contact</a>
+          <a href="#" style="display: flex; align-items: center; gap: 6px">
+            <svg class="gh-icon" viewBox="0 0 24 24" style="width: 14px; height: 14px">
+              <path
+                d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+              />
+            </svg>
+            GitHub
+          </a>
+        </div>
+      </footer>
+    </div>
+
+    <script>
+      const canvas = document.getElementById('aurora');
+      const ctx = canvas.getContext('2d');
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      resize();
+      window.addEventListener('resize', resize);
+      let t = 0;
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const cx = canvas.width / 2,
+          cy = canvas.height * 0.32;
+        const blobs = [
+          {
+            x: cx - 80 + Math.sin(t * 0.4) * 60,
+            y: cy + Math.cos(t * 0.3) * 40,
+            rx: 340,
+            ry: 180,
+            color: 'rgba(29,233,155,0.12)',
+          },
+          {
+            x: cx + 110 + Math.cos(t * 0.35) * 80,
+            y: cy - 50 + Math.sin(t * 0.25) * 50,
+            rx: 270,
+            ry: 140,
+            color: 'rgba(0,180,120,0.08)',
+          },
+          {
+            x: cx - 220 + Math.sin(t * 0.2) * 100,
+            y: cy + 70 + Math.cos(t * 0.4) * 30,
+            rx: 210,
+            ry: 110,
+            color: 'rgba(10,200,140,0.07)',
+          },
+          {
+            x: cx + 290 + Math.cos(t * 0.28) * 60,
+            y: cy + 30 + Math.sin(t * 0.33) * 60,
+            rx: 190,
+            ry: 100,
+            color: 'rgba(29,233,155,0.05)',
+          },
+        ];
+        blobs.forEach((b) => {
+          const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, Math.max(b.rx, b.ry));
+          g.addColorStop(0, b.color);
+          g.addColorStop(1, 'transparent');
+          ctx.fillStyle = g;
+          ctx.beginPath();
+          ctx.ellipse(b.x, b.y, b.rx, b.ry, Math.sin(t * 0.12) * 0.3, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        t += 0.007;
+        requestAnimationFrame(draw);
+      }
+      draw();
+    </script>
+  </body>
+</html>

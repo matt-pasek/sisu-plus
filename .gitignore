@@ -1,4 +1,5 @@
 dist
+dist-landing
 node_modules
 
 .claude/*

@@ -17,7 +17,9 @@
   "type": "module",
   "scripts": {
     "dev": "concurrently \"vite build --config vite.sw.config.ts --watch\" \"vite build --config vite.content.config.ts --watch\"",
+    "dev:landing": "vite --config vite.landing.config.ts --host",
     "build": "vite build --config vite.sw.config.ts && vite build --config vite.content.config.ts",
+    "build:landing": "vite build --config vite.landing.config.ts",
     "typecheck": "tsc --noEmit",
     "prepare": "husky",
     "generate:apis": "bun run scripts/generate-apis.ts"

@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/matt-pasek/sisu-plus/compare/v1.0.0...v1.0.1) (2026-04-26)
+
+
+### Bug Fixes
+
+* blob on landing page broke responsiveness ([453110c](https://github.com/matt-pasek/sisu-plus/commit/453110ce8a273c4d6cff11466b5eded4bd5643f8))
+
 ## 1.0.0 (2026-04-26)
 
 

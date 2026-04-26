@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/matt-pasek/sisu-plus/compare/v1.0.1...v1.0.2) (2026-04-26)
+
+
+### Bug Fixes
+
+* better typewriting, added ko-fi section ([d54db6b](https://github.com/matt-pasek/sisu-plus/commit/d54db6b0b2c7d3d70bdf4790538eec7e4e62881a))
+
 ## [1.0.1](https://github.com/matt-pasek/sisu-plus/compare/v1.0.0...v1.0.1) (2026-04-26)
 
 

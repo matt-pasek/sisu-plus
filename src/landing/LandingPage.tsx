@@ -24,10 +24,10 @@ const roadmap = [
 ];
 
 const privacyPoints = [
-  'Runs as a browser extension on top of Sisu.',
-  'Reads the same student pages and APIs you already use.',
-  'Keeps settings in your browser storage.',
-  'Does not run a separate student-data backend.',
+  'Works inside Sisu, right in your browser tab',
+  'Reads your courses and schedule the same way you do',
+  'Saves your settings on your device, not on our servers',
+  'Your data never leaves your computer',
 ];
 
 const policySections = [
@@ -136,6 +136,26 @@ function MailIcon() {
   );
 }
 
+function EnergyDrinkIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M8 3h8" />
+      <path d="M9 3 8 7h8l-1-4" />
+      <path d="M8 7h8l-1 14H9L8 7Z" />
+      <path d="M11.5 11 10 15h3l-1 3 3-5h-3l1-2Z" />
+    </svg>
+  );
+}
+
 export function LandingPage() {
   return (
     <main className="landing-page">
@@ -190,8 +210,8 @@ export function LandingPage() {
           <p className="landing-kicker">Dashboard and timeline</p>
           <h2>Less digging, more knowing what to do next.</h2>
           <p className="landing-section-copy">
-            The first release focuses on the student workflow that needs the most context: checking progress, keeping up
-            with Moodle, and moving courses through a plan without losing track of prerequisites.
+            The first release tackles the stuff that costs you the most time: checking where you stand, keeping up with
+            Moodle deadlines, and moving courses around without accidentally breaking your prerequisites.
           </p>
         </div>
         <div className="landing-feature-list">
@@ -215,10 +235,10 @@ export function LandingPage() {
       <section className="landing-section landing-privacy landing-reveal" id="privacy">
         <div>
           <p className="landing-kicker">Your browser, your data</p>
-          <h2>No separate student-data service hiding behind it.</h2>
+          <h2>Your data stays on your computer. Full stop.</h2>
           <p className="landing-section-copy">
-            Sisu+ is just an extension layered on top of the pages you already open. It improves the interface locally,
-            stores preferences in the browser, and does not upload your study plan to a separate Sisu+ backend.
+            Sisu+ works directly inside Sisu — no account, no server, no one storing your study plan somewhere else.
+            Everything stays in your browser, exactly where you left it.
           </p>
         </div>
         <div className="landing-privacy-panel">
@@ -234,10 +254,10 @@ export function LandingPage() {
       <section className="landing-section landing-reveal" id="roadmap">
         <div className="landing-section-heading">
           <p className="landing-kicker">What's coming</p>
-          <h2>Built around actual student friction.</h2>
+          <h2>Fixing the things that actually slow you down.</h2>
           <p className="landing-section-copy">
-            The roadmap stays customer-facing: more clarity, less clicking, faster planning, and support for more
-            students when the core LUT experience is stable.
+            The plan is pretty straightforward: fewer clicks to find what you need, clearer course info, and a timeline
+            that doesn't make you guess. LUT first, then more universities once that's working well.
           </p>
         </div>
         <div className="landing-roadmap-grid">
@@ -257,6 +277,32 @@ export function LandingPage() {
             </article>
           ))}
         </div>
+      </section>
+
+      <section className="landing-support landing-reveal" aria-labelledby="support-heading">
+        <div className="landing-support-copy">
+          <p className="landing-kicker">Support the project</p>
+          <h2 id="support-heading">Enjoy Sisu+ and want to support development?</h2>
+          <p>
+            Get me a strawberry-lime energy drink on Ko-fi and I will deliver new features even quicker! It helps cover
+            the small costs and late-night polish passes that keep Sisu+ moving.
+          </p>
+        </div>
+        <a
+          className="landing-support-card"
+          href="https://ko-fi.com/mattpasek"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="Support Sisu+ development on Ko-fi"
+        >
+          <span className="landing-support-icon">
+            <EnergyDrinkIcon />
+          </span>
+          <span>
+            <strong>Feed me with batteries</strong>
+            <small>(Ko-fi opens in a new tab)</small>
+          </span>
+        </a>
       </section>
 
       <section className="landing-universities landing-reveal" id="install">
@@ -323,6 +369,9 @@ export function LandingPage() {
         <div className="landing-footer-links">
           <a href="/privacy">Privacy policy</a>
           <a href="https://github.com/matt-pasek/sisu-plus">Source code</a>
+          <a href="https://ko-fi.com/mattpasek" target="_blank" rel="noreferrer">
+            Support development
+          </a>
           <a href="mailto:contact@matt-pasek.dev">Contact</a>
           <a href="https://github.com/matt-pasek">
             <GithubIcon />

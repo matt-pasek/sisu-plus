@@ -177,7 +177,7 @@ export function LandingPage() {
         <div className="landing-hero-copy">
           <div className="landing-badge">
             <span>New</span>
-            <p>v1.0.0 just shipped</p>
+            <p>v{import.meta.env.VITE_APP_VERSION} just shipped</p>
           </div>
           <h1>
             The Sisu we deserve, <span>finally.</span>

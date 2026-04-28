@@ -1,12 +1,33 @@
-const SISU_BASE = 'https://sisu.lut.fi';
+import { SISU_ORIGINS } from '../shared/domains';
+
+type OriginSessionData = Record<string, string | Record<string, string>>;
+
+function getOrigin(value?: string): string | null {
+  if (!value) return null;
+
+  try {
+    return new URL(value).origin;
+  } catch {
+    return null;
+  }
+}
+
+async function patchOriginSessionData(key: string, origin: string, value: string | Record<string, string>) {
+  const stored = await chrome.storage.session.get(key);
+  const current = (stored[key] ?? {}) as OriginSessionData;
+  await chrome.storage.session.set({ [key]: { ...current, [origin]: value } });
+}
 
 chrome.webRequest.onBeforeSendHeaders.addListener(
   (details) => {
+    const origin = getOrigin(details.url);
+    if (!origin) return;
+
     const headers = details.requestHeaders ?? [];
     const authHeader = headers.find((h) => h.name.toLowerCase() === 'authorization');
     if (authHeader?.value?.startsWith('Bearer ')) {
       const token = authHeader.value.slice(7);
-      chrome.storage.session.set({ sisuToken: token });
+      void patchOriginSessionData('sisuTokensByOrigin', origin, token);
     }
 
     const cookieHeader = headers.find((h) => h.name.toLowerCase() === 'cookie');
@@ -20,17 +41,22 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
         }
       });
       if (Object.keys(cookies).length > 0) {
-        chrome.storage.session.set({ sisuCookies: cookies });
+        void patchOriginSessionData('sisuCookiesByOrigin', origin, cookies);
       }
     }
   },
-  { urls: [`${SISU_BASE}/*`] },
+  { urls: SISU_ORIGINS.map((origin) => `${origin}/*`) },
   ['requestHeaders'],
 );
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.type === 'GET_TOKEN') {
-    chrome.storage.session.get(['sisuToken']).then(sendResponse);
+    const origin = getOrigin(message.origin);
+
+    chrome.storage.session.get(['sisuTokensByOrigin']).then(({ sisuTokensByOrigin }) => {
+      const tokens = (sisuTokensByOrigin ?? {}) as Record<string, string>;
+      sendResponse({ sisuToken: origin ? tokens[origin] : undefined });
+    });
     return true;
   }
 

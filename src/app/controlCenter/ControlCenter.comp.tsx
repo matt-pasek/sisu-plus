@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useChromeStorage } from '@/app/hooks/useChromeStorage';
 import CircularText from '@/app/components/CircularText.comp';
 import { motion, AnimatePresence } from 'motion/react';
+import { getMoodleCalendarExportUrl } from '@/shared/domains';
 
 function Toggle({ checked, onChange }: { checked: boolean; onChange: (val: boolean) => void }) {
   return (
@@ -83,6 +84,7 @@ export function ControlCenter() {
   const isActive = prefs.sisuPlusActive;
   const moodleToken = prefs.moodleToken ?? '';
   const validMoodleUrl = isValidMoodleUrl(moodleToken);
+  const moodleCalendarPlaceholder = `${getMoodleCalendarExportUrl().replace('/export.php?', '/export_execute.php?')}...`;
   const size = isActive ? 80 : 52;
   const openWidth = isActive ? 360 : 340;
   const openHeight = isActive ? 390 : 326;
@@ -168,7 +170,7 @@ export function ControlCenter() {
                   id="sisu-plus-moodle-url"
                   value={moodleToken}
                   onChange={(event) => setPrefs({ moodleToken: event.target.value })}
-                  placeholder="https://moodle.lut.fi/calendar/export_execute.php?..."
+                  placeholder={moodleCalendarPlaceholder}
                   spellCheck={false}
                   className="block h-10 w-full border-0 bg-transparent p-0 font-mono text-sm text-offwhite outline-none placeholder:text-lightGrey/55"
                 />

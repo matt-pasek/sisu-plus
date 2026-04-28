@@ -1,6 +1,7 @@
 import { IcsCalendar, type IcsEvent } from 'ts-ics';
 import React from 'react';
 import { daysUntil } from '@/app/helpers/daysUntilToday';
+import { getMoodleBaseUrl } from '@/shared/domains';
 
 interface Props {
   deadlines?: IcsCalendar;
@@ -103,6 +104,7 @@ const DeadlineCard: React.FC<{ event: IcsEvent }> = ({ event }) => {
 export const MoodleDeadlinesContent: React.FC<Props> = ({ deadlines }) => {
   const events = sortEvents(deadlines?.events ?? []);
   const urgentCount = events.filter((event) => daysUntil(event.end?.date) <= 2).length;
+  const moodleBaseUrl = getMoodleBaseUrl();
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -133,7 +135,7 @@ export const MoodleDeadlinesContent: React.FC<Props> = ({ deadlines }) => {
       </div>
 
       <a
-        href="https://moodle.lut.fi"
+        href={moodleBaseUrl}
         target="_blank"
         rel="noopener noreferrer"
         className="mt-3 flex min-h-10 shrink-0 cursor-pointer items-center justify-center rounded-xl bg-container2 text-sm font-medium text-lightGrey transition-[background-color,color,transform] duration-200 hover:bg-offwhite/10 hover:text-offwhite active:scale-[0.96]"

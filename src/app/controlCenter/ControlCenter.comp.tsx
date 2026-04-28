@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useChromeStorage } from '@/app/hooks/useChromeStorage';
 import CircularText from '@/app/components/CircularText.comp';
 import { motion, AnimatePresence } from 'motion/react';
+import { getMoodleCalendarExportUrl } from '@/shared/domains';
+import { OnboardingPanel } from '@/app/controlCenter/OnboardingPanel.comp';
 
 function Toggle({ checked, onChange }: { checked: boolean; onChange: (val: boolean) => void }) {
   return (
@@ -56,7 +58,7 @@ function getControlTip(isActive: boolean, pathname: string): ControlTip {
   if (!isActive) {
     return {
       title: 'Ready when you are',
-      body: 'SISU+ stays dormant while paused, letting you interact with the native Sisu interface as usual.',
+      body: 'SISU+ stays dormant while paused, letting you interact with Sisu as usual.',
       accentClass: 'text-warn bg-warn/15 shadow-[inset_0_0_0_1px_rgba(246,185,86,0.18)]',
     };
   }
@@ -79,15 +81,37 @@ function getControlTip(isActive: boolean, pathname: string): ControlTip {
 export function ControlCenter() {
   const [isOpen, setIsOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [prefs, setPrefs] = useChromeStorage();
+  const [prefs, setPrefs, prefsLoaded] = useChromeStorage();
   const isActive = prefs.sisuPlusActive;
   const moodleToken = prefs.moodleToken ?? '';
   const validMoodleUrl = isValidMoodleUrl(moodleToken);
-  const size = isActive ? 80 : 52;
-  const openWidth = isActive ? 360 : 340;
-  const openHeight = isActive ? 390 : 326;
-  const hoverWidth = isActive ? 382 : 318;
+  const moodleCalendarPlaceholder = `${getMoodleCalendarExportUrl().replace('/export.php?', '/export_execute.php?')}...`;
+  const onboardingActive = prefsLoaded && !prefs.sisuPlusOnboardingCompleted;
+  const size = 80;
+  const openWidth = onboardingActive ? 520 : 360;
+  const openHeight = onboardingActive ? 640 : 420;
+  const hoverWidth = 382;
   const controlTip = getControlTip(isActive, window.location.pathname);
+
+  useEffect(() => {
+    if (onboardingActive) setIsOpen(true);
+  }, [onboardingActive]);
+
+  function setOnboardingStep(step: number) {
+    setPrefs({ sisuPlusOnboardingStep: Math.min(Math.max(step, 0), 4) });
+  }
+
+  function skipOnboarding() {
+    setPrefs({ sisuPlusOnboardingCompleted: true, sisuPlusOnboardingStep: 0 });
+  }
+
+  function completeOnboarding() {
+    setPrefs({ sisuPlusActive: true, sisuPlusOnboardingCompleted: true, sisuPlusOnboardingStep: 0 });
+  }
+
+  function activateFromOnboarding() {
+    setPrefs({ sisuPlusActive: true, sisuPlusOnboardingStep: 3 });
+  }
 
   return (
     <motion.div
@@ -107,78 +131,97 @@ export function ControlCenter() {
             animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
             exit={{ opacity: 0, y: 6, filter: 'blur(4px)', transition: { duration: 0.16 } }}
             transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
-            className={`absolute inset-0 flex flex-col p-5 ${isActive ? 'gap-4 pb-20' : 'gap-3 pb-18'}`}
+            className={`absolute inset-0 flex flex-col ${
+              onboardingActive ? '' : isActive ? 'gap-4 p-5 pb-20' : 'gap-3 p-5 pb-18'
+            }`}
           >
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <span className="text-sm font-semibold tracking-wide text-offwhite/80 uppercase">SISU+</span>
-                <p className="mt-1 text-xs leading-relaxed text-lightGrey">
-                  {isActive
-                    ? 'A quiet layer for planning, deadlines, and study pace.'
-                    : 'Paused. Native Sisu is visible behind this control.'}
-                </p>
-              </div>
-              <span
-                className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
-                  isActive ? 'bg-accent/15 text-accent' : 'bg-warn/15 text-warn'
-                }`}
-              >
-                {isActive ? 'Active' : 'Paused'}
-              </span>
-            </div>
+            {onboardingActive ? (
+              <OnboardingPanel
+                active={isActive}
+                moodleCalendarPlaceholder={moodleCalendarPlaceholder}
+                moodleToken={moodleToken}
+                onActivate={activateFromOnboarding}
+                onComplete={completeOnboarding}
+                onMoodleTokenChange={(value) => setPrefs({ moodleToken: value })}
+                onSkip={skipOnboarding}
+                onStepChange={setOnboardingStep}
+                step={prefs.sisuPlusOnboardingStep}
+                validMoodleUrl={validMoodleUrl}
+              />
+            ) : (
+              <>
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <span className="text-sm font-semibold tracking-wide text-offwhite/80 uppercase">SISU+</span>
+                    <p className="mt-1 text-xs leading-relaxed text-lightGrey">
+                      {isActive
+                        ? 'A quiet layer for planning, deadlines, and study pace.'
+                        : 'Paused. Native Sisu is visible behind this control.'}
+                    </p>
+                  </div>
+                  <span
+                    className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+                      isActive ? 'bg-accent/15 text-accent' : 'bg-warn/15 text-warn'
+                    }`}
+                  >
+                    {isActive ? 'Active' : 'Paused'}
+                  </span>
+                </div>
 
-            <div className="rounded-2xl bg-container p-3 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-sm font-medium text-offwhite">Activate SISU+</p>
-                  <p className="mt-0.5 text-xs text-lightGrey">
-                    {isActive ? 'Replace the native student pages.' : 'Switch back to the enhanced dashboard.'}
+                <div className="rounded-2xl bg-container p-3 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-medium text-offwhite">Activate SISU+</p>
+                      <p className="mt-0.5 text-xs text-lightGrey">
+                        {isActive ? 'Replace the native student pages.' : 'Switch back to the enhanced dashboard.'}
+                      </p>
+                    </div>
+                    <Toggle checked={prefs.sisuPlusActive} onChange={(val) => setPrefs({ sisuPlusActive: val })} />
+                  </div>
+                </div>
+
+                {!isActive && (
+                  <div className="rounded-2xl bg-warn/10 p-3 text-xs leading-relaxed text-warn shadow-[inset_0_0_0_1px_rgba(240,168,77,0.16)]">
+                    Paused mode keeps this control isolated while Sisu handles the page.
+                  </div>
+                )}
+
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <label
+                      className="text-xs font-semibold tracking-wide text-lightGrey uppercase"
+                      htmlFor="sisu-plus-moodle-url"
+                    >
+                      Moodle Sync
+                    </label>
+                    <span className={`text-[11px] font-medium ${validMoodleUrl ? 'text-accent' : 'text-danger'}`}>
+                      {validMoodleUrl ? 'Calendar URL' : 'Check URL'}
+                    </span>
+                  </div>
+                  <div
+                    className={`rounded-2xl bg-container2 px-3 py-2 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)] transition-[box-shadow] duration-200 ${
+                      validMoodleUrl
+                        ? 'focus-within:shadow-[inset_0_0_0_1px_rgba(65,150,72,0.65)]'
+                        : 'shadow-[inset_0_0_0_1px_rgba(240,107,107,0.45)]'
+                    }`}
+                  >
+                    <input
+                      id="sisu-plus-moodle-url"
+                      value={moodleToken}
+                      onChange={(event) => setPrefs({ moodleToken: event.target.value })}
+                      placeholder={moodleCalendarPlaceholder}
+                      spellCheck={false}
+                      className="block h-10 w-full border-0 bg-transparent p-0 font-mono text-sm text-offwhite outline-none placeholder:text-lightGrey/55"
+                    />
+                  </div>
+                  <p className="text-xs leading-relaxed text-lightGrey">
+                    {isActive
+                      ? 'Paste Moodle’s exported calendar link once. SISU+ uses it only for deadline widgets.'
+                      : ''}
                   </p>
                 </div>
-                <Toggle checked={prefs.sisuPlusActive} onChange={(val) => setPrefs({ sisuPlusActive: val })} />
-              </div>
-            </div>
-
-            {!isActive && (
-              <div className="rounded-2xl bg-warn/10 p-3 text-xs leading-relaxed text-warn shadow-[inset_0_0_0_1px_rgba(240,168,77,0.16)]">
-                Paused mode keeps this control isolated while Sisu handles the page.
-              </div>
+              </>
             )}
-
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center justify-between">
-                <label
-                  className="text-xs font-semibold tracking-wide text-lightGrey uppercase"
-                  htmlFor="sisu-plus-moodle-url"
-                >
-                  Moodle Sync
-                </label>
-                <span className={`text-[11px] font-medium ${validMoodleUrl ? 'text-accent' : 'text-danger'}`}>
-                  {validMoodleUrl ? 'Calendar URL' : 'Check URL'}
-                </span>
-              </div>
-              <div
-                className={`rounded-2xl bg-container2 px-3 py-2 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)] transition-[box-shadow] duration-200 ${
-                  validMoodleUrl
-                    ? 'focus-within:shadow-[inset_0_0_0_1px_rgba(65,150,72,0.65)]'
-                    : 'shadow-[inset_0_0_0_1px_rgba(240,107,107,0.45)]'
-                }`}
-              >
-                <input
-                  id="sisu-plus-moodle-url"
-                  value={moodleToken}
-                  onChange={(event) => setPrefs({ moodleToken: event.target.value })}
-                  placeholder="https://moodle.lut.fi/calendar/export_execute.php?..."
-                  spellCheck={false}
-                  className="block h-10 w-full border-0 bg-transparent p-0 font-mono text-sm text-offwhite outline-none placeholder:text-lightGrey/55"
-                />
-              </div>
-              <p className="text-xs leading-relaxed text-lightGrey">
-                {isActive
-                  ? 'Paste Moodle’s exported calendar link once. SISU+ uses it only for deadline widgets.'
-                  : 'This stays saved while SISU+ is paused.'}
-              </p>
-            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -229,17 +272,13 @@ export function ControlCenter() {
                 transition: { duration: 0.12 },
               }}
               transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
-              className={`mr-1 text-left backdrop-blur-md ${
-                isActive
-                  ? 'w-[276px] rounded-3xl p-3 shadow-[0_14px_38px_rgba(0,0,0,0.32),inset_0_0_0_1px_rgba(255,255,255,0.06)]'
-                  : 'w-[242px] rounded-2xl bg-background/92 py-2 pr-1 pl-2.5 shadow-[0_14px_34px_rgba(0,0,0,0.24),0_0_0_1px_rgba(13,13,17,0.12),inset_0_0_0_1px_rgba(255,255,255,0.07)]'
-              }`}
+              className="mr-1 w-[290px] rounded-3xl p-3 text-left shadow-[0_14px_38px_rgba(0,0,0,0.32),inset_0_0_0_1px_rgba(255,255,255,0.06)]"
             >
-              <div className={`flex ${isActive ? 'gap-3' : 'gap-2.5'}`}>
+              <div className="flex gap-3">
                 <span
-                  className={`flex shrink-0 items-center justify-center ${isActive ? 'size-9 rounded-2xl' : 'size-7 rounded-xl'} ${controlTip.accentClass}`}
+                  className={`flex size-9 shrink-0 items-center justify-center rounded-2xl ${controlTip.accentClass}`}
                 >
-                  <SparkleIcon className={isActive ? 'size-5' : 'size-3.5'} />
+                  <SparkleIcon className="size-5" />
                 </span>
                 <div className="min-w-0">
                   <p className="text-[11px] font-semibold tracking-wide text-offwhite/80 uppercase">
@@ -255,18 +294,10 @@ export function ControlCenter() {
         <button
           aria-label={isOpen ? 'Close SISU+ controls' : 'Open SISU+ controls'}
           onClick={() => setIsOpen(!isOpen)}
-          className={`flex cursor-pointer items-center justify-center rounded-full text-offwhite transition-[transform,opacity] duration-200 active:scale-[0.96] ${
-            isActive ? 'h-20 w-20 p-2' : 'h-[52px] w-[52px] p-1'
-          }`}
+          className="flex h-20 w-20 cursor-pointer items-center justify-center rounded-full p-2 text-offwhite transition-[transform,opacity] duration-200 active:scale-[0.96]"
           type="button"
         >
-          {isActive ? (
-            <CircularText text="SISU PLUS * CONTROLS * " onHover="slowDown" spinDuration={20} />
-          ) : (
-            <div className="flex size-11 items-center justify-center rounded-full bg-container2 text-offwhite shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06),0_10px_24px_rgba(0,0,0,0.22)]">
-              <SparkleIcon className="size-6" />
-            </div>
-          )}
+          <CircularText text="SISU PLUS * CONTROLS * " onHover="slowDown" spinDuration={20} />
         </button>
       </div>
     </motion.div>

@@ -16,6 +16,7 @@ import { Button } from '@/app/components/ui/Button.comp';
 import { InlineLoader } from '@/app/components/ui/InlineLoader.comp';
 import { daysUntil } from '@/app/helpers/daysUntilToday';
 import { useSisuQuery } from '@/app/hooks/useSisuQuery';
+import { getMoodleCalendarExportUrl } from '@/shared/domains';
 import {
   CreditsVelocityContent,
   DashboardCompletedCourse,
@@ -739,7 +740,7 @@ const MoodleMissingToken: React.FC = () => (
     <p className="text-xs font-light text-lightGrey">
       Head over to Moodle and export calendar URL with options: All Events and choose Custom Date Range.
     </p>
-    <Button onClick={() => window.open('https://moodle.lut.fi/calendar/export.php?')}>Head over to Moodle</Button>
+    <Button onClick={() => window.open(getMoodleCalendarExportUrl())}>Head over to Moodle</Button>
   </div>
 );
 

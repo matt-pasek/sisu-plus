@@ -34,7 +34,7 @@ const policySections = [
   {
     title: 'Data handled by the extension',
     body: [
-      "Sisu+ may access data from the user's active Sisu session, including study plans, courses, credits, enrolments, progress information, and related study planning data available to the logged-in user on https://sisu.lut.fi.",
+      "Sisu+ may access data from the user's active Sisu session, including study plans, courses, credits, enrolments, progress information, and related study planning data available to the logged-in user on supported Sisu domains such as https://sisu.lut.fi and https://sisu.lab.fi.",
       'Sisu+ may temporarily read Sisu authorization headers and required session cookies in order to request Sisu API data on behalf of the logged-in user.',
       'If the user enables Moodle deadline integration, Sisu+ stores the Moodle calendar URL provided by the user and uses it to fetch calendar and deadline data.',
       'Sisu+ stores extension preferences, settings, enabled or disabled state, and Moodle configuration in Chrome storage.',
@@ -177,7 +177,7 @@ export function LandingPage() {
         <div className="landing-hero-copy">
           <div className="landing-badge">
             <span>New</span>
-            <p>v1.0.0 just shipped</p>
+            <p>v{import.meta.env.VITE_APP_VERSION} just shipped</p>
           </div>
           <h1>
             The Sisu we deserve, <span>finally.</span>
@@ -257,7 +257,7 @@ export function LandingPage() {
           <h2>Fixing the things that actually slow you down.</h2>
           <p className="landing-section-copy">
             The plan is pretty straightforward: fewer clicks to find what you need, clearer course info, and a timeline
-            that doesn't make you guess. LUT first, then more universities once that's working well.
+            that doesn't make you guess. Supported universities first, then more campuses as requests come in.
           </p>
         </div>
         <div className="landing-roadmap-grid">
@@ -319,8 +319,18 @@ export function LandingPage() {
             </div>
             <div className="landing-live-universities">
               <div className="landing-live-university-chip">
+                <span>LUT</span>
                 <div>
                   <h3>LUT University</h3>
+                  <p>sisu.lut.fi</p>
+                </div>
+                <CheckIcon />
+              </div>
+              <div className="landing-live-university-chip">
+                <span>LAB</span>
+                <div>
+                  <h3>LAB University of Applied Sciences</h3>
+                  <p>sisu.lab.fi</p>
                 </div>
                 <CheckIcon />
               </div>
@@ -363,7 +373,7 @@ export function LandingPage() {
           <p>
             &copy; {new Date().getFullYear()} Mateusz Pasek. All rights reserved.
             <br />
-            <span>Not affiliated with LUT University or Funidata Oy.</span>
+            <span>Not affiliated with any supported university or Funidata Oy.</span>
           </p>
         </div>
         <div className="landing-footer-links">
@@ -403,7 +413,7 @@ export function PrivacyPolicyPage() {
         <h1>Privacy Policy for Sisu+</h1>
         <p className="privacy-effective-date">Effective date: April 26, 2026</p>
         <p className="privacy-intro">
-          Sisu+ is a browser extension that improves the LUT Sisu student planning experience.
+          Sisu+ is a browser extension that improves the Sisu student planning experience.
         </p>
 
         <div className="privacy-section-list">
@@ -424,7 +434,7 @@ export function PrivacyPolicyPage() {
           <p>
             &copy; {new Date().getFullYear()} Mateusz Pasek. All rights reserved.
             <br />
-            <span>Not affiliated with LUT University or Funidata Oy.</span>
+            <span>Not affiliated with any supported university or Funidata Oy.</span>
           </p>
         </div>
         <div className="landing-footer-links">

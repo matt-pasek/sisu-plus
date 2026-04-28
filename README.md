@@ -1,7 +1,9 @@
 # Sisu+
 
-Sisu+ is a browser extension for LUT University's Sisu. It swaps the default student pages for a cleaner dashboard, an
-editable study timeline, and a small control panel for jumping back to native Sisu when you need it.
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/G2G41YIDLL)
+
+Sisu+ is a browser extension for Sisu. It swaps the default student pages for a cleaner dashboard, an editable study
+timeline, and a small control panel for jumping back to native Sisu when you need it.
 
 The project is still young, but the useful parts are already here: credits, enrolments, Moodle deadlines, study-right
 progress, timeline editing, and prerequisite warnings.
@@ -20,13 +22,15 @@ progress, timeline editing, and prerequisite warnings.
 
 ## where it works
 
-Right now Sisu+ targets:
+Right now Sisu+ supports:
 
-- `https://sisu.lut.fi/*`
-- `https://moodle.lut.fi/*` for Moodle calendar data
+| University                         | Sisu                    | Moodle calendar           |
+| ---------------------------------- | ----------------------- | ------------------------- |
+| LUT University                     | `https://sisu.lut.fi/*` | `https://moodle.lut.fi/*` |
+| LAB University of Applied Sciences | `https://sisu.lab.fi/*` | `https://moodle.lab.fi/*` |
 
 The code is structured around Sisu's internal APIs, so adding another university is possible, but not automatic. The
-first working target is LUT.
+first working targets are LUT and LAB.
 
 ## privacy
 
@@ -62,7 +66,7 @@ Then load the generated `dist/` folder in Chrome:
 2. Enable developer mode.
 3. Choose "Load unpacked".
 4. Select this repo's `dist/` folder.
-5. Open `https://sisu.lut.fi/student`.
+5. Open one of the supported universities' Sisu.
 
 Chrome does not always pick up extension changes cleanly. If something looks stale, reload the extension from
 `chrome://extensions` and refresh the Sisu tab.
@@ -92,7 +96,7 @@ bun run build:landing
 bun run generate:apis
 ```
 
-`generate:apis` regenerates Sisu API clients from LUT's internal Swagger docs:
+`generate:apis` regenerates Sisu API clients from Sisu's internal Swagger docs:
 
 - Kori
 - Arto
@@ -128,11 +132,10 @@ scripts/generate-apis.ts     generated API client refresh script
 
 ## status
 
-Sisu+ is currently focused on making the LUT student workflow less painful. Near-term work is mostly better course
-details, calendar-first planning, cleaner empty states, and support for more Sisu universities once the LUT version is
-solid.
+Sisu+ is currently focused on making university Sisu workflows less painful. Near-term work is mostly better course
+details, calendar-first planning, cleaner empty states, and support for more Sisu universities.
 
 ## acknowledgements
 
-Sisu+ is an independent project. It is not affiliated with LUT University, Sisu, Moodle, or the organizations behind
-those services.
+Sisu+ is an independent project. It is not affiliated with any supported university, Sisu, Moodle, or the organizations
+behind those services.

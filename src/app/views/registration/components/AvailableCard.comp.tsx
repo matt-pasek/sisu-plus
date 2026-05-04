@@ -11,6 +11,7 @@ import {
 import type { RegistrationTab } from '../registrationTypes';
 import { CalendarIcon } from './RegistrationIcons';
 import { CourseHeader } from './CourseHeader.comp';
+import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 
 interface Props {
   course: RegistrationCourse;
@@ -20,6 +21,7 @@ interface Props {
 }
 
 export const AvailableCard: React.FC<Props> = ({ course, implementation, onSelect, tab }) => {
+  const { t } = useTranslationWithPrefix('views.registration');
   const implementations = getImplementationsForTab(course, tab);
   const selectableCount = implementations.filter(isImplementationSelectable).length;
   const status = getStatusForTab(course, tab);
@@ -38,7 +40,7 @@ export const AvailableCard: React.FC<Props> = ({ course, implementation, onSelec
         <span
           className={`shrink-0 rounded px-2 py-0.5 text-xs font-bold ${getStatusClass(implementation ? 'not-enrolled' : 'not-selected')}`}
         >
-          {selectedDraft ? 'Selected' : implementation ? 'Open' : 'Closed'}
+          {selectedDraft ? t('labels.selected') : implementation ? t('labels.open') : t('labels.closed')}
         </span>
       </div>
 
@@ -47,22 +49,20 @@ export const AvailableCard: React.FC<Props> = ({ course, implementation, onSelec
           <p className="flex items-center gap-2 font-medium text-offwhite">
             <CalendarIcon className="size-3.5 text-darkishGrey" />
             {selectedDraft
-              ? (implementation?.name ?? implementation?.typeLabel ?? 'Selected implementation')
+              ? (implementation?.name ?? implementation?.typeLabel ?? t('labels.selectedImplementation'))
               : implementation
-                ? `${selectableCount} open ${selectableCount === 1 ? 'option' : 'options'}`
-                : 'No open registration'}
+                ? t(selectableCount === 1 ? 'labels.openOption' : 'labels.openOptions', { count: selectableCount })
+                : t('labels.noOpenRegistration')}
           </p>
           {selectedDraft && (
             <p className="mt-1 text-xs text-darkishGrey">
               {formatImplementationDateRange(implementation)}
-              {selectableCount > 1 && ` · ${selectableCount} open options`}
+              {selectableCount > 1 && ` · ${t('labels.openOptions', { count: selectableCount })}`}
             </p>
           )}
-          {!implementation && (
-            <p className="mt-1 text-xs text-darkishGrey">Registration is closed or no published implementations.</p>
-          )}
+          {!implementation && <p className="mt-1 text-xs text-darkishGrey">{t('labels.registrationClosed')}</p>}
           {implementation && !selectedDraft && (
-            <p className="mt-1 text-xs text-darkishGrey">Select an implementation before registering.</p>
+            <p className="mt-1 text-xs text-darkishGrey">{t('labels.selectBeforeRegistering')}</p>
           )}
         </div>
 
@@ -75,7 +75,7 @@ export const AvailableCard: React.FC<Props> = ({ course, implementation, onSelec
                 if (implementation) onSelect(course, implementation);
               }}
             >
-              Change
+              {t('actions.change')}
             </Button>
           )}
           <Button
@@ -91,7 +91,11 @@ export const AvailableCard: React.FC<Props> = ({ course, implementation, onSelec
               onSelect(course, implementation);
             }}
           >
-            {selectedDraft ? 'Register' : tab === 'exam' ? 'Select sitting' : 'Select implementation'}
+            {selectedDraft
+              ? t('actions.register')
+              : tab === 'exam'
+                ? t('labels.selectSitting')
+                : t('labels.selectImplementation')}
           </Button>
         </div>
       </div>

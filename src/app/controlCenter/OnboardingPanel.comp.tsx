@@ -1,7 +1,8 @@
 import { motion } from 'motion/react';
 import { getMoodleCalendarExportUrl } from '@/shared/domains';
+import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 
-const ONBOARDING_STEPS = ['Welcome', 'Control', 'Switch on', 'Views', 'Moodle'] as const;
+const ONBOARDING_STEP_COUNT = 5;
 
 interface OnboardingPanelProps {
   active: boolean;
@@ -40,7 +41,7 @@ const ICONS = {
 } as const;
 
 function clampStep(step: number) {
-  return Math.min(Math.max(step, 0), ONBOARDING_STEPS.length - 1);
+  return Math.min(Math.max(step, 0), ONBOARDING_STEP_COUNT - 1);
 }
 
 export function OnboardingPanel({
@@ -55,8 +56,10 @@ export function OnboardingPanel({
   onSkip,
   onStepChange,
 }: OnboardingPanelProps) {
+  const { t } = useTranslationWithPrefix('controlCenter.onboarding');
   const safeStep = clampStep(step);
-  const isLastStep = safeStep === ONBOARDING_STEPS.length - 1;
+  const isLastStep = safeStep === ONBOARDING_STEP_COUNT - 1;
+  const onboardingSteps = t('steps', { returnObjects: true }) as string[];
 
   function goNext() {
     if (safeStep === 2 && !active) {
@@ -72,7 +75,7 @@ export function OnboardingPanel({
     onStepChange(safeStep + 1);
   }
 
-  const primaryLabel = safeStep === 2 && !active ? 'Turn on SISU+' : isLastStep ? 'Finish setup' : 'Continue';
+  const primaryLabel = safeStep === 2 && !active ? t('turnOn') : isLastStep ? t('finishSetup') : t('continue');
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-4 p-5 pb-20">
@@ -83,8 +86,10 @@ export function OnboardingPanel({
               <OnboardingIcon path={ICONS.spark} />
             </span>
             <div>
-              <span className="text-xs font-semibold tracking-wide text-offwhite/70 uppercase">First run setup</span>
-              <h2 className="text-xl leading-tight font-semibold text-balance text-offwhite">Welcome to SISU+</h2>
+              <span className="text-xs font-semibold tracking-wide text-offwhite/70 uppercase">
+                {t('firstRunSetup')}
+              </span>
+              <h2 className="text-xl leading-tight font-semibold text-balance text-offwhite">SISU+</h2>
             </div>
           </div>
         </div>
@@ -93,12 +98,12 @@ export function OnboardingPanel({
           onClick={onSkip}
           type="button"
         >
-          Skip
+          {t('skip')}
         </button>
       </div>
 
-      <div className="grid grid-cols-5 gap-1.5" aria-label="Onboarding progress">
-        {ONBOARDING_STEPS.map((label, index) => (
+      <div className="grid grid-cols-5 gap-1.5" aria-label={t('progressLabel')}>
+        {onboardingSteps.map((label, index) => (
           <button
             key={label}
             aria-current={safeStep === index ? 'step' : undefined}
@@ -128,23 +133,16 @@ export function OnboardingPanel({
         {safeStep === 0 && (
           <div className="flex h-full flex-col justify-between gap-5">
             <div>
-              <p className="text-2xl leading-tight font-semibold text-balance text-offwhite">
-                Sisu stays untouched until you choose to switch.
-              </p>
-              <p className="mt-3 text-sm leading-6 text-pretty text-lightGrey">
-                After installation, SISU+ starts paused. This control center lets you turn the enhanced interface on,
-                configure Moodle deadlines, and come back to native Sisu whenever you need it.
-              </p>
+              <p className="text-2xl leading-tight font-semibold text-balance text-offwhite">{t('welcome.title')}</p>
+              <p className="mt-3 text-sm leading-6 text-pretty text-lightGrey">{t('welcome.body')}</p>
             </div>
             <div className="grid gap-2">
               <div className="rounded-2xl bg-container2 p-3 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]">
-                <p className="text-sm font-semibold text-offwhite">You are in control</p>
-                <p className="mt-1 text-xs leading-relaxed text-lightGrey">
-                  The enhanced dashboard only replaces student pages after you activate it.
-                </p>
+                <p className="text-sm font-semibold text-offwhite">{t('welcome.cardTitle')}</p>
+                <p className="mt-1 text-xs leading-relaxed text-lightGrey">{t('welcome.cardBody')}</p>
               </div>
               <div className="rounded-2xl bg-warn/10 p-3 text-xs leading-relaxed text-warn shadow-[inset_0_0_0_1px_rgba(240,168,77,0.16)]">
-                First-run state and setup progress are saved in Chrome sync.
+                {t('welcome.syncNotice')}
               </div>
             </div>
           </div>
@@ -157,25 +155,24 @@ export function OnboardingPanel({
                 <OnboardingIcon path={ICONS.control} />
               </span>
               <div>
-                <p className="text-lg font-semibold text-offwhite">Meet the control center</p>
-                <p className="mt-1 text-sm leading-6 text-lightGrey">
-                  This floating button is the steady place for SISU+ state. Open it to pause the extension, resume it,
-                  or update Moodle sync without hunting through browser extension menus.
-                </p>
+                <p className="text-lg font-semibold text-offwhite">{t('control.title')}</p>
+                <p className="mt-1 text-sm leading-6 text-lightGrey">{t('control.body')}</p>
               </div>
             </div>
             <div className="rounded-3xl bg-background/70 p-4 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-sm font-semibold text-offwhite">Current mode</p>
-                  <p className="mt-1 text-xs text-lightGrey">{active ? 'SISU+ is active' : 'Native Sisu is active'}</p>
+                  <p className="text-sm font-semibold text-offwhite">{t('control.currentMode')}</p>
+                  <p className="mt-1 text-xs text-lightGrey">
+                    {active ? t('control.activeMode') : t('control.nativeMode')}
+                  </p>
                 </div>
                 <span
                   className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
                     active ? 'bg-accent/15 text-accent' : 'bg-warn/15 text-warn'
                   }`}
                 >
-                  {active ? 'Active' : 'Paused'}
+                  {active ? t('control.activeMode') : t('control.nativeMode')}
                 </span>
               </div>
             </div>
@@ -188,16 +185,13 @@ export function OnboardingPanel({
               <OnboardingIcon className="size-6" path={ICONS.power} />
             </span>
             <div>
-              <p className="text-xl font-semibold text-balance text-offwhite">Switch to the enhanced interface.</p>
-              <p className="mt-2 text-sm leading-6 text-lightGrey">
-                SISU+ will reload the student page once, then continue the tour inside the enhanced dashboard. You can
-                pause it again from this same control center.
-              </p>
+              <p className="text-xl font-semibold text-balance text-offwhite">{t('switchOn.title')}</p>
+              <p className="mt-2 text-sm leading-6 text-lightGrey">{t('switchOn.body')}</p>
             </div>
             <div className="rounded-2xl bg-container2 p-3 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)]">
-              <p className="text-xs font-semibold tracking-wide text-lightGrey uppercase">Status</p>
+              <p className="text-xs font-semibold tracking-wide text-lightGrey uppercase">{t('switchOn.status')}</p>
               <p className={`mt-1 text-sm font-semibold ${active ? 'text-accent' : 'text-warn'}`}>
-                {active ? 'SISU+ is already active.' : 'SISU+ is currently paused.'}
+                {active ? t('switchOn.active') : t('switchOn.paused')}
               </p>
             </div>
           </div>
@@ -205,7 +199,7 @@ export function OnboardingPanel({
 
         {safeStep === 3 && (
           <div className="space-y-3">
-            <p className="text-xl font-semibold text-balance text-offwhite">Two views, one study plan.</p>
+            <p className="text-xl font-semibold text-balance text-offwhite">{t('views.title')}</p>
             <div className="grid gap-3">
               <article className="rounded-2xl bg-container2 p-3 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)]">
                 <div className="flex gap-3">
@@ -213,10 +207,8 @@ export function OnboardingPanel({
                     <OnboardingIcon path={ICONS.dashboard} />
                   </span>
                   <div>
-                    <h3 className="text-sm font-semibold text-offwhite">Dashboard</h3>
-                    <p className="mt-1 text-xs leading-relaxed text-lightGrey">
-                      A customizable overview for active courses, credits, deadlines, grade progress, and study pace.
-                    </p>
+                    <h3 className="text-sm font-semibold text-offwhite">{t('views.dashboardTitle')}</h3>
+                    <p className="mt-1 text-xs leading-relaxed text-lightGrey">{t('views.dashboardBody')}</p>
                   </div>
                 </div>
               </article>
@@ -226,10 +218,8 @@ export function OnboardingPanel({
                     <OnboardingIcon path={ICONS.timeline} />
                   </span>
                   <div>
-                    <h3 className="text-sm font-semibold text-offwhite">Timeline</h3>
-                    <p className="mt-1 text-xs leading-relaxed text-lightGrey">
-                      A semester-by-semester planning board where you can move courses and catch prerequisite issues.
-                    </p>
+                    <h3 className="text-sm font-semibold text-offwhite">{t('views.timelineTitle')}</h3>
+                    <p className="mt-1 text-xs leading-relaxed text-lightGrey">{t('views.timelineBody')}</p>
                   </div>
                 </div>
               </article>
@@ -244,11 +234,8 @@ export function OnboardingPanel({
                 <OnboardingIcon path={ICONS.link} />
               </span>
               <div>
-                <p className="text-lg font-semibold text-offwhite">Connect Moodle deadlines</p>
-                <p className="mt-1 text-sm leading-6 text-lightGrey">
-                  Open Moodle calendar export, choose all events and a custom date range, then paste the generated URL
-                  here.
-                </p>
+                <p className="text-lg font-semibold text-offwhite">{t('moodle.title')}</p>
+                <p className="mt-1 text-sm leading-6 text-lightGrey">{t('moodle.body')}</p>
               </div>
             </div>
 
@@ -258,7 +245,7 @@ export function OnboardingPanel({
               rel="noreferrer"
               target="_blank"
             >
-              Open Moodle calendar export
+              {t('moodle.openExport')}
             </a>
 
             <div>
@@ -266,7 +253,7 @@ export function OnboardingPanel({
                 className="text-xs font-semibold tracking-wide text-lightGrey uppercase"
                 htmlFor="sisu-plus-onboarding-moodle-url"
               >
-                Moodle calendar URL
+                {t('moodle.urlLabel')}
               </label>
               <div
                 className={`mt-2 rounded-2xl bg-background/80 px-3 py-2 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)] transition-[box-shadow] duration-200 ${
@@ -285,9 +272,7 @@ export function OnboardingPanel({
                 />
               </div>
               <p className={`mt-2 text-xs leading-relaxed ${validMoodleUrl ? 'text-lightGrey' : 'text-danger'}`}>
-                {validMoodleUrl
-                  ? 'You can finish now, or leave this empty and add it later from the control center.'
-                  : 'The URL should come from Moodle calendar export and include a calendar path.'}
+                {validMoodleUrl ? t('moodle.validHint') : t('moodle.invalidHint')}
               </p>
             </div>
           </div>
@@ -301,7 +286,7 @@ export function OnboardingPanel({
           onClick={() => onStepChange(safeStep - 1)}
           type="button"
         >
-          Back
+          {t('back')}
         </button>
         <button
           className="min-h-11 cursor-pointer rounded-xl bg-accent px-5 text-sm font-semibold text-background shadow-[0_12px_26px_rgba(65,150,72,0.24)] transition-[background-color,transform,box-shadow,opacity] duration-200 hover:bg-lighterGreen active:scale-[0.96] disabled:cursor-not-allowed disabled:opacity-50"

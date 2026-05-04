@@ -1,14 +1,16 @@
 import React from 'react';
 import { ModuleProgress } from '@/app/api/dataPoints/getCreditsByModule';
+import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 
 export const BAR_COLORS = ['#4A7EF0', '#10B981', '#F59E0B', '#A78BFA', '#EF4444', '#06B6D4'];
 
-function formatCredits(value: number): string {
+function formatCredits(value: number, unit: string): string {
   const rounded = Math.round(value * 10) / 10;
-  return `${Number.isInteger(rounded) ? rounded : rounded.toFixed(1)} cr`;
+  return `${Number.isInteger(rounded) ? rounded : rounded.toFixed(1)} ${unit}`;
 }
 
 const ProgressDial: React.FC<{ done: number; total: number }> = ({ done, total }) => {
+  const { t } = useTranslationWithPrefix('views.dashboard');
   const pct = total > 0 ? Math.min(done / total, 1) : 0;
   const r = 46;
   const circ = 2 * Math.PI * r;
@@ -17,7 +19,7 @@ const ProgressDial: React.FC<{ done: number; total: number }> = ({ done, total }
   return (
     <div className="relative grid size-36 shrink-0 place-items-center rounded-[28px] bg-background/45 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]">
       <svg
-        aria-label={`Degree completion ${Math.round(pct * 100)} percent`}
+        aria-label={t('widgets.degreeCompletion.aria', { percent: Math.round(pct * 100) })}
         className="size-28 -rotate-90"
         role="img"
         viewBox="0 0 112 112"
@@ -39,7 +41,7 @@ const ProgressDial: React.FC<{ done: number; total: number }> = ({ done, total }
         <span className="text-3xl leading-none font-semibold text-offwhite tabular-nums">
           {total > 0 ? `${Math.round(pct * 100)}%` : '-'}
         </span>
-        <span className="mt-1 text-[11px] font-medium text-lightGrey">complete</span>
+        <span className="mt-1 text-[11px] font-medium text-lightGrey">{t('widgets.degreeCompletion.complete')}</span>
       </div>
     </div>
   );
@@ -108,15 +110,20 @@ export const DegreeCompletionContent: React.FC<Props> = ({
   totalTarget,
   modules,
 }) => {
+  const { t } = useTranslationWithPrefix('views.dashboard');
+  const { t: tUtil } = useTranslationWithPrefix('util');
   const creditsRemaining = Math.max(totalTarget - creditsDone, 0);
+  const unit = tUtil('credits.short');
 
   return (
     <div className="flex h-full min-h-0 gap-5 overflow-hidden">
       <section className="flex w-52 shrink-0 flex-col justify-between rounded-[28px] bg-container2 p-4 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]">
         <div>
-          <p className="text-xs font-medium tracking-wide text-lightGrey uppercase">Degree Pace</p>
+          <p className="text-xs font-medium tracking-wide text-lightGrey uppercase">
+            {t('widgets.degreeCompletion.paceLabel')}
+          </p>
           <p className="mt-1 text-sm leading-snug text-pretty text-offwhite">
-            You have {formatCredits(creditsRemaining)} left.
+            {t('widgets.degreeCompletion.paceLeft', { credits: formatCredits(creditsRemaining, unit) })}
           </p>
         </div>
         <ProgressDial done={creditsDone} total={totalTarget} />
@@ -125,17 +132,25 @@ export const DegreeCompletionContent: React.FC<Props> = ({
       <section className="flex min-w-0 flex-1 flex-col gap-4">
         <div className="grid grid-cols-3 gap-3">
           <MetricCard
-            label="Credits done"
+            label={t('widgets.degreeCompletion.creditsLabel')}
             value={creditsDone}
-            sub={totalTarget > 0 ? `of ${totalTarget} cr` : '-'}
+            sub={totalTarget > 0 ? t('widgets.degreeCompletion.ofTarget', { target: totalTarget }) : '-'}
             tone="accent"
           />
           <MetricCard
-            label="Avg. grade"
+            label={t('widgets.degreeCompletion.avgGradeLabel')}
             value={gradeAverage?.toFixed(1) ?? '-'}
-            sub={gradedCount > 0 ? `${gradedCount} graded` : 'none yet'}
+            sub={
+              gradedCount > 0
+                ? t('widgets.degreeCompletion.gradedCount', { count: gradedCount })
+                : t('widgets.degreeCompletion.noneYet')
+            }
           />
-          <MetricCard label="Study right" value={studyRightEnd?.year ?? '-'} sub={studyRightEnd?.until ?? ''} />
+          <MetricCard
+            label={t('widgets.degreeCompletion.studyRightLabel')}
+            value={studyRightEnd?.year ?? '-'}
+            sub={studyRightEnd?.until ?? ''}
+          />
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto pr-1">
@@ -151,7 +166,7 @@ export const DegreeCompletionContent: React.FC<Props> = ({
             ))}
             {modules.length === 0 && (
               <div className="flex h-28 items-center justify-center rounded-2xl border border-dashed border-border text-sm text-lightGrey">
-                Module progress is not available yet.
+                {t('widgets.degreeCompletion.noModules')}
               </div>
             )}
           </div>

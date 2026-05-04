@@ -32,8 +32,10 @@ import { AvailableCard } from './components/AvailableCard.comp';
 import { EmptyState } from './components/EmptyState.comp';
 import { ImplementationDialog } from './components/ImplementationDialog.comp';
 import { RegisteredCard } from './components/RegisteredCard.comp';
+import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 
 const RegistrationView: React.FC = () => {
+  const { t } = useTranslationWithPrefix('views.registration');
   const queryClient = useQueryClient();
   const { data: studyRight, isLoading: isStudyRightLoading } = useSisuQuery(['study-rights'], fetchStudyRights);
   const { courses, isLoading, periods, statusCourses } = getRegistrationCourses();
@@ -108,25 +110,25 @@ const RegistrationView: React.FC = () => {
       studyRightId?: string;
     }) => submitRegistration(course, implementation, selections, studyRightId),
     onError: (error) => {
-      setMessage({ tone: 'error', text: error instanceof Error ? error.message : 'Registration failed.' });
+      setMessage({ tone: 'error', text: error instanceof Error ? error.message : t('messages.registrationFailed') });
     },
     onSuccess: async () => {
       setDialogState(null);
-      setMessage({ tone: 'success', text: 'Registration sent to Sisu. Refreshing view...' });
+      setMessage({ tone: 'success', text: t('messages.registrationSent') });
       await refreshRegistration({ settleDelayMs: 700 });
-      setMessage({ tone: 'success', text: 'Registration view updated.' });
+      setMessage({ tone: 'success', text: t('messages.viewUpdated') });
     },
   });
 
   const cancelMutation = useMutation({
     mutationFn: cancelRegistration,
     onError: (error) => {
-      setMessage({ tone: 'error', text: error instanceof Error ? error.message : 'Cancellation failed.' });
+      setMessage({ tone: 'error', text: error instanceof Error ? error.message : t('messages.cancellationFailed') });
     },
     onSuccess: async () => {
-      setMessage({ tone: 'success', text: 'Registration update sent to Sisu. Refreshing view...' });
+      setMessage({ tone: 'success', text: t('messages.refreshSent') });
       await refreshRegistration({ settleDelayMs: 700 });
-      setMessage({ tone: 'success', text: 'Registration view updated.' });
+      setMessage({ tone: 'success', text: t('messages.viewUpdated') });
     },
   });
 
@@ -160,19 +162,17 @@ const RegistrationView: React.FC = () => {
     <section className="mx-auto max-w-[1100px] pb-10">
       <header className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl leading-tight font-semibold text-balance text-offwhite">Registration</h1>
-          <p className="mt-1 text-sm text-pretty text-lightGrey">
-            Select implementations, register for courses and exams.
-          </p>
+          <h1 className="text-2xl leading-tight font-semibold text-balance text-offwhite">{t('title')}</h1>
+          <p className="mt-1 text-sm text-pretty text-lightGrey">{t('subtitle')}</p>
         </div>
         <Button
           className="min-h-10 min-w-32 rounded-lg px-3 py-2 text-xs font-semibold"
           onClick={() => {
             void refreshRegistration();
-            setMessage({ tone: 'success', text: 'Registration view refreshed.' });
+            setMessage({ tone: 'success', text: t('messages.refreshed') });
           }}
         >
-          Update view
+          {t('actions.updateView')}
         </Button>
       </header>
 
@@ -217,8 +217,8 @@ const RegistrationView: React.FC = () => {
       <div className="mb-5 inline-flex rounded-[9px] bg-container2 p-0.5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.055)]">
         {(
           [
-            ['course', 'Course Registration', courseCount],
-            ['exam', 'Exam Registration', examCount],
+            ['course', t('labels.courseRegistration'), courseCount],
+            ['exam', t('labels.examRegistration'), examCount],
           ] as const
         ).map(([value, label, count]) => (
           <button
@@ -242,7 +242,7 @@ const RegistrationView: React.FC = () => {
           <section className="min-w-0">
             <div className="mb-2.5 flex items-center justify-between gap-3">
               <h2 className="text-xs font-semibold tracking-[0.07em] text-darkishGrey uppercase">
-                {selectedTab === 'exam' ? 'Available exams' : 'Register'}
+                {selectedTab === 'exam' ? t('labels.availableExams') : t('actions.register')}
                 <span className="ml-2 rounded bg-container2 px-2 py-0.5 tracking-normal text-lightGrey tabular-nums">
                   {availableCourses.length}
                 </span>
@@ -267,8 +267,8 @@ const RegistrationView: React.FC = () => {
                 })
               ) : (
                 <EmptyState
-                  title={selectedTab === 'exam' ? 'No available exam sittings' : 'No courses ready to register'}
-                  body="You've registered for all implementations that are currently available for registration."
+                  title={selectedTab === 'exam' ? t('empty.noAvailableExams') : t('empty.noAvailableCourses')}
+                  body={t('empty.noAvailableBody')}
                 />
               )}
             </div>
@@ -277,14 +277,16 @@ const RegistrationView: React.FC = () => {
           <section className="min-w-0">
             <div className="mb-2.5 flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-xs font-semibold tracking-[0.07em] text-darkishGrey uppercase">
-                {selectedTab === 'exam' ? 'Exam registrations confirmed' : 'Registration processed'}
+                {selectedTab === 'exam' ? t('labels.examRegistrationsConfirmed') : t('labels.registrationProcessed')}
                 <span className="ml-2 rounded bg-accent/20 px-2 py-0.5 tracking-normal text-lighterGreen tabular-nums">
                   {displayedRegistrationCount}
                 </span>
               </h2>
               <div className="flex items-center gap-3">
                 {selectedTab === 'course' && (
-                  <span className="text-xs font-semibold text-lightGrey tabular-nums">{confirmedCredits} cr total</span>
+                  <span className="text-xs font-semibold text-lightGrey tabular-nums">
+                    {confirmedCredits} {t('labels.totalCredits')}
+                  </span>
                 )}
                 <label className="flex cursor-pointer items-center gap-2 text-xs font-semibold text-lightGrey transition-colors hover:text-offwhite">
                   <input
@@ -293,7 +295,7 @@ const RegistrationView: React.FC = () => {
                     onChange={(event) => setShowAllAttempts(event.target.checked)}
                     className="size-3.5 accent-[var(--color-accent)]"
                   />
-                  Show attempts
+                  {t('labels.showAttempts')}
                 </label>
               </div>
             </div>
@@ -325,19 +327,13 @@ const RegistrationView: React.FC = () => {
                   />
                 ))
               ) : (
-                <EmptyState
-                  title="No confirmed registrations"
-                  body="When you register for a course or exam, the registration will first be processed. Once done, it will appear here."
-                />
+                <EmptyState title={t('empty.noConfirmed')} body={t('empty.noConfirmedBody')} />
               )}
             </div>
           </section>
         </div>
       ) : (
-        <EmptyState
-          title="No planned courses with registration data"
-          body="Add courses to your plan first, then return here when implementations are published."
-        />
+        <EmptyState title={t('empty.noPlanned')} body={t('empty.noPlannedBody')} />
       )}
 
       {dialogState && !isStudyRightLoading && (

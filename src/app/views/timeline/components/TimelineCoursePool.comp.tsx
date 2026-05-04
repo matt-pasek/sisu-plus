@@ -5,6 +5,7 @@ import { DraggableTimelineCourseCard } from '@/app/views/timeline/components/Tim
 import { TIMELINE_COURSE_DRAG_TYPE } from '@/app/views/timeline/components/timelineDnd';
 import { formatCredits, getCourseKey, getModuleColor } from '@/app/views/timeline/components/timelineUtils';
 import type { TimelineValidationWarning } from '@/app/views/timeline/components/timelineValidation';
+import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 
 interface Props {
   draftCourseIds?: Set<string>;
@@ -49,6 +50,7 @@ export const TimelineCoursePool: React.FC<Props> = ({
   moduleIds,
   validationWarnings = new Map(),
 }) => {
+  const { t } = useTranslationWithPrefix('views.timeline');
   const credits = unscheduledCourses.reduce((sum, course) => sum + (course.credits ?? 0), 0);
   const { ref, isDropTarget } = useDroppable({
     id: 'course-pool',
@@ -68,37 +70,37 @@ export const TimelineCoursePool: React.FC<Props> = ({
       }`}
     >
       <div>
-        <h2 className="text-xs font-bold tracking-[0.16em] text-lightGrey uppercase">Course Pool</h2>
+        <h2 className="text-xs font-bold tracking-[0.16em] text-lightGrey uppercase">{t('pool.title')}</h2>
         <div className="mt-3 rounded-lg border border-border2 bg-container2 px-3 py-2 text-sm text-darkishGrey">
-          Search...
+          {t('pool.searchPlaceholder')}
         </div>
         <div className="mt-3 grid gap-2">
           <FilterCheckbox
             checked={hidePreviousPeriods}
-            label="Hide previous"
+            label={t('pool.hidePrevious')}
             onChange={(value) => onHidePreviousPeriodsChange?.(value)}
           />
           <FilterCheckbox
             checked={showHiddenSummerPeriods}
-            label="Show summer"
+            label={t('pool.showSummer')}
             onChange={(value) => onShowHiddenSummerPeriodsChange?.(value)}
           />
         </div>
       </div>
 
       <div className="mt-4 flex items-center justify-between text-xs text-lightGrey">
-        <span>Outside shown timeline</span>
+        <span>{t('pool.outsideTimeline')}</span>
         <span className="font-mono tabular-nums">{formatCredits(credits)}</span>
       </div>
       <p className="mt-1 text-xs leading-snug text-pretty text-darkishGrey">
-        {unscheduledCourses.length} course{unscheduledCourses.length === 1 ? '' : 's'} without a visible timing period.
+        {t('pool.withoutVisiblePeriod', { count: unscheduledCourses.length })}
       </p>
       <div
         className={`mt-3 rounded-lg border border-accent/30 bg-accent/10 px-3 py-2 text-xs font-semibold text-accent transition-[opacity,scale,filter] duration-200 ease-[cubic-bezier(0.2,0,0,1)] ${
           isDropTarget ? 'blur-0 scale-100 opacity-100' : 'pointer-events-none scale-[0.25] opacity-0 blur-[4px]'
         }`}
       >
-        Drop to unschedule
+        {t('pool.unscheduleDrop')}
       </div>
 
       <div className="mt-5 flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1">
@@ -118,7 +120,7 @@ export const TimelineCoursePool: React.FC<Props> = ({
           ))
         ) : (
           <div className="rounded-lg border border-dashed border-border p-4 text-sm text-lightGrey">
-            Every planned course has a study period.
+            {t('pool.empty')}
           </div>
         )}
       </div>

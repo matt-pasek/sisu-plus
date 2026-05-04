@@ -40,7 +40,6 @@ import {
   clampWidgetLayout,
   findOpenDashboardSlot,
   getHiddenWidgets,
-  getWidgetDefinition,
 } from '@/app/views/dashboard/components/dashboardWidgets';
 import {
   DASHBOARD_WIDGET_DRAG_TYPE,
@@ -48,31 +47,35 @@ import {
   isDashboardWidgetDragData,
 } from '@/app/views/dashboard/components/dashboardDnd';
 import { useChromeStorage } from '@/app/hooks/useChromeStorage';
+import { getCurrentLocale } from '@/app/i18n';
+import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
+import type { TFunction } from 'i18next';
 
-function getCurrentPeriodLabel(): string {
+function getCurrentPeriodLabel(t: TFunction): string {
   const m = new Date().getMonth() + 1;
   const y = new Date().getFullYear();
-  if (m >= 9) return `Autumn ${y} · ${m >= 11 ? '2nd' : '1st'} Period ongoing`;
-  if (m >= 6) return `Summer ${y}`;
-  if (m >= 3) return `Spring ${y} · 4th Period ongoing`;
-  return `Spring ${y} · 3rd Period ongoing`;
+  if (m >= 9)
+    return `${t('periodLabel.autumn')} ${y} · ${m >= 11 ? t('periodLabel.secondPeriod') : t('periodLabel.firstPeriod')} ${t('periodLabel.ongoing')}`;
+  if (m >= 6) return `${t('periodLabel.summer')} ${y}`;
+  if (m >= 3) return `${t('periodLabel.spring')} ${y} · ${t('periodLabel.fourthPeriod')} ${t('periodLabel.ongoing')}`;
+  return `${t('periodLabel.spring')} ${y} · ${t('periodLabel.thirdPeriod')} ${t('periodLabel.ongoing')}`;
 }
 
-function getCurrentSemester(): string {
+function getCurrentSemester(t: TFunction): string {
   const m = new Date().getMonth() + 1;
   const y = new Date().getFullYear();
-  if (m >= 9) return `Autumn ${y}`;
-  if (m >= 6) return `Summer ${y}`;
-  return `Spring ${y}`;
+  if (m >= 9) return `${t('semesterLabel.autumn')} ${y}`;
+  if (m >= 6) return `${t('semesterLabel.summer')} ${y}`;
+  return `${t('semesterLabel.spring')} ${y}`;
 }
 
-function formatStudyRightEnd(endDate: string | null): { year: string; until: string } | null {
+function formatStudyRightEnd(endDate: string | null, untilLabel: string): { year: string; until: string } | null {
   if (!endDate) return null;
   const d = new Date(endDate);
   d.setDate(d.getDate() - 1);
   return {
     year: d.getFullYear().toString(),
-    until: `until ${d.toLocaleString('en-US', { month: 'long' })}`,
+    until: `${untilLabel} ${d.toLocaleString(getCurrentLocale(), { month: 'long' })}`,
   };
 }
 
@@ -81,7 +84,7 @@ function isCourseUnitAttainment(attainment: Attainment): attainment is CourseUni
 }
 
 function getGrade(attainment: CourseUnitAttainmentRestricted): number | string | null {
-  if (attainment.gradeScaleId.includes('hyl-hyv')) return attainment.gradeId != null ? 'Pass' : null;
+  if (attainment.gradeScaleId.includes('hyl-hyv')) return attainment.gradeId != null ? 'pass' : null;
   return attainment.gradeId >= 1 && attainment.gradeId <= 5 ? attainment.gradeId : null;
 }
 
@@ -184,13 +187,14 @@ const DashboardWidgetShell: React.FC<DashboardWidgetShellProps> = ({
   onRemove,
   onResize,
 }) => {
+  const { t } = useTranslationWithPrefix('views.dashboard');
   const { ref, isDragging } = useDraggable({
     id: `dashboard-widget:${item.id}`,
     type: DASHBOARD_WIDGET_DRAG_TYPE,
     data: getDashboardWidgetDragData(item.id),
     disabled: !isEditMode,
   });
-  const definition = getWidgetDefinition(item.id);
+  const title = t(`widgets.titles.${item.id.replace(/-([a-z])/g, (_, char: string) => char.toUpperCase())}`);
   const blockedResizeControls = useAnimationControls();
   const animateResizeBlocked = (axis: ResizeAxis) => {
     void blockedResizeControls.start(getResizeBlockedMotion(axis));
@@ -249,7 +253,7 @@ const DashboardWidgetShell: React.FC<DashboardWidgetShellProps> = ({
   const editActions = isEditMode ? (
     <div className="flex items-center gap-1.5">
       <button
-        aria-label={`Shrink ${definition.title}`}
+        aria-label={t('widgets.actions.shrink', { title })}
         className="flex size-9 items-center justify-center rounded-lg bg-container2 text-lightGrey transition-[background-color,color,transform] duration-150 hover:bg-offwhite/10 hover:text-offwhite active:scale-[0.96]"
         onClick={() => applyResize('both', { w: item.w - 1, h: item.h - 1 })}
         onPointerDown={(event) => event.stopPropagation()}
@@ -258,7 +262,7 @@ const DashboardWidgetShell: React.FC<DashboardWidgetShellProps> = ({
         -
       </button>
       <button
-        aria-label={`Grow ${definition.title}`}
+        aria-label={t('widgets.actions.grow', { title })}
         className="flex size-9 items-center justify-center rounded-lg bg-container2 text-lightGrey transition-[background-color,color,transform] duration-150 hover:bg-offwhite/10 hover:text-offwhite active:scale-[0.96]"
         onClick={() => applyResize('both', { w: item.w + 1, h: item.h + 1 })}
         onPointerDown={(event) => event.stopPropagation()}
@@ -267,7 +271,7 @@ const DashboardWidgetShell: React.FC<DashboardWidgetShellProps> = ({
         +
       </button>
       <button
-        aria-label={`Remove ${definition.title}`}
+        aria-label={t('widgets.actions.remove', { title })}
         className="flex size-9 items-center justify-center rounded-lg bg-danger/15 text-danger transition-[background-color,transform] duration-150 hover:bg-danger/25 active:scale-[0.96]"
         onClick={() => onRemove(item.id)}
         onPointerDown={(event) => event.stopPropagation()}
@@ -318,19 +322,19 @@ const DashboardWidgetShell: React.FC<DashboardWidgetShellProps> = ({
               transition={{ type: 'spring', duration: 0.3, bounce: 0 }}
             />
             <button
-              aria-label={`Resize ${definition.title} horizontally`}
+              aria-label={t('widgets.actions.resizeHorizontally', { title })}
               className="absolute top-14 -right-2 bottom-10 z-20 w-4 cursor-ew-resize rounded-full transition-[background-color,opacity] duration-150 hover:bg-accent/25"
               onPointerDown={startResizeDrag('x')}
               type="button"
             />
             <button
-              aria-label={`Resize ${definition.title} vertically`}
+              aria-label={t('widgets.actions.resizeVertically', { title })}
               className="absolute right-10 -bottom-2 left-10 z-20 h-4 cursor-ns-resize rounded-full transition-[background-color,opacity] duration-150 hover:bg-accent/25"
               onPointerDown={startResizeDrag('y')}
               type="button"
             />
             <button
-              aria-label={`Resize ${definition.title}`}
+              aria-label={t('widgets.actions.resize', { title })}
               className="absolute -right-2 -bottom-2 z-30 size-7 cursor-nwse-resize rounded-full border border-accent/50 bg-accent/25 shadow-[0_8px_20px_rgba(0,0,0,0.35)] transition-[background-color,scale] duration-150 hover:bg-accent/40 active:scale-[0.96]"
               onPointerDown={startResizeDrag('both')}
               type="button"
@@ -354,6 +358,7 @@ interface DragTransform {
 }
 
 const DashboardView: React.FC = () => {
+  const { t } = useTranslationWithPrefix('views.dashboard');
   const [prefs, setPrefs, isPrefsLoaded] = useChromeStorage();
   const [isEditMode, setIsEditMode] = useState(false);
   const [layout, setLayout] = useState<DashboardWidgetLayout[]>(prefs.dashboardLayout);
@@ -379,7 +384,7 @@ const DashboardView: React.FC = () => {
         return {
           id: attainment.id ?? attainment.courseUnitId,
           courseUnitId: attainment.courseUnitId,
-          name: courseUnit.name ?? courseUnit.code ?? 'Completed course',
+          name: courseUnit.name ?? courseUnit.code ?? t('courses.completedCourse'),
           code: courseUnit.code,
           credits: attainment.credits,
           grade: getGrade(attainment),
@@ -388,7 +393,7 @@ const DashboardView: React.FC = () => {
       }),
     );
   });
-  const studyRightEnd = formatStudyRightEnd(studyRightEndDate);
+  const studyRightEnd = formatStudyRightEnd(studyRightEndDate, t('studyRight.until'));
   const semesterCredits = activeCourses.reduce((s, c) => s + (c.credits ?? 0), 0);
   const moduleColorMap = new Map(modules.map((m, i) => [m.moduleId, BAR_COLORS[i % BAR_COLORS.length]]));
   const moduleNameMap = new Map(modules.map((m) => [m.moduleId, m.name]));
@@ -487,14 +492,14 @@ const DashboardView: React.FC = () => {
   };
 
   const renderHeader = (id: DashboardWidgetId): React.ReactNode => {
-    const definition = getWidgetDefinition(id);
+    const title = t(`widgets.titles.${id.replace(/-([a-z])/g, (_, char: string) => char.toUpperCase())}`);
     if (id === 'moodle-deadlines') {
       return (
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-offwhite">Moodle Deadlines</span>
+          <span className="text-sm font-medium text-offwhite">{t('widgets.moodleDeadlines.title')}</span>
           {!missingToken && (
             <span className="rounded bg-danger/15 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-danger">
-              LIVE
+              {t('widgets.moodleDeadlines.live')}
             </span>
           )}
         </div>
@@ -503,10 +508,10 @@ const DashboardView: React.FC = () => {
     if (id === 'active-courses') {
       return (
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-offwhite">Active Courses</span>
+          <span className="text-sm font-medium text-offwhite">{t('widgets.activeCourses.title')}</span>
           <span className="flex items-center gap-1.5 rounded-full bg-accent/10 px-2.5 py-1 text-xs font-medium text-accent">
             <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent" />
-            {getCurrentSemester()}
+            {getCurrentSemester(t)}
           </span>
         </div>
       );
@@ -514,7 +519,7 @@ const DashboardView: React.FC = () => {
     return (
       <div className="flex items-center gap-2">
         <span className="text-lightGrey">{getWidgetIcon(id)}</span>
-        <span className="text-sm font-medium text-offwhite">{definition.title}</span>
+        <span className="text-sm font-medium text-offwhite">{title}</span>
       </div>
     );
   };
@@ -606,8 +611,8 @@ const DashboardView: React.FC = () => {
       <div className="flex flex-col gap-5 pb-8">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-semibold text-balance text-offwhite">Dashboard</h1>
-            <p className="mt-0.5 text-sm text-balance text-lightGrey">{getCurrentPeriodLabel()}</p>
+            <h1 className="text-2xl font-semibold text-balance text-offwhite">{t('title')}</h1>
+            <p className="mt-0.5 text-sm text-balance text-lightGrey">{getCurrentPeriodLabel(t)}</p>
           </div>
 
           <Button
@@ -615,7 +620,7 @@ const DashboardView: React.FC = () => {
             onClick={() => setIsEditMode((current) => !current)}
             variant={isEditMode ? 'accent' : 'primary'}
           >
-            {isEditMode ? 'Done Editing' : 'Customize Dashboard'}
+            {isEditMode ? t('actions.done') : t('actions.customize')}
           </Button>
         </div>
 
@@ -664,11 +669,11 @@ const DashboardView: React.FC = () => {
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h2 className="text-lg font-semibold text-offwhite">Widget Library</h2>
-                  <p className="mt-1 text-sm text-lightGrey">Add, remove, drag, and resize dashboard cards.</p>
+                  <h2 className="text-lg font-semibold text-offwhite">{t('editor.libraryTitle')}</h2>
+                  <p className="mt-1 text-sm text-lightGrey">{t('editor.libraryDescription')}</p>
                 </div>
                 <button
-                  aria-label="Close dashboard editor"
+                  aria-label={t('widgets.actions.closeEditor')}
                   className="flex size-10 items-center justify-center rounded-lg bg-container2 text-lightGrey transition-[background-color,color,transform] duration-150 hover:bg-offwhite/10 hover:text-offwhite active:scale-[0.96]"
                   onClick={() => setIsEditMode(false)}
                   type="button"
@@ -697,21 +702,27 @@ const DashboardView: React.FC = () => {
                           <span className="text-lightGrey transition-[color] duration-200 group-hover:text-accent">
                             {getWidgetIcon(widget.id)}
                           </span>
-                          {widget.title}
+                          {t(
+                            `widgets.titles.${widget.id.replace(/-([a-z])/g, (_, char: string) => char.toUpperCase())}`,
+                          )}
                         </span>
                         <span className="rounded-full bg-background px-2 py-0.5 font-mono text-[10px] text-lightGrey">
-                          {openSlot ? `${widget.size.w}x${widget.size.h}` : 'No space'}
+                          {openSlot ? `${widget.size.w}x${widget.size.h}` : t('widgets.actions.noSpace')}
                         </span>
                       </div>
-                      <p className="mt-2 text-xs leading-relaxed text-lightGrey">{widget.description}</p>
+                      <p className="mt-2 text-xs leading-relaxed text-lightGrey">
+                        {t(
+                          `widgets.descriptions.${widget.id.replace(/-([a-z])/g, (_, char: string) => char.toUpperCase())}`,
+                        )}
+                      </p>
                     </button>
                   );
                 })}
-                {hiddenWidgets.length === 0 && <EmptyWidgetState label="All widgets are on the board." />}
+                {hiddenWidgets.length === 0 && <EmptyWidgetState label={t('editor.emptyLibrary')} />}
               </div>
 
               <div className="mt-auto rounded-xl bg-background/70 p-3 text-xs leading-relaxed text-lightGrey shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]">
-                Drag widgets onto the dotted grid. Use + and - on each card to resize within its min and max size.
+                {t('editor.footerHint')}
               </div>
             </motion.aside>
           )}
@@ -721,27 +732,29 @@ const DashboardView: React.FC = () => {
   );
 };
 
-const MoodleMissingToken: React.FC = () => (
-  <div className="flex flex-col gap-3">
-    <div className="flex gap-2">
-      <svg aria-hidden="true" className="size-8 text-lightGrey" fill="currentColor" viewBox="0 0 24 24">
-        <path
-          clipRule="evenodd"
-          d="M2.25 6a3 3 0 0 1 3-3h13.5a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3V6Zm3.97.97a.75.75 0 0 1 1.06 0l2.25 2.25a.75.75 0 0 1 0 1.06l-2.25 2.25a.75.75 0 0 1-1.06-1.06l1.72-1.72-1.72-1.72a.75.75 0 0 1 0-1.06Zm4.28 4.28a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z"
-          fillRule="evenodd"
-        />
-      </svg>
+const MoodleMissingToken: React.FC = () => {
+  const { t } = useTranslationWithPrefix('views.dashboard');
 
-      <div className="text-offwhite">
-        <p className="text-sm font-medium">Configuration missing</p>
-        <p className="text-xs font-light">You need to first configure Moodle calendar.</p>
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex gap-2">
+        <svg aria-hidden="true" className="size-8 text-lightGrey" fill="currentColor" viewBox="0 0 24 24">
+          <path
+            clipRule="evenodd"
+            d="M2.25 6a3 3 0 0 1 3-3h13.5a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3V6Zm3.97.97a.75.75 0 0 1 1.06 0l2.25 2.25a.75.75 0 0 1 0 1.06l-2.25 2.25a.75.75 0 0 1-1.06-1.06l1.72-1.72-1.72-1.72a.75.75 0 0 1 0-1.06Zm4.28 4.28a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z"
+            fillRule="evenodd"
+          />
+        </svg>
+
+        <div className="text-offwhite">
+          <p className="text-sm font-medium">{t('moodleMissing.title')}</p>
+          <p className="text-xs font-light">{t('moodleMissing.subtitle')}</p>
+        </div>
       </div>
+      <p className="text-xs font-light text-lightGrey">{t('moodleMissing.description')}</p>
+      <Button onClick={() => window.open(getMoodleCalendarExportUrl())}>{t('moodleMissing.button')}</Button>
     </div>
-    <p className="text-xs font-light text-lightGrey">
-      Head over to Moodle and export calendar URL with options: All Events and choose Custom Date Range.
-    </p>
-    <Button onClick={() => window.open(getMoodleCalendarExportUrl())}>Head over to Moodle</Button>
-  </div>
-);
+  );
+};
 
 export default DashboardView;

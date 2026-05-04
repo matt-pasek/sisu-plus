@@ -4,6 +4,7 @@ import CircularText from '@/app/components/CircularText.comp';
 import { motion, AnimatePresence } from 'motion/react';
 import { getMoodleCalendarExportUrl } from '@/shared/domains';
 import { OnboardingPanel } from '@/app/controlCenter/OnboardingPanel.comp';
+import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 
 function Toggle({ checked, onChange }: { checked: boolean; onChange: (val: boolean) => void }) {
   return (
@@ -54,31 +55,36 @@ interface ControlTip {
   accentClass: string;
 }
 
-function getControlTip(isActive: boolean, pathname: string): ControlTip {
+function getControlTip(
+  isActive: boolean,
+  pathname: string,
+  t: ReturnType<typeof useTranslationWithPrefix>['t'],
+): ControlTip {
   if (!isActive) {
     return {
-      title: 'Ready when you are',
-      body: 'SISU+ stays dormant while paused, letting you interact with Sisu as usual.',
+      title: t('tip.dormantTitle'),
+      body: t('tip.dormantBody'),
       accentClass: 'text-warn bg-warn/15 shadow-[inset_0_0_0_1px_rgba(246,185,86,0.18)]',
     };
   }
 
   if (pathname.startsWith('/student/plan')) {
     return {
-      title: 'Planning made easy',
-      body: 'SISU+ keeps track of prerequisites and planned teaching periods.',
+      title: t('tip.planningTitle'),
+      body: t('tip.planningBody'),
       accentClass: 'text-blue-300 bg-blue-400/15 shadow-[inset_0_0_0_1px_rgba(102,142,255,0.18)]',
     };
   }
 
   return {
-    title: 'Make it your own',
-    body: 'Dashboard widgets can be resized from their edges in edit mode.',
+    title: t('tip.dashboardTitle'),
+    body: t('tip.dashboardBody'),
     accentClass: 'text-accent bg-accent/15 shadow-[inset_0_0_0_1px_rgba(65,150,72,0.18)]',
   };
 }
 
 export function ControlCenter() {
+  const { t } = useTranslationWithPrefix('controlCenter');
   const [isOpen, setIsOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [prefs, setPrefs, prefsLoaded] = useChromeStorage();
@@ -91,7 +97,7 @@ export function ControlCenter() {
   const openWidth = onboardingActive ? 520 : 360;
   const openHeight = onboardingActive ? 640 : 420;
   const hoverWidth = 382;
-  const controlTip = getControlTip(isActive, window.location.pathname);
+  const controlTip = getControlTip(isActive, window.location.pathname, t);
 
   useEffect(() => {
     if (onboardingActive) setIsOpen(true);
@@ -152,11 +158,9 @@ export function ControlCenter() {
               <>
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <span className="text-sm font-semibold tracking-wide text-offwhite/80 uppercase">SISU+</span>
+                    <span className="text-sm font-semibold tracking-wide text-offwhite/80 uppercase">{t('title')}</span>
                     <p className="mt-1 text-xs leading-relaxed text-lightGrey">
-                      {isActive
-                        ? 'A quiet layer for planning, deadlines, and study pace.'
-                        : 'Paused. Native Sisu is visible behind this control.'}
+                      {isActive ? t('activate.descriptionActive') : t('activate.descriptionPaused')}
                     </p>
                   </div>
                   <span
@@ -164,16 +168,16 @@ export function ControlCenter() {
                       isActive ? 'bg-accent/15 text-accent' : 'bg-warn/15 text-warn'
                     }`}
                   >
-                    {isActive ? 'Active' : 'Paused'}
+                    {isActive ? t('status.active') : t('status.paused')}
                   </span>
                 </div>
 
                 <div className="rounded-2xl bg-container p-3 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]">
                   <div className="flex items-center justify-between gap-4">
                     <div>
-                      <p className="text-sm font-medium text-offwhite">Activate SISU+</p>
+                      <p className="text-sm font-medium text-offwhite">{t('activate.title')}</p>
                       <p className="mt-0.5 text-xs text-lightGrey">
-                        {isActive ? 'Replace the native student pages.' : 'Switch back to the enhanced dashboard.'}
+                        {isActive ? t('activate.helperActive') : t('activate.helperPaused')}
                       </p>
                     </div>
                     <Toggle checked={prefs.sisuPlusActive} onChange={(val) => setPrefs({ sisuPlusActive: val })} />
@@ -182,7 +186,7 @@ export function ControlCenter() {
 
                 {!isActive && (
                   <div className="rounded-2xl bg-warn/10 p-3 text-xs leading-relaxed text-warn shadow-[inset_0_0_0_1px_rgba(240,168,77,0.16)]">
-                    Paused mode keeps this control isolated while Sisu handles the page.
+                    {t('pausedNotice')}
                   </div>
                 )}
 
@@ -192,10 +196,10 @@ export function ControlCenter() {
                       className="text-xs font-semibold tracking-wide text-lightGrey uppercase"
                       htmlFor="sisu-plus-moodle-url"
                     >
-                      Moodle Sync
+                      {t('moodle.label')}
                     </label>
                     <span className={`text-[11px] font-medium ${validMoodleUrl ? 'text-accent' : 'text-danger'}`}>
-                      {validMoodleUrl ? 'Calendar URL' : 'Check URL'}
+                      {validMoodleUrl ? t('moodle.validUrl') : t('moodle.checkUrl')}
                     </span>
                   </div>
                   <div
@@ -215,9 +219,7 @@ export function ControlCenter() {
                     />
                   </div>
                   <p className="text-xs leading-relaxed text-lightGrey">
-                    {isActive
-                      ? 'Paste Moodle’s exported calendar link once. SISU+ uses it only for deadline widgets.'
-                      : ''}
+                    {isActive ? t('moodle.connectedHelper') : ''}
                   </p>
                 </div>
               </>
@@ -240,9 +242,9 @@ export function ControlCenter() {
               exit={{ opacity: 0, x: 10, filter: 'blur(4px)', transition: { duration: 0.12 } }}
               className="flex flex-col items-end pr-3 font-mono text-xs font-medium whitespace-nowrap text-lightGrey"
             >
-              <span>SISU+ v{import.meta.env.VITE_APP_VERSION} made with love</span>
+              <span>{t('footer.madeWithLove', { version: import.meta.env.VITE_APP_VERSION })}</span>
               <p>
-                by{' '}
+                {t('footer.by')}{' '}
                 <a
                   className="text-offwhite/75 transition-colors duration-200 hover:text-offwhite"
                   href="https://matt-pasek.dev"
@@ -255,7 +257,7 @@ export function ControlCenter() {
                   className="text-offwhite/75 transition-colors duration-200 hover:text-offwhite"
                   href="mailto:contact@matt-pasek.dev"
                 >
-                  contact
+                  {t('footer.contact')}
                 </a>
               </p>
             </motion.div>
@@ -292,7 +294,7 @@ export function ControlCenter() {
         </AnimatePresence>
 
         <button
-          aria-label={isOpen ? 'Close SISU+ controls' : 'Open SISU+ controls'}
+          aria-label={isOpen ? t('toggle.close') : t('toggle.open')}
           onClick={() => setIsOpen(!isOpen)}
           className="flex h-20 w-20 cursor-pointer items-center justify-center rounded-full p-2 text-offwhite transition-[transform,opacity] duration-200 active:scale-[0.96]"
           type="button"

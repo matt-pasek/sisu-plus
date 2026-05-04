@@ -1,11 +1,13 @@
 import React from 'react';
 import { ErrorResponse, isRouteErrorResponse, useRouteError } from 'react-router';
+import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 
 const RouteErrorContent: React.FC<{ error: ErrorResponse }> = ({ error }) => {
+  const { t } = useTranslationWithPrefix('components.errors');
   return (
     <>
       <div className="flex flex-row items-center gap-2">
-        <h1 className="text-red-400">ERR</h1>
+        <h1 className="text-red-400">{t('code')}</h1>
         <p>
           {error.status} {error.statusText}
         </p>
@@ -15,17 +17,23 @@ const RouteErrorContent: React.FC<{ error: ErrorResponse }> = ({ error }) => {
   );
 };
 
-const ErrorContent: React.FC<{ error: Error }> = ({ error }) => (
-  <>
-    <div className="flex flex-row items-center gap-2">
-      <h1 className="text-red-400">ERR</h1>
-      <p>{error.message}</p>
-    </div>
-    <pre>{error.stack}</pre>
-  </>
-);
+const ErrorContent: React.FC<{ error: Error }> = ({ error }) => <ErrorContentInner error={error} />;
+
+const ErrorContentInner: React.FC<{ error: Error }> = ({ error }) => {
+  const { t } = useTranslationWithPrefix('components.errors');
+  return (
+    <>
+      <div className="flex flex-row items-center gap-2">
+        <h1 className="text-red-400">{t('code')}</h1>
+        <p>{error.message}</p>
+      </div>
+      <pre>{error.stack}</pre>
+    </>
+  );
+};
 
 export const RootErrorBoundary: React.FC = () => {
+  const { t } = useTranslationWithPrefix('components.errors');
   let error = useRouteError();
 
   return (
@@ -48,21 +56,18 @@ export const RootErrorBoundary: React.FC = () => {
           </svg>
         </div>
         <div>
-          <h1 className="text-2xl font-medium">An error has occurred</h1>
-          <p className="text-xl opacity-70">Whoops, this shouldn't have happened.</p>
+          <h1 className="text-2xl font-medium">{t('root.title')}</h1>
+          <p className="text-xl opacity-70">{t('root.subtitle')}</p>
         </div>
       </div>
-      <p className="text-lg">
-        Try refreshing the page. If the error continues, click the icon in bottom right corner and send me a screenshot
-        of the error message.
-      </p>
+      <p className="text-lg">{t('root.guidance')}</p>
       <div className="rounded-lg bg-container px-4 py-2 font-mono">
         {isRouteErrorResponse(error) ? (
           <RouteErrorContent error={error} />
         ) : error instanceof Error ? (
           <ErrorContent error={error} />
         ) : (
-          <h1>Unknown Error</h1>
+          <h1>{t('root.unknown')}</h1>
         )}
       </div>
     </div>

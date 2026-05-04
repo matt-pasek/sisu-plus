@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 
 interface Props {
   endpoint: string;
@@ -6,6 +7,7 @@ interface Props {
 }
 
 export const InlineError: React.FC<Props> = ({ endpoint, error }) => {
+  const { t } = useTranslationWithPrefix('components.errors');
   return (
     <div
       style={{
@@ -15,8 +17,8 @@ export const InlineError: React.FC<Props> = ({ endpoint, error }) => {
         color: 'var(--text-tertiary)',
       }}
     >
-      <span style={{ color: '#f87171' }}>ERR</span> <span style={{ color: 'var(--text-secondary)' }}>{endpoint}</span>{' '}
-      {error.message}
+      <span style={{ color: '#f87171' }}>{t('code')}</span>{' '}
+      <span style={{ color: 'var(--text-secondary)' }}>{endpoint}</span> {error.message}
     </div>
   );
 };

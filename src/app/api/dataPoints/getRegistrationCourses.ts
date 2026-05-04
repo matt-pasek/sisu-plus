@@ -6,6 +6,7 @@ import { resolveCourseUnit } from '@/app/api/resolvers/resolveCourseUnit';
 import { useSisuQuery } from '@/app/hooks/useSisuQuery';
 import type { Enrolment } from '@/app/api/generated/IlmoApi';
 import type { RealisationResult } from '@/app/api/resolvers/resolveRealization';
+import i18n, { I18N_NAMESPACE } from '@/app/i18n';
 
 export type RegistrationStatus = 'not-selected' | 'not-enrolled' | 'processing' | 'registered' | 'rejected';
 
@@ -21,6 +22,7 @@ export interface RegistrationImplementation {
   externalEnrolmentUrl: string | null;
   flowState: string | null;
   isEnrolmentOpen: boolean;
+  isExam: boolean;
   isUpcoming: boolean;
   studyGroupSetCount: number;
   studyGroupSets: RegistrationStudyGroupSet[];
@@ -70,9 +72,13 @@ function compareNullableDate(first: string | null, second: string | null): numbe
   return first.localeCompare(second);
 }
 
-function getTypeLabel(typeUrn: string | null): string {
-  if (!typeUrn) return 'Course implementation';
+function isExamType(typeUrn: string | null): boolean {
+  return typeUrn?.split(':').at(-1)?.includes('exam') === true;
+}
 
+function getTypeLabel(typeUrn: string | null): string {
+  if (!typeUrn) return i18n.t('views.registration.labels.courseImplementation', { ns: I18N_NAMESPACE });
+  if (isExamType(typeUrn)) return i18n.t('views.registration.labels.examImplementation', { ns: I18N_NAMESPACE });
   const type = typeUrn.split(':').at(-1)?.replaceAll('-', ' ') ?? 'Course implementation';
   return type.charAt(0).toUpperCase() + type.slice(1);
 }
@@ -104,6 +110,7 @@ function toRegistrationImplementation(realisation: RealisationResult): Registrat
     flowState: realisation.flowState,
     isEnrolmentOpen:
       realisation.continuousEnrolment || isDateTimeInRange(realisation.enrolmentStart, effectiveEnrolmentEnd),
+    isExam: isExamType(realisation.typeUrn),
     isUpcoming: isFutureDateTime(realisation.enrolmentStart),
     studyGroupSetCount: realisation.studyGroupSets.length,
     studyGroupSets: realisation.studyGroupSets,

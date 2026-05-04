@@ -14,6 +14,7 @@ import {
 import { getDefaultSelections, getImplementationsForTab, isSelectionValid } from '../registrationUtils';
 import type { SelectionState } from '../registrationTypes';
 import { CheckIcon, CloseIcon } from './RegistrationIcons';
+import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 
 interface Props {
   course: RegistrationCourse;
@@ -30,6 +31,7 @@ export const ImplementationDialog: React.FC<Props> = ({
   onClose,
   onConfirm,
 }) => {
+  const { t } = useTranslationWithPrefix('views.registration');
   const implementationOptions = getImplementationsForTab(
     course,
     isExamImplementation(initialImplementation) ? 'exam' : 'course',
@@ -69,15 +71,13 @@ export const ImplementationDialog: React.FC<Props> = ({
         <header className="flex items-start justify-between gap-5 border-b border-border px-5 py-5">
           <div>
             <h2 id="registration-dialog-title" className="text-lg font-semibold text-balance text-offwhite">
-              {isExamImplementation(implementation) ? 'Select an exam sitting' : 'Select a course implementation'}
+              {isExamImplementation(implementation) ? t('dialog.examTitle') : t('dialog.courseTitle')}
             </h2>
-            <p className="mt-1 text-xs leading-relaxed text-pretty text-lightGrey">
-              Confirm the option you want Sisu to register for this course.
-            </p>
+            <p className="mt-1 text-xs leading-relaxed text-pretty text-lightGrey">{t('dialog.explanation')}</p>
           </div>
           <button
             type="button"
-            aria-label="Close dialog"
+            aria-label={t('dialog.close')}
             onClick={onClose}
             className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-lg bg-container2 text-lightGrey transition-[background-color,color,transform] duration-150 hover:bg-offwhite/10 hover:text-offwhite active:scale-[0.96]"
           >
@@ -87,13 +87,13 @@ export const ImplementationDialog: React.FC<Props> = ({
 
         <div className="min-h-0 overflow-y-auto">
           <section className="grid gap-x-7 gap-y-1.5 border-b border-border bg-container2/70 px-5 py-4 text-xs sm:grid-cols-[6rem_minmax(0,1fr)]">
-            <p className="font-semibold tracking-wide text-lightGrey uppercase">Course</p>
+            <p className="font-semibold tracking-wide text-lightGrey uppercase">{t('dialog.course')}</p>
             <p className="font-semibold text-[#7ea0ff]">
               {course.courseCode} · {course.courseName}
             </p>
-            <p className="font-semibold tracking-wide text-lightGrey uppercase">Version</p>
+            <p className="font-semibold tracking-wide text-lightGrey uppercase">{t('dialog.version')}</p>
             <p className="text-lightGrey">{implementation.typeLabel}</p>
-            <p className="font-semibold tracking-wide text-lightGrey uppercase">Completion</p>
+            <p className="font-semibold tracking-wide text-lightGrey uppercase">{t('dialog.completion')}</p>
             <p className="text-lightGrey">{formatCredits(course.credits)}</p>
           </section>
 
@@ -131,7 +131,7 @@ export const ImplementationDialog: React.FC<Props> = ({
                       </span>
                       {candidate.enrolmentEnd && (
                         <span className="mt-2 inline-flex rounded bg-warn/15 px-2 py-0.5 text-xs font-semibold text-warn">
-                          Registration closes {formatDate(candidate.enrolmentEnd)}
+                          {t('dialog.registrationCloses', { date: formatDate(candidate.enrolmentEnd) })}
                         </span>
                       )}
                     </span>
@@ -152,9 +152,11 @@ export const ImplementationDialog: React.FC<Props> = ({
                   }`}
                 >
                   <legend className="px-1 text-xs font-semibold text-offwhite">
-                    {set.name ?? 'Study group'}{' '}
+                    {set.name ?? t('dialog.studyGroup')}{' '}
                     <span className="font-normal text-lightGrey">
-                      select {set.max === set.min ? set.min : `${set.min}-${set.max ?? 'any'}`}
+                      {t('dialog.selectRange', {
+                        range: set.max === set.min ? set.min : `${set.min}-${set.max ?? t('dialog.selectAny')}`,
+                      })}
                     </span>
                   </legend>
                   <div className="mt-3 grid gap-2">
@@ -186,18 +188,15 @@ export const ImplementationDialog: React.FC<Props> = ({
             })}
 
             <div className="rounded-[10px] bg-container2 px-4 py-3 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.07)]">
-              <p className="text-xs font-semibold text-offwhite">What happens after confirmation?</p>
-              <p className="mt-2 text-xs leading-relaxed text-pretty text-lightGrey">
-                Sisu+ creates the enrolment if needed and sends your selected implementation or sitting to Sisu.
-                Confirmed registrations will appear in the right column after the view refreshes.
-              </p>
+              <p className="text-xs font-semibold text-offwhite">{t('dialog.whatHappensTitle')}</p>
+              <p className="mt-2 text-xs leading-relaxed text-pretty text-lightGrey">{t('dialog.whatHappensBody')}</p>
             </div>
           </section>
         </div>
 
         <footer className="flex flex-col-reverse gap-2 border-t border-border px-5 py-4 sm:flex-row sm:justify-end">
           <Button className="min-h-10 min-w-28 text-sm font-semibold tracking-wide uppercase" onClick={onClose}>
-            Cancel
+            {t('actions.cancel')}
           </Button>
           <Button
             disabled={!isValid || isPending}
@@ -205,7 +204,7 @@ export const ImplementationDialog: React.FC<Props> = ({
             className="min-h-10 min-w-32 text-sm font-semibold tracking-wide uppercase"
             onClick={() => onConfirm(implementation, selections)}
           >
-            {isPending ? 'Confirming' : 'Confirm'}
+            {isPending ? t('actions.confirming') : t('actions.confirm')}
           </Button>
         </footer>
       </div>

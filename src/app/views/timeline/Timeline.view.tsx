@@ -23,6 +23,7 @@ import { TimelineBoard } from '@/app/views/timeline/components/TimelineBoard.com
 import { isTimelineCourseDragData, isTimelineDropData } from '@/app/views/timeline/components/timelineDnd';
 import { getVisibleSemesters } from '@/app/views/timeline/components/timelineUtils';
 import type { TimelineValidationWarning } from '@/app/views/timeline/components/timelineValidation';
+import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 
 function isCourseUnitAttainment(attainment: Attainment): attainment is CourseUnitAttainmentRestricted {
   return attainment.type === 'CourseUnitAttainment';
@@ -131,8 +132,8 @@ function getPassedCourseUnitGroupIds(attainments: CourseUnitAttainmentRestricted
   );
 }
 
-function getCourseLabel(course: TimelineCourse): string {
-  return course.courseCode ?? course.courseName ?? 'Required course';
+function getCourseLabel(course: TimelineCourse, requiredCourseLabel: string): string {
+  return course.courseCode ?? course.courseName ?? requiredCourseLabel;
 }
 
 function getPlannedPrerequisiteCourse(
@@ -187,7 +188,7 @@ function getValidationWarnings(
       if (invalidPeriods.length > 0) {
         addWarning(course.courseUnitId, {
           id: `period:${course.courseUnitId}:${invalidPeriods.map((period) => period.locator).join(':')}`,
-          message: `Not organized in ${invalidPeriods.map((period) => period.name).join(', ')}.`,
+          message: '',
           type: 'period',
         });
       }
@@ -218,11 +219,11 @@ function getValidationWarnings(
     for (const prerequisite of bestOptionMissing) {
       const prerequisiteCourse = getCourseByGroupId(prerequisite.courseUnitGroupId, courses);
       const prerequisiteLabel = prerequisiteCourse
-        ? getCourseLabel(prerequisiteCourse)
+        ? getCourseLabel(prerequisiteCourse, 'a required course')
         : (prerequisite.name ?? 'a required course');
       addWarning(course.courseUnitId, {
         id: `prerequisite:${course.courseUnitId}:${prerequisite.courseUnitGroupId}`,
-        message: `${prerequisiteLabel} must be completed before this course.`,
+        message: prerequisiteLabel,
         type: 'prerequisite',
       });
     }
@@ -232,6 +233,7 @@ function getValidationWarnings(
 }
 
 const TimelineView: React.FC = () => {
+  const { t } = useTranslationWithPrefix('views.timeline');
   const { planId } = useParams();
   const queryClient = useQueryClient();
   const [activeDragCourseId, setActiveDragCourseId] = useState<string | null>(null);
@@ -301,15 +303,32 @@ const TimelineView: React.FC = () => {
       ),
     { enabled: selectedPlanId != null && timelineCourses.length > 0 },
   );
-  const validationWarnings = useMemo(
-    () =>
-      getValidationWarnings(
-        draftTimelineCourses,
-        prerequisiteQuery.data ?? new Map(),
-        (attainmentsQuery.data ?? []).filter(isCourseUnitAttainment),
-      ),
-    [attainmentsQuery.data, draftTimelineCourses, prerequisiteQuery.data],
-  );
+  const validationWarnings = useMemo(() => {
+    const warnings = getValidationWarnings(
+      draftTimelineCourses,
+      prerequisiteQuery.data ?? new Map(),
+      (attainmentsQuery.data ?? []).filter(isCourseUnitAttainment),
+    );
+    return new Map(
+      [...warnings].map(([courseUnitId, courseWarnings]) => [
+        courseUnitId,
+        courseWarnings.map((warning) => {
+          if (warning.type === 'period') {
+            const periods = warning.id
+              .split(':')
+              .slice(2)
+              .map((locator) => studyPeriodMap.get(locator)?.name ?? locator)
+              .join(', ');
+            return { ...warning, message: t('validation.missingPeriod', { periods }) };
+          }
+          return {
+            ...warning,
+            message: t('validation.prerequisite', { course: warning.message || t('validation.requiredCourse') }),
+          };
+        }),
+      ]),
+    );
+  }, [attainmentsQuery.data, draftTimelineCourses, prerequisiteQuery.data, studyPeriodMap, t]);
   const visibleValidationWarnings = useMemo(() => {
     const visibleWarnings = new Map<string, TimelineValidationWarning[]>();
 
@@ -368,9 +387,10 @@ const TimelineView: React.FC = () => {
     () =>
       moduleIds.map(
         (moduleId) =>
-          draftTimelineCourses.find((course) => course.moduleId === moduleId)?.moduleName ?? 'Unknown module',
+          draftTimelineCourses.find((course) => course.moduleId === moduleId)?.moduleName ??
+          t('validation.unknownModule'),
       ),
-    [draftTimelineCourses, moduleIds],
+    [draftTimelineCourses, moduleIds, t],
   );
 
   const semesters = useMemo(() => {

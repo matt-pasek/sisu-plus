@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 
 interface Props {
   activeCoursesCount: number;
@@ -20,9 +21,35 @@ const SemesterStat: React.FC<{ label: string; value: React.ReactNode; sub: strin
 );
 
 export const SemesterStatsContent: React.FC<Props> = ({ activeCoursesCount, semesterCredits, upcomingDeadlines }) => (
-  <div className="grid grid-cols-3 gap-3">
-    <SemesterStat label="Enrolled" value={activeCoursesCount} sub="courses" color="text-blue-400" />
-    <SemesterStat label="Credits" value={semesterCredits} sub="this semester" color="text-accent" />
-    <SemesterStat label="Deadlines" value={upcomingDeadlines} sub="upcoming" color="text-warn/90" />
-  </div>
+  <SemesterStatsInner
+    activeCoursesCount={activeCoursesCount}
+    semesterCredits={semesterCredits}
+    upcomingDeadlines={upcomingDeadlines}
+  />
 );
+
+const SemesterStatsInner: React.FC<Props> = ({ activeCoursesCount, semesterCredits, upcomingDeadlines }) => {
+  const { t } = useTranslationWithPrefix('views.dashboard');
+  return (
+    <div className="grid grid-cols-3 gap-3">
+      <SemesterStat
+        label={t('widgets.semesterStats.enrolled')}
+        value={activeCoursesCount}
+        sub={t('widgets.semesterStats.courses')}
+        color="text-blue-400"
+      />
+      <SemesterStat
+        label={t('widgets.semesterStats.credits')}
+        value={semesterCredits}
+        sub={t('widgets.semesterStats.thisSemester')}
+        color="text-accent"
+      />
+      <SemesterStat
+        label={t('widgets.semesterStats.deadlines')}
+        value={upcomingDeadlines}
+        sub={t('widgets.semesterStats.upcoming')}
+        color="text-warn/90"
+      />
+    </div>
+  );
+};

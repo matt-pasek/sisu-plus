@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { SisuPrefs, DEFAULT_PREFS } from '@/app/types/prefs';
+import i18n from '@/app/i18n';
+import { isLocale } from '@/app/locales/locale';
 
 export function useChromeStorage(): [SisuPrefs, (patch: Partial<SisuPrefs>) => void, boolean] {
   const [prefs, setPrefs] = useState<SisuPrefs>(DEFAULT_PREFS);
@@ -7,7 +9,9 @@ export function useChromeStorage(): [SisuPrefs, (patch: Partial<SisuPrefs>) => v
 
   useEffect(() => {
     chrome.storage.sync.get(DEFAULT_PREFS, (stored) => {
-      setPrefs(stored as SisuPrefs);
+      const nextPrefs = stored as SisuPrefs;
+      setPrefs(nextPrefs);
+      if (isLocale(nextPrefs.locale)) void i18n.changeLanguage(nextPrefs.locale);
       setIsLoaded(true);
     });
 
@@ -17,7 +21,9 @@ export function useChromeStorage(): [SisuPrefs, (patch: Partial<SisuPrefs>) => v
         for (const key of Object.keys(changes) as (keyof SisuPrefs)[]) {
           (patch as Record<string, unknown>)[key] = changes[key].newValue;
         }
-        return { ...prev, ...patch };
+        const nextPrefs = { ...prev, ...patch };
+        if (isLocale(patch.locale)) void i18n.changeLanguage(patch.locale);
+        return nextPrefs;
       });
     };
 

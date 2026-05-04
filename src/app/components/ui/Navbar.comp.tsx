@@ -5,6 +5,7 @@ import { getUserDetails } from '@/app/api/dataPoints/getUserDetails';
 import { fetchPlans } from '@/app/api/endpoints/plans';
 import { AccountDropdown } from '@/app/components/ui/AccountDropdown.comp';
 import { useSisuQuery } from '@/app/hooks/useSisuQuery';
+import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 
 const NaviLink: React.FC<{ to: string; name: string }> = ({ to, name }) => (
   <NavLink
@@ -18,6 +19,7 @@ const NaviLink: React.FC<{ to: string; name: string }> = ({ to, name }) => (
 );
 
 export const Navbar: React.FC = () => {
+  const { t } = useTranslationWithPrefix('components.navbar');
   const { modules, totalTarget, isLoading } = getCreditsByModule();
   const { loadingDetails, userDetails } = getUserDetails();
   const plansQuery = useSisuQuery(['plans'], fetchPlans);
@@ -30,15 +32,15 @@ export const Navbar: React.FC = () => {
         SISU <span className="mb-1 text-xl text-accent">+</span>
       </div>
       <div className="flex items-center gap-2 text-sm font-medium">
-        <NaviLink to={'/student/frontpage'} name="Dashboard" />
-        <NaviLink to={planId ? `/student/plan/${planId}/timing` : '/student/plan'} name="Timeline" />
-        <NaviLink to={'/student/structure'} name="Structure" />
-        <NaviLink to={'/student/enrolments'} name="Registration" />
+        <NaviLink to={'/student/frontpage'} name={t('links.dashboard')} />
+        <NaviLink to={planId ? `/student/plan/${planId}/timing` : '/student/plan'} name={t('links.timeline')} />
+        <NaviLink to={'/student/structure'} name={t('links.structure')} />
+        <NaviLink to={'/student/enrolments'} name={t('links.registration')} />
       </div>
       <div className="ml-auto flex items-center gap-3 text-sm font-medium">
         {!isLoading && (
           <span className="rounded-xl bg-lighterGreen/20 px-2 py-0.5 text-xs font-light text-lighterGreen tabular-nums transition-colors">
-            {modules.map((m) => m.done).reduce((a, b) => a + b, 0)} / {totalTarget} cr
+            {modules.map((m) => m.done).reduce((a, b) => a + b, 0)} / {totalTarget} {t('creditsUnit')}
           </span>
         )}
         {!loadingDetails && userDetails && <AccountDropdown userDetails={userDetails} />}

@@ -25,3 +25,27 @@
   -moz-osx-font-smoothing: grayscale;
   font-family: var(--font-sans);
 }
+
+#app,
+#app * {
+  scrollbar-color: var(--color-border2) transparent;
+  scrollbar-width: thin;
+}
+
+#app *::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+#app *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#app *::-webkit-scrollbar-thumb {
+  background: var(--color-border2);
+  border-radius: 999px;
+}
+
+#app *::-webkit-scrollbar-thumb:hover {
+  background: var(--color-lightGrey);
+}

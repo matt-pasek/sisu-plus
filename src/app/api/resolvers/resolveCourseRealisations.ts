@@ -1,5 +1,6 @@
 import { koriApi } from '@/app/api/client';
 import type { RealisationResult } from '@/app/api/resolvers/resolveRealization';
+import { mapRealisationToResult } from '@/app/api/resolvers/resolveRealization';
 
 const courseRealisationsCache = new Map<string, RealisationResult[]>();
 
@@ -19,13 +20,7 @@ export async function resolveCourseRealisations(assessmentItemIds: string[]): Pr
     const responses = await Promise.all(
       uniqueAssessmentItemIds.map((assessmentItemId) => koriApi.api.getCourseUnitRealisations({ assessmentItemId })),
     );
-    const realisations = responses.flatMap((response) =>
-      response.data.map((realisation) => ({
-        startDate: realisation.activityPeriod?.startDate ?? null,
-        endDate: realisation.activityPeriod?.endDate ?? null,
-        name: null,
-      })),
-    );
+    const realisations = responses.flatMap((response) => response.data.map((r) => mapRealisationToResult(r)));
 
     courseRealisationsCache.set(cacheKey, realisations);
     return realisations;

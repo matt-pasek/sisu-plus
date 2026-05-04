@@ -42,10 +42,7 @@ export const formatImplementationDateRange = (implementation: RegistrationImplem
   if (!implementation) return 'Check Sisu later';
   const { activityStart: start, activityEnd: end } = implementation;
   if (isExamImplementation(implementation)) {
-    const startDate = start ? formatDate(start) : null;
-    const endDate = end ? formatDate(end) : null;
-    if (startDate && (!endDate || startDate === endDate)) return startDate;
-    if (!startDate && endDate) return endDate;
+    return start ? formatDate(start) : 'Exam date not published';
   }
   return formatDateRange(start, end);
 };

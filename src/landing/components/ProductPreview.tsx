@@ -6,6 +6,7 @@ import { TimelineCourseCard } from '@/app/views/timeline/components/TimelineCour
 import type { ModuleProgress } from '@/app/api/dataPoints/getCreditsByModule';
 import type { ActiveCourse } from '@/app/api/dataPoints/getActiveCourses';
 import type { TimelineCourse } from '@/app/api/dataPoints/getTimelineCourses';
+import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { useState } from 'react';
 
 const modules: ModuleProgress[] = [
@@ -146,6 +147,8 @@ const moduleColorMap = new Map(
 const moduleNameMap = new Map(modules.map((module) => [module.moduleId, module.name]));
 
 function DeadlinesPreview() {
+  const { t } = useTranslationWithPrefix('landing.preview');
+
   return (
     <div className="flex h-full flex-col gap-2">
       {deadlines.map((deadline) => (
@@ -159,7 +162,7 @@ function DeadlinesPreview() {
             {deadline.course} - {deadline.title}
           </p>
           <p className={`mt-1 text-xs ${deadline.urgency === 'soon' ? 'text-warn' : 'text-lightGrey'}`}>
-            Due {deadline.due}
+            {t('due', { date: deadline.due })}
           </p>
         </div>
       ))}
@@ -168,6 +171,8 @@ function DeadlinesPreview() {
 }
 
 function DashboardPreview() {
+  const { t } = useTranslationWithPrefix('landing.preview');
+
   return (
     <div className="grid h-full min-h-[520px] grid-cols-10 grid-rows-10 gap-3">
       <div className="col-span-7 row-span-4 flex min-w-0">
@@ -187,9 +192,9 @@ function DashboardPreview() {
         <Widget
           header={
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-offwhite">Moodle Deadlines</span>
+              <span className="text-sm font-medium text-offwhite">{t('moodleDeadlines')}</span>
               <span className="rounded bg-danger/15 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-danger">
-                LIVE
+                {t('live')}
               </span>
             </div>
           }
@@ -202,10 +207,10 @@ function DashboardPreview() {
         <Widget
           header={
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-offwhite">Active Courses</span>
+              <span className="text-sm font-medium text-offwhite">{t('activeCourses')}</span>
               <span className="flex items-center gap-1.5 rounded-full bg-accent/10 px-2.5 py-1 text-xs font-medium text-accent">
                 <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent" />
-                Spring 2026
+                {t('spring')}
               </span>
             </div>
           }
@@ -219,7 +224,7 @@ function DashboardPreview() {
       </div>
 
       <div className="col-span-3 row-span-4 flex min-w-0">
-        <Widget header={<span className="text-sm font-medium text-offwhite">This Semester</span>}>
+        <Widget header={<span className="text-sm font-medium text-offwhite">{t('thisSemester')}</span>}>
           <SemesterStatsContent activeCoursesCount={13} semesterCredits={49} upcomingDeadlines={3} />
         </Widget>
       </div>
@@ -228,19 +233,22 @@ function DashboardPreview() {
 }
 
 function TimelinePreview() {
-  const periods = ['Period 3', 'Period 4', 'Summer', 'Period 1'];
+  const { t } = useTranslationWithPrefix('landing.preview');
+  const periods = t('periods', { returnObjects: true }) as string[];
 
   return (
     <div className="h-full min-h-[520px] rounded-2xl border border-border bg-background/80 p-4">
       <div className="mb-4 flex items-center justify-between gap-4">
         <div>
-          <h3 className="text-lg font-semibold text-offwhite">Timeline</h3>
-          <p className="text-sm text-lightGrey">Drag courses, check credits, then confirm back to Sisu.</p>
+          <h3 className="text-lg font-semibold text-offwhite">{t('timeline')}</h3>
+          <p className="text-sm text-lightGrey">{t('timelineBody')}</p>
         </div>
         <div className="flex gap-2">
-          <span className="rounded-lg border border-border bg-container px-3 py-2 text-xs text-lightGrey">Reset</span>
+          <span className="rounded-lg border border-border bg-container px-3 py-2 text-xs text-lightGrey">
+            {t('reset')}
+          </span>
           <span className="rounded-lg border border-accent bg-accent/20 px-3 py-2 text-xs font-medium text-accent">
-            Confirm
+            {t('confirm')}
           </span>
         </div>
       </div>
@@ -251,7 +259,7 @@ function TimelinePreview() {
             <div className="mb-3 flex items-start justify-between gap-2">
               <div>
                 <p className="text-sm font-semibold text-offwhite">{period}</p>
-                <p className="text-xs text-lightGrey">{periodIndex === 2 ? 'Jun - Aug' : 'Mar - May'}</p>
+                <p className="text-xs text-lightGrey">{periodIndex === 2 ? t('summerRange') : t('regularRange')}</p>
               </div>
               <span className="font-mono text-xs text-lightGrey">{periodIndex === 1 ? '12 cr' : '9 cr'}</span>
             </div>
@@ -285,6 +293,7 @@ function TimelinePreview() {
 }
 
 export function ProductPreview() {
+  const { t } = useTranslationWithPrefix('landing.preview');
   const [activeTab, setActiveTab] = useState<'dashboard' | 'timeline'>('dashboard');
   const previewUrl =
     activeTab === 'dashboard' ? 'sisu.university.fi/student/frontpage' : 'sisu.university.fi/student/plan/timing';
@@ -312,7 +321,7 @@ export function ProductPreview() {
                   onClick={() => setActiveTab('dashboard')}
                   type="button"
                 >
-                  Dashboard
+                  {t('dashboard')}
                 </button>
                 <button
                   aria-pressed={activeTab === 'timeline'}
@@ -320,10 +329,10 @@ export function ProductPreview() {
                   onClick={() => setActiveTab('timeline')}
                   type="button"
                 >
-                  Timeline
+                  {t('timeline')}
                 </button>
               </div>
-              <span className="ml-auto font-mono text-xs text-lightGrey">12 / 100 cr</span>
+              <span className="ml-auto font-mono text-xs text-lightGrey">{t('creditsCurrent')}</span>
             </div>
             <div className="landing-preview-grid">
               <div className="landing-preview-pane" key={activeTab}>

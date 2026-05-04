@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import '@/app/global.css';
 import '@/landing/landing.css';
+import '@/app/i18n';
 import { LandingPage, PrivacyPolicyPage } from '@/landing/LandingPage';
 
 const root = document.getElementById('landing-root');

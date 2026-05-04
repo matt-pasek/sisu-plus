@@ -31,7 +31,6 @@ void i18n
     interpolation: {
       escapeValue: false,
     },
-    lng: DEFAULT_LOCALE,
     ns: [I18N_NAMESPACE],
     resources,
   });

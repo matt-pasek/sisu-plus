@@ -12,6 +12,7 @@ interface Props {
   compact?: boolean;
   className?: string;
   dragBlockedControls?: LegacyAnimationControls;
+  dragPeriodCount?: number;
   isDraft?: boolean;
   onDismissValidationWarning?: (warningId: string) => void;
   onPointerDown?: React.PointerEventHandler<HTMLDivElement>;
@@ -45,7 +46,7 @@ export const TimelineCourseCard = React.forwardRef<HTMLDivElement, Props>(
       title={`${course.courseName ?? 'Unnamed course'} · ${formatCredits(course.credits)} · ${getStatusLabel(course)}${
         validationWarnings.length > 0 ? ` · ${validationWarnings.map((warning) => warning.message).join(' ')}` : ''
       }`}
-      className={`group relative flex flex-col overflow-hidden rounded-lg border px-3 py-2 transition-[border-color,background-color,box-shadow,opacity,transform] duration-200 ease-out ${
+      className={`group relative flex w-full min-w-0 flex-col overflow-hidden rounded-lg border px-3 py-2 transition-[border-color,background-color,box-shadow,opacity,transform] duration-200 ease-out ${
         validationWarnings.length > 0
           ? 'border-amber-300/70 bg-amber-400/10 shadow-[0_0_0_1px_rgba(251,191,36,0.24),0_8px_20px_rgba(0,0,0,0.22)]'
           : isDraft
@@ -131,7 +132,7 @@ export const DraggableTimelineCourseCard: React.FC<DraggableProps> = ({
   const { ref, isDragging } = useDraggable({
     id: `course:${props.course.courseUnitId}`,
     type: TIMELINE_COURSE_DRAG_TYPE,
-    data: getCourseDragData(props.course),
+    data: getCourseDragData(props.course, props.dragPeriodCount),
     disabled,
   });
   const dragBlockedControls = useAnimationControls();

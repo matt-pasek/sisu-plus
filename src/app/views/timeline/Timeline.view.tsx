@@ -10,6 +10,7 @@ import { getTimelineCourses, type TimelineCourse } from '@/app/api/dataPoints/ge
 import { getStudyPeriodMap } from '@/app/api/dataPoints/getStudyPeriodMap';
 import { getCreditsByPeriod, getCreditsBySemester } from '@/app/api/dataPoints/getCreditsByPeriod';
 import type { StudyPeriodInfo } from '@/app/api/dataPoints/getStudyPeriodMap';
+import type { PeriodCreditSummary } from '@/app/api/dataPoints/getCreditsByPeriod';
 import type { CourseUnitAttainmentRestricted } from '@/app/api/generated/OriApi';
 import type { Plan } from '@/app/api/generated/OsuvaApi';
 import type { PrerequisiteInfo } from '@/app/api/resolvers/resolvePrerequisites';
@@ -70,6 +71,19 @@ function applyDraftToPlan(plan: Plan, draft: Map<string, string[]>): Plan {
 
 function getSortedPeriods(periodMap: Map<string, StudyPeriodInfo>): StudyPeriodInfo[] {
   return [...periodMap.values()].sort((first, second) => first.startDate.localeCompare(second.startDate));
+}
+
+function isPastPeriod(period: PeriodCreditSummary, today = new Date().toISOString().slice(0, 10)): boolean {
+  return period.period.endDate <= today;
+}
+
+function isPeriodVisible(
+  period: PeriodCreditSummary,
+  { hidePreviousPeriods, showHiddenSummerPeriods }: { hidePreviousPeriods: boolean; showHiddenSummerPeriods: boolean },
+): boolean {
+  if (hidePreviousPeriods && isPastPeriod(period)) return false;
+  if (showHiddenSummerPeriods) return true;
+  return period.period.visibleByDefault || period.courses.some((course) => !course.isPassed);
 }
 
 function getTargetPeriodLocators(
@@ -223,6 +237,8 @@ const TimelineView: React.FC = () => {
   const [activeDragCourseId, setActiveDragCourseId] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isAutoScheduling, setIsAutoScheduling] = useState(false);
+  const [hidePreviousPeriods, setHidePreviousPeriods] = useState(false);
+  const [showHiddenSummerPeriods, setShowHiddenSummerPeriods] = useState(false);
   const [dismissedPrerequisiteWarningIds, setDismissedPrerequisiteWarningIds] = useState<Set<string>>(new Set());
   const [draftPeriodsByCourseId, setDraftPeriodsByCourseId] = useState<Map<string, string[]>>(new Map());
   const plansQuery = useSisuQuery(['plans'], fetchPlans);
@@ -240,6 +256,15 @@ const TimelineView: React.FC = () => {
     [draftPeriodsByCourseId, studyPeriodMap, timelineCourses],
   );
   const draftCourseIds = useMemo(() => new Set(draftPeriodsByCourseId.keys()), [draftPeriodsByCourseId]);
+  const draftOriginalPeriodCounts = useMemo(
+    () =>
+      new Map(
+        timelineCourses
+          .filter((course) => draftPeriodsByCourseId.has(course.courseUnitId) && course.plannedPeriods.length > 0)
+          .map((course) => [course.courseUnitId, course.plannedPeriods.length] as const),
+      ),
+    [draftPeriodsByCourseId, timelineCourses],
+  );
   const activeDragCourse = useMemo(
     () => draftTimelineCourses.find((course) => course.courseUnitId === activeDragCourseId) ?? null,
     [activeDragCourseId, draftTimelineCourses],
@@ -348,6 +373,13 @@ const TimelineView: React.FC = () => {
     [draftTimelineCourses, moduleIds],
   );
 
+  const semesters = useMemo(() => {
+    const periods = getCreditsByPeriod(draftTimelineCourses, studyPeriodMap).filter((period) =>
+      isPeriodVisible(period, { hidePreviousPeriods, showHiddenSummerPeriods }),
+    );
+    return getVisibleSemesters(getCreditsBySemester(periods));
+  }, [draftTimelineCourses, hidePreviousPeriods, showHiddenSummerPeriods, studyPeriodMap]);
+
   const unscheduledCourses = useMemo(
     () =>
       draftTimelineCourses.filter(
@@ -355,15 +387,6 @@ const TimelineView: React.FC = () => {
       ),
     [draftTimelineCourses],
   );
-
-  const semesters = useMemo(() => {
-    const periods = getCreditsByPeriod(draftTimelineCourses, studyPeriodMap);
-    return getVisibleSemesters(
-      getCreditsBySemester(
-        periods.filter((period) => period.period.visibleByDefault || period.courses.some((course) => !course.isPassed)),
-      ),
-    );
-  }, [draftTimelineCourses, studyPeriodMap]);
 
   const stageCoursePeriods = useCallback(
     (courseUnitId: string, newPeriodLocators: string[]) => {
@@ -483,12 +506,17 @@ const TimelineView: React.FC = () => {
         <div className="flex min-h-0 flex-1">
           <TimelineCoursePool
             draftCourseIds={draftCourseIds}
+            draftOriginalPeriodCounts={draftOriginalPeriodCounts}
+            hidePreviousPeriods={hidePreviousPeriods}
             isDragging={isDragging}
             unscheduledCourses={unscheduledCourses}
             moduleIds={moduleIds}
+            onHidePreviousPeriodsChange={setHidePreviousPeriods}
             onDismissValidationWarning={(warningId) =>
               setDismissedPrerequisiteWarningIds((current) => new Set(current).add(warningId))
             }
+            onShowHiddenSummerPeriodsChange={setShowHiddenSummerPeriods}
+            showHiddenSummerPeriods={showHiddenSummerPeriods}
             validationWarnings={visibleValidationWarnings}
           />
           <TimelineBoard

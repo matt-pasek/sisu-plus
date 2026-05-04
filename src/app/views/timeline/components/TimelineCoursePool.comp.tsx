@@ -8,17 +8,43 @@ import type { TimelineValidationWarning } from '@/app/views/timeline/components/
 
 interface Props {
   draftCourseIds?: Set<string>;
+  draftOriginalPeriodCounts?: Map<string, number>;
+  hidePreviousPeriods?: boolean;
   isDragging?: boolean;
+  onHidePreviousPeriodsChange?: (value: boolean) => void;
   onDismissValidationWarning?: (warningId: string) => void;
+  onShowHiddenSummerPeriodsChange?: (value: boolean) => void;
+  showHiddenSummerPeriods?: boolean;
   unscheduledCourses: TimelineCourse[];
   moduleIds: string[];
   validationWarnings?: Map<string, TimelineValidationWarning[]>;
 }
 
+const FilterCheckbox: React.FC<{ checked: boolean; label: string; onChange: (value: boolean) => void }> = ({
+  checked,
+  label,
+  onChange,
+}) => (
+  <label className="flex min-h-8 cursor-pointer items-center gap-2 rounded-lg border border-border bg-container2 px-3 text-xs font-semibold text-lightGrey transition-[border-color,color,background-color] duration-150 hover:border-border2 hover:text-offwhite">
+    <input
+      type="checkbox"
+      checked={checked}
+      onChange={(event) => onChange(event.target.checked)}
+      className="size-3.5 accent-[var(--color-accent)]"
+    />
+    {label}
+  </label>
+);
+
 export const TimelineCoursePool: React.FC<Props> = ({
   draftCourseIds = new Set(),
+  draftOriginalPeriodCounts = new Map(),
+  hidePreviousPeriods = false,
   isDragging = false,
+  onHidePreviousPeriodsChange,
   onDismissValidationWarning,
+  onShowHiddenSummerPeriodsChange,
+  showHiddenSummerPeriods = false,
   unscheduledCourses,
   moduleIds,
   validationWarnings = new Map(),
@@ -46,6 +72,18 @@ export const TimelineCoursePool: React.FC<Props> = ({
         <div className="mt-3 rounded-lg border border-border2 bg-container2 px-3 py-2 text-sm text-darkishGrey">
           Search...
         </div>
+        <div className="mt-3 grid gap-2">
+          <FilterCheckbox
+            checked={hidePreviousPeriods}
+            label="Hide previous"
+            onChange={(value) => onHidePreviousPeriodsChange?.(value)}
+          />
+          <FilterCheckbox
+            checked={showHiddenSummerPeriods}
+            label="Show summer"
+            onChange={(value) => onShowHiddenSummerPeriodsChange?.(value)}
+          />
+        </div>
       </div>
 
       <div className="mt-4 flex items-center justify-between text-xs text-lightGrey">
@@ -71,6 +109,7 @@ export const TimelineCoursePool: React.FC<Props> = ({
               course={course}
               color={getModuleColor(course.moduleId, moduleIds)}
               disabled={course.isPassed}
+              dragPeriodCount={draftOriginalPeriodCounts.get(course.courseUnitId)}
               isDraft={draftCourseIds.has(course.courseUnitId)}
               onDismissValidationWarning={onDismissValidationWarning}
               validationWarnings={validationWarnings.get(course.courseUnitId)}

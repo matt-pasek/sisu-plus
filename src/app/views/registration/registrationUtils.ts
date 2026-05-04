@@ -22,6 +22,9 @@ export const canCancelImplementation = (implementation: RegistrationImplementati
   );
 };
 
+export const canWithdrawImplementation = (implementation: RegistrationImplementation | null): boolean =>
+  implementation != null && !isImplementationFinished(implementation) && !canCancelImplementation(implementation);
+
 export const getImplementationsForTab = (
   course: RegistrationCourse,
   tab: RegistrationTab,

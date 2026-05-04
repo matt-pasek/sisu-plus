@@ -155,6 +155,16 @@ function getUniqueEnrolments(enrolments: Enrolment[]): Enrolment[] {
   });
 }
 
+function isInactiveEnrolment(enrolment: Enrolment): boolean {
+  return (
+    enrolment.state === 'NOT_ENROLLED' ||
+    enrolment.state === 'ABORTED_BY_STUDENT' ||
+    enrolment.state === 'ABORTED_BY_TEACHER' ||
+    enrolment.status === 'CANCELLED' ||
+    enrolment.documentState === 'DELETED'
+  );
+}
+
 export const getRegistrationCourses = (): {
   courses: RegistrationCourse[];
   isLoading: boolean;
@@ -171,13 +181,14 @@ export const getRegistrationCourses = (): {
       const plan = plansQuery.data?.find((candidate) => candidate.primary) ?? plansQuery.data?.[0];
       if (!plan) return [];
 
-      const enrolmentsByCourseUnit = (enrolmentsQuery.data ?? []).reduce((map, enrolment) => {
+      const activeEnrolments = (enrolmentsQuery.data ?? []).filter((enrolment) => !isInactiveEnrolment(enrolment));
+      const enrolmentsByCourseUnit = activeEnrolments.reduce((map, enrolment) => {
         const current = map.get(enrolment.courseUnitId) ?? [];
         map.set(enrolment.courseUnitId, [...current, enrolment]);
         return map;
       }, new Map<string, Enrolment[]>());
       const enrolmentsByRealisation = new Map(
-        (enrolmentsQuery.data ?? []).map((enrolment) => [enrolment.courseUnitRealisationId, enrolment]),
+        activeEnrolments.map((enrolment) => [enrolment.courseUnitRealisationId, enrolment]),
       );
       const courseUnits = await Promise.all(
         plan.courseUnitSelections.map(async (selection) => ({

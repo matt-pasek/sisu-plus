@@ -124,7 +124,7 @@ const RegistrationView: React.FC = () => {
       setMessage({ tone: 'error', text: error instanceof Error ? error.message : 'Cancellation failed.' });
     },
     onSuccess: async () => {
-      setMessage({ tone: 'success', text: 'Registration cancellation sent to Sisu. Refreshing view...' });
+      setMessage({ tone: 'success', text: 'Registration update sent to Sisu. Refreshing view...' });
       await refreshRegistration({ settleDelayMs: 700 });
       setMessage({ tone: 'success', text: 'Registration view updated.' });
     },

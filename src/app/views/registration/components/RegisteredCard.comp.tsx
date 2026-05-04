@@ -11,6 +11,7 @@ import {
 } from '../registrationFormatters';
 import {
   canCancelImplementation,
+  canWithdrawImplementation,
   getEnrolmentForTab,
   getImplementationForEnrolment,
   getImplementationsForTab,
@@ -49,6 +50,7 @@ export const RegisteredCard: React.FC<Props> = ({
     : getPreferredImplementation(course, tab);
   const status = getRegistrationStatus(enrolment, implementation);
   const cancelAllowed = canCancelImplementation(implementation);
+  const withdrawAllowed = canWithdrawImplementation(implementation);
   const finished = isImplementationFinished(implementation);
   const selectableImplementation = getSelectableImplementation(course, tab);
   const retryImplementation =
@@ -124,13 +126,15 @@ export const RegisteredCard: React.FC<Props> = ({
             </span>
           ) : (
             <Button
-              disabled={!enrolment?.id || isPending}
-              className={`min-h-9 min-w-20 rounded-md px-3 py-1.5 text-xs ${cancelAllowed ? 'border-danger/80 text-danger hover:bg-danger/10' : ''}`}
+              disabled={!enrolment?.id || isPending || (!cancelAllowed && !withdrawAllowed)}
+              className={`min-h-9 min-w-20 rounded-md px-3 py-1.5 text-xs ${
+                cancelAllowed || withdrawAllowed ? 'border-danger/80 text-danger hover:bg-danger/10' : ''
+              }`}
               onClick={() => {
                 if (enrolment) onCancel(enrolment, implementation);
               }}
             >
-              {isPending ? 'Cancelling' : 'Cancel'}
+              {isPending ? (withdrawAllowed ? 'Withdrawing' : 'Cancelling') : withdrawAllowed ? 'Withdraw' : 'Cancel'}
             </Button>
           )}
         </div>

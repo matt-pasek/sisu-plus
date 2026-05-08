@@ -13,8 +13,20 @@ const securityWorker = async () => {
   return { headers: { Authorization: `Bearer ${sisuToken}` } };
 };
 
-export const ilmoApi = new IlmoApi({ baseUrl: getSisuApiBaseUrl('ilmo'), securityWorker });
-export const oriApi = new OriApi({ baseUrl: getSisuApiBaseUrl('ori'), securityWorker });
-export const osuvaApi = new OsuvaApi({ baseUrl: getSisuApiBaseUrl('osuva'), securityWorker });
-export const koriApi = new KoriApi({ baseUrl: getSisuApiBaseUrl('kori'), securityWorker });
-export const artoApi = new ArtoApi({ baseUrl: getSisuApiBaseUrl('arto'), securityWorker });
+const customFetch = new Proxy(fetch, {
+  async apply(target, _thisArg, args) {
+    const response = await (Reflect.apply(target, globalThis, args) as Promise<Response>);
+    if (response.url.includes('/student/login')) {
+      window.dispatchEvent(new CustomEvent('sisuplus:session-expired'));
+    }
+    return response;
+  },
+});
+
+const apiConfig = { securityWorker, customFetch };
+
+export const ilmoApi = new IlmoApi({ baseUrl: getSisuApiBaseUrl('ilmo'), ...apiConfig });
+export const oriApi = new OriApi({ baseUrl: getSisuApiBaseUrl('ori'), ...apiConfig });
+export const osuvaApi = new OsuvaApi({ baseUrl: getSisuApiBaseUrl('osuva'), ...apiConfig });
+export const koriApi = new KoriApi({ baseUrl: getSisuApiBaseUrl('kori'), ...apiConfig });
+export const artoApi = new ArtoApi({ baseUrl: getSisuApiBaseUrl('arto'), ...apiConfig });

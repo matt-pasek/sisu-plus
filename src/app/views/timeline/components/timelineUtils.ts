@@ -1,8 +1,9 @@
 import type { TimelineCourse } from '@/app/api/dataPoints/getTimelineCourses';
 import type { PeriodCreditSummary, SemesterCreditSummary } from '@/app/api/dataPoints/getCreditsByPeriod';
 import i18n, { getCurrentLocale, I18N_NAMESPACE } from '@/app/i18n';
+import { MODULE_COLOR_VALUES } from '@/app/theme/moduleColors';
 
-export const TIMELINE_COLORS = ['#4A7EF0', '#10B981', '#F59E0B', '#A78BFA', '#EF4444', '#06B6D4'];
+export const TIMELINE_COLORS = MODULE_COLOR_VALUES;
 
 export function getModuleColor(moduleId: string | null, moduleIds: string[]): string {
   if (!moduleId) return '#7878A0';

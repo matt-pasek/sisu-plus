@@ -1,7 +1,8 @@
 import React from 'react';
 import { useDraggable } from '@dnd-kit/react';
-import { motion, useAnimationControls, type LegacyAnimationControls } from 'motion/react';
+import { useAnimationControls, type LegacyAnimationControls } from 'motion/react';
 import type { TimelineCourse } from '@/app/api/dataPoints/getTimelineCourses';
+import { CourseCard } from '@/app/components/ui/CourseCard.comp';
 import { getCourseDragData, TIMELINE_COURSE_DRAG_TYPE } from '@/app/views/timeline/components/timelineDnd';
 import { formatCredits, getStatusClass, getStatusLabel } from '@/app/views/timeline/components/timelineUtils';
 import type { TimelineValidationWarning } from '@/app/views/timeline/components/timelineValidation';
@@ -39,7 +40,7 @@ export const TimelineCourseCard = React.forwardRef<HTMLDivElement, Props>(
   ) => {
     const { t } = useTranslationWithPrefix('views.timeline');
     return (
-      <motion.div
+      <CourseCard
         layout
         animate={dragBlockedControls}
         initial={false}
@@ -49,7 +50,17 @@ export const TimelineCourseCard = React.forwardRef<HTMLDivElement, Props>(
         title={`${course.courseName ?? t('course.unnamed')} · ${formatCredits(course.credits)} · ${getStatusLabel(course)}${
           validationWarnings.length > 0 ? ` · ${validationWarnings.map((warning) => warning.message).join(' ')}` : ''
         }`}
-        className={`group relative flex w-full min-w-0 flex-col overflow-hidden rounded-lg border px-3 py-2 transition-[border-color,background-color,box-shadow,opacity,transform] duration-200 ease-out ${
+        heading={course.courseName ?? t('course.unnamed')}
+        code={course.courseCode ?? t('course.fallback')}
+        credits={formatCredits(course.credits)}
+        badge={
+          <span className={`shrink-0 rounded border px-1.5 py-0.5 text-[10px] font-semibold ${getStatusClass(course)}`}>
+            {getStatusLabel(course)}
+          </span>
+        }
+        stripeClassName=""
+        stripeStyle={{ backgroundColor: color }}
+        className={`rounded-lg border ${
           validationWarnings.length > 0
             ? 'border-amber-300/70 bg-amber-400/10 shadow-[0_0_0_1px_rgba(251,191,36,0.24),0_8px_20px_rgba(0,0,0,0.22)]'
             : isDraft
@@ -58,28 +69,14 @@ export const TimelineCourseCard = React.forwardRef<HTMLDivElement, Props>(
         } ${className}`}
         style={style}
       >
-        <div className="absolute inset-y-0 left-0 w-1" style={{ backgroundColor: color }} />
         <span
           className={`absolute top-2 right-2 size-2 rounded-full bg-accent transition-[opacity,scale,filter] duration-200 ease-[cubic-bezier(0.2,0,0,1)] ${
             isDraft ? 'blur-0 scale-100 opacity-100' : 'scale-[0.25] opacity-0 blur-[4px]'
           }`}
         />
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <p className="truncate font-mono text-[10px] font-medium text-lightGrey">
-              {course.courseCode ?? t('course.fallback')}
-            </p>
-            <h3 className="mt-0.5 line-clamp-2 text-[13px] leading-snug font-semibold text-balance text-offwhite">
-              {course.courseName ?? t('course.unnamed')}
-            </h3>
-          </div>
-          <span className={`shrink-0 rounded border px-1.5 py-0.5 text-[10px] font-semibold ${getStatusClass(course)}`}>
-            {getStatusLabel(course)}
-          </span>
-        </div>
 
         {validationWarnings.length > 0 && (
-          <div className="mt-2 rounded-md border border-amber-300/40 bg-amber-300/10 px-2 py-1.5 text-[11px] leading-snug font-medium text-amber-100">
+          <div className="mx-3.5 mb-2 rounded-md border border-amber-300/40 bg-amber-300/10 px-2 py-1.5 text-[11px] leading-snug font-medium text-amber-100">
             <div className="flex items-start gap-1.5">
               <svg
                 aria-hidden="true"
@@ -114,12 +111,11 @@ export const TimelineCourseCard = React.forwardRef<HTMLDivElement, Props>(
         )}
 
         {!compact && (
-          <div className="mt-auto flex items-end justify-between gap-2 pt-2 text-xs text-lightGrey">
+          <div className="mt-auto flex items-end justify-between gap-2 px-3.5 pb-2 text-xs text-lightGrey">
             <span className="truncate">{course.moduleName ?? t('course.noModule')}</span>
-            <span className="shrink-0 font-mono text-offwhite">{formatCredits(course.credits)}</span>
           </div>
         )}
-      </motion.div>
+      </CourseCard>
     );
   },
 );

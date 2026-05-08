@@ -1,8 +1,9 @@
 import React from 'react';
 import { ModuleProgress } from '@/app/api/dataPoints/getCreditsByModule';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
+import { MODULE_COLOR_VALUES } from '@/app/theme/moduleColors';
 
-export const BAR_COLORS = ['#4A7EF0', '#10B981', '#F59E0B', '#A78BFA', '#EF4444', '#06B6D4'];
+export const BAR_COLORS = MODULE_COLOR_VALUES;
 
 function formatCredits(value: number, unit: string): string {
   const rounded = Math.round(value * 10) / 10;
@@ -73,17 +74,17 @@ const ModuleProgressRow: React.FC<{ name: string; done: number; target: number; 
   const pct = target > 0 ? Math.min(done / target, 1) : 0;
 
   return (
-    <div className="group rounded-xl bg-background/35 px-3 py-2 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.035)] transition-[background-color,box-shadow] duration-200 hover:bg-background/55 hover:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-2.5">
-          <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: color }} />
-          <span className="truncate text-sm font-medium text-lightGrey">{name}</span>
-        </div>
+    <div className="group grid grid-cols-[4px_minmax(0,1fr)_auto] items-center gap-x-3 rounded-xl bg-background/35 px-3 py-2 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.035)] transition-[background-color,box-shadow] duration-200 hover:bg-background/55 hover:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]">
+      <span className="row-span-2 h-8 w-1 self-center rounded-full" style={{ backgroundColor: color }} />
+      <div className="min-w-0">
+        <span className="truncate text-sm font-medium text-lightGrey">{name}</span>
+      </div>
+      <div className="text-right">
         <span className="shrink-0 font-mono text-xs text-offwhite tabular-nums">
           {done}/{target}
         </span>
       </div>
-      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-border2">
+      <div className="col-start-2 col-end-4 mt-2 h-1.5 overflow-hidden rounded-full bg-border2">
         <div
           className="h-full rounded-full transition-[width] duration-700 ease-out"
           style={{ width: `${pct * 100}%`, backgroundColor: color }}

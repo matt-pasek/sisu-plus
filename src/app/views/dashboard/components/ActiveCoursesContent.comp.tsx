@@ -15,11 +15,11 @@ export const ActiveCoursesContent: React.FC<Props> = ({ activeCourses, moduleCol
   return (
     <div className="-mx-4 -mb-4">
       {activeCourses.map((course) => {
-        const dotColor = course.moduleId ? (moduleColorMap.get(course.moduleId) ?? '#6B7280') : '#6B7280';
+        const sectionColor = course.moduleId ? (moduleColorMap.get(course.moduleId) ?? '#6B7280') : '#6B7280';
         const moduleName = course.moduleId ? moduleNameMap.get(course.moduleId) : null;
         return (
           <div key={course.id} className="flex items-center gap-3 border-b border-border/60 px-4 py-3 last:border-0">
-            <div className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: dotColor }} />
+            <div className="h-9 w-1 shrink-0 self-center rounded-full" style={{ backgroundColor: sectionColor }} />
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium text-offwhite">{course.courseName}</p>
               <p className="text-xs text-lightGrey">{course.courseCode}</p>
@@ -27,7 +27,7 @@ export const ActiveCoursesContent: React.FC<Props> = ({ activeCourses, moduleCol
             {moduleName && (
               <span
                 className="shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-medium"
-                style={{ backgroundColor: `${dotColor}22`, color: dotColor }}
+                style={{ backgroundColor: `${sectionColor}22`, color: sectionColor }}
               >
                 {moduleName.split(' ').slice(0, 2).join(' ')}
               </span>

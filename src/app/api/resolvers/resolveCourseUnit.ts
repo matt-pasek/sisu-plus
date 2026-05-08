@@ -1,6 +1,7 @@
 import { extractCourseCode } from '@/app/api/resolvers/helpers/extractCourseCode';
 import { koriApi } from '@/app/api/client';
 import { pickLabel } from '@/app/api/resolvers/helpers/pickLabel';
+import { getCurrentLocale } from '@/app/i18n';
 
 type CourseUnitResult = {
   assessmentItemIds: string[];
@@ -14,7 +15,8 @@ type CourseUnitResult = {
 const courseUnitCache = new Map<string, CourseUnitResult>();
 
 export const resolveCourseUnit = async (courseUnitId: string): Promise<CourseUnitResult> => {
-  const cached = courseUnitCache.get(courseUnitId);
+  const cacheKey = `${courseUnitId}:${getCurrentLocale()}`;
+  const cached = courseUnitCache.get(cacheKey);
   if (cached) return cached;
 
   try {
@@ -33,7 +35,7 @@ export const resolveCourseUnit = async (courseUnitId: string): Promise<CourseUni
         ),
       ],
     };
-    courseUnitCache.set(courseUnitId, result);
+    courseUnitCache.set(cacheKey, result);
     return result;
   } catch {
     const fallbackCode = extractCourseCode(courseUnitId);
@@ -45,7 +47,7 @@ export const resolveCourseUnit = async (courseUnitId: string): Promise<CourseUni
       name: fallbackCode,
       teachingPeriodLocators: [],
     };
-    courseUnitCache.set(courseUnitId, fallback);
+    courseUnitCache.set(cacheKey, fallback);
     return fallback;
   }
 };

@@ -1,11 +1,12 @@
 import { koriApi } from '@/app/api/client';
 import type { RealisationResult } from '@/app/api/resolvers/resolveRealization';
 import { mapRealisationToResult } from '@/app/api/resolvers/resolveRealization';
+import { getCurrentLocale } from '@/app/i18n';
 
 const courseRealisationsCache = new Map<string, RealisationResult[]>();
 
 function getCacheKey(assessmentItemIds: string[]): string {
-  return [...assessmentItemIds].sort().join(':');
+  return `${[...assessmentItemIds].sort().join(':')}:${getCurrentLocale()}`;
 }
 
 export async function resolveCourseRealisations(assessmentItemIds: string[]): Promise<RealisationResult[]> {

@@ -1,5 +1,6 @@
 import { koriApi } from '@/app/api/client';
 import { pickLabel } from '@/app/api/resolvers/helpers/pickLabel';
+import { getCurrentLocale } from '@/app/i18n';
 import type { CourseUnitRealisation, LocalizedUrl, StudyGroupSet } from '@/app/api/generated/KoriApi';
 
 export type RealisationStudySubGroupResult = {
@@ -76,7 +77,8 @@ export function mapRealisationToResult(realisation: CourseUnitRealisation, fallb
 }
 
 export const resolveRealisation = async (courseUnitRealisationId: string): Promise<RealisationResult> => {
-  const cached = realisationCache.get(courseUnitRealisationId);
+  const cacheKey = `${courseUnitRealisationId}:${getCurrentLocale()}`;
+  const cached = realisationCache.get(cacheKey);
   if (cached) return cached;
 
   try {
@@ -84,7 +86,7 @@ export const resolveRealisation = async (courseUnitRealisationId: string): Promi
       (await koriApi.api.getCourseUnitRealisation(courseUnitRealisationId)).data,
       courseUnitRealisationId,
     );
-    realisationCache.set(courseUnitRealisationId, result);
+    realisationCache.set(cacheKey, result);
     return result;
   } catch {
     const fallback: RealisationResult = {
@@ -104,7 +106,7 @@ export const resolveRealisation = async (courseUnitRealisationId: string): Promi
       typeUrn: null,
       usesExternalEnrolment: false,
     };
-    realisationCache.set(courseUnitRealisationId, fallback);
+    realisationCache.set(cacheKey, fallback);
     return fallback;
   }
 };

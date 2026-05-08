@@ -1,7 +1,6 @@
 import { PrivatePerson } from '@/app/api/generated/OriApi';
 import { AnimatePresence, motion } from 'motion/react';
 import React from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import { useChromeStorage } from '@/app/hooks/useChromeStorage';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { LOCALES, Locale } from '@/app/locales/locale';
@@ -12,12 +11,10 @@ interface Props {
 
 export const AccountDropdown: React.FC<Props> = ({ userDetails }) => {
   const { t } = useTranslationWithPrefix('components.accountDropdown');
-  const queryClient = useQueryClient();
   const [prefs, setPrefs] = useChromeStorage();
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
   const setLocale = (locale: Locale) => {
     setPrefs({ locale });
-    void queryClient.invalidateQueries();
   };
 
   return (

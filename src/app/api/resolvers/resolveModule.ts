@@ -1,5 +1,6 @@
 import { koriApi } from '@/app/api/client';
 import { pickLabel } from '@/app/api/resolvers/helpers/pickLabel';
+import { getCurrentLocale } from '@/app/i18n';
 import type { CreditRange, LocalizedString } from '@/app/api/generated/KoriApi';
 
 type ModuleResult = { name: string; targetCredits: number };
@@ -7,7 +8,8 @@ type ModuleResult = { name: string; targetCredits: number };
 const moduleCache = new Map<string, ModuleResult>();
 
 export const resolveModule = async (moduleId: string): Promise<ModuleResult> => {
-  const cached = moduleCache.get(moduleId);
+  const cacheKey = `${moduleId}:${getCurrentLocale()}`;
+  const cached = moduleCache.get(cacheKey);
   if (cached) return cached;
 
   try {
@@ -17,11 +19,11 @@ export const resolveModule = async (moduleId: string): Promise<ModuleResult> => 
       name: pickLabel(mod.name) ?? moduleId,
       targetCredits: mod.targetCredits?.min ?? 0,
     };
-    moduleCache.set(moduleId, result);
+    moduleCache.set(cacheKey, result);
     return result;
   } catch {
     const fallback: ModuleResult = { name: moduleId, targetCredits: 0 };
-    moduleCache.set(moduleId, fallback);
+    moduleCache.set(cacheKey, fallback);
     return fallback;
   }
 };

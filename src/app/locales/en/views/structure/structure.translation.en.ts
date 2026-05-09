@@ -30,6 +30,26 @@ export type StructureTranslation = {
     detailsAction: string;
     methodAction: string;
   };
+  edit: {
+    edit: string;
+    save: string;
+    saving: string;
+    cancel: string;
+    title: string;
+    draftHint: string;
+    groups: string;
+    noGroups: string;
+    selected: string;
+    select: string;
+    add: string;
+    remove: string;
+    countRule: string;
+    creditRule: string;
+    searchLabel: string;
+    searchPlaceholder: string;
+    searchMinLength: string;
+    searching: string;
+  };
   errors: {
     noPlan: string;
   };
@@ -66,6 +86,27 @@ export const structureTranslation: StructureTranslation = {
     notCompletedLabel: 'Not completed',
     detailsAction: 'Details ->',
     methodAction: 'Method ->',
+  },
+  edit: {
+    edit: 'Edit structure',
+    save: 'Save',
+    saving: 'Saving...',
+    cancel: 'Cancel',
+    title: 'Edit selections',
+    draftHint:
+      'Changes stay in draft until saved. Choosing a new alternative removes the old alternative and its nested courses.',
+    groups: 'groups',
+    noGroups: 'No structured selection groups were found for this section.',
+    selected: 'Selected',
+    select: 'Select',
+    add: 'Add',
+    remove: 'Remove',
+    countRule: 'Select {{min}}-{{max}} options',
+    creditRule: 'Select {{min}}-{{max}} cr',
+    searchLabel: 'Search optional courses',
+    searchPlaceholder: 'Search by course name or code',
+    searchMinLength: 'Type at least three characters.',
+    searching: 'Searching...',
   },
   errors: {
     noPlan: 'No study plan data was found.',

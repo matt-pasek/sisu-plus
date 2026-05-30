@@ -8,6 +8,7 @@ import { pickLabel } from '@/app/api/resolvers/helpers/pickLabel';
 import { DialogShell, DialogCloseButton } from './DialogShell.comp';
 import type { CourseEntry } from '@/app/views/structure/structureTypes';
 import type { PrerequisiteCourse } from '@/app/views/structure/hooks/usePrerequisites';
+import type { CourseUnit } from '@/app/api/generated/KoriApi';
 
 interface Props {
   course: CourseEntry;
@@ -52,6 +53,14 @@ export function formatVersion(startDate: string | undefined, endDate: string | u
   return `${startYear}-${endYear}`;
 }
 
+export function formatCourseVersion(unit: CourseUnit | undefined): string {
+  const curriculumYear = unit?.curriculumPeriodIds
+    ?.map((id) => id.match(/(\d{4})-(\d{4})/)?.[0])
+    .find((year): year is string => year != null);
+
+  return curriculumYear ?? formatVersion(unit?.validityPeriod?.startDate, unit?.validityPeriod?.endDate);
+}
+
 export const CourseDetailsDialog: React.FC<Props> = ({ course, planId, onClose, onAttainmentClick }) => {
   const { t } = useTranslationWithPrefix('views.structure.dialogs');
   const { data: unit, isLoading } = useCourseUnit(course.courseUnitId);
@@ -81,11 +90,9 @@ export const CourseDetailsDialog: React.FC<Props> = ({ course, planId, onClose, 
   const additional = unit ? pickLabel((unit.additional as Record<string, string>) ?? {}) : null;
   const learningMaterial = unit ? pickLabel((unit.learningMaterial as Record<string, string>) ?? {}) : null;
 
-  const version = unit ? formatVersion(unit.validityPeriod?.startDate, unit.validityPeriod?.endDate) : '–';
+  const version = formatCourseVersion(unit);
   const selectedVersion = versions.find((candidate) => candidate.id === selectedCourseUnitId);
-  const selectedVersionLabel = selectedVersion
-    ? formatVersion(selectedVersion.validityPeriod?.startDate, selectedVersion.validityPeriod?.endDate)
-    : version;
+  const selectedVersionLabel = selectedVersion ? formatCourseVersion(selectedVersion) : version;
   const canChangeVersion = !course.completed && selectedCourseUnitId !== course.courseUnitId;
 
   const languages = unit?.possibleAttainmentLanguages?.map(formatLanguageUrn).join(', ') ?? '–';
@@ -174,9 +181,7 @@ export const CourseDetailsDialog: React.FC<Props> = ({ course, planId, onClose, 
                           candidate.id === selectedCourseUnitId ? 'text-offwhite' : 'text-lightGrey'
                         }`}
                       >
-                        <span>
-                          {formatVersion(candidate.validityPeriod?.startDate, candidate.validityPeriod?.endDate)}
-                        </span>
+                        <span>{formatCourseVersion(candidate)}</span>
                         {candidate.id === course.courseUnitId && (
                           <span className="text-[11px] whitespace-nowrap text-lighterGreen">
                             {t('courseDetails.versionInPlan')}

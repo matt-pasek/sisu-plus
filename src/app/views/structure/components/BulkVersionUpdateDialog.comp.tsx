@@ -7,7 +7,7 @@ import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { pickLabel } from '@/app/api/resolvers/helpers/pickLabel';
 import { useStructurePlanMutation } from '@/app/views/structure/editing/useStructurePlanMutation';
 import { swapCourseVersion } from '@/app/views/structure/editing/useChangeCourseVersion';
-import { formatVersion } from '@/app/views/structure/components/CourseDetailsDialog.comp';
+import { formatCourseVersion } from '@/app/views/structure/components/CourseDetailsDialog.comp';
 import { DialogShell, DialogCloseButton } from './DialogShell.comp';
 import type { CourseUnit } from '@/app/api/generated/KoriApi';
 import type { Plan } from '@/app/api/generated/OsuvaApi';
@@ -50,6 +50,13 @@ function findPlannedAcademicYear(periods: StudyPeriodInfo[]): number | null {
 }
 
 function coversAcademicYear(unit: CourseUnit, academicYear: number): boolean {
+  const curriculumYears = unit.curriculumPeriodIds
+    ?.map((id) => id.match(/(\d{4})-(\d{4})/)?.[1])
+    .map(Number)
+    .filter(Number.isFinite);
+
+  if (curriculumYears?.length) return curriculumYears.includes(academicYear);
+
   const startYear = Number(unit.validityPeriod?.startDate?.split('-')[0]);
   const endYear = Number(unit.validityPeriod?.endDate?.split('-')[0]);
   if (!Number.isFinite(startYear)) return false;
@@ -228,20 +235,14 @@ export const BulkVersionUpdateDialog: React.FC<Props> = ({ plan, sections, onClo
                               <span className="text-lightGrey">
                                 {t('bulkUpdate.oldVersion')}:{' '}
                                 <strong className="font-semibold text-offwhite">
-                                  {formatVersion(
-                                    update.current.validityPeriod?.startDate,
-                                    update.current.validityPeriod?.endDate,
-                                  )}
+                                  {formatCourseVersion(update.current)}
                                 </strong>
                               </span>
                               <span className="text-darkishGrey">{'->'}</span>
                               <span className="text-lightGrey">
                                 {t('bulkUpdate.newVersion')}:{' '}
                                 <strong className="font-semibold text-lighterGreen">
-                                  {formatVersion(
-                                    update.latest.validityPeriod?.startDate,
-                                    update.latest.validityPeriod?.endDate,
-                                  )}
+                                  {formatCourseVersion(update.latest)}
                                 </strong>
                               </span>
                             </div>

@@ -239,7 +239,7 @@ const TimelineView: React.FC = () => {
   const [activeDragCourseId, setActiveDragCourseId] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isAutoScheduling, setIsAutoScheduling] = useState(false);
-  const [hidePreviousPeriods, setHidePreviousPeriods] = useState(false);
+  const [hidePreviousPeriods, setHidePreviousPeriods] = useState(true);
   const [showHiddenSummerPeriods, setShowHiddenSummerPeriods] = useState(false);
   const [dismissedPrerequisiteWarningIds, setDismissedPrerequisiteWarningIds] = useState<Set<string>>(new Set());
   const [draftPeriodsByCourseId, setDraftPeriodsByCourseId] = useState<Map<string, string[]>>(new Map());

@@ -7,13 +7,16 @@ import { CourseCard } from '@/app/views/structure/components/CourseCard.comp';
 interface Props {
   courses: CourseEntry[];
   color: ModuleColor;
+  onMethodClick: (course: CourseEntry) => void;
+  onDetailsClick: (course: CourseEntry) => void;
+  onCardClick: (course: CourseEntry) => void;
 }
 
 function sumCredits(courses: CourseEntry[]): number {
   return courses.reduce((sum, course) => sum + (course.credits ?? 0), 0);
 }
 
-export const SectionBody: React.FC<Props> = ({ courses, color }) => {
+export const SectionBody: React.FC<Props> = ({ courses, color, onMethodClick, onDetailsClick, onCardClick }) => {
   const { t } = useTranslationWithPrefix('views.structure');
   const completed = courses.filter((course) => course.completed);
   const remaining = courses.filter((course) => !course.completed);
@@ -29,12 +32,16 @@ export const SectionBody: React.FC<Props> = ({ courses, color }) => {
         color={color}
         label={t('section.completedGroup', { count: sumCredits(completed) })}
         tone="completed"
+        onDetailsClick={onDetailsClick}
+        onCardClick={onCardClick}
       />
       <CourseGroup
         courses={remaining}
         color={color}
         label={t('section.remainingGroup', { count: sumCredits(remaining) })}
         tone="remaining"
+        onMethodClick={onMethodClick}
+        onCardClick={onCardClick}
       />
     </div>
   );
@@ -45,7 +52,10 @@ const CourseGroup: React.FC<{
   color: ModuleColor;
   label: string;
   tone: 'completed' | 'remaining';
-}> = ({ courses, color, label, tone }) => {
+  onMethodClick?: (course: CourseEntry) => void;
+  onDetailsClick?: (course: CourseEntry) => void;
+  onCardClick: (course: CourseEntry) => void;
+}> = ({ courses, color, label, tone, onMethodClick, onDetailsClick, onCardClick }) => {
   if (courses.length === 0) return null;
 
   return (
@@ -60,7 +70,14 @@ const CourseGroup: React.FC<{
       </div>
       <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-2">
         {courses.map((course) => (
-          <CourseCard key={course.courseUnitId} color={color} course={course} />
+          <CourseCard
+            key={course.courseUnitId}
+            color={color}
+            course={course}
+            onMethodClick={onMethodClick ? () => onMethodClick(course) : undefined}
+            onDetailsClick={onDetailsClick ? () => onDetailsClick(course) : undefined}
+            onCardClick={() => onCardClick(course)}
+          />
         ))}
       </div>
     </section>

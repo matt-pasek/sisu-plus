@@ -1,4 +1,6 @@
 export type StructureTranslation = {
+  pageTitle: string;
+  pageSubtitle: string;
   header: {
     planLabel: string;
     primaryBadge: string;
@@ -53,9 +55,95 @@ export type StructureTranslation = {
   errors: {
     noPlan: string;
   };
+  bulkUpdate: {
+    button: string;
+    title: string;
+    subtitle: string;
+    applyButton: string;
+    noneTitle: string;
+    noneSubtitle: string;
+    oldVersion: string;
+    newVersion: string;
+    unscheduledGroup: string;
+    courseCount: string;
+    selectedCount: string;
+  };
+  dialogs: {
+    close: string;
+    completionMethod: {
+      title: string;
+      description: string;
+      courseDetailsHeading: string;
+      courseLabel: string;
+      creditsLabel: string;
+      methodsHeading: string;
+      methodLabel: string;
+      whatNextHeading: string;
+      whatNextBody: string;
+      cancel: string;
+    };
+    attainment: {
+      title: string;
+      stateLabel: string;
+      gradeLabel: string;
+      creditsLabel: string;
+      dateLabel: string;
+      expiryLabel: string;
+      noExpiry: string;
+      languageLabel: string;
+      averageGradeLabel: string;
+      approvedByLabel: string;
+      studyRightLabel: string;
+      versionLabel: string;
+      typeOfStudiesLabel: string;
+      registrationDateLabel: string;
+      stateAttained: string;
+      stateIncluded: string;
+      stateSubstituted: string;
+      stateFailed: string;
+    };
+    courseDetails: {
+      statusLabel: string;
+      gradeLabel: string;
+      placedToLabel: string;
+      tabInfo: string;
+      tabEquivalences: string;
+      courseVersionLabel: string;
+      changeVersionButton: string;
+      versionInPlan: string;
+      completedBannerTitle: string;
+      completedBannerRecorded: string;
+      viewAttainmentAction: string;
+      basicInfoHeading: string;
+      languageLabel: string;
+      gradeScaleLabel: string;
+      creditsLabel: string;
+      courseLevelLabel: string;
+      courseTypeLabel: string;
+      organiserLabel: string;
+      contentHeading: string;
+      outcomesHeading: string;
+      contentSectionHeading: string;
+      additionalInfoLabel: string;
+      prerequisitesHeading: string;
+      noPrerequisites: string;
+      additionalHeading: string;
+      studyMaterialsHeading: string;
+      studyMaterialsLabel: string;
+      classificationHeading: string;
+      fieldsOfStudyLabel: string;
+      responsiblePersonsHeading: string;
+      responsibleTeacherLabel: string;
+      toBeConfirmed: string;
+      noData: string;
+      loading: string;
+    };
+  };
 };
 
 export const structureTranslation: StructureTranslation = {
+  pageTitle: 'Structure of Studies',
+  pageSubtitle: 'Your degree programme, modules, and courses.',
   header: {
     planLabel: 'My study plan',
     primaryBadge: 'PRIMARY',
@@ -84,8 +172,8 @@ export const structureTranslation: StructureTranslation = {
   course: {
     completedLabel: 'Completed',
     notCompletedLabel: 'Not completed',
-    detailsAction: 'Details ->',
-    methodAction: 'Method ->',
+    detailsAction: 'Details',
+    methodAction: 'Method',
   },
   edit: {
     edit: 'Edit structure',
@@ -110,5 +198,91 @@ export const structureTranslation: StructureTranslation = {
   },
   errors: {
     noPlan: 'No study plan data was found.',
+  },
+  bulkUpdate: {
+    button: 'Update all to latest',
+    title: 'Update course versions',
+    subtitle: 'These uncompleted courses have a newer version available.',
+    applyButton: 'Apply changes',
+    noneTitle: 'All up to date',
+    noneSubtitle: 'All uncompleted courses are already on their latest version.',
+    oldVersion: 'Old version',
+    newVersion: 'New version',
+    unscheduledGroup: 'Unscheduled',
+    courseCount: 'courses',
+    selectedCount: 'selected',
+  },
+  dialogs: {
+    close: 'Close',
+    completionMethod: {
+      title: 'Select a completion method.',
+      description:
+        'The course can be completed in the ways listed. If necessary, read the course completion instructions in the course information sheet.',
+      courseDetailsHeading: 'Course details',
+      courseLabel: 'Course',
+      creditsLabel: 'Credits',
+      methodsHeading: 'Course completion methods',
+      methodLabel: 'Completion method {{index}} ({{credits}} cr)',
+      whatNextHeading: 'What to expect after confirmation?',
+      whatNextBody:
+        'Select the implementations related to the completion method and register for them in the Registration view.',
+      cancel: 'Close',
+    },
+    attainment: {
+      title: 'Details of the attainment',
+      stateLabel: 'STATE',
+      gradeLabel: 'GRADE',
+      creditsLabel: 'CREDITS (CR)',
+      dateLabel: 'DATE',
+      expiryLabel: 'EXPIRATION DATE',
+      noExpiry: 'No expiration date',
+      languageLabel: 'LANGUAGE OF LEARNING',
+      averageGradeLabel: 'AVERAGE GRADE',
+      approvedByLabel: 'APPROVED BY',
+      studyRightLabel: 'STUDY RIGHT',
+      versionLabel: 'VERSION',
+      typeOfStudiesLabel: 'TYPE OF STUDIES',
+      registrationDateLabel: 'DATE OF REGISTRATION',
+      stateAttained: 'Attained',
+      stateIncluded: 'Included',
+      stateSubstituted: 'Substituted',
+      stateFailed: 'Failed',
+    },
+    courseDetails: {
+      statusLabel: 'Status',
+      gradeLabel: 'Grade',
+      placedToLabel: 'Placed to',
+      tabInfo: 'Information sheet',
+      tabEquivalences: 'Equivalences & substitutions',
+      courseVersionLabel: 'Course version',
+      changeVersionButton: 'Change version',
+      versionInPlan: '(in plan)',
+      completedBannerTitle: 'Study completed',
+      completedBannerRecorded: 'Recorded',
+      viewAttainmentAction: 'View attainment',
+      basicInfoHeading: 'Basic information',
+      languageLabel: 'Languages of learning',
+      gradeScaleLabel: 'Grading scale',
+      creditsLabel: 'Credits',
+      courseLevelLabel: 'Course level',
+      courseTypeLabel: 'Course type',
+      organiserLabel: 'Organiser',
+      contentHeading: 'Content and goals',
+      outcomesHeading: 'Learning outcomes',
+      contentSectionHeading: 'Content',
+      additionalInfoLabel: 'Additional information',
+      prerequisitesHeading: 'Prerequisites',
+      noPrerequisites: 'No prerequisites defined for this course.',
+      additionalHeading: 'Additional information',
+      studyMaterialsHeading: 'Course materials',
+      studyMaterialsLabel: 'Study materials',
+      classificationHeading: 'Classification',
+      fieldsOfStudyLabel: 'Fields of study',
+      responsiblePersonsHeading: 'Responsible persons and contact information',
+      responsibleTeacherLabel: 'Responsible teacher',
+      toBeConfirmed: 'To be confirmed',
+      noData: 'No data available.',
+      loading: 'Loading course details…',
+    },
   },
 };

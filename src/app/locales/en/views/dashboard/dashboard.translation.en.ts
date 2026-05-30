@@ -185,12 +185,12 @@ export const dashboardTranslation: DashboardTranslation = {
       },
     },
     activeCourses: {
-      title: 'Active Courses',
-      empty: 'No active courses',
+      title: 'Current & Upcoming Courses',
+      empty: 'No current or upcoming courses',
     },
     titles: {
       degreeCompletion: 'Degree Completion',
-      activeCourses: 'Active Courses',
+      activeCourses: 'Current & Upcoming Courses',
       moodleDeadlines: 'Moodle Deadlines',
       semesterStats: 'This Semester',
       gradeTrend: 'Grade Trend',
@@ -202,7 +202,7 @@ export const dashboardTranslation: DashboardTranslation = {
     },
     descriptions: {
       degreeCompletion: 'Target credits, study right, grade average, and module progress.',
-      activeCourses: 'Current semester enrolments with module and credit badges.',
+      activeCourses: 'Current and future enrolments with module and credit badges.',
       moodleDeadlines: 'Live deadline cards from Moodle calendar.',
       semesterStats: 'Enrolled courses, active credits, and upcoming deadlines.',
       gradeTrend: 'Completed-course grade scatter plot with credit-weighted dots.',

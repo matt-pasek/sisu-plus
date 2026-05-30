@@ -5,12 +5,7 @@ import { fetchAttainments } from '@/app/api/endpoints/attainments';
 import { resolveAllEnrolments } from '@/app/api/resolvers/resolveEnrolment';
 import { buildCuToTopModuleMap } from '@/app/api/resolvers/helpers/buildCuToTopModuleMap';
 import type { CourseUnitAttainmentRestricted } from '@/app/api/generated/OriApi';
-
-function getSemesterStart(): string {
-  const now = new Date();
-  const year = now.getFullYear();
-  return now.getMonth() + 1 >= 9 ? `${year}-08-01` : `${year}-01-01`;
-}
+import { isCurrentOrUpcomingCourse } from './activeCourseDateFilter';
 
 export interface ActiveCourse {
   moduleId: string | null;
@@ -36,14 +31,7 @@ export const getActiveCourses = (): { activeCourses: ActiveCourse[]; isLoading: 
       const resolved = await resolveAllEnrolments(enrolled);
 
       const today = new Date().toISOString().slice(0, 10);
-      const semesterStart = getSemesterStart();
-
-      const filtered = resolved.filter(
-        (e) =>
-          (e.startDate != null || e.endDate != null) &&
-          (!e.startDate || e.startDate <= today) &&
-          (!e.endDate || e.endDate >= semesterStart),
-      );
+      const filtered = resolved.filter((e) => isCurrentOrUpcomingCourse(e, today));
 
       const seen = new Map<string, (typeof filtered)[0]>();
       for (const e of filtered) {

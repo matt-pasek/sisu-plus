@@ -52,8 +52,8 @@ export const DASHBOARD_WIDGETS: DashboardWidgetDefinition[] = [
   },
   {
     id: 'active-courses',
-    title: 'Active Courses',
-    description: 'Current semester enrolments with module and credit badges.',
+    title: 'Current & Upcoming Courses',
+    description: 'Current and future enrolments with module and credit badges.',
     size: { w: 7, h: 4 },
     minSize: { w: 5, h: 3 },
     maxSize: { w: 10, h: 6 },

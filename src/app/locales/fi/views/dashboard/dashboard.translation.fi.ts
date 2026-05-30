@@ -48,12 +48,12 @@ export const dashboardTranslation: DashboardTranslation = {
       },
     },
     activeCourses: {
-      title: 'Aktiiviset kurssit',
-      empty: 'Ei aktiivisia kursseja',
+      title: 'Nykyiset ja tulevat kurssit',
+      empty: 'Ei nykyisiä tai tulevia kursseja',
     },
     titles: {
       degreeCompletion: 'Tutkinnon eteneminen',
-      activeCourses: 'Aktiiviset kurssit',
+      activeCourses: 'Nykyiset ja tulevat kurssit',
       moodleDeadlines: 'Moodlen määräajat',
       semesterStats: 'Tämä lukukausi',
       gradeTrend: 'Arvosanakehitys',
@@ -65,7 +65,7 @@ export const dashboardTranslation: DashboardTranslation = {
     },
     descriptions: {
       degreeCompletion: 'Tavoiteopintopisteet, opinto-oikeus, keskiarvo ja moduulien eteneminen.',
-      activeCourses: 'Nykyisen lukukauden ilmoittautumiset moduuli- ja opintopistebadgella.',
+      activeCourses: 'Nykyiset ja tulevat ilmoittautumiset moduuli- ja opintopistebadgella.',
       moodleDeadlines: 'Määräaikakortit suoraan Moodle-kalenterista.',
       semesterStats: 'Ilmoittautuneet kurssit, aktiiviset opintopisteet ja tulevat määräajat.',
       gradeTrend: 'Suoritettujen kurssien arvosanakaavio opintopistepainotetuilla pisteillä.',

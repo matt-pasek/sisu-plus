@@ -51,7 +51,7 @@ void mainImage(out vec4 o, vec2 C) {
   float i, d, z, T = iTime * uSpeed * uDirection;
   vec3 O, p, S;
 
-  for (vec2 r = iResolution.xy, Q; ++i < 60.; O += o.w/d*o.xyz) {
+  for (vec2 r = iResolution.xy, Q; ++i < 32.; O += o.w/d*o.xyz) {
     p = z*normalize(vec3(C-.5*r,r.y)); 
     p.z -= 4.; 
     S = p;
@@ -114,7 +114,7 @@ export const Plasma: React.FC<PlasmaProps> = ({
         webgl: 2,
         alpha: true,
         antialias: false,
-        dpr: Math.min(window.devicePixelRatio || 1, 2),
+        dpr: 1,
       });
     } catch {
       return;
@@ -180,9 +180,16 @@ export const Plasma: React.FC<PlasmaProps> = ({
     let contextLost = false;
     let isVisible = true;
     const t0 = performance.now();
+    let lastFrame = 0;
+    const FPS_CAP = 1000 / 30;
 
     const loop = (t: number) => {
       if (contextLost || !isVisible) return;
+      if (t - lastFrame < FPS_CAP) {
+        raf = requestAnimationFrame(loop);
+        return;
+      }
+      lastFrame = t;
       let timeValue = (t - t0) * 0.001;
       if (direction === 'pingpong') {
         const pingpongDuration = 10;

@@ -1,14 +1,21 @@
 import React, { useEffect, useState } from 'react';
+import { fetchPublicPersons } from '@/app/api/endpoints/people';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { useCourseUnit } from '@/app/views/structure/hooks/useCourseUnit';
 import { useCourseVersions } from '@/app/views/structure/hooks/useCourseVersions';
 import { usePrerequisites } from '@/app/views/structure/hooks/usePrerequisites';
 import { useChangeCourseVersion } from '@/app/views/structure/editing/useChangeCourseVersion';
 import { pickLabel } from '@/app/api/resolvers/helpers/pickLabel';
+import {
+  formatPersonDisplayName,
+  formatPersonEmail,
+  formatLocalizedLabel,
+} from '@/app/views/structure/utils/dialogData';
 import { DialogShell, DialogCloseButton } from './DialogShell.comp';
 import type { CourseEntry } from '@/app/views/structure/structureTypes';
 import type { PrerequisiteCourse } from '@/app/views/structure/hooks/usePrerequisites';
 import type { CourseUnit } from '@/app/api/generated/KoriApi';
+import { useSisuQuery } from '@/app/hooks/useSisuQuery';
 
 interface Props {
   course: CourseEntry;
@@ -65,6 +72,18 @@ export const CourseDetailsDialog: React.FC<Props> = ({ course, planId, onClose, 
   const { t } = useTranslationWithPrefix('views.structure.dialogs');
   const { data: unit, isLoading } = useCourseUnit(course.courseUnitId);
   const { data: versions = [] } = useCourseVersions(unit?.groupId);
+  const responsibleTeacherInfos =
+    unit?.responsibilityInfos?.filter(
+      (r) => r.roleUrn === 'urn:code:module-responsibility-info-type:responsible-teacher',
+    ) ?? [];
+  const responsibleTeacherPersonIds = responsibleTeacherInfos
+    .map((responsibility) => responsibility.personId)
+    .filter((personId): personId is string => Boolean(personId));
+  const { data: responsibleTeacherPersons = [] } = useSisuQuery(
+    ['public-persons', responsibleTeacherPersonIds],
+    () => fetchPublicPersons(responsibleTeacherPersonIds),
+    { enabled: responsibleTeacherPersonIds.length > 0 },
+  );
   const [tab, setTab] = useState<Tab>('info');
   const [versionsOpen, setVersionsOpen] = useState(false);
   const [selectedCourseUnitId, setSelectedCourseUnitId] = useState(course.courseUnitId);
@@ -100,12 +119,16 @@ export const CourseDetailsDialog: React.FC<Props> = ({ course, planId, onClose, 
   const courseLevel = formatUrn(unit?.studyLevel);
   const courseType = formatUrn(unit?.courseUnitType);
 
-  const responsibleTeachers =
-    unit?.responsibilityInfos
-      ?.filter((r) => r.roleUrn === 'urn:code:module-responsibility-info-type:responsible-teacher')
-      .map((r) => (r.text ? pickLabel(r.text as Record<string, string>) : null))
-      .filter(Boolean)
-      .join(', ') ?? null;
+  const publicPersonById = new Map(responsibleTeacherPersons.map((person) => [person.id, person]));
+  const responsibleTeachers = responsibleTeacherInfos
+    .map((responsibility) => {
+      const person = responsibility.personId ? publicPersonById.get(responsibility.personId) : undefined;
+      const text = formatLocalizedLabel(responsibility.text as Record<string, string> | undefined);
+      const name = formatPersonDisplayName(text, person);
+      if (!name) return null;
+      return { id: responsibility.personId ?? name, name, email: formatPersonEmail(person) };
+    })
+    .filter((teacher): teacher is { id: string; name: string; email: string | null } => teacher != null);
 
   const studyFields = unit?.studyFields?.map(formatUrn).join(', ') ?? null;
 
@@ -115,8 +138,8 @@ export const CourseDetailsDialog: React.FC<Props> = ({ course, planId, onClose, 
 
   return (
     <DialogShell labelId="course-details-dialog-title" onClose={onClose} maxWidth="max-w-3xl">
-      <div className="relative flex-shrink-0 px-[26px] pt-[22px]">
-        <div className="absolute top-[22px] bottom-0 left-0 w-1 rounded-r-[3px] bg-lighterGreen" />
+      <div className="relative shrink-0 px-6.5 pt-5.5">
+        <div className="absolute top-5.5 bottom-0 left-0 w-1 rounded-r-[3px] bg-lighterGreen" />
 
         <div className="flex items-start gap-4">
           <div className="min-w-0 flex-1">
@@ -126,20 +149,20 @@ export const CourseDetailsDialog: React.FC<Props> = ({ course, planId, onClose, 
             >
               {courseName}
               {credits != null && (
-                <span className="ml-2.5 inline-flex translate-y-[-2px] items-center rounded-[7px] bg-lighterGreen/12 px-[9px] py-[3px] align-middle text-[13px] font-bold text-lighterGreen">
+                <span className="ml-2.5 inline-flex -translate-y-0.5 items-center rounded-[7px] bg-lighterGreen/12 px-[9px] py-[3px] align-middle text-[13px] font-bold text-lighterGreen">
                   {credits} cr
                 </span>
               )}
             </h2>
-            <div className="mt-[5px] font-mono text-[12px] text-lightGrey">
+            <div className="mt-1.25 font-mono text-[12px] text-lightGrey">
               {courseCode} <span className="text-darkishGrey">· Course</span>
             </div>
           </div>
           <DialogCloseButton label={t('close')} onClose={onClose} />
         </div>
 
-        <div className="mt-[18px] mb-[16px] flex flex-wrap items-center gap-x-8 gap-y-[14px]">
-          <div className="flex flex-col gap-[5px]">
+        <div className="mt-4.5 mb-4 flex flex-wrap items-center gap-x-8 gap-y-3.5">
+          <div className="flex flex-col gap-1.25">
             <span className="text-[10.5px] font-semibold tracking-[.06em] text-darkishGrey uppercase">
               {t('courseDetails.courseVersionLabel')}
             </span>
@@ -149,7 +172,7 @@ export const CourseDetailsDialog: React.FC<Props> = ({ course, planId, onClose, 
                   type="button"
                   disabled={course.completed || versions.length <= 1}
                   onClick={() => setVersionsOpen((open) => !open)}
-                  className="flex items-center gap-2 rounded-lg border border-border2 bg-container2 px-[12px] py-[8px] text-[12.5px] font-medium text-offwhite transition-colors hover:bg-border2/40 disabled:cursor-not-allowed disabled:text-lightGrey"
+                  className="flex items-center gap-2 rounded-lg border border-border2 bg-container2 px-3 py-2 text-[12.5px] font-medium text-offwhite transition-colors hover:bg-border2/40 disabled:cursor-not-allowed disabled:text-lightGrey"
                 >
                   {selectedVersionLabel}
                   <span className="font-normal text-lightGrey">{course.completed ? '(Completed)' : '(Active)'}</span>
@@ -164,7 +187,7 @@ export const CourseDetailsDialog: React.FC<Props> = ({ course, planId, onClose, 
                   </svg>
                 </button>
                 {versionsOpen && (
-                  <div className="absolute top-[calc(100%+6px)] left-0 z-20 min-w-[170px] overflow-hidden rounded-lg border border-border2 bg-container shadow-[0_14px_32px_rgba(0,0,0,0.35)]">
+                  <div className="absolute top-[calc(100%+6px)] left-0 z-20 min-w-42.5 overflow-hidden rounded-lg border border-border2 bg-container shadow-[0_14px_32px_rgba(0,0,0,0.35)]">
                     {versions.map((candidate) => (
                       <button
                         key={candidate.id}
@@ -193,14 +216,14 @@ export const CourseDetailsDialog: React.FC<Props> = ({ course, planId, onClose, 
                   type="button"
                   disabled={changeCourseVersion.isPending}
                   onClick={() => changeCourseVersion.changeVersion({ onSuccess: onClose })}
-                  className="rounded-lg border border-accent bg-accent/20 px-[12px] py-[8px] text-[12px] font-semibold text-accent transition-colors hover:bg-accent/30 disabled:cursor-not-allowed disabled:border-border disabled:bg-container disabled:text-lightGrey"
+                  className="rounded-lg border border-accent bg-accent/20 px-3 py-2 text-[12px] font-semibold text-accent transition-colors hover:bg-accent/30 disabled:cursor-not-allowed disabled:border-border disabled:bg-container disabled:text-lightGrey"
                 >
                   {t('courseDetails.changeVersionButton')}
                 </button>
               )}
             </div>
           </div>
-          <div className="flex flex-col gap-[7px] pt-[2px] text-[12.5px]">
+          <div className="flex flex-col gap-1.75 pt-0.5 text-[12.5px]">
             <div>
               <span className="text-lightGrey">Status: </span>
               <span className={`font-semibold ${course.completed ? 'text-lighterGreen' : 'text-offwhite'}`}>
@@ -222,7 +245,7 @@ export const CourseDetailsDialog: React.FC<Props> = ({ course, planId, onClose, 
               key={value}
               type="button"
               onClick={() => setTab(value)}
-              className={`-mb-px border-b-2 px-0.5 py-[9px] text-[13px] font-semibold transition-colors ${
+              className={`-mb-px border-b-2 px-0.5 py-2.25 text-[13px] font-semibold transition-colors ${
                 tab === value ? 'border-accent text-offwhite' : 'border-transparent text-lightGrey hover:text-offwhite'
               }`}
             >
@@ -232,7 +255,7 @@ export const CourseDetailsDialog: React.FC<Props> = ({ course, planId, onClose, 
         </div>
       </div>
 
-      <div className="min-h-0 overflow-y-auto px-[26px] pb-[26px]">
+      <div className="min-h-0 overflow-y-auto px-6.5 pb-6.5">
         {isLoading && (
           <div className="flex h-40 items-center justify-center">
             <span className="text-xs text-lightGrey">{t('courseDetails.loading')}</span>
@@ -247,8 +270,8 @@ export const CourseDetailsDialog: React.FC<Props> = ({ course, planId, onClose, 
           <div>
             <div className="mt-5 mb-1">
               {course.completed ? (
-                <div className="flex items-center gap-[13px] rounded-[11px] border border-lighterGreen/22 bg-lighterGreen/12 px-4 py-[13px]">
-                  <div className="flex size-[34px] shrink-0 items-center justify-center rounded-full bg-lighterGreen/20">
+                <div className="flex items-center gap-3.25 rounded-[11px] border border-lighterGreen/22 bg-lighterGreen/12 px-4 py-3.25">
+                  <div className="flex size-8.5 shrink-0 items-center justify-center rounded-full bg-lighterGreen/20">
                     <svg width="15" height="13" viewBox="0 0 14 12" fill="none">
                       <path
                         d="M1 6l4 4 8-9"
@@ -274,7 +297,7 @@ export const CourseDetailsDialog: React.FC<Props> = ({ course, planId, onClose, 
                     <button
                       type="button"
                       onClick={onAttainmentClick}
-                      className="shrink-0 rounded-lg border border-border2 bg-container2 px-[13px] py-[7px] text-[12px] font-medium text-offwhite transition-colors hover:bg-border2/40"
+                      className="shrink-0 rounded-lg border border-border2 bg-container2 px-3.25 py-1.75 text-[12px] font-medium text-offwhite transition-colors hover:bg-border2/40"
                     >
                       {t('courseDetails.viewAttainmentAction')}
                     </button>
@@ -283,9 +306,7 @@ export const CourseDetailsDialog: React.FC<Props> = ({ course, planId, onClose, 
               ) : null}
             </div>
 
-            <h3 className="mt-6 mb-[14px] text-[16px] font-semibold tracking-[-0.2px] text-offwhite">
-              Information sheet
-            </h3>
+            <h3 className="mt-6 mb-3.5 text-[16px] font-semibold tracking-[-0.2px] text-offwhite">Information sheet</h3>
 
             <CDLabel>{t('courseDetails.basicInfoHeading')}</CDLabel>
             <div className="mb-2 grid gap-x-8 gap-y-0.5 sm:grid-cols-2">
@@ -301,7 +322,7 @@ export const CourseDetailsDialog: React.FC<Props> = ({ course, planId, onClose, 
                   {outcomes && (
                     <div>
                       <CDLabel>{t('courseDetails.outcomesHeading')}</CDLabel>
-                      <p className="mb-[11px] text-[13px] leading-[1.55] text-offwhite">
+                      <p className="mb-2.75 text-[13px] leading-[1.55] text-offwhite">
                         At the end of the course students will be able to:
                       </p>
                       <div
@@ -318,7 +339,7 @@ export const CourseDetailsDialog: React.FC<Props> = ({ course, planId, onClose, 
                         dangerouslySetInnerHTML={{ __html: content }}
                       />
                       {additional && (
-                        <div className="mt-[18px]">
+                        <div className="mt-4.5">
                           <CDLabel>{t('courseDetails.additionalInfoLabel')}</CDLabel>
                           <div
                             className="text-[13px] leading-relaxed text-offwhite/80"
@@ -378,13 +399,20 @@ export const CourseDetailsDialog: React.FC<Props> = ({ course, planId, onClose, 
             )}
 
             <CDCollapse title={t('courseDetails.responsiblePersonsHeading')}>
-              <div className="grid gap-9 sm:grid-cols-2">
-                <div>
-                  <CDLabel>{t('courseDetails.responsibleTeacherLabel')}</CDLabel>
-                  <div className="text-[13.5px] font-semibold text-offwhite">
-                    {responsibleTeachers ?? t('courseDetails.toBeConfirmed')}
+              <div>
+                <CDLabel>{t('courseDetails.responsibleTeacherLabel')}</CDLabel>
+                {responsibleTeachers.length > 0 ? (
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {responsibleTeachers.map((teacher) => (
+                      <div key={teacher.id} className="rounded-[9px] border border-border bg-container px-3 py-2.5">
+                        <div className="text-[13.5px] font-semibold text-offwhite">{teacher.name}</div>
+                        {teacher.email && <div className="mt-1 text-[12px] text-lightGrey">{teacher.email}</div>}
+                      </div>
+                    ))}
                   </div>
-                </div>
+                ) : (
+                  <div className="text-[13.5px] font-semibold text-offwhite">{t('courseDetails.toBeConfirmed')}</div>
+                )}
               </div>
             </CDCollapse>
           </div>
@@ -395,8 +423,8 @@ export const CourseDetailsDialog: React.FC<Props> = ({ course, planId, onClose, 
 };
 
 const PrerequisiteCard: React.FC<{ prereq: PrerequisiteCourse }> = ({ prereq }) => (
-  <div className="flex overflow-hidden rounded-[8px] border border-border bg-container transition-colors hover:border-border2">
-    <div className={`w-[3px] shrink-0 ${prereq.completed ? 'bg-lighterGreen' : 'bg-border2'}`} />
+  <div className="flex overflow-hidden rounded-lg border border-border bg-container transition-colors hover:border-border2">
+    <div className={`w-0.75 shrink-0 ${prereq.completed ? 'bg-lighterGreen' : 'bg-border2'}`} />
     <div className="flex flex-1 items-center gap-3 px-3 py-2.5">
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
@@ -406,12 +434,12 @@ const PrerequisiteCard: React.FC<{ prereq: PrerequisiteCourse }> = ({ prereq }) 
             {prereq.name}
           </span>
           {!prereq.required && (
-            <span className="shrink-0 rounded-[4px] bg-border2/60 px-[5px] py-[1px] text-[9.5px] font-medium text-lightGrey">
+            <span className="shrink-0 rounded-sm bg-border2/60 px-1.25 py-px text-[9.5px] font-medium text-lightGrey">
               Recommended
             </span>
           )}
         </div>
-        <div className="mt-[2px] flex items-center gap-1.5">
+        <div className="mt-0.5 flex items-center gap-1.5">
           <span className="font-mono text-[9.5px] text-darkishGrey">{prereq.code}</span>
           {prereq.credits != null && (
             <>
@@ -424,11 +452,11 @@ const PrerequisiteCard: React.FC<{ prereq: PrerequisiteCourse }> = ({ prereq }) 
       {prereq.completed ? (
         <div className="flex shrink-0 items-center gap-1.5">
           {prereq.grade && (
-            <span className="rounded-[5px] bg-lighterGreen/15 px-[7px] py-[2px] text-[11px] font-semibold text-lighterGreen">
+            <span className="rounded-[5px] bg-lighterGreen/15 px-1.75 py-0.5 text-[11px] font-semibold text-lighterGreen">
               {prereq.grade}
             </span>
           )}
-          <div className="flex size-[18px] items-center justify-center rounded-full bg-lighterGreen/20">
+          <div className="flex size-4.5 items-center justify-center rounded-full bg-lighterGreen/20">
             <svg width="9" height="8" viewBox="0 0 9 8" fill="none">
               <path
                 d="M1 4l2.5 2.5 5-5"
@@ -441,20 +469,20 @@ const PrerequisiteCard: React.FC<{ prereq: PrerequisiteCourse }> = ({ prereq }) 
           </div>
         </div>
       ) : (
-        <div className="size-[18px] shrink-0 rounded-full border border-border2" />
+        <div className="size-4.5 shrink-0 rounded-full border border-border2" />
       )}
     </div>
   </div>
 );
 
 const CDLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div className="mb-[9px] text-[10.5px] font-semibold tracking-[.07em] text-darkishGrey uppercase">{children}</div>
+  <div className="mb-2.25 text-[10.5px] font-semibold tracking-[.07em] text-darkishGrey uppercase">{children}</div>
 );
 
 const CDField: React.FC<{ label: string; value: string }> = ({ label, value }) => (
-  <div className="flex gap-[11px] py-[5px]">
+  <div className="flex gap-2.75 py-1.25">
     <div className="w-0.5 shrink-0 self-stretch rounded-sm bg-border2" />
-    <div className="text-[13px] leading-[1.5]">
+    <div className="text-[13px] leading-normal">
       <span className="text-lightGrey">{label}: </span>
       <span className="font-medium text-offwhite">{value}</span>
     </div>
@@ -474,10 +502,10 @@ const CDCollapse: React.FC<{ title: string; children: React.ReactNode; defaultOp
         tabIndex={0}
         onClick={() => setOpen((o) => !o)}
         onKeyDown={(e) => e.key === 'Enter' && setOpen((o) => !o)}
-        className="flex cursor-pointer items-center gap-[13px] py-[15px] select-none"
+        className="flex cursor-pointer items-center gap-3.25 py-3.75 select-none"
       >
         <div
-          className="flex size-[26px] shrink-0 items-center justify-center rounded-full border border-border2 text-lightGrey transition-transform duration-200"
+          className="flex size-6.5 shrink-0 items-center justify-center rounded-full border border-border2 text-lightGrey transition-transform duration-200"
           style={{ transform: open ? 'rotate(180deg)' : 'none' }}
         >
           <svg width="11" height="7" viewBox="0 0 11 7" fill="none">
@@ -492,7 +520,7 @@ const CDCollapse: React.FC<{ title: string; children: React.ReactNode; defaultOp
         </div>
         <span className="text-[14.5px] font-semibold tracking-[-0.1px] text-offwhite">{title}</span>
       </div>
-      {open && <div className="pr-1 pb-5 pl-[39px]">{children}</div>}
+      {open && <div className="pr-1 pb-5 pl-9.75">{children}</div>}
     </div>
   );
 };

@@ -112,6 +112,16 @@ export type StructureTranslation = {
       versionLabel: string;
       typeOfStudiesLabel: string;
       registrationDateLabel: string;
+      fieldOfStudyLabel: string;
+      coordinatingOrgLabel: string;
+      responsibleOrgLabel: string;
+      approvedDateLabel: string;
+      recordedLabel: string;
+      courseCardTitle: string;
+      validityCardTitle: string;
+      adminCardTitle: string;
+      additionalInfoCardTitle: string;
+      noAdditionalInfo: string;
       stateAttained: string;
       stateIncluded: string;
       stateSubstituted: string;
@@ -274,6 +284,16 @@ export const structureTranslation: StructureTranslation = {
       versionLabel: 'VERSION',
       typeOfStudiesLabel: 'TYPE OF STUDIES',
       registrationDateLabel: 'DATE OF REGISTRATION',
+      fieldOfStudyLabel: 'FIELD OF STUDY',
+      coordinatingOrgLabel: 'COORDINATING ORG.',
+      responsibleOrgLabel: 'RESPONSIBLE ORG.',
+      approvedDateLabel: 'APPROVED DATE',
+      recordedLabel: 'Recorded',
+      courseCardTitle: 'Course',
+      validityCardTitle: 'Validity & registration',
+      adminCardTitle: 'Administration',
+      additionalInfoCardTitle: 'Additional information',
+      noAdditionalInfo: 'No additional information provided for this attainment.',
       stateAttained: 'Attained',
       stateIncluded: 'Included',
       stateSubstituted: 'Substituted',

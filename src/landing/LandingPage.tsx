@@ -2,7 +2,7 @@ import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import i18n, { getCurrentLocale } from '@/app/i18n';
 import type { LandingPolicySection, LandingRoadmapColumn } from '@/app/locales/en/landing/landing.translation.en';
 import { LOCALES, Locale } from '@/app/locales/locale';
-import { ProductPreview } from '@/landing/components/ProductPreview';
+import { HeroShowcase } from '@/landing/components/HeroShowcase';
 import Plasma from '@/landing/components/Plasma';
 
 const chromeStoreUrl = import.meta.env.VITE_CHROME_WEB_STORE_URL?.trim();
@@ -116,6 +116,23 @@ function LanguageToggle() {
   );
 }
 
+function HeroSocialProof() {
+  const { t } = useTranslationWithPrefix('landing');
+  const avatars = ['AK', 'MV', 'JS'];
+
+  return (
+    <div className="landing-hero-social" aria-label={t('hero.activeUsers')}>
+      <div className="landing-social-avatars" aria-hidden="true">
+        {avatars.map((avatar) => (
+          <span key={avatar}>{avatar}</span>
+        ))}
+        <span>+</span>
+      </div>
+      <p>{t('hero.activeUsers')}</p>
+    </div>
+  );
+}
+
 function Footer({ full = true }: { full?: boolean }) {
   const { t } = useTranslationWithPrefix('landing');
 
@@ -173,7 +190,16 @@ export function LandingPage() {
       </nav>
       <section className="landing-hero" id="top">
         <div className="landing-aurora">
-          <Plasma color="#419648" speed={0.6} direction="forward" scale={1.1} opacity={0.8} mouseInteractive={true} />
+          <Plasma
+            center={[1, 0.75]}
+            color="#419648"
+            rotation={1.5}
+            speed={0.6}
+            direction="forward"
+            scale={1.38}
+            opacity={0.78}
+            mouseInteractive={true}
+          />
         </div>
         <div className="landing-hero-copy">
           <div className="landing-badge">
@@ -196,10 +222,11 @@ export function LandingPage() {
               {t('hero.seeChanged')}
             </a>
           </div>
+          <HeroSocialProof />
           <p className="landing-mobile-note">{t('hero.mobileNote')}</p>
         </div>
         <div className="landing-preview-wrap">
-          <ProductPreview />
+          <HeroShowcase />
         </div>
       </section>
 

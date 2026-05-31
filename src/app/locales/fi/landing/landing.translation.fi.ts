@@ -15,16 +15,17 @@ export const landingTranslation: LandingTranslation = {
     shipped: 'v{{version}} julkaistu',
     titleStart: 'Sisu jonka ansaitsemme,',
     titleAccent: 'vihdoin.',
-    body: 'Selainlaajennus, joka ajattelee Sisu-kokemuksen uudelleen. Selkeämpi etusivu, opintojen aikajana, Moodle-integraatio ja muuta. Opiskelijoille, opiskelijalta.',
+    body: 'Selainlaajennus joka korjaa Sisun. Etusivu, aikajana, opintorakenne, ilmoittautumiset. Kaikki mitä ennen piti kaivaa esiin, nyt yhdessä paikassa. Opiskelijoille, opiskelijalta.',
     addToChromeFree: 'Lisää Chromeen - ilmainen',
     sourceCode: 'Lähdekoodi',
     seeChanged: 'Katso mikä muuttui',
+    activeUsers: '25+ aktiivista Chrome-käyttäjää',
     mobileNote: 'Sisu+ ei ole vielä optimoitu mobiililaitteille.',
   },
   features: {
-    kicker: 'Etusivu ja aikajana',
+    kicker: 'Mitä sisältä löytyy',
     title: 'Vähemmän kaivelua, enemmän tietoa seuraavasta askeleesta.',
-    body: 'Ensimmäinen julkaisu korjaa ne asiat, jotka vievät eniten aikaa: tilanteen tarkistamisen, Moodlen määräaikojen seuraamisen ja kurssien siirtämisen rikkomatta vahingossa esitietoja.',
+    body: 'Sisu piilottaa paljon. Kurssitiedot eri sivuilla, määräajat haudattuna Moodleen, opintosuunnitelmasi välilehdissä jotka eivät yhdisty. Sisu+ kokoaa kaiken yhteen.',
     cards: [
       {
         title: 'Etusivu, josta on heti hyötyä',
@@ -37,6 +38,18 @@ export const landingTranslation: LandingTranslation = {
       {
         title: 'Varoitukset oikealla hetkellä',
         body: 'Esitieto- ja ajoitusongelmat pysyvät poissa tieltä, kunnes alat muuttaa suunnitelmaa.',
+      },
+      {
+        title: 'Opintorakenne',
+        body: 'Koko tutkintosuunnitelmasi yhdessä näkymässä. Näe mikä lasketaan mihinkin, tarkista ilmoittautumistilanne, valitse suoritustapa. Kurssiversion vaihtaminenkin onnistuu.',
+      },
+      {
+        title: 'Kurssin tiedot ilman klikkausta',
+        body: 'Arvosana, arvosteluasteikko, suoritustapa, suorituspäivä. Kaikki mikä ennen vei kolme klikkausta löytyy nyt yhdeltä kortilta.',
+      },
+      {
+        title: 'Ilmoittautumiset yhdessä paikassa',
+        body: 'Ilmoittaudu, peruuta tai peru ilmoittautuminen suoraan Sisu+:ssa. Oikeaa sivua ei tarvitse enää etsiä Sisusta.',
       },
     ],
   },
@@ -57,38 +70,34 @@ export const landingTranslation: LandingTranslation = {
     body: 'Suunnitelma on yksinkertainen: vähemmän klikkauksia tarvittavan tiedon löytämiseen, selkeämmät kurssitiedot ja aikajana, joka ei pakota arvaamaan. Tuetut yliopistot ensin, sitten lisää kampuksia pyyntöjen mukaan.',
     columns: [
       {
-        version: 'v1.0.0',
+        version: 'v1.0',
         title: 'Ensimmäinen julkaisu',
-        status: 'Julkaistu nyt',
+        status: 'Julkaistu',
         items: [
           'Henkilökohtainen etusivu',
           'Moodlen määräaikanäkymä',
           'Muokattava opintoaikajana',
           'Esitietovaroitukset',
         ],
+      },
+      {
+        version: 'v1.2',
+        title: 'Kurssinhallinta',
+        status: 'Julkaistaan nyt',
+        items: [
+          'Opintorakenne',
+          'Suoritukset ja kurssitiedot',
+          'Ilmoittautumiset',
+          'Kurssiversion hallinta',
+          'Suomen kieli',
+        ],
         current: true,
       },
       {
         version: 'Seuraavaksi',
-        title: 'Lisää apua suunnitteluun',
-        status: 'Työn alla',
-        items: [
-          'Selkeämmät kurssitiedot',
-          'Kalenterilähtöinen opintosuunnittelu',
-          'Paremmat tyhjät tilat',
-          'Lisää aikajanan ohjausta',
-        ],
-      },
-      {
-        version: 'Myöhemmin',
-        title: 'Laajennus kampuksille',
+        title: 'Lisää syvyyttä',
         status: 'Suunnitteilla',
-        items: [
-          'Lisää Sisu-yliopistoja',
-          'Palautteeseen perustuvat parannukset',
-          'Mobiilinäkymän viimeistely',
-          'Nopeampi käyttöönotto',
-        ],
+        items: ['Kalenterinäkymä', 'Mobiilinäkymän viimeistely', 'Lisää aikajanan ohjausta', 'Lisää yliopistoja'],
       },
     ],
   },
@@ -189,5 +198,97 @@ export const landingTranslation: LandingTranslation = {
     summerRange: 'Kesä - elo',
     regularRange: 'Maalis - touko',
     creditsCurrent: '12 / 100 op',
+  },
+  releasePreview: {
+    aria: 'Sisu+:n julkaisun kohokohdat',
+    kicker: 'Julkaisunäkymä',
+    title: 'Opintosuunnitelma toimii vihdoin yhtenä kokonaisuutena.',
+    version: 'v1.2',
+    structure: {
+      code: 'Tietotekniikan kandidaatti',
+      title: 'Opintorakenne',
+      credits: '124 / 180 op',
+      done: 'valmis',
+      ready: 'valmis',
+    },
+    checklist: [
+      'Pakolliset opinnot lasketaan oikeaan moduuliin',
+      'Suoritustapa valitaan ennen ilmoittautumista',
+      'Kurssiversion päivitys valmiina vuodelle 2027-2028',
+    ],
+    cards: [
+      {
+        eyebrow: 'Päivitä kurssit',
+        title: 'Uudet versiot ilman Sisu-selailua',
+        body: 'Näe vanhentuneet suunnitellut kurssit, vertaa kohdeversioon ja päivitä suunnitelma yhdessä näkymässä.',
+        meta: '3 päivitystä',
+      },
+      {
+        eyebrow: 'Suoritustapa',
+        title: 'Valitse oikea reitti ennen ilmoittautumista',
+        body: 'Tutkinto-opintojen suoritustavat pysyvät kurssikortilla, joten tentti- ja luentovaihtoehdot eivät katoa.',
+        meta: 'tapa 2',
+      },
+      {
+        eyebrow: 'Ilmoittautumiset',
+        title: 'Ilmoittaudu, peru tai poista samasta paikasta',
+        body: 'Toteutukset näkyvät opintosuunnitelman yhteydessä, eivät toisella Sisu-sivulla jota pitää etsiä.',
+        meta: 'auki nyt',
+      },
+    ],
+  },
+  heroShowcase: {
+    aria: 'Visuaalinen esitys siitä, miten Sisu+ kokoaa hajallaan olevat Sisun opintosuunnittelutoiminnot',
+    ghostTitle: 'sisu.university.fi/student',
+    ghostTabs: {
+      plan: 'Suunnitelma',
+      timing: 'Ajoitus',
+      registration: 'Ilmoittautuminen',
+    },
+    ghostRows: [
+      { label: 'Kurssiversio', value: 'piilossa', tone: 'muted' },
+      { label: 'Moodlen määräaika', value: 'muualla', tone: 'warn' },
+      { label: 'Suoritustapa', value: '3 klikkausta', tone: 'danger' },
+      { label: 'Kurssitiedot', value: 'uusi välilehti', tone: 'muted' },
+    ],
+    productKicker: 'Sisu+ kerros',
+    productTitle: 'Yksi ohjausnäkymä opinnoille.',
+    productStatus: 'Sisun sisällä',
+    structure: {
+      label: 'Opintorakenne',
+      title: 'Tietotekniikan kandidaatti',
+      credits: '124 / 180 op',
+      meta: 'tutkinnon eteneminen',
+    },
+    panels: [
+      {
+        label: 'Aikajana',
+        title: 'Siirrä kursseja periodien välillä',
+        body: 'Muokkaa suunnitelmaa, tarkista varoitukset ja vahvista takaisin Sisuun.',
+        stat: '12 op',
+      },
+      {
+        label: 'Kurssiversiot',
+        title: 'Vanhat kurssit löytyvät ajoissa',
+        body: 'Huomaa vanhat suunnitellut versiot ennen ilmoittautumista tai ajoituksen sotkeutumista.',
+        stat: 'tarkista',
+      },
+      {
+        label: 'Ilmoittautuminen',
+        title: 'Ilmoittautuminen oikeassa kontekstissa',
+        body: 'Valitse toteutus poistumatta opintosuunnitelmasta.',
+        stat: 'auki',
+      },
+    ],
+    command: {
+      label: 'Mikä muuttui',
+      title: 'Sisu ei tunnu enää hajanaiselta.',
+      body: 'Määräajat, eteneminen, kurssitiedot, versiot ja ilmoittautumiset nousevat esiin silloin kun niitä tarvitset.',
+    },
+    signals: {
+      users: '25+ aktiivista käyttäjää',
+      local: 'Ei tiliä tai palvelinta',
+      sisu: 'Toimii Sisun sisällä',
+    },
   },
 };

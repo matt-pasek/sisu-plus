@@ -30,6 +30,7 @@ export type LandingTranslation = {
     addToChromeFree: string;
     sourceCode: string;
     seeChanged: string;
+    activeUsers: string;
     mobileNote: string;
   };
   features: {
@@ -105,6 +106,65 @@ export type LandingTranslation = {
     regularRange: string;
     creditsCurrent: string;
   };
+  releasePreview: {
+    aria: string;
+    kicker: string;
+    title: string;
+    version: string;
+    structure: {
+      code: string;
+      title: string;
+      credits: string;
+      done: string;
+      ready: string;
+    };
+    checklist: string[];
+    cards: {
+      eyebrow: string;
+      title: string;
+      body: string;
+      meta: string;
+    }[];
+  };
+  heroShowcase: {
+    aria: string;
+    ghostTitle: string;
+    ghostTabs: {
+      plan: string;
+      timing: string;
+      registration: string;
+    };
+    ghostRows: {
+      label: string;
+      value: string;
+      tone: 'muted' | 'warn' | 'danger';
+    }[];
+    productKicker: string;
+    productTitle: string;
+    productStatus: string;
+    structure: {
+      label: string;
+      title: string;
+      credits: string;
+      meta: string;
+    };
+    panels: {
+      label: string;
+      title: string;
+      body: string;
+      stat: string;
+    }[];
+    command: {
+      label: string;
+      title: string;
+      body: string;
+    };
+    signals: {
+      users: string;
+      local: string;
+      sisu: string;
+    };
+  };
 };
 
 export const landingTranslation: LandingTranslation = {
@@ -122,16 +182,17 @@ export const landingTranslation: LandingTranslation = {
     shipped: 'v{{version}} just shipped',
     titleStart: 'The Sisu we deserve,',
     titleAccent: 'finally.',
-    body: 'A browser extension that reimagines your Sisu experience. Cleaner dashboard, study timeline, Moodle integration, and more. For students, by student.',
+    body: 'A browser extension that fixes Sisu. Dashboard, study timeline, structure of studies, registrations. Everything that used to take too long, now in one place. For students, by student.',
     addToChromeFree: 'Add to Chrome - free',
     sourceCode: 'Source code',
     seeChanged: 'See what changed',
+    activeUsers: '25+ active Chrome users',
     mobileNote: 'Sisu+ experience is not yet optimized for mobile devices.',
   },
   features: {
-    kicker: 'Dashboard and timeline',
+    kicker: "What's inside",
     title: 'Less digging, more knowing what to do next.',
-    body: 'The first release tackles the stuff that costs you the most time: checking where you stand, keeping up with Moodle deadlines, and moving courses around without accidentally breaking your prerequisites.',
+    body: 'Sisu hides a lot. Course details across different pages, deadlines buried in Moodle, your study plan in tabs that do not connect. Sisu+ puts it all in one place.',
     cards: [
       {
         title: 'Dashboard that starts useful',
@@ -144,6 +205,18 @@ export const landingTranslation: LandingTranslation = {
       {
         title: 'Warnings when they matter',
         body: 'Prerequisite and timing issues stay out of the way until you start changing the plan.',
+      },
+      {
+        title: 'Structure of studies',
+        body: 'Your full degree plan in one view. See which courses count where, check enrollment status, pick your completion method. Course versions are in there too.',
+      },
+      {
+        title: 'Course details without the clicking',
+        body: 'Grade, grading scale, completion method, attainment date. Everything that used to take three clicks is on one card.',
+      },
+      {
+        title: 'Registrations in one place',
+        body: 'Enrol, withdraw, or cancel from Sisu+. No more hunting for the right page in Sisu.',
       },
     ],
   },
@@ -164,28 +237,29 @@ export const landingTranslation: LandingTranslation = {
     body: "The plan is pretty straightforward: fewer clicks to find what you need, clearer course info, and a timeline that doesn't make you guess. Supported universities first, then more campuses as requests come in.",
     columns: [
       {
-        version: 'v1.0.0',
+        version: 'v1.0',
         title: 'Initial release',
-        status: 'Shipping now',
+        status: 'Shipped',
         items: ['Personal dashboard', 'Moodle deadline view', 'Editable study timeline', 'Prerequisite warnings'],
+      },
+      {
+        version: 'v1.2',
+        title: 'Course management',
+        status: 'Shipping now',
+        items: [
+          'Structure of studies',
+          'Attainments and course details',
+          'Registrations',
+          'Course version management',
+          'Finnish language',
+        ],
         current: true,
       },
       {
         version: 'Next',
-        title: 'More planning help',
-        status: 'In progress',
-        items: [
-          'Cleaner course details',
-          'Calendar-first study planning',
-          'Better empty states',
-          'More timeline guidance',
-        ],
-      },
-      {
-        version: 'Later',
-        title: 'Campus expansion',
+        title: 'More depth',
         status: 'Planned',
-        items: ['More Sisu universities', 'Feedback-led improvements', 'Mobile layout polish', 'Faster setup'],
+        items: ['Calendar view', 'Mobile layout polish', 'More timeline guidance', 'More universities'],
       },
     ],
   },
@@ -284,5 +358,97 @@ export const landingTranslation: LandingTranslation = {
     summerRange: 'Jun - Aug',
     regularRange: 'Mar - May',
     creditsCurrent: '12 / 100 cr',
+  },
+  releasePreview: {
+    aria: 'Sisu+ release highlights preview',
+    kicker: 'Release view',
+    title: 'The plan finally behaves like one plan.',
+    version: 'v1.2',
+    structure: {
+      code: 'BSc Computer Science',
+      title: 'Structure of studies',
+      credits: '124 / 180 cr',
+      done: 'done',
+      ready: 'ready',
+    },
+    checklist: [
+      'Core studies counted in the right module',
+      'Completion method selected before enrolment',
+      'Course version update ready for 2027-2028',
+    ],
+    cards: [
+      {
+        eyebrow: 'Update Courses',
+        title: 'New versions without hunting through Sisu',
+        body: 'See outdated planned courses, compare the target version, and update the plan in one focused flow.',
+        meta: '3 updates',
+      },
+      {
+        eyebrow: 'Completion Method',
+        title: 'Pick the right route before you register',
+        body: 'Degree-study methods stay visible on the course card, so exam and lecture options stop disappearing.',
+        meta: 'method 2',
+      },
+      {
+        eyebrow: 'Registrations',
+        title: 'Enroll, withdraw, or cancel from the same place',
+        body: 'Course implementations sit next to the plan context instead of another Sisu page you have to find.',
+        meta: 'open now',
+      },
+    ],
+  },
+  heroShowcase: {
+    aria: 'Visual showcase of Sisu+ organizing scattered Sisu study planning features',
+    ghostTitle: 'sisu.university.fi/student',
+    ghostTabs: {
+      plan: 'Plan',
+      timing: 'Timing',
+      registration: 'Registration',
+    },
+    ghostRows: [
+      { label: 'Course version', value: 'hidden', tone: 'muted' },
+      { label: 'Moodle deadline', value: 'elsewhere', tone: 'warn' },
+      { label: 'Completion method', value: '3 clicks', tone: 'danger' },
+      { label: 'Course details', value: 'new tab', tone: 'muted' },
+    ],
+    productKicker: 'Sisu+ layer',
+    productTitle: 'One study command center.',
+    productStatus: 'Live in Sisu',
+    structure: {
+      label: 'Structure of studies',
+      title: 'Computer Science BSc',
+      credits: '124 / 180 cr',
+      meta: 'degree progress',
+    },
+    panels: [
+      {
+        label: 'Timeline',
+        title: 'Drag courses between periods',
+        body: 'Move the plan, check warnings, confirm back to Sisu.',
+        stat: '12 cr',
+      },
+      {
+        label: 'Course Versions',
+        title: 'Outdated courses, caught early',
+        body: 'Spot old planned versions before registration or timing gets messy.',
+        stat: 'review',
+      },
+      {
+        label: 'Register',
+        title: 'Enrollment where context lives',
+        body: 'Pick an implementation without leaving your plan.',
+        stat: 'open',
+      },
+    ],
+    command: {
+      label: 'What changed',
+      title: 'Sisu stops feeling scattered.',
+      body: 'Deadlines, progress, course details, versions, and registration actions come forward when you need them.',
+    },
+    signals: {
+      users: '25+ active users',
+      local: 'No account or server',
+      sisu: 'Runs inside Sisu',
+    },
   },
 };

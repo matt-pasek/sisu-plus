@@ -1,5 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { Analytics } from '@vercel/analytics/react';
 import '@/app/global.css';
 import '@/landing/landing.css';
 import '@/app/i18n';
@@ -13,4 +14,9 @@ if (!root) {
 
 const isPrivacyRoute = window.location.pathname.replace(/\/$/, '') === '/privacy';
 
-createRoot(root).render(<StrictMode>{isPrivacyRoute ? <PrivacyPolicyPage /> : <LandingPage />}</StrictMode>);
+createRoot(root).render(
+  <StrictMode>
+    {isPrivacyRoute ? <PrivacyPolicyPage /> : <LandingPage />}
+    <Analytics />
+  </StrictMode>,
+);

@@ -25,14 +25,17 @@ export const structureTranslation: StructureTranslation = {
     creditsPlanned: '',
     credits: '',
     completedGroup: '',
+    activeGroup: '',
     remainingGroup: '',
     noCourses: '',
   },
   course: {
     completedLabel: '',
     notCompletedLabel: '',
+    enrolledLabel: '',
     detailsAction: '',
     methodAction: '',
+    methodSelectedLabel: '',
   },
   edit: {
     edit: '',
@@ -98,6 +101,8 @@ export const structureTranslation: StructureTranslation = {
       whatNextHeading: '',
       whatNextBody: '',
       cancel: '',
+      confirm: '',
+      saving: '',
     },
     attainment: {
       title: '',

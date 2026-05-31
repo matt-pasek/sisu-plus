@@ -1,4 +1,5 @@
 import { fetchAttainments } from '@/app/api/endpoints/attainments';
+import { fetchEnrolments } from '@/app/api/endpoints/enrolments';
 import { fetchPlans } from '@/app/api/endpoints/plans';
 import { fetchStudyRights } from '@/app/api/endpoints/studyRights';
 import { koriApi } from '@/app/api/client';
@@ -23,7 +24,7 @@ type StructurePlan = {
   rootId: string;
   curriculumPeriodId: string;
   moduleSelections: { moduleId: string; parentModuleId?: string }[];
-  courseUnitSelections: { courseUnitId: string; parentModuleId?: string }[];
+  courseUnitSelections: { courseUnitId: string; parentModuleId?: string; completionMethodId?: string }[];
 };
 
 type EditableRule = {
@@ -257,6 +258,7 @@ export const getStructureData = (): { data: StructureData | undefined; isLoading
   const plansQuery = useSisuQuery(['plans'], fetchPlans);
   const attainmentsQuery = useSisuQuery(['attainments'], fetchAttainments);
   const studyRightsQuery = useSisuQuery(['study-rights'], fetchStudyRights);
+  const enrolmentsQuery = useSisuQuery(['enrolments'], fetchEnrolments);
 
   const { data, isLoading: structureLoading } = useSisuQuery(
     ['structure-data'],
@@ -280,6 +282,12 @@ export const getStructureData = (): { data: StructureData | undefined; isLoading
       const passingAttainments = (attainmentsQuery.data ?? []).filter(isPassingCourseUnitAttainment);
       const passingByCourseUnit = new Map(
         passingAttainments.map((attainment) => [attainment.courseUnitId, attainment]),
+      );
+      const enrolledCourseUnitIds = new Set(
+        (enrolmentsQuery.data ?? [])
+          .filter((e) => e.state === 'ENROLLED' || e.state === 'CONFIRMED')
+          .map((e) => e.courseUnitId)
+          .filter((id): id is string => id != null),
       );
       const courseUnitIds = plan.courseUnitSelections
         .filter((selection) => cuToTopModule.has(selection.courseUnitId))
@@ -306,16 +314,20 @@ export const getStructureData = (): { data: StructureData | undefined; isLoading
 
         const courseUnit = courseUnits[index];
         const attainment = passingByCourseUnit.get(courseUnitId);
+        const selection = plan.courseUnitSelections.find((s) => s.courseUnitId === courseUnitId);
+        const completionMethodId = selection?.completionMethodId ?? null;
+        const methodIdx = completionMethodId ? courseUnit.completionMethodLocalIds.indexOf(completionMethodId) : -1;
         const course: CourseEntry = {
           courseUnitId,
-          parentModuleId:
-            plan.courseUnitSelections.find((selection) => selection.courseUnitId === courseUnitId)?.parentModuleId ??
-            null,
+          parentModuleId: selection?.parentModuleId ?? null,
           code: courseUnit.code,
           name: courseUnit.name,
           credits: courseUnit.credits,
           completed: attainment != null,
+          enrolled: !attainment && enrolledCourseUnitIds.has(courseUnitId),
           grade: getGrade(attainment),
+          completionMethodId,
+          completionMethodIndex: methodIdx >= 0 ? methodIdx + 1 : null,
         };
 
         coursesByModule.set(moduleId, [...(coursesByModule.get(moduleId) ?? []), course]);

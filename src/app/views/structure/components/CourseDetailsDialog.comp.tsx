@@ -16,6 +16,7 @@ import type { CourseEntry } from '@/app/views/structure/structureTypes';
 import type { PrerequisiteCourse } from '@/app/views/structure/hooks/usePrerequisites';
 import type { CourseUnit } from '@/app/api/generated/KoriApi';
 import { useSisuQuery } from '@/app/hooks/useSisuQuery';
+import { resolveGradeScaleName } from '@/app/api/resolvers/resolveGradeScale';
 
 interface Props {
   course: CourseEntry;
@@ -114,8 +115,13 @@ export const CourseDetailsDialog: React.FC<Props> = ({ course, planId, onClose, 
   const selectedVersionLabel = selectedVersion ? formatCourseVersion(selectedVersion) : version;
   const canChangeVersion = !course.completed && selectedCourseUnitId !== course.courseUnitId;
 
+  const { data: gradeScale = unit?.gradeScaleId ? formatUrn(unit.gradeScaleId) : '–' } = useSisuQuery(
+    ['grade-scale', unit?.gradeScaleId],
+    () => resolveGradeScaleName(unit!.gradeScaleId),
+    { enabled: !!unit?.gradeScaleId },
+  );
+
   const languages = unit?.possibleAttainmentLanguages?.map(formatLanguageUrn).join(', ') ?? '–';
-  const gradeScale = formatUrn(unit?.gradeScaleId);
   const courseLevel = formatUrn(unit?.studyLevel);
   const courseType = formatUrn(unit?.courseUnitType);
 

@@ -23,14 +23,17 @@ export type StructureTranslation = {
     creditsPlanned: string;
     credits: string;
     completedGroup: string;
+    activeGroup: string;
     remainingGroup: string;
     noCourses: string;
   };
   course: {
     completedLabel: string;
     notCompletedLabel: string;
+    enrolledLabel: string;
     detailsAction: string;
     methodAction: string;
+    methodSelectedLabel: string;
   };
   edit: {
     edit: string;
@@ -96,6 +99,8 @@ export type StructureTranslation = {
       whatNextHeading: string;
       whatNextBody: string;
       cancel: string;
+      confirm: string;
+      saving: string;
     };
     attainment: {
       title: string;
@@ -191,14 +196,17 @@ export const structureTranslation: StructureTranslation = {
     creditsPlanned: 'planned',
     credits: '{{done}} / {{total}} cr',
     completedGroup: 'Completed · {{count}} cr',
+    activeGroup: 'Active · {{count}} cr',
     remainingGroup: 'Remaining · {{count}} cr',
     noCourses: 'No courses',
   },
   course: {
     completedLabel: 'Completed',
     notCompletedLabel: 'Not completed',
+    enrolledLabel: 'Enrolled',
     detailsAction: 'Details',
     methodAction: 'Method',
+    methodSelectedLabel: 'Method {{n}}',
   },
   edit: {
     edit: 'Edit structure',
@@ -267,7 +275,9 @@ export const structureTranslation: StructureTranslation = {
       whatNextHeading: 'What to expect after confirmation?',
       whatNextBody:
         'Select the implementations related to the completion method and register for them in the Registration view.',
-      cancel: 'Close',
+      cancel: 'Cancel',
+      confirm: 'Confirm',
+      saving: 'Saving...',
     },
     attainment: {
       title: 'Details of the attainment',

@@ -7,7 +7,10 @@ export type CourseEntry = {
   name: string | null;
   credits: number | null;
   completed: boolean;
+  enrolled: boolean;
   grade: string | null;
+  completionMethodId: string | null;
+  completionMethodIndex: number | null;
 };
 
 export type StructureOption = {

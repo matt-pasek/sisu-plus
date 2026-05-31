@@ -14,8 +14,21 @@ interface Props {
 
 export const CourseCard: React.FC<Props> = ({ course, color, onMethodClick, onDetailsClick, onCardClick }) => {
   const { t } = useTranslationWithPrefix('views.structure');
-  const actionHandler = course.completed ? onDetailsClick : onMethodClick;
+
+  const actionHandler = course.completed ? onDetailsClick : course.enrolled ? undefined : onMethodClick;
   const actionLabel = course.completed ? t('course.detailsAction') : t('course.methodAction');
+
+  const statusLabel = course.completed
+    ? t('course.completedLabel')
+    : course.enrolled
+      ? t('course.enrolledLabel')
+      : t('course.notCompletedLabel');
+
+  const statusColor = course.completed
+    ? 'font-medium text-lighterGreen'
+    : course.enrolled
+      ? 'font-medium text-amber-400'
+      : 'font-medium text-lightGrey';
 
   return (
     <SharedCourseCard
@@ -39,9 +52,14 @@ export const CourseCard: React.FC<Props> = ({ course, color, onMethodClick, onDe
       onClick={onCardClick}
       footer={
         <div className="flex min-h-5 items-center justify-between gap-3">
-          <span className={course.completed ? 'font-medium text-lighterGreen' : 'font-medium text-lightGrey'}>
-            {course.completed ? t('course.completedLabel') : t('course.notCompletedLabel')}
-          </span>
+          <div className="flex flex-col gap-0.5">
+            <span className={statusColor}>{statusLabel}</span>
+            {!course.completed && !course.enrolled && course.completionMethodIndex != null && (
+              <span className="text-xs text-lightGrey/70">
+                {t('course.methodSelectedLabel', { n: course.completionMethodIndex })}
+              </span>
+            )}
+          </div>
           {actionHandler && (
             <button
               type="button"

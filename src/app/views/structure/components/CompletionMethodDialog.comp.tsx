@@ -1,25 +1,49 @@
 import React, { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/app/components/ui/Button.comp';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { useCourseUnit } from '@/app/views/structure/hooks/useCourseUnit';
+import { useStructurePlanMutation } from '@/app/views/structure/editing/useStructurePlanMutation';
+import { setCompletionMethod } from '@/app/views/structure/editing/structurePlanDraft';
 import { DialogShell, DialogCloseButton } from './DialogShell.comp';
 import type { CourseEntry } from '@/app/views/structure/structureTypes';
 import type { CompletionMethod } from '@/app/api/generated/KoriApi';
+import type { Plan } from '@/app/api/generated/OsuvaApi';
 import { pickLabel } from '@/app/api/resolvers/helpers/pickLabel';
 
 interface Props {
   course: CourseEntry;
+  plan: Plan;
   onClose: () => void;
 }
 
-export const CompletionMethodDialog: React.FC<Props> = ({ course, onClose }) => {
+export const CompletionMethodDialog: React.FC<Props> = ({ course, plan, onClose }) => {
   const { t } = useTranslationWithPrefix('views.structure.dialogs');
   const { data: unit, isLoading } = useCourseUnit(course.courseUnitId);
-  const methods = unit?.completionMethods ?? [];
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const mutation = useStructurePlanMutation();
+  const queryClient = useQueryClient();
+  const methods = (unit?.completionMethods ?? []).filter((m) => m.studyType === 'DEGREE_STUDIES');
+
+  const [selectedIndex, setSelectedIndex] = useState<number>(() => {
+    if (!course.completionMethodId) return 0;
+    const idx = (unit?.completionMethods ?? []).findIndex((m) => m.localId === course.completionMethodId);
+    return idx >= 0 ? idx : 0;
+  });
 
   const courseName = course.name ?? course.code ?? course.courseUnitId;
   const courseCode = course.code ?? course.courseUnitId;
+
+  const handleConfirm = () => {
+    const selectedMethod = methods[selectedIndex];
+    if (!selectedMethod?.localId) return;
+    mutation.mutate(setCompletionMethod(plan, course.courseUnitId, selectedMethod.localId), {
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({ queryKey: ['plans'] });
+        await queryClient.invalidateQueries({ queryKey: ['structure-data'] });
+        onClose();
+      },
+    });
+  };
 
   return (
     <DialogShell labelId="method-dialog-title" onClose={onClose}>
@@ -74,9 +98,21 @@ export const CompletionMethodDialog: React.FC<Props> = ({ course, onClose }) => 
         </section>
       </div>
 
-      <footer className="flex justify-end border-t border-border px-5 py-4">
-        <Button className="min-w-28 text-xs font-semibold" onClick={onClose}>
+      <footer className="flex justify-end gap-2 border-t border-border px-5 py-4">
+        <Button
+          variant="onSurface"
+          className="min-w-28 text-xs font-semibold"
+          onClick={onClose}
+          disabled={mutation.isPending}
+        >
           {t('completionMethod.cancel')}
+        </Button>
+        <Button
+          className="min-w-28 text-xs font-semibold"
+          onClick={handleConfirm}
+          disabled={isLoading || methods.length === 0 || mutation.isPending}
+        >
+          {mutation.isPending ? t('completionMethod.saving') : t('completionMethod.confirm')}
         </Button>
       </footer>
     </DialogShell>

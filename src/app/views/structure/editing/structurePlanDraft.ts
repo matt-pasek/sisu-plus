@@ -113,3 +113,12 @@ export function removeCourseFromModule(plan: Plan, courseUnitId: string, parentM
     ),
   };
 }
+
+export function setCompletionMethod(plan: Plan, courseUnitId: string, completionMethodId: string): Plan {
+  return {
+    ...plan,
+    courseUnitSelections: plan.courseUnitSelections.map((s) =>
+      s.courseUnitId === courseUnitId ? { ...s, completionMethodId } : s,
+    ),
+  };
+}

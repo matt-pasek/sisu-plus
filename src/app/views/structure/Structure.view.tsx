@@ -172,7 +172,11 @@ const StructureView: React.FC = () => {
       </main>
 
       {methodDialogCourse && (
-        <CompletionMethodDialog course={methodDialogCourse} onClose={() => setMethodDialogCourse(null)} />
+        <CompletionMethodDialog
+          course={methodDialogCourse}
+          plan={data.plan}
+          onClose={() => setMethodDialogCourse(null)}
+        />
       )}
       {attainmentDialogCourse && (
         <AttainmentDialog course={attainmentDialogCourse} onClose={() => setAttainmentDialogCourse(null)} />

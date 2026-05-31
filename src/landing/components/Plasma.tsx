@@ -2,7 +2,9 @@ import React, { useEffect, useRef } from 'react';
 import { Renderer, Program, Mesh, Triangle } from 'ogl';
 
 interface PlasmaProps {
+  center?: [number, number];
   color?: string;
+  rotation?: number;
   speed?: number;
   direction?: 'forward' | 'reverse' | 'pingpong';
   scale?: number;
@@ -38,12 +40,17 @@ uniform float uDirection;
 uniform float uScale;
 uniform float uOpacity;
 uniform vec2 uMouse;
+uniform vec2 uCenter;
+uniform float uRotation;
 uniform float uMouseInteractive;
 out vec4 fragColor;
 
 void mainImage(out vec4 o, vec2 C) {
-  vec2 center = iResolution.xy * 0.5;
-  C = (C - center) / uScale + center;
+  vec2 center = iResolution.xy * uCenter;
+  float c = cos(uRotation);
+  float s = sin(uRotation);
+  mat2 rotation = mat2(c, -s, s, c);
+  C = rotation * ((C - center) / uScale) + center;
   
   vec2 mouseOffset = (uMouse - center) * 0.0002;
   C += mouseOffset * length(C - center) * step(0.5, uMouseInteractive);
@@ -51,8 +58,8 @@ void mainImage(out vec4 o, vec2 C) {
   float i, d, z, T = iTime * uSpeed * uDirection;
   vec3 O, p, S;
 
-  for (vec2 r = iResolution.xy, Q; ++i < 60.; O += o.w/d*o.xyz) {
-    p = z*normalize(vec3(C-.5*r,r.y)); 
+  for (vec2 r = iResolution.xy, Q; ++i < 32.; O += o.w/d*o.xyz) {
+    p = z*normalize(vec3(C-center,r.y)); 
     p.z -= 4.; 
     S = p;
     d = p.y-T;
@@ -89,7 +96,9 @@ void main() {
 }`;
 
 export const Plasma: React.FC<PlasmaProps> = ({
+  center = [0.5, 0.5],
   color = '#ffffff',
+  rotation = 0,
   speed = 1,
   direction = 'forward',
   scale = 1,
@@ -114,7 +123,7 @@ export const Plasma: React.FC<PlasmaProps> = ({
         webgl: 2,
         alpha: true,
         antialias: false,
-        dpr: Math.min(window.devicePixelRatio || 1, 2),
+        dpr: 1,
       });
     } catch {
       return;
@@ -142,6 +151,8 @@ export const Plasma: React.FC<PlasmaProps> = ({
         uScale: { value: scale },
         uOpacity: { value: opacity },
         uMouse: { value: new Float32Array([0, 0]) },
+        uCenter: { value: new Float32Array(center) },
+        uRotation: { value: rotation },
         uMouseInteractive: { value: mouseInteractive ? 1.0 : 0.0 },
       },
     });
@@ -180,9 +191,16 @@ export const Plasma: React.FC<PlasmaProps> = ({
     let contextLost = false;
     let isVisible = true;
     const t0 = performance.now();
+    let lastFrame = 0;
+    const FPS_CAP = 1000 / 30;
 
     const loop = (t: number) => {
       if (contextLost || !isVisible) return;
+      if (t - lastFrame < FPS_CAP) {
+        raf = requestAnimationFrame(loop);
+        return;
+      }
+      lastFrame = t;
       let timeValue = (t - t0) * 0.001;
       if (direction === 'pingpong') {
         const pingpongDuration = 10;

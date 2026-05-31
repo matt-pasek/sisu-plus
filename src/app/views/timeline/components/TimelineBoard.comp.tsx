@@ -14,6 +14,7 @@ import {
   isCurrentSemester,
 } from '@/app/views/timeline/components/timelineUtils';
 import type { TimelineValidationWarning } from '@/app/views/timeline/components/timelineValidation';
+import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 
 interface Props {
   draftCourseIds?: Set<string>;
@@ -47,6 +48,7 @@ const PeriodDropCell: React.FC<{
   period: PeriodCreditSummary;
   rowCount: number;
 }> = ({ index, hasHighlightedDropPeriods, isHighlighted, isDragging, period, rowCount }) => {
+  const { t } = useTranslationWithPrefix('views.timeline');
   const { ref, isDropTarget } = useDroppable({
     id: `period:${period.periodLocator}`,
     accept: TIMELINE_COURSE_DRAG_TYPE,
@@ -76,7 +78,7 @@ const PeriodDropCell: React.FC<{
             : 'scale-[0.25] opacity-0 blur-[4px]'
         }`}
       >
-        {isDropTarget ? 'Drop here' : 'Offered here'}
+        {isDropTarget ? t('board.dropHere') : t('board.offeredHere')}
       </div>
     </div>
   );
@@ -187,6 +189,7 @@ const TimelineBoardContent: React.FC<Props> = ({
   moduleIds,
   validationWarnings = new Map(),
 }) => {
+  const { t } = useTranslationWithPrefix('views.timeline');
   const visiblePeriods = semesters.flatMap((semester) => semester.periods.map((period) => ({ period, semester })));
   const courseBlocks = getCourseBlocks(semesters, visiblePeriods);
   const rowCount = Math.max(courseBlocks.length > 0 ? Math.max(...courseBlocks.map((block) => block.row)) + 1 : 1, 3);
@@ -220,10 +223,10 @@ const TimelineBoardContent: React.FC<Props> = ({
                       </div>
                       <div className="flex shrink-0 flex-wrap justify-end gap-1.5">
                         {semester.completedCredits > 0 && (
-                          <CreditChip label="Done" credits={semester.completedCredits} variant="completed" />
+                          <CreditChip label={t('board.done')} credits={semester.completedCredits} variant="completed" />
                         )}
                         {semester.plannedCredits > 0 && (
-                          <CreditChip label="Planned" credits={semester.plannedCredits} variant="planned" />
+                          <CreditChip label={t('board.planned')} credits={semester.plannedCredits} variant="planned" />
                         )}
                       </div>
                     </div>
@@ -236,7 +239,10 @@ const TimelineBoardContent: React.FC<Props> = ({
               {visiblePeriods.map(({ period }) => (
                 <div
                   key={period.periodLocator}
-                  title={`Workload in ${period.period.name}: ${formatCredits(getTotalCredits(period))}`}
+                  title={t('board.workloadTitle', {
+                    period: period.period.name,
+                    credits: formatCredits(getTotalCredits(period)),
+                  })}
                   className={`rounded-lg border px-3 py-2 ${
                     isCurrentPeriod(period) ? 'border-accent/70 bg-accent/10' : 'border-border bg-container'
                   }`}
@@ -297,14 +303,14 @@ const TimelineBoardContent: React.FC<Props> = ({
                   className="z-10 flex items-center justify-center text-xs text-darkishGrey"
                   style={{ gridColumn: '1 / -1' }}
                 >
-                  No courses
+                  {t('board.noCourses')}
                 </div>
               )}
             </div>
           </>
         ) : (
           <div className="flex h-64 w-[70vw] items-center justify-center rounded-xl border border-dashed border-border text-sm text-lightGrey">
-            No timeline periods available yet.
+            {t('board.noPeriods')}
           </div>
         )}
       </div>

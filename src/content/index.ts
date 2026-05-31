@@ -87,7 +87,9 @@ async function init() {
 
   if (isStudentLoginPage()) {
     handOffToSisuLogin();
-    return;
+    await new Promise<void>((resolve) => {
+      onStudentRoute = resolve;
+    });
   }
 
   chrome.storage.sync.get(DEFAULT_PREFS, (stored) => {
@@ -95,6 +97,8 @@ async function init() {
     if (prefs.sisuPlusActive) mountSisuPlus();
     mountControlCenter();
   });
+
+  window.addEventListener('sisuplus:session-expired', () => handOffToSisuLogin());
 
   chrome.storage.onChanged.addListener((changes) => {
     if ('sisuPlusActive' in changes) {
@@ -106,5 +110,5 @@ async function init() {
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);
 } else {
-  init();
+  void init();
 }

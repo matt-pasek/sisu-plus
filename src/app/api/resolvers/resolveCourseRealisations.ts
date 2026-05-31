@@ -1,10 +1,12 @@
 import { koriApi } from '@/app/api/client';
 import type { RealisationResult } from '@/app/api/resolvers/resolveRealization';
+import { mapRealisationToResult } from '@/app/api/resolvers/resolveRealization';
+import { getCurrentLocale } from '@/app/i18n';
 
 const courseRealisationsCache = new Map<string, RealisationResult[]>();
 
 function getCacheKey(assessmentItemIds: string[]): string {
-  return [...assessmentItemIds].sort().join(':');
+  return `${[...assessmentItemIds].sort().join(':')}:${getCurrentLocale()}`;
 }
 
 export async function resolveCourseRealisations(assessmentItemIds: string[]): Promise<RealisationResult[]> {
@@ -19,13 +21,7 @@ export async function resolveCourseRealisations(assessmentItemIds: string[]): Pr
     const responses = await Promise.all(
       uniqueAssessmentItemIds.map((assessmentItemId) => koriApi.api.getCourseUnitRealisations({ assessmentItemId })),
     );
-    const realisations = responses.flatMap((response) =>
-      response.data.map((realisation) => ({
-        startDate: realisation.activityPeriod?.startDate ?? null,
-        endDate: realisation.activityPeriod?.endDate ?? null,
-        name: null,
-      })),
-    );
+    const realisations = responses.flatMap((response) => response.data.map((r) => mapRealisationToResult(r)));
 
     courseRealisationsCache.set(cacheKey, realisations);
     return realisations;

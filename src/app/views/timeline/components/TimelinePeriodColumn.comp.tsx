@@ -9,6 +9,7 @@ import {
   getModuleColor,
   isCurrentPeriod,
 } from '@/app/views/timeline/components/timelineUtils';
+import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 
 interface Props {
   period: PeriodCreditSummary;
@@ -24,6 +25,7 @@ function sortCourses(courses: TimelineCourse[]): TimelineCourse[] {
 }
 
 export const TimelinePeriodColumn: React.FC<Props> = ({ period, moduleIds }) => {
+  const { t } = useTranslationWithPrefix('views.timeline');
   const current = isCurrentPeriod(period);
   const courses = sortCourses(period.courses);
 
@@ -55,7 +57,7 @@ export const TimelinePeriodColumn: React.FC<Props> = ({ period, moduleIds }) => 
             />
           ))
         ) : (
-          <div className="flex flex-1 items-center justify-center text-xs text-darkishGrey">No courses</div>
+          <div className="flex flex-1 items-center justify-center text-xs text-darkishGrey">{t('board.noCourses')}</div>
         )}
       </div>
     </section>

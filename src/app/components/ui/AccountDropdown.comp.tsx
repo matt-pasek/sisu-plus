@@ -1,13 +1,21 @@
 import { PrivatePerson } from '@/app/api/generated/OriApi';
 import { AnimatePresence, motion } from 'motion/react';
 import React from 'react';
+import { useChromeStorage } from '@/app/hooks/useChromeStorage';
+import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
+import { LOCALES, Locale } from '@/app/locales/locale';
 
 interface Props {
   userDetails: PrivatePerson;
 }
 
 export const AccountDropdown: React.FC<Props> = ({ userDetails }) => {
+  const { t } = useTranslationWithPrefix('components.accountDropdown');
+  const [prefs, setPrefs] = useChromeStorage();
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
+  const setLocale = (locale: Locale) => {
+    setPrefs({ locale });
+  };
 
   return (
     <div className="relative">
@@ -64,6 +72,27 @@ export const AccountDropdown: React.FC<Props> = ({ userDetails }) => {
                     {userDetails.firstNames} {userDetails.lastName}
                   </div>
                   <div className="text-xs font-light">{userDetails.primaryEmail}</div>
+                </div>
+              </div>
+              <div className="border-t border-border px-2.5 py-2">
+                <p className="mb-2 text-xs font-semibold tracking-wide text-lightGrey uppercase">
+                  {t('language.label')}
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  {LOCALES.map((locale) => (
+                    <button
+                      key={locale}
+                      className={`min-h-9 rounded-lg text-xs font-semibold transition-[background-color,color,transform] duration-150 active:scale-[0.96] ${
+                        prefs.locale === locale
+                          ? 'bg-accent/15 text-accent shadow-[inset_0_0_0_1px_rgba(65,150,72,0.45)]'
+                          : 'bg-container text-lightGrey hover:bg-offwhite/10 hover:text-offwhite'
+                      }`}
+                      onClick={() => setLocale(locale)}
+                      type="button"
+                    >
+                      {locale === 'en' ? t('language.english') : t('language.finnish')}
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>

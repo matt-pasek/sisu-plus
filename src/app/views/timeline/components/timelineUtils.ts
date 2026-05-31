@@ -1,7 +1,9 @@
 import type { TimelineCourse } from '@/app/api/dataPoints/getTimelineCourses';
 import type { PeriodCreditSummary, SemesterCreditSummary } from '@/app/api/dataPoints/getCreditsByPeriod';
+import i18n, { getCurrentLocale, I18N_NAMESPACE } from '@/app/i18n';
+import { MODULE_COLOR_VALUES } from '@/app/theme/moduleColors';
 
-export const TIMELINE_COLORS = ['#4A7EF0', '#10B981', '#F59E0B', '#A78BFA', '#EF4444', '#06B6D4'];
+export const TIMELINE_COLORS = MODULE_COLOR_VALUES;
 
 export function getModuleColor(moduleId: string | null, moduleIds: string[]): string {
   if (!moduleId) return '#7878A0';
@@ -14,9 +16,10 @@ export function getCourseKey(course: TimelineCourse): string {
 }
 
 export function getStatusLabel(course: TimelineCourse): string {
-  if (course.isPassed) return course.grade != null ? String(course.grade) : 'Done';
-  if (course.isEnrolled) return 'Active';
-  return 'Planned';
+  if (course.isPassed)
+    return course.grade != null ? String(course.grade) : i18n.t('views.timeline.status.done', { ns: I18N_NAMESPACE });
+  if (course.isEnrolled) return i18n.t('views.timeline.status.active', { ns: I18N_NAMESPACE });
+  return i18n.t('views.timeline.status.planned', { ns: I18N_NAMESPACE });
 }
 
 export function getStatusClass(course: TimelineCourse): string {
@@ -28,7 +31,7 @@ export function getStatusClass(course: TimelineCourse): string {
 export function formatCredits(credits: number | null | undefined): string {
   const value = credits ?? 0;
   const rounded = Math.round(value * 10) / 10;
-  return `${Number.isInteger(rounded) ? rounded : rounded.toFixed(1)} cr`;
+  return `${Number.isInteger(rounded) ? rounded : rounded.toFixed(1)} ${i18n.t('util.credits.short', { ns: I18N_NAMESPACE })}`;
 }
 
 export function formatPeriodRange(startDate: string, endDate: string): string {
@@ -36,8 +39,8 @@ export function formatPeriodRange(startDate: string, endDate: string): string {
   const end = new Date(endDate);
   end.setDate(end.getDate() - 1);
 
-  const startLabel = start.toLocaleString('en-US', { month: 'short', day: 'numeric' });
-  const endLabel = end.toLocaleString('en-US', { month: 'short', day: 'numeric' });
+  const startLabel = start.toLocaleString(getCurrentLocale(), { month: 'short', day: 'numeric' });
+  const endLabel = end.toLocaleString(getCurrentLocale(), { month: 'short', day: 'numeric' });
   return `${startLabel} - ${endLabel}`;
 }
 
@@ -46,7 +49,10 @@ export function getSemesterTitle(semester: SemesterCreditSummary): string {
   if (!firstPeriod) return semester.termName;
 
   const month = new Date(firstPeriod.startDate).getMonth() + 1;
-  const season = month >= 8 ? 'Autumn' : 'Spring';
+  const season =
+    month >= 8
+      ? i18n.t('views.timeline.semester.autumn', { ns: I18N_NAMESPACE })
+      : i18n.t('views.timeline.semester.spring', { ns: I18N_NAMESPACE });
   const year = month >= 8 ? firstPeriod.studyYear : firstPeriod.studyYear + 1;
   return `${season} ${year}`;
 }

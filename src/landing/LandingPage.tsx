@@ -1,75 +1,9 @@
-import { ProductPreview } from '@/landing/components/ProductPreview';
+import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
+import i18n, { getCurrentLocale } from '@/app/i18n';
+import type { LandingPolicySection, LandingRoadmapColumn } from '@/app/locales/en/landing/landing.translation.en';
+import { LOCALES, Locale } from '@/app/locales/locale';
+import { HeroShowcase } from '@/landing/components/HeroShowcase';
 import Plasma from '@/landing/components/Plasma';
-
-const roadmap = [
-  {
-    version: 'v1.0.0',
-    title: 'Initial release',
-    status: 'Shipping now',
-    items: ['Personal dashboard', 'Moodle deadline view', 'Editable study timeline', 'Prerequisite warnings'],
-    current: true,
-  },
-  {
-    version: 'Next',
-    title: 'More planning help',
-    status: 'In progress',
-    items: ['Cleaner course details', 'Calendar-first study planning', 'Better empty states', 'More timeline guidance'],
-  },
-  {
-    version: 'Later',
-    title: 'Campus expansion',
-    status: 'Planned',
-    items: ['More Sisu universities', 'Feedback-led improvements', 'Mobile layout polish', 'Faster setup'],
-  },
-];
-
-const privacyPoints = [
-  'Works inside Sisu, right in your browser tab',
-  'Reads your courses and schedule the same way you do',
-  'Saves your settings on your device, not on our servers',
-  'Your data never leaves your computer',
-];
-
-const policySections = [
-  {
-    title: 'Data handled by the extension',
-    body: [
-      "Sisu+ may access data from the user's active Sisu session, including study plans, courses, credits, enrolments, progress information, and related study planning data available to the logged-in user on supported Sisu domains such as https://sisu.lut.fi and https://sisu.lab.fi.",
-      'Sisu+ may temporarily read Sisu authorization headers and required session cookies in order to request Sisu API data on behalf of the logged-in user.',
-      'If the user enables Moodle deadline integration, Sisu+ stores the Moodle calendar URL provided by the user and uses it to fetch calendar and deadline data.',
-      'Sisu+ stores extension preferences, settings, enabled or disabled state, and Moodle configuration in Chrome storage.',
-    ],
-  },
-  {
-    title: 'How data is used',
-    body: [
-      'The data is used only to provide Sisu+ features inside the browser, including dashboard views, study progress, timeline planning, course information, and optional Moodle deadline display.',
-    ],
-  },
-  {
-    title: 'Data sharing',
-    body: [
-      'Sisu+ does not sell user data.',
-      'Sisu+ does not use user data for advertising.',
-      "Sisu+ does not send user data to the developer's own servers.",
-      "Sisu+ communicates with Sisu and Moodle only as needed to provide the extension's user-facing features.",
-    ],
-  },
-  {
-    title: 'Data storage',
-    body: [
-      "Sisu+ stores settings and temporary session information using Chrome's extension storage APIs. Authentication and session data is used only to access Sisu data for the current browser session.",
-    ],
-  },
-  {
-    title: 'Remote code',
-    body: ['Sisu+ does not execute remote JavaScript or remote code.'],
-  },
-  {
-    title: 'Contact',
-    body: ['For questions about this privacy policy, contact contact@matt-pasek.dev.'],
-  },
-];
 
 const chromeStoreUrl = import.meta.env.VITE_CHROME_WEB_STORE_URL?.trim();
 const chromeStoreLinkProps = chromeStoreUrl
@@ -156,90 +90,167 @@ function EnergyDrinkIcon() {
   );
 }
 
+function LanguageToggle() {
+  const activeLocale = getCurrentLocale();
+
+  function setLocale(locale: Locale) {
+    localStorage.setItem('i18nextLng', locale);
+    void i18n.changeLanguage(locale);
+  }
+
+  return (
+    <div className="flex items-center gap-1 rounded-full border border-border bg-container2 p-1 text-xs font-semibold">
+      {LOCALES.map((locale) => (
+        <button
+          key={locale}
+          className={`min-h-7 rounded-full px-2.5 transition-[background-color,color,transform] duration-150 active:scale-[0.96] ${
+            activeLocale === locale ? 'bg-lighterGreen text-background' : 'text-lightGrey hover:text-offwhite'
+          }`}
+          onClick={() => setLocale(locale)}
+          type="button"
+        >
+          {locale.toUpperCase()}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function HeroSocialProof() {
+  const { t } = useTranslationWithPrefix('landing');
+  const avatars = ['AK', 'MV', 'JS'];
+
+  return (
+    <div className="landing-hero-social" aria-label={t('hero.activeUsers')}>
+      <div className="landing-social-avatars" aria-hidden="true">
+        {avatars.map((avatar) => (
+          <span key={avatar}>{avatar}</span>
+        ))}
+        <span>+</span>
+      </div>
+      <p>{t('hero.activeUsers')}</p>
+    </div>
+  );
+}
+
+function Footer({ full = true }: { full?: boolean }) {
+  const { t } = useTranslationWithPrefix('landing');
+
+  return (
+    <footer className="landing-footer">
+      <div className="landing-footer-left">
+        <Logo />
+        <p>
+          &copy; {new Date().getFullYear()} Mateusz Pasek. {t('footer.copyright')}
+          <br />
+          <span>{t('footer.affiliation')}</span>
+        </p>
+      </div>
+      <div className="landing-footer-links">
+        {full && <a href="/privacy">{t('footer.privacyPolicy')}</a>}
+        <a href="https://github.com/matt-pasek/sisu-plus">{t('footer.sourceCode')}</a>
+        {full && (
+          <a href="https://ko-fi.com/mattpasek" target="_blank" rel="noreferrer">
+            {t('footer.supportDevelopment')}
+          </a>
+        )}
+        <a href="mailto:contact@matt-pasek.dev">{t('footer.contact')}</a>
+        {full && (
+          <a href="https://github.com/matt-pasek">
+            <GithubIcon />
+            {t('footer.myGithub')}
+          </a>
+        )}
+      </div>
+    </footer>
+  );
+}
+
 export function LandingPage() {
+  const { t } = useTranslationWithPrefix('landing');
+  const roadmap = t('roadmap.columns', { returnObjects: true }) as LandingRoadmapColumn[];
+  const privacyPoints = t('privacy.points', { returnObjects: true }) as string[];
+  const featureCards = t('features.cards', { returnObjects: true }) as { title: string; body: string }[];
+
   return (
     <main className="landing-page">
       <nav className="landing-nav">
         <Logo />
         <div className="landing-nav-links">
-          <a href="#features">Features</a>
-          <a href="#privacy">Privacy</a>
-          <a href="#roadmap">Roadmap</a>
+          <a href="#features">{t('nav.features')}</a>
+          <a href="#privacy">{t('nav.privacy')}</a>
+          <a href="#roadmap">{t('nav.roadmap')}</a>
         </div>
-        <a className="landing-nav-cta" {...chromeStoreLinkProps}>
-          Add to Chrome
-        </a>
+        <div className="flex items-center gap-3">
+          <a className="landing-nav-cta" {...chromeStoreLinkProps}>
+            {t('nav.addToChrome')}
+          </a>
+          <LanguageToggle />
+        </div>
       </nav>
       <section className="landing-hero" id="top">
         <div className="landing-aurora">
-          <Plasma color="#419648" speed={0.6} direction="forward" scale={1.1} opacity={0.8} mouseInteractive={true} />
+          <Plasma
+            center={[1, 0.75]}
+            color="#419648"
+            rotation={1.5}
+            speed={0.6}
+            direction="forward"
+            scale={1.38}
+            opacity={0.78}
+            mouseInteractive={true}
+          />
         </div>
         <div className="landing-hero-copy">
           <div className="landing-badge">
-            <span>New</span>
-            <p>v{import.meta.env.VITE_APP_VERSION} just shipped</p>
+            <span>{t('hero.badge')}</span>
+            <p>{t('hero.shipped', { version: import.meta.env.VITE_APP_VERSION })}</p>
           </div>
           <h1>
-            The Sisu we deserve, <span>finally.</span>
+            {t('hero.titleStart')} <span>{t('hero.titleAccent')}</span>
           </h1>
-          <p>
-            A browser extension that reimagines your Sisu experience. Cleaner dashboard, study timeline, Moodle
-            integration, and more. For students, by student.
-          </p>
+          <p>{t('hero.body')}</p>
           <div className="landing-actions">
             <a className="landing-primary" {...chromeStoreLinkProps}>
-              Add to Chrome - free
+              {t('hero.addToChromeFree')}
             </a>
             <a className="landing-secondary" href="https://github.com/matt-pasek/sisu-plus">
               <GithubIcon />
-              Source code
+              {t('hero.sourceCode')}
             </a>
             <a className="landing-secondary" href="#features">
-              See what changed
+              {t('hero.seeChanged')}
             </a>
           </div>
-          <p className="landing-mobile-note">Sisu+ experience is not yet optimized for mobile devices.</p>
+          <HeroSocialProof />
+          <p className="landing-mobile-note">{t('hero.mobileNote')}</p>
         </div>
         <div className="landing-preview-wrap">
-          <ProductPreview />
+          <HeroShowcase />
         </div>
       </section>
 
       <section className="landing-section landing-feature-band landing-reveal" id="features">
         <div>
-          <p className="landing-kicker">Dashboard and timeline</p>
-          <h2>Less digging, more knowing what to do next.</h2>
-          <p className="landing-section-copy">
-            The first release tackles the stuff that costs you the most time: checking where you stand, keeping up with
-            Moodle deadlines, and moving courses around without accidentally breaking your prerequisites.
-          </p>
+          <p className="landing-kicker">{t('features.kicker')}</p>
+          <h2>{t('features.title')}</h2>
+          <p className="landing-section-copy">{t('features.body')}</p>
         </div>
         <div className="landing-feature-list">
-          <article className="landing-interactive-card">
-            <h3>Dashboard that starts useful</h3>
-            <p>Credits, grades, study right, active courses, and deadlines are pulled into one quiet overview.</p>
-          </article>
-          <article className="landing-interactive-card">
-            <h3>Timeline you can edit</h3>
-            <p>
-              Move planned courses between periods, review the changes, then confirm the updated timing back to Sisu.
-            </p>
-          </article>
-          <article className="landing-interactive-card">
-            <h3>Warnings when they matter</h3>
-            <p>Prerequisite and timing issues stay out of the way until you start changing the plan.</p>
-          </article>
+          {featureCards.map((card) => (
+            <article className="landing-interactive-card" key={card.title}>
+              <h3>{card.title}</h3>
+              <p>{card.body}</p>
+            </article>
+          ))}
         </div>
       </section>
 
       <section className="landing-section landing-privacy landing-reveal" id="privacy">
         <div>
-          <p className="landing-kicker">Your browser, your data</p>
-          <h2>Your data stays on your computer. Full stop.</h2>
-          <p className="landing-section-copy">
-            Sisu+ works directly inside Sisu — no account, no server, no one storing your study plan somewhere else.
-            Everything stays in your browser, exactly where you left it.
-          </p>
+          <p className="landing-kicker">{t('privacy.kicker')}</p>
+          <h2>{t('privacy.title')}</h2>
+          <p className="landing-section-copy">{t('privacy.body')}</p>
         </div>
         <div className="landing-privacy-panel">
           {privacyPoints.map((point) => (
@@ -253,12 +264,9 @@ export function LandingPage() {
 
       <section className="landing-section landing-reveal" id="roadmap">
         <div className="landing-section-heading">
-          <p className="landing-kicker">What's coming</p>
-          <h2>Fixing the things that actually slow you down.</h2>
-          <p className="landing-section-copy">
-            The plan is pretty straightforward: fewer clicks to find what you need, clearer course info, and a timeline
-            that doesn't make you guess. Supported universities first, then more campuses as requests come in.
-          </p>
+          <p className="landing-kicker">{t('roadmap.kicker')}</p>
+          <h2>{t('roadmap.title')}</h2>
+          <p className="landing-section-copy">{t('roadmap.body')}</p>
         </div>
         <div className="landing-roadmap-grid">
           {roadmap.map((column) => (
@@ -281,41 +289,38 @@ export function LandingPage() {
 
       <section className="landing-support landing-reveal" aria-labelledby="support-heading">
         <div className="landing-support-copy">
-          <p className="landing-kicker">Support the project</p>
-          <h2 id="support-heading">Enjoy Sisu+ and want to support development?</h2>
-          <p>
-            Get me a strawberry-lime energy drink on Ko-fi and I will deliver new features even quicker! It helps cover
-            the small costs and late-night polish passes that keep Sisu+ moving.
-          </p>
+          <p className="landing-kicker">{t('support.kicker')}</p>
+          <h2 id="support-heading">{t('support.title')}</h2>
+          <p>{t('support.body')}</p>
         </div>
         <a
           className="landing-support-card"
           href="https://ko-fi.com/mattpasek"
           target="_blank"
           rel="noreferrer"
-          aria-label="Support Sisu+ development on Ko-fi"
+          aria-label={t('support.aria')}
         >
           <span className="landing-support-icon">
             <EnergyDrinkIcon />
           </span>
           <span>
-            <strong>Feed me with batteries</strong>
-            <small>(Ko-fi opens in a new tab)</small>
+            <strong>{t('support.action')}</strong>
+            <small>{t('support.hint')}</small>
           </span>
         </a>
       </section>
 
       <section className="landing-universities landing-reveal" id="install">
         <div className="landing-university-heading">
-          <p className="landing-kicker">Where it works</p>
-          <h2>Your university, your Sisu+.</h2>
+          <p className="landing-kicker">{t('universities.kicker')}</p>
+          <h2>{t('universities.title')}</h2>
         </div>
 
         <div className="landing-university-panel">
           <div className="landing-university-left">
             <div className="landing-live-label">
               <span />
-              Live universities
+              {t('universities.live')}
             </div>
             <div className="landing-live-universities">
               <div className="landing-live-university-chip">
@@ -338,83 +343,61 @@ export function LandingPage() {
           </div>
 
           <div className="landing-request-card">
-            <h3>Want it at your university?</h3>
-            <p>
-              Sisu+ is built to support Finnish universities running Sisu. If your university is not listed, send me the
-              Sisu URL and I can check support.
-            </p>
+            <h3>{t('universities.requestTitle')}</h3>
+            <p>{t('universities.requestBody')}</p>
             <div className="landing-request-steps">
               <div>
                 <span>1</span>
                 <p>
-                  <strong>Email me</strong> with your university name and Sisu URL
+                  <strong>{t('universities.emailStrong')}</strong> {t('universities.emailRest')}
                 </p>
               </div>
               <div>
                 <span>2</span>
-                <p>We collaborate to make sure everything works</p>
+                <p>{t('universities.steps.1')}</p>
               </div>
               <div>
                 <span>3</span>
-                <p>Your campus gets the same cleaner dashboard and timeline</p>
+                <p>{t('universities.steps.2')}</p>
               </div>
             </div>
             <a href="mailto:contact@matt-pasek.dev?subject=Sisu%2B university support">
               <MailIcon />
-              Email me to add your university
+              {t('universities.action')}
             </a>
           </div>
         </div>
       </section>
 
-      <footer className="landing-footer">
-        <div className="landing-footer-left">
-          <Logo />
-          <p>
-            &copy; {new Date().getFullYear()} Mateusz Pasek. All rights reserved.
-            <br />
-            <span>Not affiliated with any supported university or Funidata Oy.</span>
-          </p>
-        </div>
-        <div className="landing-footer-links">
-          <a href="/privacy">Privacy policy</a>
-          <a href="https://github.com/matt-pasek/sisu-plus">Source code</a>
-          <a href="https://ko-fi.com/mattpasek" target="_blank" rel="noreferrer">
-            Support development
-          </a>
-          <a href="mailto:contact@matt-pasek.dev">Contact</a>
-          <a href="https://github.com/matt-pasek">
-            <GithubIcon />
-            My GitHub
-          </a>
-        </div>
-      </footer>
+      <Footer />
     </main>
   );
 }
 
 export function PrivacyPolicyPage() {
+  const { t } = useTranslationWithPrefix('landing');
+  const policySections = t('policy.sections', { returnObjects: true }) as LandingPolicySection[];
+
   return (
     <main className="landing-page privacy-page">
       <nav className="landing-nav">
         <Logo />
         <div className="landing-nav-links">
-          <a href="/">Home</a>
-          <a href="/#features">Features</a>
-          <a href="/#install">Install</a>
+          <a href="/">{t('nav.home')}</a>
+          <a href="/#features">{t('nav.features')}</a>
+          <a href="/#install">{t('nav.install')}</a>
         </div>
+        <LanguageToggle />
         <a className="landing-nav-cta" href="/">
-          Back to Sisu+
+          {t('nav.backToSisu')}
         </a>
       </nav>
 
       <section className="privacy-document">
-        <p className="landing-kicker">Privacy policy</p>
-        <h1>Privacy Policy for Sisu+</h1>
-        <p className="privacy-effective-date">Effective date: April 26, 2026</p>
-        <p className="privacy-intro">
-          Sisu+ is a browser extension that improves the Sisu student planning experience.
-        </p>
+        <p className="landing-kicker">{t('policy.kicker')}</p>
+        <h1>{t('policy.title')}</h1>
+        <p className="privacy-effective-date">{t('policy.effectiveDate')}</p>
+        <p className="privacy-intro">{t('policy.intro')}</p>
 
         <div className="privacy-section-list">
           {policySections.map((section) => (
@@ -428,21 +411,7 @@ export function PrivacyPolicyPage() {
         </div>
       </section>
 
-      <footer className="landing-footer">
-        <div className="landing-footer-left">
-          <Logo />
-          <p>
-            &copy; {new Date().getFullYear()} Mateusz Pasek. All rights reserved.
-            <br />
-            <span>Not affiliated with any supported university or Funidata Oy.</span>
-          </p>
-        </div>
-        <div className="landing-footer-links">
-          <a href="/">Home</a>
-          <a href="https://github.com/matt-pasek/sisu-plus">Source code</a>
-          <a href="mailto:contact@matt-pasek.dev">Contact</a>
-        </div>
-      </footer>
+      <Footer full={false} />
     </main>
   );
 }

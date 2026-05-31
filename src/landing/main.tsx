@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { Analytics } from '@vercel/analytics/react';
 import '@/app/global.css';
 import '@/landing/landing.css';
+import '@/app/i18n';
 import { LandingPage, PrivacyPolicyPage } from '@/landing/LandingPage';
 
 const root = document.getElementById('landing-root');

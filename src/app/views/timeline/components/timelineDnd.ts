@@ -20,11 +20,11 @@ export interface TimelinePoolDropData {
 
 export type TimelineDropData = TimelinePeriodDropData | TimelinePoolDropData;
 
-export function getCourseDragData(course: TimelineCourse): TimelineCourseDragData {
+export function getCourseDragData(course: TimelineCourse, periodCountOverride?: number): TimelineCourseDragData {
   return {
     kind: 'timeline-course',
     courseUnitId: course.courseUnitId,
-    periodCount: Math.max(course.plannedPeriods.length, 1),
+    periodCount: Math.max(periodCountOverride ?? course.plannedPeriods.length, 1),
     periodLocators: course.plannedPeriods.map((period) => period.locator),
   };
 }

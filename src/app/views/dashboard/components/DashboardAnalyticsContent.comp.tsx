@@ -2,6 +2,8 @@ import React from 'react';
 import { useNavigate } from 'react-router';
 import type { PeriodCreditSummary, SemesterCreditSummary } from '@/app/api/dataPoints/getCreditsByPeriod';
 import { formatCredits, getModuleColor, getSemesterTitle } from '@/app/views/timeline/components/timelineUtils';
+import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
+import { getCurrentLocale } from '@/app/i18n';
 
 export interface DashboardCompletedCourse {
   id: string;
@@ -14,12 +16,12 @@ export interface DashboardCompletedCourse {
 }
 
 function formatCompactDate(value: string): string {
-  return new Date(value).toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+  return new Date(value).toLocaleDateString(getCurrentLocale(), { month: 'short', year: '2-digit' });
 }
 
 function formatDays(days: number | null): string {
   if (days == null) return '-';
-  return new Intl.NumberFormat('en-US').format(Math.max(days, 0));
+  return new Intl.NumberFormat(getCurrentLocale()).format(Math.max(days, 0));
 }
 
 function getNumericGrade(course: DashboardCompletedCourse): number | null {
@@ -46,6 +48,7 @@ function getTrendLine(points: { x: number; y: number }[]): { x1: number; y1: num
 }
 
 export const GradeTrendContent: React.FC<{ courses: DashboardCompletedCourse[] }> = ({ courses }) => {
+  const { t } = useTranslationWithPrefix('views.dashboard');
   const graded = courses
     .filter((course) => getNumericGrade(course) != null && course.registrationDate)
     .sort((a, b) => a.registrationDate.localeCompare(b.registrationDate));
@@ -64,7 +67,9 @@ export const GradeTrendContent: React.FC<{ courses: DashboardCompletedCourse[] }
 
   if (graded.length < 2) {
     return (
-      <div className="flex h-full items-center justify-center text-sm text-lightGrey">More graded courses needed.</div>
+      <div className="flex h-full items-center justify-center text-sm text-lightGrey">
+        {t('widgets.analytics.moreGradesNeeded')}
+      </div>
     );
   }
 
@@ -72,7 +77,7 @@ export const GradeTrendContent: React.FC<{ courses: DashboardCompletedCourse[] }
     <div className="flex h-full flex-col gap-3">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-xs text-lightGrey">Credit-weighted grades over time</p>
+          <p className="text-xs text-lightGrey">{t('widgets.analytics.creditWeightedGrades')}</p>
           <p className="text-xl font-semibold text-offwhite tabular-nums">
             {trendLabel == null ? '-' : trendLabel >= 0 ? `+${trendLabel.toFixed(1)}` : trendLabel.toFixed(1)}
           </p>
@@ -82,11 +87,11 @@ export const GradeTrendContent: React.FC<{ courses: DashboardCompletedCourse[] }
             trendLabel != null && trendLabel >= 0 ? 'bg-lighterGreen/10 text-lighterGreen' : 'bg-danger/10 text-danger'
           }`}
         >
-          {trendLabel != null && trendLabel >= 0 ? 'Improving' : 'Watch pace'}
+          {trendLabel != null && trendLabel >= 0 ? t('widgets.analytics.improving') : t('widgets.analytics.watchPace')}
         </span>
       </div>
       <div className="relative min-h-0 flex-1 rounded-xl bg-background/45 p-3 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]">
-        <svg aria-label="Grade trend chart" className="h-full w-full" role="img" viewBox="0 0 320 170">
+        <svg aria-label={t('widgets.analytics.chartAria')} className="h-full w-full" role="img" viewBox="0 0 320 170">
           {[1, 2, 3, 4, 5].map((grade) => (
             <g key={grade}>
               <line x1="28" x2="306" y1={158 - grade * 26} y2={158 - grade * 26} stroke="rgba(255,255,255,0.07)" />
@@ -115,7 +120,13 @@ export const GradeTrendContent: React.FC<{ courses: DashboardCompletedCourse[] }
               opacity="0.88"
               r={Math.min(8, 3.5 + point.course.credits / 3)}
             >
-              <title>{`${point.course.name} · grade ${point.course.grade} · ${formatCredits(point.course.credits)}`}</title>
+              <title>
+                {t('widgets.analytics.gradeTooltip', {
+                  name: point.course.name,
+                  grade: point.course.grade,
+                  credits: formatCredits(point.course.credits),
+                })}
+              </title>
             </circle>
           ))}
         </svg>
@@ -129,6 +140,7 @@ export const GradeTrendContent: React.FC<{ courses: DashboardCompletedCourse[] }
 };
 
 export const CreditsVelocityContent: React.FC<{ semesters: SemesterCreditSummary[] }> = ({ semesters }) => {
+  const { t } = useTranslationWithPrefix('views.dashboard');
   const visible = semesters
     .filter((semester) => semester.completedCredits > 0 || semester.plannedCredits > 0)
     .slice(-6);
@@ -153,16 +165,16 @@ export const CreditsVelocityContent: React.FC<{ semesters: SemesterCreditSummary
             />
           </div>
           <span className="text-right font-mono text-xs text-offwhite tabular-nums">
-            {Math.round(semester.completedCredits + semester.plannedCredits)} cr
+            {formatCredits(semester.completedCredits + semester.plannedCredits)}
           </span>
         </div>
       ))}
       <div className="mt-auto flex items-center gap-4 text-[11px] text-lightGrey">
         <span className="flex items-center gap-1.5">
-          <span className="size-2 rounded-sm bg-lighterGreen" /> completed
+          <span className="size-2 rounded-sm bg-lighterGreen" /> {t('widgets.analytics.completed')}
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="size-2 rounded-sm bg-blue-400/45" /> planned
+          <span className="size-2 rounded-sm bg-blue-400/45" /> {t('widgets.analytics.planned')}
         </span>
       </div>
     </div>
@@ -173,6 +185,7 @@ export const TimelinePeekContent: React.FC<{
   moduleIds: string[];
   periods: PeriodCreditSummary[];
 }> = ({ moduleIds, periods }) => {
+  const { t } = useTranslationWithPrefix('views.dashboard');
   const navigate = useNavigate();
   const now = new Date();
   const upcoming = periods
@@ -202,10 +215,12 @@ export const TimelinePeekContent: React.FC<{
                 const color = getModuleColor(course.moduleId, moduleIds);
                 return (
                   <div key={course.courseUnitId} className="min-w-0 rounded-lg bg-container2 px-2 py-1.5">
-                    <p className="truncate text-xs font-semibold text-offwhite">{course.courseName ?? 'Course'}</p>
+                    <p className="truncate text-xs font-semibold text-offwhite">
+                      {course.courseName ?? t('widgets.analytics.courseFallback')}
+                    </p>
                     <div className="mt-1 flex items-center justify-between gap-2">
                       <span className="truncate text-[10px]" style={{ color }}>
-                        {course.moduleName ?? 'No module'}
+                        {course.moduleName ?? t('widgets.analytics.noModule')}
                       </span>
                       <span className="font-mono text-[10px] text-lightGrey">{formatCredits(course.credits)}</span>
                     </div>
@@ -217,40 +232,47 @@ export const TimelinePeekContent: React.FC<{
       ))}
       {upcoming.length === 0 && (
         <div className="flex flex-1 items-center justify-center text-sm text-lightGrey">
-          No upcoming planned courses.
+          {t('widgets.analytics.noUpcomingCourses')}
         </div>
       )}
     </button>
   );
 };
 
-export const RecentAchievementsContent: React.FC<{ courses: DashboardCompletedCourse[] }> = ({ courses }) => (
-  <div className="-mx-4 -my-2">
-    {courses.slice(0, 8).map((course) => (
-      <div key={course.id} className="flex items-center gap-3 border-b border-border/60 px-4 py-2.5 last:border-0">
-        <span
-          className={`flex size-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold tabular-nums ${
-            typeof course.grade === 'number' && course.grade >= 4
-              ? 'bg-lighterGreen/10 text-lighterGreen'
-              : 'bg-blue-400/10 text-blue-300'
-          }`}
-        >
-          {course.grade ?? '✓'}
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium text-offwhite">{course.name}</p>
-          <p className="text-xs text-lightGrey">{formatCompactDate(course.registrationDate)}</p>
+export const RecentAchievementsContent: React.FC<{ courses: DashboardCompletedCourse[] }> = ({ courses }) => {
+  const { t } = useTranslationWithPrefix('views.dashboard');
+
+  return (
+    <div className="-mx-4 -my-2">
+      {courses.slice(0, 8).map((course) => (
+        <div key={course.id} className="flex items-center gap-3 border-b border-border/60 px-4 py-2.5 last:border-0">
+          <span
+            className={`flex size-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold tabular-nums ${
+              typeof course.grade === 'number' && course.grade >= 4
+                ? 'bg-lighterGreen/10 text-lighterGreen'
+                : 'bg-blue-400/10 text-blue-300'
+            }`}
+          >
+            {course.grade === 'pass' ? t('grades.pass') : (course.grade ?? '✓')}
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium text-offwhite">{course.name}</p>
+            <p className="text-xs text-lightGrey">{formatCompactDate(course.registrationDate)}</p>
+          </div>
+          <span className="font-mono text-xs text-lightGrey">{formatCredits(course.credits)}</span>
         </div>
-        <span className="font-mono text-xs text-lightGrey">{formatCredits(course.credits)}</span>
-      </div>
-    ))}
-    {courses.length === 0 && (
-      <div className="flex items-center justify-center py-10 text-sm text-lightGrey">No completed courses yet.</div>
-    )}
-  </div>
-);
+      ))}
+      {courses.length === 0 && (
+        <div className="flex items-center justify-center py-10 text-sm text-lightGrey">
+          {t('widgets.analytics.noCompletedCourses')}
+        </div>
+      )}
+    </div>
+  );
+};
 
 export const WorkloadForecastContent: React.FC<{ periods: PeriodCreditSummary[] }> = ({ periods }) => {
+  const { t } = useTranslationWithPrefix('views.dashboard');
   const now = new Date();
   const upcoming = periods
     .filter((period) => new Date(period.period.endDate) >= now)
@@ -280,7 +302,9 @@ export const WorkloadForecastContent: React.FC<{ periods: PeriodCreditSummary[] 
         </div>
       ))}
       {upcoming.length === 0 && (
-        <div className="flex flex-1 items-center justify-center text-sm text-lightGrey">Nothing planned ahead.</div>
+        <div className="flex flex-1 items-center justify-center text-sm text-lightGrey">
+          {t('widgets.analytics.nothingPlanned')}
+        </div>
       )}
     </div>
   );
@@ -291,6 +315,7 @@ export const GraduationCountdownContent: React.FC<{
   semesters: SemesterCreditSummary[];
   totalTarget: number;
 }> = ({ creditsDone, semesters, totalTarget }) => {
+  const { t } = useTranslationWithPrefix('views.dashboard');
   const creditsRemaining = Math.max(totalTarget - creditsDone, 0);
   const plannedGraduationDate =
     semesters
@@ -309,16 +334,16 @@ export const GraduationCountdownContent: React.FC<{
   return (
     <div className="grid h-full grid-cols-2 gap-3">
       <div className="rounded-xl bg-container2 p-3">
-        <p className="text-xs text-lightGrey">Credits left</p>
+        <p className="text-xs text-lightGrey">{t('widgets.analytics.creditsLeft')}</p>
         <p className="mt-1 text-2xl font-semibold text-offwhite tabular-nums">{creditsRemaining}</p>
       </div>
       <div className="rounded-xl bg-container2 p-3">
-        <p className="text-xs text-lightGrey">Days left</p>
+        <p className="text-xs text-lightGrey">{t('widgets.analytics.daysLeft')}</p>
         <p className="mt-1 text-2xl font-semibold text-offwhite tabular-nums">{formatDays(daysRemaining)}</p>
       </div>
       <div className="col-span-2 rounded-xl bg-background/45 p-3 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]">
         <div className="flex items-center justify-between gap-3">
-          <span className="text-xs text-lightGrey">Credits/day needed</span>
+          <span className="text-xs text-lightGrey">{t('widgets.analytics.creditsPerDay')}</span>
           <span
             className={`font-mono text-sm font-semibold tabular-nums ${intense ? 'text-danger' : 'text-lighterGreen'}`}
           >

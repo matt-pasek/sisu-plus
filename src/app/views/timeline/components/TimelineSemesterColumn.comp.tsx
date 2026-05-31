@@ -11,6 +11,7 @@ import {
   isCurrentPeriod,
   isCurrentSemester,
 } from '@/app/views/timeline/components/timelineUtils';
+import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 
 interface Props {
   semester: SemesterCreditSummary;
@@ -61,6 +62,7 @@ function getSemesterCourseBlocks(semester: SemesterCreditSummary): SemesterCours
 }
 
 export const TimelineSemesterColumn: React.FC<Props> = ({ semester, moduleIds }) => {
+  const { t } = useTranslationWithPrefix('views.timeline');
   const current = isCurrentSemester(semester);
   const courseBlocks = getSemesterCourseBlocks(semester);
   const rowCount = Math.max(courseBlocks.length > 0 ? Math.max(...courseBlocks.map((block) => block.row)) + 1 : 1, 2);
@@ -79,7 +81,9 @@ export const TimelineSemesterColumn: React.FC<Props> = ({ semester, moduleIds })
           <div>
             <div className="flex items-center gap-2">
               {current && (
-                <span className="rounded bg-accent px-1.5 py-0.5 text-[10px] font-bold text-background">NOW</span>
+                <span className="rounded bg-accent px-1.5 py-0.5 text-[10px] font-bold text-background">
+                  {t('semester.now')}
+                </span>
               )}
               <h2 className="text-lg font-semibold text-offwhite">{getSemesterTitle(semester)}</h2>
             </div>
@@ -87,12 +91,12 @@ export const TimelineSemesterColumn: React.FC<Props> = ({ semester, moduleIds })
           <div className="flex shrink-0 gap-2">
             {semester.completedCredits > 0 && (
               <span className="rounded-full bg-lighterGreen/10 px-2 py-1 text-xs font-semibold text-lighterGreen">
-                {formatCredits(semester.completedCredits)} done
+                {formatCredits(semester.completedCredits)} {t('board.completed')}
               </span>
             )}
             {semester.plannedCredits > semester.completedCredits && (
               <span className="rounded-full bg-blue-400/10 px-2 py-1 text-xs font-semibold text-blue-300">
-                {formatCredits(semester.plannedCredits - semester.completedCredits)} planned
+                {formatCredits(semester.plannedCredits - semester.completedCredits)} {t('board.planned')}
               </span>
             )}
           </div>
@@ -153,7 +157,7 @@ export const TimelineSemesterColumn: React.FC<Props> = ({ semester, moduleIds })
             className="z-10 flex items-center justify-center text-xs text-darkishGrey"
             style={{ gridColumn: '1 / -1' }}
           >
-            No courses
+            {t('board.noCourses')}
           </div>
         )}
       </div>

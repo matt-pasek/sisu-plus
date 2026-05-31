@@ -2,6 +2,8 @@ import { IcsCalendar, type IcsEvent } from 'ts-ics';
 import React from 'react';
 import { daysUntil } from '@/app/helpers/daysUntilToday';
 import { getMoodleBaseUrl } from '@/shared/domains';
+import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
+import { getCurrentLocale } from '@/app/i18n';
 
 interface Props {
   deadlines?: IcsCalendar;
@@ -15,12 +17,13 @@ interface DeadlineTone {
 }
 
 const getDeadlineTone = (days: number): DeadlineTone => {
+  const t = (key: string) => key;
   if (days < 0) {
     return {
       accent: '#F06B6B',
       badge: 'bg-danger/15 text-danger ring-danger/20',
       card: 'bg-danger/10 shadow-[inset_0_0_0_1px_rgba(240,107,107,0.18),0_8px_18px_rgba(0,0,0,0.16)]',
-      label: 'Overdue',
+      label: t('overdue'),
     };
   }
 
@@ -29,7 +32,7 @@ const getDeadlineTone = (days: number): DeadlineTone => {
       accent: '#F06B6B',
       badge: 'bg-danger/15 text-danger ring-danger/20',
       card: 'bg-danger/10 shadow-[inset_0_0_0_1px_rgba(240,107,107,0.16),0_8px_18px_rgba(0,0,0,0.16)]',
-      label: 'Urgent',
+      label: t('urgent'),
     };
   }
 
@@ -38,7 +41,7 @@ const getDeadlineTone = (days: number): DeadlineTone => {
       accent: '#F0A84D',
       badge: 'bg-warn/15 text-warn ring-warn/20',
       card: 'bg-warn/10 shadow-[inset_0_0_0_1px_rgba(240,168,77,0.16),0_8px_18px_rgba(0,0,0,0.16)]',
-      label: 'Soon',
+      label: t('soon'),
     };
   }
 
@@ -46,7 +49,7 @@ const getDeadlineTone = (days: number): DeadlineTone => {
     accent: '#7878A0',
     badge: 'bg-container2 text-lightGrey ring-white/5',
     card: 'bg-container2 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.045),0_8px_18px_rgba(0,0,0,0.12)]',
-    label: 'Later',
+    label: t('later'),
   };
 };
 
@@ -57,7 +60,7 @@ function getCourseCode(event: IcsEvent): string {
 function getDateLabel(event: IcsEvent): string {
   const date = event.end?.date ?? event.start?.date;
   if (!date) return '';
-  return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return new Date(date).toLocaleDateString(getCurrentLocale(), { month: 'short', day: 'numeric' });
 }
 
 function sortEvents(events: IcsEvent[]): IcsEvent[] {
@@ -65,8 +68,10 @@ function sortEvents(events: IcsEvent[]): IcsEvent[] {
 }
 
 const DeadlineCard: React.FC<{ event: IcsEvent }> = ({ event }) => {
+  const { t } = useTranslationWithPrefix('views.dashboard');
   const days = daysUntil(event.end?.date);
   const tone = getDeadlineTone(days);
+  tone.label = t(`widgets.moodleDeadlines.tone.${tone.label}`);
   const dayLabel = days < 0 ? `${days}d` : `${days}d`;
 
   return (
@@ -102,6 +107,7 @@ const DeadlineCard: React.FC<{ event: IcsEvent }> = ({ event }) => {
 };
 
 export const MoodleDeadlinesContent: React.FC<Props> = ({ deadlines }) => {
+  const { t } = useTranslationWithPrefix('views.dashboard');
   const events = sortEvents(deadlines?.events ?? []);
   const urgentCount = events.filter((event) => daysUntil(event.end?.date) <= 2).length;
   const moodleBaseUrl = getMoodleBaseUrl();
@@ -110,9 +116,11 @@ export const MoodleDeadlinesContent: React.FC<Props> = ({ deadlines }) => {
     <div className="flex h-full min-h-0 flex-col">
       <div className="mb-3 flex items-center justify-between rounded-xl bg-background/45 px-3 py-2 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]">
         <div>
-          <p className="text-xs font-medium text-lightGrey">Next deadline pressure</p>
+          <p className="text-xs font-medium text-lightGrey">{t('widgets.moodleDeadlines.nextPressure')}</p>
           <p className="text-sm font-semibold text-offwhite">
-            {urgentCount > 0 ? `${urgentCount} urgent item${urgentCount === 1 ? '' : 's'}` : 'No urgent items'}
+            {urgentCount > 0
+              ? t('widgets.moodleDeadlines.urgentItems', { count: urgentCount })
+              : t('widgets.moodleDeadlines.noUrgentItems')}
           </p>
         </div>
         <span className="rounded-full bg-container2 px-2.5 py-1 font-mono text-xs font-semibold text-lightGrey tabular-nums">
@@ -127,8 +135,8 @@ export const MoodleDeadlinesContent: React.FC<Props> = ({ deadlines }) => {
           ))}
           {events.length === 0 && (
             <div className="flex h-40 flex-col items-center justify-center rounded-2xl border border-dashed border-border text-center">
-              <p className="text-sm font-medium text-offwhite">No deadlines approaching</p>
-              <p className="mt-1 text-xs text-lightGrey">Moodle sync is connected, but there is nothing urgent.</p>
+              <p className="text-sm font-medium text-offwhite">{t('widgets.moodleDeadlines.emptyTitle')}</p>
+              <p className="mt-1 text-xs text-lightGrey">{t('widgets.moodleDeadlines.emptyBody')}</p>
             </div>
           )}
         </div>
@@ -140,7 +148,7 @@ export const MoodleDeadlinesContent: React.FC<Props> = ({ deadlines }) => {
         rel="noopener noreferrer"
         className="mt-3 flex min-h-10 shrink-0 cursor-pointer items-center justify-center rounded-xl bg-container2 text-sm font-medium text-lightGrey transition-[background-color,color,transform] duration-200 hover:bg-offwhite/10 hover:text-offwhite active:scale-[0.96]"
       >
-        Open Moodle
+        {t('widgets.moodleDeadlines.openMoodle')}
       </a>
     </div>
   );

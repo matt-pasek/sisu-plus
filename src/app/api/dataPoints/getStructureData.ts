@@ -241,7 +241,8 @@ function buildSelectionGroups(args: {
       {
         id: rule.localId ?? `${args.section.id}:${fallbackTitle}`,
         parentModuleId: args.section.id ?? args.section.groupId,
-        title: pickMarkup(rule.type === 'CompositeRule' ? rule.description : undefined) ?? fallbackTitle,
+        title: fallbackTitle,
+        instructions: pickMarkup(rule.type === 'CompositeRule' ? rule.description : undefined),
         ...getRuleRange(rule),
         options,
       },
@@ -333,6 +334,9 @@ export const getStructureData = (): { data: StructureData | undefined; isLoading
           targetCredits: plannedCredits || moduleDetails[index].targetCredits,
           minimumCredits: moduleDetails[index].targetCredits,
           completedCredits,
+          instructions: sectionDocuments[index]
+            ? pickMarkup((sectionDocuments[index].rule as unknown as EditableRule).description)
+            : null,
           courses,
           selectionGroups: sectionDocuments[index]
             ? buildSelectionGroups({

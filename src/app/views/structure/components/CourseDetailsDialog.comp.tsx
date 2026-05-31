@@ -115,12 +115,9 @@ export const CourseDetailsDialog: React.FC<Props> = ({ course, planId, onClose, 
 
   return (
     <DialogShell labelId="course-details-dialog-title" onClose={onClose} maxWidth="max-w-3xl">
-      {/* HEADER — no border-b, version strip and tabs are inside */}
       <div className="relative flex-shrink-0 px-[26px] pt-[22px]">
-        {/* Left accent bar scoped to header */}
         <div className="absolute top-[22px] bottom-0 left-0 w-1 rounded-r-[3px] bg-lighterGreen" />
 
-        {/* Title row */}
         <div className="flex items-start gap-4">
           <div className="min-w-0 flex-1">
             <h2
@@ -141,7 +138,6 @@ export const CourseDetailsDialog: React.FC<Props> = ({ course, planId, onClose, 
           <DialogCloseButton label={t('close')} onClose={onClose} />
         </div>
 
-        {/* Version + status strip */}
         <div className="mt-[18px] mb-[16px] flex flex-wrap items-center gap-x-8 gap-y-[14px]">
           <div className="flex flex-col gap-[5px]">
             <span className="text-[10.5px] font-semibold tracking-[.06em] text-darkishGrey uppercase">
@@ -220,7 +216,6 @@ export const CourseDetailsDialog: React.FC<Props> = ({ course, planId, onClose, 
           </div>
         </div>
 
-        {/* Tabs — border-b acts as the header/body separator */}
         <div className="flex gap-6 border-b border-border">
           {(['info', 'equivalences'] as Tab[]).map((value) => (
             <button
@@ -237,7 +232,6 @@ export const CourseDetailsDialog: React.FC<Props> = ({ course, planId, onClose, 
         </div>
       </div>
 
-      {/* BODY */}
       <div className="min-h-0 overflow-y-auto px-[26px] pb-[26px]">
         {isLoading && (
           <div className="flex h-40 items-center justify-center">
@@ -251,7 +245,6 @@ export const CourseDetailsDialog: React.FC<Props> = ({ course, planId, onClose, 
 
         {!isLoading && tab === 'info' && (
           <div>
-            {/* Completion / action banner */}
             <div className="mt-5 mb-1">
               {course.completed ? (
                 <div className="flex items-center gap-[13px] rounded-[11px] border border-lighterGreen/22 bg-lighterGreen/12 px-4 py-[13px]">
@@ -290,12 +283,10 @@ export const CourseDetailsDialog: React.FC<Props> = ({ course, planId, onClose, 
               ) : null}
             </div>
 
-            {/* Information sheet heading */}
             <h3 className="mt-6 mb-[14px] text-[16px] font-semibold tracking-[-0.2px] text-offwhite">
               Information sheet
             </h3>
 
-            {/* Basic information */}
             <CDLabel>{t('courseDetails.basicInfoHeading')}</CDLabel>
             <div className="mb-2 grid gap-x-8 gap-y-0.5 sm:grid-cols-2">
               <CDField label={t('courseDetails.languageLabel')} value={languages} />
@@ -304,7 +295,6 @@ export const CourseDetailsDialog: React.FC<Props> = ({ course, planId, onClose, 
               <CDField label={t('courseDetails.courseTypeLabel')} value={courseType} />
             </div>
 
-            {/* Content and goals */}
             {(outcomes || content) && (
               <CDCollapse title={t('courseDetails.contentHeading')} defaultOpen>
                 <div className="grid gap-9 sm:grid-cols-2">

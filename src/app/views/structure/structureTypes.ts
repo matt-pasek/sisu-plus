@@ -24,6 +24,7 @@ export type StructureSelectionGroup = {
   id: string;
   parentModuleId: string;
   title: string;
+  instructions: string | null;
   min: number | null;
   max: number | null;
   creditsMin: number | null;
@@ -37,6 +38,7 @@ export type SectionData = {
   targetCredits: number;
   minimumCredits: number;
   completedCredits: number;
+  instructions: string | null;
   courses: CourseEntry[];
   selectionGroups: StructureSelectionGroup[];
   supportsFreeCourseSearch: boolean;

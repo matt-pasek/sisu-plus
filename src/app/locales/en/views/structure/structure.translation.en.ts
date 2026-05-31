@@ -39,6 +39,7 @@ export type StructureTranslation = {
     cancel: string;
     title: string;
     draftHint: string;
+    instructions: string;
     groups: string;
     noGroups: string;
     selected: string;
@@ -57,9 +58,23 @@ export type StructureTranslation = {
   };
   bulkUpdate: {
     button: string;
+    panelTitle: string;
+    panelDescription: string;
+    checking: string;
+    counter: string;
     title: string;
     subtitle: string;
     applyButton: string;
+    applySelectedButton: string;
+    cancelButton: string;
+    coursesToUpdate: string;
+    availableCount: string;
+    selectAll: string;
+    deselectAll: string;
+    selectYear: string;
+    deselectYear: string;
+    newVersionTag: string;
+    fromVersion: string;
     noneTitle: string;
     noneSubtitle: string;
     oldVersion: string;
@@ -183,6 +198,7 @@ export const structureTranslation: StructureTranslation = {
     title: 'Edit selections',
     draftHint:
       'Changes stay in draft until saved. Choosing a new alternative removes the old alternative and its nested courses.',
+    instructions: 'Instructions',
     groups: 'groups',
     noGroups: 'No structured selection groups were found for this section.',
     selected: 'Selected',
@@ -201,13 +217,28 @@ export const structureTranslation: StructureTranslation = {
   },
   bulkUpdate: {
     button: 'Update all to latest',
+    panelTitle: 'Course version updates',
+    panelDescription:
+      'Your planned courses have newer versions available. Enrolled and completed courses are not affected.',
+    checking: 'Checking...',
+    counter: '{{count}} to update',
     title: 'Update course versions',
-    subtitle: 'These uncompleted courses have a newer version available.',
-    applyButton: 'Apply changes',
+    subtitle: 'Select which courses to update to their latest version.',
+    applyButton: 'Apply updates',
+    applySelectedButton: 'Apply {{count}} updates',
+    cancelButton: 'Cancel',
+    coursesToUpdate: 'Courses to update',
+    availableCount: '{{count}} available',
+    selectAll: 'Select all',
+    deselectAll: 'Deselect all',
+    selectYear: 'Select year',
+    deselectYear: 'Deselect year',
+    newVersionTag: 'New version',
+    fromVersion: 'from {{version}}',
     noneTitle: 'All up to date',
     noneSubtitle: 'All uncompleted courses are already on their latest version.',
-    oldVersion: 'Old version',
-    newVersion: 'New version',
+    oldVersion: 'Current',
+    newVersion: 'Latest',
     unscheduledGroup: 'Unscheduled',
     courseCount: 'courses',
     selectedCount: 'selected',

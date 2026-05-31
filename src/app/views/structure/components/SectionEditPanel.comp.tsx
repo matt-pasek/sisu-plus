@@ -3,6 +3,7 @@ import { searchCourseUnits } from '@/app/api/dataPoints/searchCourseUnits';
 import type { Plan } from '@/app/api/generated/OsuvaApi';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import type { ModuleColor } from '@/app/theme/moduleColors';
+import { getSectionInstructionsForEdit } from '@/app/views/structure/components/sectionInstructions';
 import {
   addCourseToModule,
   removeCourseFromModule,
@@ -32,6 +33,7 @@ export const SectionEditPanel: React.FC<Props> = ({ color, draftPlan, section, o
   const [query, setQuery] = useState('');
   const search = searchCourseUnits(query.trim());
   const selectedCourses = selectedCourseIds(draftPlan);
+  const sectionInstructions = getSectionInstructionsForEdit(section.instructions, section.selectionGroups);
 
   const chooseOption = (group: StructureSelectionGroup, option: StructureOption) => {
     if (option.type === 'module') {
@@ -71,6 +73,15 @@ export const SectionEditPanel: React.FC<Props> = ({ color, draftPlan, section, o
       </div>
 
       <div className="grid gap-3">
+        {sectionInstructions && (
+          <div className="rounded-lg bg-container2/70 px-4 py-3 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)]">
+            <div className="mb-1 text-xs font-bold tracking-[0.13em] text-lightGrey uppercase">
+              {t('edit.instructions')}
+            </div>
+            <p className="text-sm leading-6 text-offwhite">{sectionInstructions}</p>
+          </div>
+        )}
+
         {section.selectionGroups.map((group) => (
           <SelectionGroupCard
             key={group.id}
@@ -156,6 +167,7 @@ const SelectionGroupCard: React.FC<{
               ? t('edit.creditRule', { min: group.creditsMin, max: group.creditsMax ?? '∞' })
               : t('edit.countRule', { min: group.min ?? 0, max: group.max ?? '∞' })}
           </p>
+          {group.instructions && <p className="mt-2 max-w-5xl text-sm leading-6 text-offwhite">{group.instructions}</p>}
         </div>
         <span className="rounded bg-container px-2 py-1 font-mono text-xs text-darkishGrey">
           {group.options.length}

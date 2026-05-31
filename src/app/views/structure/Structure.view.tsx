@@ -15,6 +15,7 @@ import { CompletionMethodDialog } from '@/app/views/structure/components/Complet
 import { AttainmentDialog } from '@/app/views/structure/components/AttainmentDialog.comp';
 import { CourseDetailsDialog } from '@/app/views/structure/components/CourseDetailsDialog.comp';
 import { BulkVersionUpdateDialog } from '@/app/views/structure/components/BulkVersionUpdateDialog.comp';
+import { BulkVersionUpdatePanel } from '@/app/views/structure/components/BulkVersionUpdatePanel.comp';
 import type { Plan } from '@/app/api/generated/OsuvaApi';
 import type { CourseEntry } from '@/app/views/structure/structureTypes';
 
@@ -103,10 +104,7 @@ const StructureView: React.FC = () => {
                     </Button>
                   </>
                 ) : (
-                  <>
-                    <Button onClick={() => setBulkDialogOpen(true)}>{t('bulkUpdate.button')}</Button>
-                    <Button onClick={startEditing}>{t('edit.edit')}</Button>
-                  </>
+                  <Button onClick={startEditing}>{t('edit.edit')}</Button>
                 )}
               </div>
             </header>
@@ -122,6 +120,13 @@ const StructureView: React.FC = () => {
             </div>
 
             <div className="flex flex-col gap-3">
+              {!isEditing && (
+                <BulkVersionUpdatePanel
+                  plan={data.plan}
+                  sections={data.sections}
+                  onOpen={() => setBulkDialogOpen(true)}
+                />
+              )}
               {data.sections.map((section, index) => {
                 const color = MODULE_COLORS[index % MODULE_COLORS.length];
                 const isOpen = expandedSections.has(section.moduleId);

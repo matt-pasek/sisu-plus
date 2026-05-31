@@ -18,6 +18,21 @@
   --font-mono: 'Fira Code', ui-monospace, monospace;
 }
 
+#app,
+#app *,
+#app::before,
+#app::after,
+#app *::before,
+#app *::after,
+#sisu-plus-control-root,
+#sisu-plus-control-root *,
+#sisu-plus-control-root::before,
+#sisu-plus-control-root::after,
+#sisu-plus-control-root *::before,
+#sisu-plus-control-root *::after {
+  --tw-border-style: solid;
+}
+
 #app {
   min-height: 100dvh;
   margin: -8px;

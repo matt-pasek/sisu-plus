@@ -4,21 +4,27 @@ import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import i18n, { getCurrentLocale } from '@/app/i18n';
 import type { LandingPolicySection, LandingRoadmapColumn } from '@/app/locales/en/landing/landing.translation.en';
 import { LOCALES, Locale } from '@/app/locales/locale';
+import { getRoutePath, LandingRoute } from '@/landing/landingSeo';
 import { HeroShowcase } from '@/landing/components/HeroShowcase';
 import Plasma from '@/landing/components/Plasma';
+import packageJson from '../../package.json';
 
 type LandingFeatureCard = { title: string; body: string };
 
-const chromeStoreUrl = import.meta.env.VITE_CHROME_WEB_STORE_URL?.trim();
-const chromeStoreLinkProps = chromeStoreUrl
-  ? {
-      href: chromeStoreUrl,
-      target: '_blank',
-      rel: 'noreferrer',
-    }
-  : {
-      href: '#install',
-    };
+const appVersion = import.meta.env?.VITE_APP_VERSION ?? packageJson.version;
+const chromeStoreUrl = import.meta.env?.VITE_CHROME_WEB_STORE_URL?.trim();
+
+function getChromeStoreLinkProps(fallbackHref: string) {
+  return chromeStoreUrl
+    ? {
+        href: chromeStoreUrl,
+        target: '_blank',
+        rel: 'noreferrer',
+      }
+    : {
+        href: fallbackHref,
+      };
+}
 
 function Logo() {
   return (
@@ -92,12 +98,17 @@ function SupportIcon() {
   );
 }
 
-function LanguageToggle() {
+function LanguageToggle({ route }: { route: LandingRoute }) {
   const activeLocale = getCurrentLocale();
 
   function setLocale(locale: Locale) {
     localStorage.setItem('i18nextLng', locale);
     void i18n.changeLanguage(locale);
+
+    const nextPath = getRoutePath(locale, route.kind);
+    if (window.location.pathname !== nextPath) {
+      window.location.assign(nextPath);
+    }
   }
 
   return (
@@ -225,7 +236,7 @@ function FeatureCarousel({ cards }: { cards: LandingFeatureCard[] }) {
   );
 }
 
-function Footer({ full = true }: { full?: boolean }) {
+function Footer({ full = true, route }: { full?: boolean; route: LandingRoute }) {
   const { t } = useTranslationWithPrefix('landing');
 
   return (
@@ -239,7 +250,7 @@ function Footer({ full = true }: { full?: boolean }) {
         </p>
       </div>
       <div className="landing-footer-links">
-        {full && <a href="/privacy">{t('footer.privacyPolicy')}</a>}
+        {full && <a href={getRoutePath(route.locale, 'privacy')}>{t('footer.privacyPolicy')}</a>}
         <a href="https://github.com/matt-pasek/sisu-plus">{t('footer.sourceCode')}</a>
         {full && (
           <a href="https://ko-fi.com/mattpasek" target="_blank" rel="noreferrer">
@@ -258,26 +269,28 @@ function Footer({ full = true }: { full?: boolean }) {
   );
 }
 
-export function LandingPage() {
+export function LandingPage({ route }: { route: LandingRoute }) {
   const { t } = useTranslationWithPrefix('landing');
   const roadmap = t('roadmap.columns', { returnObjects: true }) as LandingRoadmapColumn[];
   const privacyPoints = t('privacy.points', { returnObjects: true }) as string[];
   const featureCards = t('features.cards', { returnObjects: true }) as LandingFeatureCard[];
+  const homePath = getRoutePath(route.locale, 'home');
+  const chromeStoreLinkProps = getChromeStoreLinkProps(`${homePath}#install`);
 
   return (
     <main className="landing-page">
       <nav className="landing-nav">
         <Logo />
         <div className="landing-nav-links">
-          <a href="#features">{t('nav.features')}</a>
-          <a href="#privacy">{t('nav.privacy')}</a>
-          <a href="#roadmap">{t('nav.roadmap')}</a>
+          <a href={`${homePath}#features`}>{t('nav.features')}</a>
+          <a href={`${homePath}#privacy`}>{t('nav.privacy')}</a>
+          <a href={`${homePath}#roadmap`}>{t('nav.roadmap')}</a>
         </div>
         <div className="flex items-center gap-3">
           <a className="landing-nav-cta" {...chromeStoreLinkProps}>
             {t('nav.addToChrome')}
           </a>
-          <LanguageToggle />
+          <LanguageToggle route={route} />
         </div>
       </nav>
       <section className="landing-hero" id="top">
@@ -296,7 +309,7 @@ export function LandingPage() {
         <div className="landing-hero-copy">
           <div className="landing-badge">
             <span>{t('hero.badge')}</span>
-            <p>{t('hero.shipped', { version: import.meta.env.VITE_APP_VERSION })}</p>
+            <p>{t('hero.shipped', { version: appVersion })}</p>
           </div>
           <h1>
             {t('hero.titleStart')} <span>{t('hero.titleAccent')}</span>
@@ -310,7 +323,7 @@ export function LandingPage() {
               <GithubIcon />
               {t('hero.sourceCode')}
             </a>
-            <a className="landing-secondary" href="#features">
+            <a className="landing-secondary" href={`${homePath}#features`}>
               {t('hero.seeChanged')}
             </a>
           </div>
@@ -454,28 +467,31 @@ export function LandingPage() {
         </div>
       </section>
 
-      <Footer />
+      <Footer route={route} />
     </main>
   );
 }
 
-export function PrivacyPolicyPage() {
+export function PrivacyPolicyPage({ route }: { route: LandingRoute }) {
   const { t } = useTranslationWithPrefix('landing');
   const policySections = t('policy.sections', { returnObjects: true }) as LandingPolicySection[];
+  const homePath = getRoutePath(route.locale, 'home');
+  const chromeStoreLinkProps = getChromeStoreLinkProps(`${homePath}#install`);
 
   return (
     <main className="landing-page privacy-page">
       <nav className="landing-nav">
         <Logo />
         <div className="landing-nav-links">
-          <a href="/">{t('nav.home')}</a>
-          <a href="/#features">{t('nav.features')}</a>
-          <a href="/#install">{t('nav.install')}</a>
+          <a href={homePath}>{t('nav.home')}</a>
+          <a href={`${homePath}#features`}>{t('nav.features')}</a>
         </div>
-        <LanguageToggle />
-        <a className="landing-nav-cta" href="/">
-          {t('nav.backToSisu')}
-        </a>
+        <div className="flex items-center gap-3">
+          <a className="landing-nav-cta" {...chromeStoreLinkProps}>
+            {t('nav.addToChrome')}
+          </a>
+          <LanguageToggle route={route} />
+        </div>
       </nav>
 
       <section className="privacy-document">
@@ -496,7 +512,11 @@ export function PrivacyPolicyPage() {
         </div>
       </section>
 
-      <Footer full={false} />
+      <Footer full={false} route={route} />
     </main>
   );
+}
+
+export function LandingApp({ route }: { route: LandingRoute }) {
+  return route.kind === 'privacy' ? <PrivacyPolicyPage route={route} /> : <LandingPage route={route} />;
 }

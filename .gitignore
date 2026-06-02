@@ -6,3 +6,5 @@ node_modules
 .idea
 /src/app/api/generated/*
 .collab/
+.vercel
+.env*

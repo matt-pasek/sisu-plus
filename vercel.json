@@ -2,7 +2,15 @@
   "rewrites": [
     {
       "source": "/privacy",
-      "destination": "/index.html"
+      "destination": "/en/privacy"
+    },
+    {
+      "source": "/en",
+      "destination": "/en/"
+    },
+    {
+      "source": "/fi",
+      "destination": "/fi/"
     }
   ]
 }

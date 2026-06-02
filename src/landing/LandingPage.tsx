@@ -1,9 +1,13 @@
+import { useEffect, useState } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import i18n, { getCurrentLocale } from '@/app/i18n';
 import type { LandingPolicySection, LandingRoadmapColumn } from '@/app/locales/en/landing/landing.translation.en';
 import { LOCALES, Locale } from '@/app/locales/locale';
 import { HeroShowcase } from '@/landing/components/HeroShowcase';
 import Plasma from '@/landing/components/Plasma';
+
+type LandingFeatureCard = { title: string; body: string };
 
 const chromeStoreUrl = import.meta.env.VITE_CHROME_WEB_STORE_URL?.trim();
 const chromeStoreLinkProps = chromeStoreUrl
@@ -70,7 +74,7 @@ function MailIcon() {
   );
 }
 
-function EnergyDrinkIcon() {
+function SupportIcon() {
   return (
     <svg
       aria-hidden="true"
@@ -82,10 +86,8 @@ function EnergyDrinkIcon() {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <path d="M8 3h8" />
-      <path d="M9 3 8 7h8l-1-4" />
-      <path d="M8 7h8l-1 14H9L8 7Z" />
-      <path d="M11.5 11 10 15h3l-1 3 3-5h-3l1-2Z" />
+      <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z" />
+      <path d="M12 5 9.7 9.2h4.1L11.6 14" />
     </svg>
   );
 }
@@ -133,6 +135,96 @@ function HeroSocialProof() {
   );
 }
 
+function FeatureCarousel({ cards }: { cards: LandingFeatureCard[] }) {
+  const [featureState, setFeatureState] = useState({ direction: 1, index: 0 });
+  const [isPaused, setIsPaused] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
+  const activeIndex = featureState.index;
+  const activeCard = cards[activeIndex];
+
+  function selectFeature(nextIndex: number) {
+    setFeatureState((currentState) => {
+      if (nextIndex === currentState.index) {
+        return currentState;
+      }
+
+      return {
+        direction: nextIndex > currentState.index ? 1 : -1,
+        index: nextIndex,
+      };
+    });
+  }
+
+  useEffect(() => {
+    if (cards.length < 2 || isPaused || shouldReduceMotion) {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      setFeatureState((currentState) => ({
+        direction: 1,
+        index: (currentState.index + 1) % cards.length,
+      }));
+    }, 4200);
+
+    return () => window.clearInterval(intervalId);
+  }, [cards.length, isPaused, shouldReduceMotion]);
+
+  if (!activeCard) {
+    return null;
+  }
+
+  return (
+    <div
+      className="landing-feature-carousel"
+      onBlur={() => setIsPaused(false)}
+      onFocus={() => setIsPaused(true)}
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
+      <div className="landing-feature-card-window">
+        <AnimatePresence custom={featureState.direction} initial={false} mode="wait">
+          <motion.article
+            animate={{ filter: 'blur(0px)', opacity: 1, x: 0 }}
+            className="landing-feature-card-active landing-interactive-card"
+            exit={{
+              filter: shouldReduceMotion ? 'blur(0px)' : 'blur(6px)',
+              opacity: 0,
+              x: shouldReduceMotion ? 0 : featureState.direction * -18,
+            }}
+            initial={{
+              filter: shouldReduceMotion ? 'blur(0px)' : 'blur(8px)',
+              opacity: 0,
+              x: shouldReduceMotion ? 0 : featureState.direction * 28,
+            }}
+            key={activeCard.title}
+            transition={{ bounce: 0, duration: 0.36, type: 'spring' }}
+          >
+            <span>{String(activeIndex + 1).padStart(2, '0')}</span>
+            <h3>{activeCard.title}</h3>
+            <p>{activeCard.body}</p>
+          </motion.article>
+        </AnimatePresence>
+      </div>
+
+      <div className="landing-feature-controls" aria-label="Feature carousel">
+        {cards.map((card, index) => (
+          <button
+            aria-label={`Show ${card.title}`}
+            className={index === activeIndex ? 'is-active' : undefined}
+            key={card.title}
+            onClick={() => selectFeature(index)}
+            type="button"
+          >
+            <span>{String(index + 1).padStart(2, '0')}</span>
+            <strong>{card.title}</strong>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function Footer({ full = true }: { full?: boolean }) {
   const { t } = useTranslationWithPrefix('landing');
 
@@ -170,7 +262,7 @@ export function LandingPage() {
   const { t } = useTranslationWithPrefix('landing');
   const roadmap = t('roadmap.columns', { returnObjects: true }) as LandingRoadmapColumn[];
   const privacyPoints = t('privacy.points', { returnObjects: true }) as string[];
-  const featureCards = t('features.cards', { returnObjects: true }) as { title: string; body: string }[];
+  const featureCards = t('features.cards', { returnObjects: true }) as LandingFeatureCard[];
 
   return (
     <main className="landing-page">
@@ -236,14 +328,7 @@ export function LandingPage() {
           <h2>{t('features.title')}</h2>
           <p className="landing-section-copy">{t('features.body')}</p>
         </div>
-        <div className="landing-feature-list">
-          {featureCards.map((card) => (
-            <article className="landing-interactive-card" key={card.title}>
-              <h3>{card.title}</h3>
-              <p>{card.body}</p>
-            </article>
-          ))}
-        </div>
+        <FeatureCarousel cards={featureCards} />
       </section>
 
       <section className="landing-section landing-privacy landing-reveal" id="privacy">
@@ -301,7 +386,7 @@ export function LandingPage() {
           aria-label={t('support.aria')}
         >
           <span className="landing-support-icon">
-            <EnergyDrinkIcon />
+            <SupportIcon />
           </span>
           <span>
             <strong>{t('support.action')}</strong>

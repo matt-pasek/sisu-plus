@@ -268,8 +268,8 @@ export const landingTranslation: LandingTranslation = {
     title: 'Enjoy Sisu+ and want to support development?',
     body: 'Get me a strawberry-lime energy drink on Ko-fi and I will deliver new features even quicker! It helps cover the small costs and late-night polish passes that keep Sisu+ moving.',
     aria: 'Support Sisu+ development on Ko-fi',
-    action: 'Feed me with batteries',
-    hint: '(Ko-fi opens in a new tab)',
+    action: 'Feed me batteries',
+    hint: 'Support development via Ko-fi',
   },
   universities: {
     kicker: 'Where it works',

@@ -107,7 +107,7 @@ export const landingTranslation: LandingTranslation = {
     body: 'Tarjoa minulle mansikka-lime-energiajuoma Ko-fissa, niin toimitan uusia ominaisuuksia vielä nopeammin. Se auttaa kattamaan pienet kulut ja myöhäisillan viimeistelyt, joilla Sisu+ pysyy liikkeessä.',
     aria: 'Tue Sisu+:n kehitystä Ko-fissa',
     action: 'Syötä minulle akkuja',
-    hint: '(Ko-fi avautuu uuteen välilehteen)',
+    hint: 'Tue kehitystä Ko-fin kautta',
   },
   universities: {
     kicker: 'Missä se toimii',

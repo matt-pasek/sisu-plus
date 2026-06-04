@@ -27,9 +27,11 @@ export const Navbar: React.FC = () => {
 
   return (
     <nav className="sticky z-50 flex w-full gap-5 border-b border-solid border-border bg-container px-6 py-2">
-      <div className="flex items-center gap-1 text-lg font-medium">
-        <div className="size-2 rounded-full bg-accent" />
-        SISU <span className="mb-1 text-xl text-accent">+</span>
+      <div className="flex items-center gap-2 font-semibold text-offwhite">
+        <span className="grid h-8 w-8 place-items-center rounded-lg bg-lighterGreen font-bold text-background">S+</span>
+        <span>
+          Sisu<span className="text-lighterGreen">+</span>
+        </span>
       </div>
       <div className="flex items-center gap-2 text-sm font-medium">
         <NaviLink to={'/student/frontpage'} name={t('links.dashboard')} />

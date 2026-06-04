@@ -121,6 +121,50 @@ export function ControlCenter() {
     setPrefs({ sisuPlusActive: true, sisuPlusOnboardingStep: 3 });
   }
 
+  function openOnboarding() {
+    void chrome.tabs.create({ url: chrome.runtime.getURL('onboarding.html') });
+  }
+
+  if (prefsLoaded && !prefs.universityConfig) {
+    return (
+      <div
+        style={{
+          position: 'fixed',
+          right: 16,
+          bottom: 16,
+          zIndex: 30,
+          background: 'var(--color-background)',
+          border: '1px solid rgba(255,255,255,0.08)',
+          borderRadius: 16,
+          padding: '16px 18px',
+          maxWidth: 280,
+          fontFamily: 'var(--font-sans)',
+          color: 'var(--color-offwhite)',
+          boxShadow: '0 12px 32px rgba(0,0,0,0.4)',
+        }}
+      >
+        <p style={{ fontSize: 13, marginBottom: 10, color: 'var(--color-lightGrey)' }}>Sisu+ isn't configured yet.</p>
+        <button
+          onClick={openOnboarding}
+          style={{
+            background: 'var(--color-accent)',
+            border: 'none',
+            borderRadius: 8,
+            color: '#fff',
+            cursor: 'pointer',
+            fontSize: 13,
+            fontWeight: 600,
+            padding: '7px 14px',
+            width: '100%',
+          }}
+          type="button"
+        >
+          Set up now
+        </button>
+      </div>
+    );
+  }
+
   return (
     <motion.div
       className="fixed right-4 bottom-4 z-30 overflow-hidden bg-background text-offwhite shadow-[0_24px_60px_rgba(0,0,0,0.38),0_0_0_1px_rgba(255,255,255,0.08)]"

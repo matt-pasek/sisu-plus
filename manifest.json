@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "Sisu+",
+  "name": "__MSG_extName__",
   "version": "1.1.0",
-  "description": "A better user experience for Sisu",
+  "description": "__MSG_extDescription__",
+  "default_locale": "en",
   "permissions": ["storage", "webRequest"],
   "optional_host_permissions": ["https://*/*"],
   "background": {

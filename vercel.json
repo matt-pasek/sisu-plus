@@ -1,4 +1,11 @@
 {
+  "redirects": [
+    {
+      "source": "/install",
+      "destination": "https://chromewebstore.google.com/detail/sisu+/oaimdmdjlgfgfigmblpolficgleijcoe",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/privacy",

@@ -2,6 +2,7 @@ import { mountApp } from '@/app/main';
 import { mountControlCenter } from '@/app/controlCenter/main';
 import { DEFAULT_PREFS, SisuPrefs } from '@/app/types/prefs';
 import globalCss from '@/app/global.css?inline';
+import type { UniversityConfig } from '@/app/types/universityConfig';
 
 const origPushState = history.pushState;
 const origReplaceState = history.replaceState;
@@ -83,6 +84,10 @@ function mountSisuPlus() {
 }
 
 async function init() {
+  const stored = await chrome.storage.sync.get('universityConfig');
+  const universityConfig = stored.universityConfig as UniversityConfig | undefined;
+  if (!universityConfig || window.location.hostname !== universityConfig.sisuDomain) return;
+
   await waitForStudentPage();
 
   if (isStudentLoginPage()) {

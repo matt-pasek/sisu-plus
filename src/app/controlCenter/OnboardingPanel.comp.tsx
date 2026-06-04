@@ -1,6 +1,6 @@
 import { motion } from 'motion/react';
-import { getMoodleCalendarExportUrl } from '@/shared/domains';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
+import { useChromeStorage } from '@/app/hooks/useChromeStorage';
 
 const ONBOARDING_STEP_COUNT = 5;
 
@@ -57,6 +57,10 @@ export function OnboardingPanel({
   onStepChange,
 }: OnboardingPanelProps) {
   const { t } = useTranslationWithPrefix('controlCenter.onboarding');
+  const [prefs] = useChromeStorage();
+  const moodleCalendarExportUrl = prefs.universityConfig
+    ? `${prefs.universityConfig.moodleOrigin}/calendar/export.php?`
+    : '';
   const safeStep = clampStep(step);
   const isLastStep = safeStep === ONBOARDING_STEP_COUNT - 1;
   const onboardingSteps = t('steps', { returnObjects: true }) as string[];
@@ -241,7 +245,7 @@ export function OnboardingPanel({
 
             <a
               className="flex min-h-10 cursor-pointer items-center justify-center rounded-xl bg-container2 px-3 text-sm font-semibold text-offwhite transition-[background-color,color,transform] duration-200 hover:bg-offwhite/10 active:scale-[0.96]"
-              href={getMoodleCalendarExportUrl()}
+              href={moodleCalendarExportUrl}
               rel="noreferrer"
               target="_blank"
             >

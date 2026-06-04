@@ -1,8 +1,8 @@
 import { IcsCalendar, type IcsEvent } from 'ts-ics';
 import React from 'react';
 import { daysUntil } from '@/app/helpers/daysUntilToday';
-import { getMoodleBaseUrl } from '@/shared/domains';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
+import { useChromeStorage } from '@/app/hooks/useChromeStorage';
 import { getCurrentLocale } from '@/app/i18n';
 
 interface Props {
@@ -110,7 +110,8 @@ export const MoodleDeadlinesContent: React.FC<Props> = ({ deadlines }) => {
   const { t } = useTranslationWithPrefix('views.dashboard');
   const events = sortEvents(deadlines?.events ?? []);
   const urgentCount = events.filter((event) => daysUntil(event.end?.date) <= 2).length;
-  const moodleBaseUrl = getMoodleBaseUrl();
+  const [prefs] = useChromeStorage();
+  const moodleBaseUrl = prefs.universityConfig?.moodleOrigin ?? '';
 
   return (
     <div className="flex h-full min-h-0 flex-col">

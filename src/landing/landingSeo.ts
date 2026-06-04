@@ -129,10 +129,10 @@ export function buildOpenGraphImageUrl(): string {
 
 export function buildRobotsTxt(): string {
   return `User-agent: *
-Allow: /
-
-Sitemap: ${LANDING_ORIGIN}/sitemap.xml
-`;
+    Allow: /
+    
+    Sitemap: ${LANDING_ORIGIN}/sitemap.xml
+  `;
 }
 
 export function buildSitemapXml(): string {
@@ -153,10 +153,10 @@ ${alternates}
     .join('\n');
 
   return `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
-${urls}
-</urlset>
-`;
+    <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+    ${urls}
+    </urlset>
+  `;
 }
 
 function normalizePath(pathname: string): string {

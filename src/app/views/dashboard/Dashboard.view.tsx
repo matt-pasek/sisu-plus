@@ -16,7 +16,7 @@ import { Button } from '@/app/components/ui/Button.comp';
 import { InlineLoader } from '@/app/components/ui/InlineLoader.comp';
 import { daysUntil } from '@/app/helpers/daysUntilToday';
 import { useSisuQuery } from '@/app/hooks/useSisuQuery';
-import { getMoodleCalendarExportUrl } from '@/shared/domains';
+import { getMoodleCalendarExportUrlFromConfig } from '@/shared/domains';
 import {
   CreditsVelocityContent,
   DashboardCompletedCourse,
@@ -734,6 +734,7 @@ const DashboardView: React.FC = () => {
 
 const MoodleMissingToken: React.FC = () => {
   const { t } = useTranslationWithPrefix('views.dashboard');
+  const [prefs] = useChromeStorage();
 
   return (
     <div className="flex flex-col gap-3">
@@ -752,7 +753,13 @@ const MoodleMissingToken: React.FC = () => {
         </div>
       </div>
       <p className="text-xs font-light text-lightGrey">{t('moodleMissing.description')}</p>
-      <Button onClick={() => window.open(getMoodleCalendarExportUrl())}>{t('moodleMissing.button')}</Button>
+      <Button
+        onClick={() =>
+          prefs.universityConfig && window.open(getMoodleCalendarExportUrlFromConfig(prefs.universityConfig))
+        }
+      >
+        {t('moodleMissing.button')}
+      </Button>
     </div>
   );
 };

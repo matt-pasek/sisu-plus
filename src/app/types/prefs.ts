@@ -1,5 +1,6 @@
 import { DashboardWidgetLayout, DEFAULT_DASHBOARD_LAYOUT } from '@/app/views/dashboard/components/dashboardWidgets';
 import { DEFAULT_LOCALE, Locale } from '@/app/locales/locale';
+import type { UniversityConfig } from './universityConfig';
 
 export interface SisuPrefs {
   locale: Locale;
@@ -8,6 +9,7 @@ export interface SisuPrefs {
   dashboardLayout: DashboardWidgetLayout[];
   sisuPlusOnboardingCompleted: boolean;
   sisuPlusOnboardingStep: number;
+  universityConfig: UniversityConfig | null;
 }
 
 export const DEFAULT_PREFS: SisuPrefs = {
@@ -17,4 +19,5 @@ export const DEFAULT_PREFS: SisuPrefs = {
   dashboardLayout: DEFAULT_DASHBOARD_LAYOUT,
   sisuPlusOnboardingCompleted: false,
   sisuPlusOnboardingStep: 0,
+  universityConfig: null,
 };

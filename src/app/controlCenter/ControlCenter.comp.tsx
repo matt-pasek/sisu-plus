@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useChromeStorage } from '@/app/hooks/useChromeStorage';
 import CircularText from '@/app/components/CircularText.comp';
 import { motion, AnimatePresence } from 'motion/react';
-import { getMoodleCalendarExportUrl } from '@/shared/domains';
+import { getMoodleCalendarExportUrlFromConfig } from '@/shared/domains';
 import { OnboardingPanel } from '@/app/controlCenter/OnboardingPanel.comp';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 
@@ -91,7 +91,9 @@ export function ControlCenter() {
   const isActive = prefs.sisuPlusActive;
   const moodleToken = prefs.moodleToken ?? '';
   const validMoodleUrl = isValidMoodleUrl(moodleToken);
-  const moodleCalendarPlaceholder = `${getMoodleCalendarExportUrl().replace('/export.php?', '/export_execute.php?')}...`;
+  const moodleCalendarPlaceholder = prefs.universityConfig
+    ? `${getMoodleCalendarExportUrlFromConfig(prefs.universityConfig).replace('/export.php?', '/export_execute.php?')}...`
+    : 'https://moodle.youruni.fi/calendar/export_execute.php?...';
   const onboardingActive = prefsLoaded && !prefs.sisuPlusOnboardingCompleted;
   const size = 80;
   const openWidth = onboardingActive ? 520 : 360;

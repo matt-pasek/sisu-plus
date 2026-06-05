@@ -6,6 +6,7 @@ import { fetchPlans } from '@/app/api/endpoints/plans';
 import { AccountDropdown } from '@/app/components/ui/AccountDropdown.comp';
 import { useSisuQuery } from '@/app/hooks/useSisuQuery';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
+import { SisuPlusLogo } from '@/shared/SisuPlusLogo';
 
 const NaviLink: React.FC<{ to: string; name: string }> = ({ to, name }) => (
   <NavLink
@@ -27,12 +28,7 @@ export const Navbar: React.FC = () => {
 
   return (
     <nav className="sticky z-50 flex w-full gap-5 border-b border-solid border-border bg-container px-6 py-2">
-      <div className="flex items-center gap-2 font-semibold text-offwhite">
-        <span className="grid h-8 w-8 place-items-center rounded-lg bg-lighterGreen font-bold text-background">S+</span>
-        <span>
-          Sisu<span className="text-lighterGreen">+</span>
-        </span>
-      </div>
+      <SisuPlusLogo />
       <div className="flex items-center gap-2 text-sm font-medium">
         <NaviLink to={'/student/frontpage'} name={t('links.dashboard')} />
         <NaviLink to={planId ? `/student/plan/${planId}/timing` : '/student/plan'} name={t('links.timeline')} />

@@ -4,8 +4,8 @@ import { Analytics } from '@vercel/analytics/react';
 import '@/app/global.css';
 import '@/landing/landing.css';
 import i18n from '@/app/i18n';
-import { LandingApp } from '@/landing/LandingPage';
 import { getLandingRoute } from '@/landing/landingSeo';
+import { LandingApp } from '@/landing/LandingApp';
 
 const root = document.getElementById('landing-root');
 

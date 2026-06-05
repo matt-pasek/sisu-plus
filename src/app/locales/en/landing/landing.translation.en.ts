@@ -65,13 +65,11 @@ export type LandingTranslation = {
   universities: {
     kicker: string;
     title: string;
-    live: string;
-    requestTitle: string;
-    requestBody: string;
+    installTitle: string;
+    installBody: string;
     steps: string[];
-    emailStrong: string;
-    emailRest: string;
-    action: string;
+    confirmed: string;
+    confirmedNote: string;
   };
   footer: {
     copyright: string;
@@ -274,18 +272,11 @@ export const landingTranslation: LandingTranslation = {
   universities: {
     kicker: 'Where it works',
     title: 'Your university, your Sisu+.',
-    live: 'Live universities',
-    requestTitle: 'Want it at your university?',
-    requestBody:
-      'Sisu+ is built to support Finnish universities running Sisu. If your university is not listed, send me the Sisu URL and I can check support.',
-    steps: [
-      'with your university name and Sisu URL',
-      'We collaborate to make sure everything works',
-      'Your campus gets the same cleaner dashboard and timeline',
-    ],
-    emailStrong: 'Email me',
-    emailRest: 'with your university name and Sisu URL',
-    action: 'Email me to add your university',
+    installTitle: 'Install Sisu+. Your campus is already in.',
+    installBody: 'A 30-second setup - grant access, pick your university - and Sisu+ activates every time.',
+    steps: ['Install', 'Grant access once', 'Open Sisu'],
+    confirmed: 'Confirmed',
+    confirmedNote: 'Any university running Sisu works automatically.',
   },
   footer: {
     copyright: 'All rights reserved.',

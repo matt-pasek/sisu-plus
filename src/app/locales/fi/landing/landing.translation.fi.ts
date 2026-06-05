@@ -112,18 +112,11 @@ export const landingTranslation: LandingTranslation = {
   universities: {
     kicker: 'Missä se toimii',
     title: 'Sinun yliopistosi, sinun Sisu+.',
-    live: 'Tuetut yliopistot',
-    requestTitle: 'Haluatko sen omaan yliopistoosi?',
-    requestBody:
-      'Sisu+ on rakennettu tukemaan suomalaisia Sisu-yliopistoja. Jos yliopistoasi ei ole listalla, lähetä minulle Sisun URL ja voin tarkistaa tuen.',
-    steps: [
-      'yliopistosi nimen ja Sisun URL-osoitteen kanssa',
-      'Varmistamme yhdessä, että kaikki toimii',
-      'Kampuksesi saa saman selkeämmän etusivun ja aikajanan',
-    ],
-    emailStrong: 'Lähetä sähköpostia',
-    emailRest: 'yliopistosi nimen ja Sisun URL-osoitteen kanssa',
-    action: 'Lähetä viesti yliopiston lisäämiseksi',
+    installTitle: 'Asenna Sisu+. Yliopistosi on jo mukana.',
+    installBody: '30 sekunnin käyttöönotto - myönnä käyttöoikeus, valitse yliopistosi - ja Sisu+ aktivoituu aina kun.',
+    steps: ['Asenna', 'Myönnä käyttöoikeus', 'Avaa Sisu'],
+    confirmed: 'Vahvistettu',
+    confirmedNote: 'Mikä tahansa Sisua käyttävä yliopisto toimii automaattisesti.',
   },
   footer: {
     copyright: 'Kaikki oikeudet pidätetään.',

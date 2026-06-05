@@ -2,7 +2,6 @@ import { copyFile, mkdir } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { renderToString } from 'react-dom/server';
 import i18n from '@/app/i18n';
-import { LandingApp } from '@/landing/LandingPage';
 import {
   buildCanonicalUrl,
   buildHreflangLinks,
@@ -15,6 +14,7 @@ import {
   landingRoutes,
   localizedPageMetadata,
 } from '@/landing/landingSeo';
+import { LandingApp } from '../src/landing/LandingApp';
 
 const outDir = 'dist-landing';
 const rootElement = '<div id="landing-root"></div>';

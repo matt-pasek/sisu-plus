@@ -3,8 +3,6 @@ import { ModuleProgress } from '@/app/api/dataPoints/getCreditsByModule';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { MODULE_COLOR_VALUES } from '@/app/theme/moduleColors';
 
-export const BAR_COLORS = MODULE_COLOR_VALUES;
-
 function formatCredits(value: number, unit: string): string {
   const rounded = Math.round(value * 10) / 10;
   return `${Number.isInteger(rounded) ? rounded : rounded.toFixed(1)} ${unit}`;
@@ -162,7 +160,7 @@ export const DegreeCompletionContent: React.FC<Props> = ({
                 name={mod.name}
                 done={mod.done}
                 target={mod.target}
-                color={BAR_COLORS[i % BAR_COLORS.length]}
+                color={MODULE_COLOR_VALUES[i % MODULE_COLOR_VALUES.length]}
               />
             ))}
             {modules.length === 0 && (

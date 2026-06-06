@@ -2,6 +2,7 @@ import { fetchAttainments } from '@/app/api/endpoints/attainments';
 import { fetchEnrolments } from '@/app/api/endpoints/enrolments';
 import { fetchPlans } from '@/app/api/endpoints/plans';
 import { getStudyPeriodMap, type StudyPeriodInfo } from '@/app/api/dataPoints/getStudyPeriodMap';
+import { isPassingCourseUnitAttainment, rangesOverlap } from '@/app/api/dataPoints/util';
 import { resolveCourseRealisations } from '@/app/api/resolvers/resolveCourseRealisations';
 import { resolveCourseUnit } from '@/app/api/resolvers/resolveCourseUnit';
 import { resolveModule } from '@/app/api/resolvers/resolveModule';
@@ -28,11 +29,6 @@ export interface TimelineCourse {
   teachingPeriodLocators: string[];
 }
 
-function isPassingCourseUnitAttainment(attainment: unknown): attainment is CourseUnitAttainmentRestricted {
-  const candidate = attainment as Partial<CourseUnitAttainmentRestricted>;
-  return candidate.type === 'CourseUnitAttainment' && candidate.primary === true && candidate.state !== 'FAILED';
-}
-
 function getGrade(attainment: CourseUnitAttainmentRestricted | undefined): number | string | null {
   if (!attainment) return null;
 
@@ -46,16 +42,6 @@ function getGrade(attainment: CourseUnitAttainmentRestricted | undefined): numbe
 function findPeriodForDate(periods: StudyPeriodInfo[], date: string | undefined): StudyPeriodInfo | null {
   if (!date) return null;
   return periods.find((period) => date >= period.startDate && date < period.endDate) ?? null;
-}
-
-function rangesOverlap(
-  firstStart: string | null,
-  firstEnd: string | null,
-  secondStart: string,
-  secondEnd: string,
-): boolean {
-  if (!firstStart || !firstEnd) return false;
-  return firstStart < secondEnd && firstEnd > secondStart;
 }
 
 function getTeachingPeriodLocators(realisations: RealisationResult[], periods: StudyPeriodInfo[]): string[] {

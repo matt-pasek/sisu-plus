@@ -4,29 +4,28 @@ import { getRegistrationStatus } from '@/app/api/dataPoints/getRegistrationCours
 import type { Enrolment } from '@/app/api/generated/IlmoApi';
 import { Button } from '@/app/components/ui/Button.comp';
 import { CourseCard } from '@/app/components/ui/CourseCard.comp';
-import {
-  formatDateTime,
-  formatImplementationDateRange,
-  getCourseTone,
-  getStatusClass,
-  getStatusLabel,
-} from '../registrationFormatters';
+
+import { CourseHeader } from './CourseHeader.comp';
+import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
+import { RegistrationTab } from '@/app/views/registration/types';
 import {
   canCancelImplementation,
   canWithdrawImplementation,
+  formatDateTime,
+  formatImplementationDateRange,
+  getCourseTone,
   getEnrolmentForTab,
   getImplementationForEnrolment,
   getImplementationsForTab,
   getPreferredImplementation,
   getSelectableImplementation,
+  getStatusClass,
+  getStatusLabel,
   isImplementationFinished,
   isImplementationSelectable,
-} from '../registrationUtils';
-import { updateEnrolmentsStudyRightId } from '../registrationActions';
-import type { RegistrationTab } from '../registrationTypes';
-import { CalendarIcon, CheckIcon, CloseIcon } from './RegistrationIcons';
-import { CourseHeader } from './CourseHeader.comp';
-import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
+} from '@/app/views/registration/util';
+import { CalendarIcon, CheckIcon, CloseIcon } from '@/app/views/registration/components/icons';
+import { updateEnrolmentsStudyRightId } from '@/app/views/registration/util/actions';
 
 interface Props {
   course: RegistrationCourse;

@@ -4,15 +4,12 @@ import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { useCourseUnit } from '@/app/views/structure/hooks/useCourseUnit';
 import { useCourseVersions } from '@/app/views/structure/hooks/useCourseVersions';
 import { usePrerequisites } from '@/app/views/structure/hooks/usePrerequisites';
-import { useChangeCourseVersion } from '@/app/views/structure/editing/useChangeCourseVersion';
+import { useChangeCourseVersion } from '@/app/views/structure/hooks/useChangeCourseVersion';
 import { pickLabel } from '@/app/api/resolvers/helpers/pickLabel';
-import {
-  formatPersonDisplayName,
-  formatPersonEmail,
-  formatLocalizedLabel,
-} from '@/app/views/structure/utils/dialogData';
-import { DialogShell, DialogCloseButton } from './DialogShell.comp';
-import type { CourseEntry } from '@/app/views/structure/structureTypes';
+import { formatPersonDisplayName, formatPersonEmail, formatLocalizedLabel } from '../util/formatters';
+import { DialogCloseButton } from './DialogCloseButton.comp';
+import { DialogShell } from './DialogShell.comp';
+import type { CourseEntry } from '@/app/views/structure/types';
 import type { PrerequisiteCourse } from '@/app/views/structure/hooks/usePrerequisites';
 import type { CourseUnit } from '@/app/api/generated/KoriApi';
 import { useSisuQuery } from '@/app/hooks/useSisuQuery';

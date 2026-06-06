@@ -1,17 +1,18 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { pickLabel } from '@/app/api/resolvers/helpers/pickLabel';
-import { useStructurePlanMutation } from '@/app/views/structure/editing/useStructurePlanMutation';
-import { swapCourseVersion } from '@/app/views/structure/editing/useChangeCourseVersion';
 import { formatCourseVersion } from '@/app/views/structure/components/CourseDetailsDialog.comp';
 import {
   formatAcademicYear,
   useBulkVersionUpdates,
   type VersionUpdate,
 } from '@/app/views/structure/hooks/useBulkVersionUpdates';
-import { DialogShell, DialogCloseButton } from './DialogShell.comp';
+import { DialogCloseButton } from './DialogCloseButton.comp';
+import { DialogShell } from './DialogShell.comp';
 import type { Plan } from '@/app/api/generated/OsuvaApi';
-import type { SectionData } from '@/app/views/structure/structureTypes';
+import { SectionData } from '@/app/views/structure/types';
+import { useStructurePlanMutation } from '@/app/views/structure/hooks/useStructurePlanMutation';
+import { swapCourseVersion } from '@/app/views/structure/hooks/useChangeCourseVersion';
 
 interface Props {
   plan: Plan;
@@ -100,7 +101,7 @@ export const BulkVersionUpdateDialog: React.FC<Props> = ({ plan, sections, onClo
 
   return (
     <DialogShell labelId="bulk-version-update-dialog-title" onClose={onClose} maxWidth="max-w-[740px]">
-      <div className="relative flex-shrink-0 border-b border-border px-[26px] pt-6 pb-5">
+      <div className="relative shrink-0 border-b border-border px-6.5 pt-6 pb-5">
         <div className="flex items-start gap-4">
           <div className="flex size-10 shrink-0 items-center justify-center rounded-[11px] border border-lighterGreen/35 bg-lighterGreen/12 text-lighterGreen">
             <svg className="size-5" viewBox="0 0 24 24" fill="none">
@@ -123,7 +124,7 @@ export const BulkVersionUpdateDialog: React.FC<Props> = ({ plan, sections, onClo
             <h2 id="bulk-version-update-dialog-title" className="text-[21px] leading-[1.3] font-semibold text-offwhite">
               {t('bulkUpdate.title')}
             </h2>
-            <p className="mt-1 text-[13px] leading-[1.5] text-lightGrey">
+            <p className="mt-1 text-[13px] leading-normal text-lightGrey">
               {updates.length > 0 ? t('bulkUpdate.subtitle') : t('bulkUpdate.noneSubtitle')}
             </p>
           </div>
@@ -137,13 +138,13 @@ export const BulkVersionUpdateDialog: React.FC<Props> = ({ plan, sections, onClo
             {t('dialogs.courseDetails.loading')}
           </div>
         ) : updates.length === 0 ? (
-          <div className="m-[26px] rounded-[10px] border border-border bg-container2 px-4 py-5">
+          <div className="m-6.5 rounded-[10px] border border-border bg-container2 px-4 py-5">
             <div className="text-[14px] font-semibold text-offwhite">{t('bulkUpdate.noneTitle')}</div>
-            <p className="mt-1 text-[13px] leading-[1.5] text-lightGrey">{t('bulkUpdate.noneSubtitle')}</p>
+            <p className="mt-1 text-[13px] leading-normal text-lightGrey">{t('bulkUpdate.noneSubtitle')}</p>
           </div>
         ) : (
           <>
-            <div className="flex items-center justify-between gap-3 border-b border-border bg-container2/70 px-[26px] py-[13px]">
+            <div className="flex items-center justify-between gap-3 border-b border-border bg-container2/70 px-6.5 py-3.25">
               <div className="flex min-w-0 flex-wrap items-center gap-2 text-[11px] font-semibold tracking-[.07em] text-lightGrey uppercase">
                 <span>{t('bulkUpdate.coursesToUpdate')}</span>
                 <span className="rounded-full border border-lighterGreen/35 bg-lighterGreen/12 px-2.5 py-0.5 tracking-normal text-lighterGreen normal-case tabular-nums">
@@ -172,7 +173,7 @@ export const BulkVersionUpdateDialog: React.FC<Props> = ({ plan, sections, onClo
               </button>
             </div>
 
-            <div className="flex flex-col gap-1.5 px-[18px] pt-2 pb-3">
+            <div className="flex flex-col gap-1.5 px-4.5 pt-2 pb-3">
               {groupedUpdates.map((group) => {
                 const transitions = new Set(
                   group.updates.map((u) => `${formatCourseVersion(u.current)}|${formatCourseVersion(u.latest)}`),
@@ -257,7 +258,7 @@ export const BulkVersionUpdateDialog: React.FC<Props> = ({ plan, sections, onClo
                           </div>
                           {!uniformTransition && (
                             <div className="flex shrink-0 items-center gap-2 max-sm:flex-col max-sm:items-end max-sm:gap-1">
-                              <span className="inline-flex min-w-[78px] flex-col items-center gap-0.5 rounded-lg bg-container2 px-3 py-1.5 leading-none text-lightGrey">
+                              <span className="inline-flex min-w-19.5 flex-col items-center gap-0.5 rounded-lg bg-container2 px-3 py-1.5 leading-none text-lightGrey">
                                 <span className="text-[9px] font-semibold tracking-[.06em] uppercase opacity-70">
                                   {t('bulkUpdate.oldVersion')}
                                 </span>
@@ -266,7 +267,7 @@ export const BulkVersionUpdateDialog: React.FC<Props> = ({ plan, sections, onClo
                                 </span>
                               </span>
                               <span className="flex text-darkishGrey max-sm:rotate-90" aria-hidden="true">
-                                <svg className="h-3 w-[18px]" viewBox="0 0 18 12" fill="none">
+                                <svg className="h-3 w-4.5" viewBox="0 0 18 12" fill="none">
                                   <path
                                     d="M1 6h14M11 1.5L16.5 6 11 10.5"
                                     stroke="currentColor"
@@ -276,7 +277,7 @@ export const BulkVersionUpdateDialog: React.FC<Props> = ({ plan, sections, onClo
                                   />
                                 </svg>
                               </span>
-                              <span className="inline-flex min-w-[78px] flex-col items-center gap-0.5 rounded-lg bg-lighterGreen/12 px-3 py-1.5 leading-none text-lighterGreen">
+                              <span className="inline-flex min-w-19.5 flex-col items-center gap-0.5 rounded-lg bg-lighterGreen/12 px-3 py-1.5 leading-none text-lighterGreen">
                                 <span className="text-[9px] font-semibold tracking-[.06em] uppercase opacity-70">
                                   {t('bulkUpdate.newVersion')}
                                 </span>
@@ -293,7 +294,7 @@ export const BulkVersionUpdateDialog: React.FC<Props> = ({ plan, sections, onClo
                 );
               })}
             </div>
-            <div className="flex items-center justify-between gap-3 border-t border-border bg-container px-[26px] py-4">
+            <div className="flex items-center justify-between gap-3 border-t border-border bg-container px-6.5 py-4">
               <span className="text-[12.5px] text-lightGrey">
                 <strong className="font-semibold text-offwhite tabular-nums">{selectedUpdates.length}</strong> /{' '}
                 <strong className="font-semibold text-offwhite tabular-nums">{updates.length}</strong>{' '}

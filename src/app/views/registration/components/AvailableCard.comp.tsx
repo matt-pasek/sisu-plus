@@ -2,17 +2,19 @@ import React from 'react';
 import type { RegistrationCourse, RegistrationImplementation } from '@/app/api/dataPoints/getRegistrationCourses';
 import { Button } from '@/app/components/ui/Button.comp';
 import { CourseCard } from '@/app/components/ui/CourseCard.comp';
-import { formatImplementationDateRange, getCourseTone, getStatusClass } from '../registrationFormatters';
+import { CourseHeader } from './CourseHeader.comp';
+import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import {
+  formatImplementationDateRange,
+  getCourseTone,
   getImplementationsForTab,
+  getStatusClass,
   getStatusForTab,
   isCourseSelectionDraftForTab,
   isImplementationSelectable,
-} from '../registrationUtils';
-import type { RegistrationTab } from '../registrationTypes';
-import { CalendarIcon } from './RegistrationIcons';
-import { CourseHeader } from './CourseHeader.comp';
-import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
+} from '@/app/views/registration/util';
+import { RegistrationTab } from '@/app/views/registration/types';
+import { CalendarIcon } from '@/app/views/registration/components/icons';
 
 interface Props {
   course: RegistrationCourse;

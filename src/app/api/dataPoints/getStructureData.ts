@@ -3,6 +3,7 @@ import { fetchEnrolments } from '@/app/api/endpoints/enrolments';
 import { fetchPlans } from '@/app/api/endpoints/plans';
 import { fetchStudyRights } from '@/app/api/endpoints/studyRights';
 import { koriApi } from '@/app/api/client';
+import { isPassingCourseUnitAttainment } from '@/app/api/dataPoints/util';
 import type { CourseUnitAttainmentRestricted } from '@/app/api/generated/OriApi';
 import type { CourseUnit, LocalizedMarkupString, LocalizedString, Module } from '@/app/api/generated/KoriApi';
 import type { Plan } from '@/app/api/generated/OsuvaApi';
@@ -12,12 +13,7 @@ import { resolveCourseUnit } from '@/app/api/resolvers/resolveCourseUnit';
 import { resolveModule } from '@/app/api/resolvers/resolveModule';
 import { getCurrentLocale } from '@/app/i18n';
 import { useSisuQuery } from '@/app/hooks/useSisuQuery';
-import type {
-  CourseEntry,
-  StructureData,
-  StructureOption,
-  StructureSelectionGroup,
-} from '@/app/views/structure/structureTypes';
+import { CourseEntry, StructureData, StructureOption, StructureSelectionGroup } from '@/app/views/structure/types';
 
 type StructurePlan = {
   id?: string;
@@ -55,11 +51,6 @@ function getTopLevelModuleIds(plan: StructurePlan): { topLevelModuleIds: string[
   }
 
   return { topLevelModuleIds, wrapperModuleId };
-}
-
-function isPassingCourseUnitAttainment(attainment: unknown): attainment is CourseUnitAttainmentRestricted {
-  const candidate = attainment as Partial<CourseUnitAttainmentRestricted>;
-  return candidate.type === 'CourseUnitAttainment' && candidate.primary === true && candidate.state !== 'FAILED';
 }
 
 function getGrade(attainment: CourseUnitAttainmentRestricted | undefined): string | null {

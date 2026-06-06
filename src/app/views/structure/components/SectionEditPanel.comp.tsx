@@ -4,13 +4,13 @@ import type { Plan } from '@/app/api/generated/OsuvaApi';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import type { ModuleColor } from '@/app/theme/moduleColors';
 import { getSectionInstructionsForEdit } from '@/app/views/structure/components/sectionInstructions';
+import { SectionData, StructureOption, StructureSelectionGroup } from '@/app/views/structure/types';
 import {
   addCourseToModule,
   removeCourseFromModule,
   selectCourseOption,
   selectModuleOption,
-} from '@/app/views/structure/editing/structurePlanDraft';
-import type { SectionData, StructureOption, StructureSelectionGroup } from '@/app/views/structure/structureTypes';
+} from '@/app/views/structure/util/editing/structurePlanDraft';
 
 interface Props {
   color: ModuleColor;

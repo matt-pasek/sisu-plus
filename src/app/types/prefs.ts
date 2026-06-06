@@ -1,4 +1,4 @@
-import { DashboardWidgetLayout, DEFAULT_DASHBOARD_LAYOUT } from '@/app/views/dashboard/components/dashboardWidgets';
+import { DashboardWidgetLayout, DEFAULT_DASHBOARD_LAYOUT } from '@/app/views/dashboard/util/widgetsHandlers';
 import { DEFAULT_LOCALE, Locale } from '@/app/locales/locale';
 import type { UniversityConfig } from './universityConfig';
 

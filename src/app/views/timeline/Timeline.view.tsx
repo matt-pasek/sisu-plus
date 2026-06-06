@@ -19,11 +19,11 @@ import { InlineLoader } from '@/app/components/ui/InlineLoader.comp';
 import { useSisuQuery } from '@/app/hooks/useSisuQuery';
 import { TimelineToolbar } from '@/app/views/timeline/components/TimelineToolbar.comp';
 import { TimelineCoursePool } from '@/app/views/timeline/components/TimelineCoursePool.comp';
-import { TimelineBoard } from '@/app/views/timeline/components/TimelineBoard.comp';
-import { isTimelineCourseDragData, isTimelineDropData } from '@/app/views/timeline/components/timelineDnd';
-import { getVisibleSemesters } from '@/app/views/timeline/components/timelineUtils';
-import type { TimelineValidationWarning } from '@/app/views/timeline/components/timelineValidation';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
+import { isTimelineCourseDragData, isTimelineDropData } from '@/app/views/timeline/util/dndHandlers';
+import { TimelineValidationWarning } from '@/app/views/timeline/util/timelineValidation';
+import { getVisibleSemesters } from '@/app/views/timeline/util/getVisibleSemesters';
+import { TimelineBoard } from '@/app/views/timeline/components/TimelineBoard/TimelineBoard.comp';
 
 function isCourseUnitAttainment(attainment: Attainment): attainment is CourseUnitAttainmentRestricted {
   return attainment.type === 'CourseUnitAttainment';
@@ -127,7 +127,7 @@ function getCourseEndDate(course: TimelineCourse): string | null {
 function getPassedCourseUnitGroupIds(attainments: CourseUnitAttainmentRestricted[]): Set<string> {
   return new Set(
     attainments
-      .filter((attainment) => attainment.primary === true && attainment.state !== 'FAILED')
+      .filter((attainment) => attainment.primary && attainment.state !== 'FAILED')
       .map((attainment) => attainment.courseUnitGroupId),
   );
 }

@@ -1,8 +1,8 @@
 import React from 'react';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import type { ModuleColor } from '@/app/theme/moduleColors';
-import type { CourseEntry } from '@/app/views/structure/structureTypes';
 import { CourseCard } from '@/app/views/structure/components/CourseCard.comp';
+import { CourseEntry } from '@/app/views/structure/types';
 
 interface Props {
   courses: CourseEntry[];

@@ -10,6 +10,10 @@ import { useSisuQuery } from '@/app/hooks/useSisuQuery';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { useCourseUnit } from '@/app/views/structure/hooks/useCourseUnit';
 import { formatCourseVersion } from '@/app/views/structure/components/CourseDetailsDialog.comp';
+import { DialogCloseButton } from './DialogCloseButton.comp';
+import { DialogShell } from './DialogShell.comp';
+import type { CourseUnitAttainmentRestricted } from '@/app/api/generated/OriApi';
+import { CourseEntry } from '@/app/views/structure/types';
 import {
   formatCodeLabel,
   formatGradeAverage,
@@ -19,10 +23,7 @@ import {
   getStudyRightSelectionGroupIds,
   resolveOrganisationRoleLabels,
   resolveOrganisationRoleNames,
-} from '@/app/views/structure/utils/dialogData';
-import { DialogShell, DialogCloseButton } from './DialogShell.comp';
-import type { CourseEntry } from '@/app/views/structure/structureTypes';
-import type { CourseUnitAttainmentRestricted } from '@/app/api/generated/OriApi';
+} from '@/app/views/structure/util/formatters';
 
 interface Props {
   course: CourseEntry;
@@ -41,14 +42,13 @@ function formatLanguage(urn: string): string {
     en: 'English',
     fi: 'Finnish',
     sv: 'Swedish',
-    de: 'German',
-    fr: 'French',
   };
   return names[code] ?? code.toUpperCase();
 }
 
 function getGradeWord(grade: string | null): string | null {
   const words: Record<string, string> = {
+    '0': 'Failed',
     '1': 'Satisfactory',
     '2': 'Satisfactory',
     '3': 'Good',

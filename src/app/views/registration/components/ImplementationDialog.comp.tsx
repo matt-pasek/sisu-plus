@@ -5,16 +5,18 @@ import type {
   RegistrationStudyGroupSet,
 } from '@/app/api/dataPoints/getRegistrationCourses';
 import { Button } from '@/app/components/ui/Button.comp';
+import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import {
-  formatCredits,
   formatDate,
   formatImplementationDateRange,
+  getDefaultSelections,
+  getImplementationsForTab,
   isExamImplementation,
-} from '../registrationFormatters';
-import { getDefaultSelections, getImplementationsForTab, isSelectionValid } from '../registrationUtils';
-import type { SelectionState } from '../registrationTypes';
-import { CheckIcon, CloseIcon } from './RegistrationIcons';
-import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
+  isSelectionValid,
+} from '@/app/views/registration/util';
+import { SelectionState } from '@/app/views/registration/types';
+import { formatCredits } from '@/app/helpers/formatCredits';
+import { CheckIcon, CloseIcon } from '@/app/views/registration/components/icons';
 
 interface Props {
   course: RegistrationCourse;
@@ -62,7 +64,7 @@ export const ImplementationDialog: React.FC<Props> = ({
 
   return (
     <div
-      className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/65 px-4 py-6 backdrop-blur-sm"
+      className="fixed inset-0 z-1000 flex items-center justify-center bg-black/65 px-4 py-6 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-labelledby="registration-dialog-title"
@@ -176,7 +178,7 @@ export const ImplementationDialog: React.FC<Props> = ({
                             name={set.id}
                             checked={checked}
                             onChange={() => toggleSubGroup(set, subGroup.id)}
-                            className="size-5 accent-[var(--color-accent)]"
+                            className="size-5 accent-accent"
                           />
                           <span className="text-xs font-semibold text-offwhite">{subGroup.name ?? subGroup.id}</span>
                         </label>

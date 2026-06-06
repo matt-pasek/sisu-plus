@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from '@/app/components/ui/Button.comp';
-import { TIMELINE_COLORS } from '@/app/views/timeline/components/timelineUtils';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
+import { MODULE_COLOR_VALUES } from '@/app/theme/moduleColors';
 
 interface Props {
   moduleNames: string[];
@@ -53,9 +53,9 @@ export const TimelineToolbar: React.FC<Props> = ({
         {moduleNames.slice(0, 6).map((name, index) => (
           <div
             key={name}
-            className="flex min-w-0 items-center gap-1.5 text-xs font-medium text-lightGrey transition-[opacity] duration-200"
+            className="flex min-w-0 items-center gap-1.5 text-xs font-medium text-lightGrey transition-opacity duration-200"
           >
-            <span className="size-2 shrink-0 rounded-sm" style={{ backgroundColor: TIMELINE_COLORS[index] }} />
+            <span className="size-2 shrink-0 rounded-sm" style={{ backgroundColor: MODULE_COLOR_VALUES[index] }} />
             <span className="max-w-fit truncate">{name}</span>
           </div>
         ))}
@@ -66,7 +66,7 @@ export const TimelineToolbar: React.FC<Props> = ({
           className={`flex min-h-8 items-center gap-2 rounded-lg border px-3 text-xs font-semibold tabular-nums transition-[opacity,scale,filter,border-color,background-color] duration-200 ease-[cubic-bezier(0.2,0,0,1)] ${
             pendingChangesCount > 0
               ? 'blur-0 scale-100 border-accent/30 bg-accent/10 text-accent opacity-100'
-              : 'pointer-events-none scale-[0.25] border-border bg-container2 text-lightGrey opacity-0 blur-[4px]'
+              : 'pointer-events-none scale-[0.25] border-border bg-container2 text-lightGrey opacity-0 blur-xs'
           }`}
         >
           <span className="size-1.5 rounded-full bg-accent" />
@@ -76,7 +76,7 @@ export const TimelineToolbar: React.FC<Props> = ({
           className={`flex min-h-8 items-center gap-2 rounded-lg border px-3 text-xs font-semibold tabular-nums transition-[opacity,scale,filter,border-color,background-color] duration-200 ease-[cubic-bezier(0.2,0,0,1)] ${
             validationIssueCount > 0
               ? 'blur-0 scale-100 border-amber-300/40 bg-amber-300/10 text-amber-100 opacity-100'
-              : 'pointer-events-none scale-[0.25] border-border bg-container2 text-lightGrey opacity-0 blur-[4px]'
+              : 'pointer-events-none scale-[0.25] border-border bg-container2 text-lightGrey opacity-0 blur-xs'
           }`}
         >
           <span className="size-1.5 rounded-full bg-amber-300" />

@@ -46,10 +46,12 @@ export const MODULE_COLORS: ModuleColor[] = [
 
 export const MODULE_COLOR_VALUES = MODULE_COLORS.map((color) => color.value);
 
-export function getModuleColorByIndex(index: number): ModuleColor {
-  return MODULE_COLORS[index % MODULE_COLORS.length];
-}
+export const getModuleColorByIndex = (index: number): ModuleColor => MODULE_COLORS[index % MODULE_COLORS.length];
 
-export function getModuleColorValueByIndex(index: number): string {
-  return getModuleColorByIndex(index).value;
-}
+export const getModuleColorValueByIndex = (index: number): string => getModuleColorByIndex(index).value;
+
+export const getModuleColor = (moduleId: string | null, moduleIds: string[]): string => {
+  if (!moduleId) return '#7878A0';
+  const index = moduleIds.indexOf(moduleId);
+  return getModuleColorValueByIndex(index >= 0 ? index : 0);
+};

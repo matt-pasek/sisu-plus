@@ -1,13 +1,14 @@
+import { useState } from 'react';
+import type { ActiveCourse } from '@/app/api/dataPoints/getActiveCourses';
+import type { ModuleProgress } from '@/app/api/dataPoints/getCreditsByModule';
+import type { TimelineCourse } from '@/app/api/dataPoints/getTimelineCourses';
+import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
+import { MODULE_COLOR_VALUES } from '@/app/theme/moduleColors';
 import { Widget } from '@/app/views/dashboard/components/Widget.comp';
-import { BAR_COLORS, DegreeCompletionContent } from '@/app/views/dashboard/components/DegreeCompletionContent.comp';
+import { DegreeCompletionContent } from '@/app/views/dashboard/components/DegreeCompletionContent.comp';
 import { ActiveCoursesContent } from '@/app/views/dashboard/components/ActiveCoursesContent.comp';
 import { SemesterStatsContent } from '@/app/views/dashboard/components/SemesterStatsContent.comp';
 import { TimelineCourseCard } from '@/app/views/timeline/components/TimelineCourseCard.comp';
-import type { ModuleProgress } from '@/app/api/dataPoints/getCreditsByModule';
-import type { ActiveCourse } from '@/app/api/dataPoints/getActiveCourses';
-import type { TimelineCourse } from '@/app/api/dataPoints/getTimelineCourses';
-import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
-import { useState } from 'react';
 
 const modules: ModuleProgress[] = [
   { moduleId: 'core', name: 'Core Studies', done: 25, target: 31 },
@@ -142,7 +143,7 @@ const deadlines = [
 ];
 
 const moduleColorMap = new Map(
-  modules.map((module, index) => [module.moduleId, BAR_COLORS[index % BAR_COLORS.length]]),
+  modules.map((module, index) => [module.moduleId, MODULE_COLOR_VALUES[index % MODULE_COLOR_VALUES.length]]),
 );
 const moduleNameMap = new Map(modules.map((module) => [module.moduleId, module.name]));
 

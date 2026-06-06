@@ -9,30 +9,31 @@ import { Button } from '@/app/components/ui/Button.comp';
 import { InlineLoader } from '@/app/components/ui/InlineLoader.comp';
 import { useSisuQuery } from '@/app/hooks/useSisuQuery';
 import { fetchStudyRights } from '@/app/api/endpoints/studyRights';
-import { cancelRegistration, submitRegistration } from './registrationActions';
-import {
-  getImplementationsForTab,
-  isCourseRegisteredForTab,
-  isCourseSelectionDraftForTab,
-  courseMatchesPeriod,
-  getDraftImplementation,
-  getDefaultPeriodId,
-  getEnrolmentForTab,
-  getEnrolmentsForTab,
-  getImplementationForEnrolment,
-  getPeriodState,
-  getSelectableImplementation,
-  getStatusForTab,
-  sortAttemptsForTab,
-  sortCoursesForTab,
-} from './registrationUtils';
+
 import { getRegistrationStatus } from '@/app/api/dataPoints/getRegistrationCourses';
-import type { RegistrationAttempt, RegistrationTab } from './registrationTypes';
 import { AvailableCard } from './components/AvailableCard.comp';
 import { EmptyState } from './components/EmptyState.comp';
 import { ImplementationDialog } from './components/ImplementationDialog.comp';
 import { RegisteredCard } from './components/RegisteredCard.comp';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
+import {
+  courseMatchesPeriod,
+  getDefaultPeriodId,
+  getDraftImplementation,
+  getEnrolmentForTab,
+  getEnrolmentsForTab,
+  getImplementationForEnrolment,
+  getImplementationsForTab,
+  getPeriodState,
+  getSelectableImplementation,
+  getStatusForTab,
+  isCourseRegisteredForTab,
+  isCourseSelectionDraftForTab,
+  sortAttemptsForTab,
+  sortCoursesForTab,
+} from '@/app/views/registration/util';
+import { RegistrationAttempt, RegistrationTab } from '@/app/views/registration/types';
+import { cancelRegistration, submitRegistration } from '@/app/views/registration/util/actions';
 
 const RegistrationView: React.FC = () => {
   const { t } = useTranslationWithPrefix('views.registration');
@@ -159,7 +160,7 @@ const RegistrationView: React.FC = () => {
   }
 
   return (
-    <section className="mx-auto max-w-[1100px] pb-10">
+    <section className="mx-auto max-w-275 pb-10">
       <header className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-2xl leading-tight font-semibold text-balance text-offwhite">{t('title')}</h1>
@@ -293,7 +294,7 @@ const RegistrationView: React.FC = () => {
                     type="checkbox"
                     checked={showAllAttempts}
                     onChange={(event) => setShowAllAttempts(event.target.checked)}
-                    className="size-3.5 accent-[var(--color-accent)]"
+                    className="size-3.5 accent-accent"
                   />
                   {t('labels.showAttempts')}
                 </label>

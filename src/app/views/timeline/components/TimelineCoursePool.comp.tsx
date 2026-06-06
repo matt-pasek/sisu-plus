@@ -1,11 +1,13 @@
 import React from 'react';
 import { useDroppable } from '@dnd-kit/react';
 import type { TimelineCourse } from '@/app/api/dataPoints/getTimelineCourses';
-import { DraggableTimelineCourseCard } from '@/app/views/timeline/components/TimelineCourseCard.comp';
-import { TIMELINE_COURSE_DRAG_TYPE } from '@/app/views/timeline/components/timelineDnd';
-import { formatCredits, getCourseKey, getModuleColor } from '@/app/views/timeline/components/timelineUtils';
-import type { TimelineValidationWarning } from '@/app/views/timeline/components/timelineValidation';
+import { DraggableTimelineCourseCard } from '@/app/views/timeline/components/DraggableTimelineCourseCard.comp';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
+import { formatCredits } from '@/app/helpers/formatCredits';
+import { TimelineValidationWarning } from '@/app/views/timeline/util/timelineValidation';
+import { TIMELINE_COURSE_DRAG_TYPE } from '@/app/views/timeline/util/dndHandlers';
+import { getCourseKey } from '@/app/views/timeline/util/getCourseKey';
+import { getModuleColor } from '@/app/theme/moduleColors';
 
 interface Props {
   draftCourseIds?: Set<string>;
@@ -31,7 +33,7 @@ const FilterCheckbox: React.FC<{ checked: boolean; label: string; onChange: (val
       type="checkbox"
       checked={checked}
       onChange={(event) => onChange(event.target.checked)}
-      className="size-3.5 accent-[var(--color-accent)]"
+      className="size-3.5 accent-accent"
     />
     {label}
   </label>
@@ -61,7 +63,7 @@ export const TimelineCoursePool: React.FC<Props> = ({
   return (
     <aside
       ref={ref}
-      className={`flex h-[calc(100dvh-96px)] w-[270px] shrink-0 flex-col border-r border-solid px-4 py-5 transition-[border-color,background-color,box-shadow] duration-200 ease-out ${
+      className={`flex h-[calc(100dvh-96px)] w-67.5 shrink-0 flex-col border-r border-solid px-4 py-5 transition-[border-color,background-color,box-shadow] duration-200 ease-out ${
         isDropTarget
           ? 'border-accent bg-accent/10 shadow-[inset_-1px_0_0_rgba(65,150,72,0.35)]'
           : isDragging

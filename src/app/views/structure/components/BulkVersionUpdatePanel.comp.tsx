@@ -3,7 +3,7 @@ import { Button } from '@/app/components/ui/Button.comp';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { useBulkVersionUpdates } from '@/app/views/structure/hooks/useBulkVersionUpdates';
 import type { Plan } from '@/app/api/generated/OsuvaApi';
-import type { SectionData } from '@/app/views/structure/structureTypes';
+import { SectionData } from '@/app/views/structure/types';
 
 interface Props {
   plan: Plan;
@@ -21,7 +21,7 @@ export const BulkVersionUpdatePanel: React.FC<Props> = ({ plan, sections, onOpen
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="text-[14px] font-semibold text-offwhite">{t('bulkUpdate.panelTitle')}</h2>
-            <span className="rounded-[6px] border border-border2 bg-container2 px-2 py-1 text-[11px] font-semibold text-lighterGreen">
+            <span className="rounded-md border border-border2 bg-container2 px-2 py-1 text-[11px] font-semibold text-lighterGreen">
               {isLoading ? t('bulkUpdate.checking') : t('bulkUpdate.counter', { count: updates.length })}
             </span>
           </div>

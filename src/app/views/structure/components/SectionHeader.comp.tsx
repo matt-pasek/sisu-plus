@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import type { ModuleColor } from '@/app/theme/moduleColors';
-import type { SectionData } from '@/app/views/structure/structureTypes';
+import { SectionData } from '@/app/views/structure/types';
 
 interface Props {
   section: SectionData;
@@ -42,7 +42,7 @@ export const SectionHeader: React.FC<Props> = ({ section, color, isOpen, onToggl
           <span className="truncate text-lg font-semibold text-offwhite">{section.name}</span>
           <span className="rounded bg-container2 px-2 py-1 font-mono text-xs text-lightGrey">{section.moduleId}</span>
         </span>
-        <span className="block h-1.5 max-w-[260px] overflow-hidden rounded-full bg-border2">
+        <span className="block h-1.5 max-w-65 overflow-hidden rounded-full bg-border2">
           <span
             className={`block h-full rounded-full transition-[width] duration-300 ease-out ${color.progress}`}
             style={{

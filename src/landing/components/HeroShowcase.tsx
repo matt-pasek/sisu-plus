@@ -5,7 +5,7 @@ import { getModuleColorByIndex, MODULE_COLOR_VALUES } from '@/app/theme/moduleCo
 import { Widget } from '@/app/views/dashboard/components/Widget.comp';
 import { DegreeCompletionContent } from '@/app/views/dashboard/components/DegreeCompletionContent.comp';
 import { CourseCard as StructureCourseCard } from '@/app/views/structure/components/CourseCard.comp';
-import type { CourseEntry } from '@/app/views/structure/structureTypes';
+import type { CourseEntry } from '@/app/views/structure/types';
 import { TimelineCourseCard } from '@/app/views/timeline/components/TimelineCourseCard.comp';
 import type React from 'react';
 

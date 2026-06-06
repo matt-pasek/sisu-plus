@@ -9,7 +9,6 @@ import { PlanHeader } from '@/app/views/structure/components/PlanHeader.comp';
 import { SectionBody } from '@/app/views/structure/components/SectionBody.comp';
 import { SectionEditPanel } from '@/app/views/structure/components/SectionEditPanel.comp';
 import { SectionHeader } from '@/app/views/structure/components/SectionHeader.comp';
-import { useStructurePlanMutation } from '@/app/views/structure/editing/useStructurePlanMutation';
 import { Button } from '@/app/components/ui/Button.comp';
 import { CompletionMethodDialog } from '@/app/views/structure/components/CompletionMethodDialog.comp';
 import { AttainmentDialog } from '@/app/views/structure/components/AttainmentDialog.comp';
@@ -17,7 +16,8 @@ import { CourseDetailsDialog } from '@/app/views/structure/components/CourseDeta
 import { BulkVersionUpdateDialog } from '@/app/views/structure/components/BulkVersionUpdateDialog.comp';
 import { BulkVersionUpdatePanel } from '@/app/views/structure/components/BulkVersionUpdatePanel.comp';
 import type { Plan } from '@/app/api/generated/OsuvaApi';
-import type { CourseEntry } from '@/app/views/structure/structureTypes';
+import { useStructurePlanMutation } from '@/app/views/structure/hooks/useStructurePlanMutation';
+import { CourseEntry } from '@/app/views/structure/types';
 
 const StructureView: React.FC = () => {
   const { t } = useTranslationWithPrefix('views.structure');
@@ -89,7 +89,7 @@ const StructureView: React.FC = () => {
     <>
       <main className="flex flex-1 overflow-hidden">
         <div className="flex-1 overflow-y-auto">
-          <div className="mx-auto flex max-w-[1100px] flex-col gap-6 pb-10">
+          <div className="mx-auto flex max-w-275 flex-col gap-6 pb-10">
             <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <h1 className="text-2xl leading-tight font-semibold text-balance text-offwhite">{t('pageTitle')}</h1>

@@ -2,7 +2,7 @@ import React from 'react';
 import { CourseCard as SharedCourseCard } from '@/app/components/ui/CourseCard.comp';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import type { ModuleColor } from '@/app/theme/moduleColors';
-import type { CourseEntry } from '@/app/views/structure/structureTypes';
+import { CourseEntry } from '@/app/views/structure/types';
 
 interface Props {
   course: CourseEntry;

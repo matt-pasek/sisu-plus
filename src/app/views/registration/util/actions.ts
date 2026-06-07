@@ -6,10 +6,11 @@ import {
   updateOwnEnrolment,
 } from '@/app/api/endpoints/enrolments';
 import type { RegistrationCourse, RegistrationImplementation } from '@/app/api/dataPoints/getRegistrationCourses';
-import type { Enrolment, EnrolmentStudySubGroup, EnrolRequest } from '@/app/api/generated/IlmoApi';
+import type { Enrolment, EnrolmentStudySubGroup } from '@/app/api/generated/IlmoApi';
 import {
   canCancelImplementation,
   getEnrolmentForImplementation,
+  isImplementationRegisterable,
   isImplementationFinished,
 } from '@/app/views/registration/util';
 import { SelectionState } from '@/app/views/registration/types';
@@ -46,6 +47,7 @@ export const submitRegistration = async (
   implementation: RegistrationImplementation,
   selections: SelectionState,
   studyRightId?: string,
+  personId?: string,
 ): Promise<Enrolment> => {
   const studySubGroups = buildStudySubGroups(selections);
   const studyGroupSets = buildStudyGroupSets(implementation, selections);
@@ -59,6 +61,9 @@ export const submitRegistration = async (
     if (!studyRightId && !course.studyRightId) {
       throw new Error("Study right id is required to create an enrolment, but it's missing for this course.");
     }
+    if (!personId) {
+      throw new Error('Person id is required to create an enrolment, but Sisu did not return it.');
+    }
 
     const draftEnrolment: Enrolment = {
       assessmentItemId,
@@ -66,6 +71,7 @@ export const submitRegistration = async (
       courseUnitRealisationId: implementation.id,
       documentState: 'ACTIVE',
       isInCalendar: true,
+      personId,
       state: 'NOT_ENROLLED',
       studyGroupSets,
       studyRightId: studyRightId ?? course.studyRightId ?? undefined,
@@ -79,14 +85,16 @@ export const submitRegistration = async (
     throw new Error('Sisu did not return an enrolment id.');
   }
 
-  const request: EnrolRequest = {
+  if (!isImplementationRegisterable(implementation)) {
+    return currentEnrolment;
+  }
+
+  return enrol(currentEnrolment.id, {
     enrolmentId: currentEnrolment.id,
     studyGroupSets,
     studyRightId: studyRightId ?? course.studyRightId ?? currentEnrolment.studyRightId,
     studySubGroups,
-  };
-
-  return enrol(currentEnrolment.id, request);
+  });
 };
 
 export const cancelRegistration = async ({

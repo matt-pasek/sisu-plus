@@ -143,65 +143,60 @@ Single-context repo — `CONTEXT.md` at root (not yet created) + `docs/adr/`. Se
 <claude-mem-context>
 # Memory Context
 
-# [sisu-plus] recent context, 2026-06-07 12:58am GMT+3
+# [sisu-plus] recent context, 2026-06-07 3:37pm GMT+3
 
 Legend: 🎯session 🔴bugfix 🟣feature 🔄refactor ✅change 🔵discovery ⚖️decision 🚨security_alert 🔐security_note Format:
 ID TIME TYPE TITLE Fetch details: get_observations([IDs]) | Search: mem-search skill
 
-Stats: 50 obs (21,194t read) | 258,764t work | 92% savings
-
-### Jun 6, 2026
-
-2440 11:51p ✅ Added Study Plan canonical term to CONTEXT.md — overrides "Plan" and "HOPS" as Avoid terms 2441 11:52p ✅
-Added Module canonical term to CONTEXT.md — umbrella term with subtypes used only when specifically needed 2442 11:53p
-✅ Added Course and Enrolment canonical terms to CONTEXT.md — "Course Unit" and "enrollment" both banned 2443 " ✅ Added
-Moodle and Moodle Token canonical terms to CONTEXT.md 2444 11:55p ✅ Added ## Views section to CONTEXT.md documenting
-all four app views 2445 11:56p ✅ Added Study Period canonical term to CONTEXT.md — "Period", "term", "semester block"
-all banned 2446 11:57p ✅ Added Credits canonical term to CONTEXT.md — ECTS accepted as synonym, points/units/hours
-banned 2447 " ✅ Added Widget canonical term to CONTEXT.md — grid-based Dashboard panels; card/panel/tile banned 2448
-11:58p ✅ Added University canonical term to CONTEXT.md — "configures" is the onboarding action verb
+Stats: 50 obs (20,781t read) | 490,675t work | 96% savings
 
 ### Jun 7, 2026
 
-2449 12:00a ✅ Added Onboarding canonical term to CONTEXT.md — two-part flow with Control Center walkthrough revealed
-2450 12:01a ✅ Added Control Center canonical term to CONTEXT.md — FAB visible in both Sisu and Sisu+, CC abbreviation
-permitted 2451 12:02a ✅ Added Active/Inactive canonical term to CONTEXT.md — Sisu+ replaces (not overlays) Sisu UI when
-active 2452 12:03a ✅ Added Preferences canonical term to CONTEXT.md — "prefs" accepted as shorthand, settings/config
-banned 2453 12:04a ✅ Updated Registration view description in CONTEXT.md — "realisation" introduced as domain term S268
-/grill-with-docs domain interview — Q20: Implementation vs Realisation vocabulary resolved via code inspection (Jun 7 at
-12:04 AM) 2454 12:06a 🔵 resolveCourseRealisations fetches KORI realisations by assessmentItemId with locale-aware
-in-memory cache 2455 " 🔵 Registration view uses "Implementation" not "Realisation" as the domain term in view-layer
-code S269 /grill-with-docs domain interview — Q21: "Completions" as a third potentially confusing term alongside
-realisations and implementations (Jun 7 at 12:07 AM) 2456 12:07a 🟣 Added Implementation canonical term to CONTEXT.md —
-"Realisation" demoted to API-layer-only usage S270 /grill-with-docs domain interview — Q21 cont: Completion Method
-definition confirmed, awaiting shortening preference (Jun 7 at 12:07 AM) 2457 12:09a 🔵 Completion Method is a Structure
-view concept for how courses can be completed — distinct from Attainment 2458 " 🔵 Completion Method is a
-user-selectable KORI property on a Course within the Structure view Study Plan S271 /grill-with-docs domain interview —
-Q22: Grade Scale naming and visibility to students (Jun 7 at 12:10 AM) 2459 12:10a ✅ Added Completion Method canonical
-term to CONTEXT.md — "completion" accepted as shorthand 2460 " 🔵 Two additional resolver-backed domain concepts
-identified: Grade Scale and Prerequisites S272 /grill-with-docs domain interview — Q23: Prerequisites visibility and
-location in Sisu+ UI (Jun 7 at 12:11 AM) 2461 12:11a ✅ Added Grade Scale and Grade canonical terms to CONTEXT.md —
-"Grading scale" permitted as synonym S273 /grill-with-docs domain interview — Q24: Study Group vs Group canonical naming
-and enrolment selection (Jun 7 at 12:12 AM) 2462 12:12a ✅ Added Prerequisite canonical term to CONTEXT.md — flagged in
-Timeline on conflict S274 /grill-with-docs domain interview — final check: any uncovered terms before CONTEXT.md is
-declared complete (Jun 7 at 12:13 AM) 2463 12:14a ✅ Added Study Group canonical term to CONTEXT.md — includes external
-selection gotcha S275 Setup matt-pocock-skills + /grill-with-docs domain interview — BOTH FULLY COMPLETE (Jun 7 at 12:14
-AM) 2464 12:15a 🟣 CONTEXT.md finalized at 128 lines with 27 language terms and 4 view definitions S276 Impeccable init
-— run /impeccable init on sisu-plus to produce PRODUCT.md, DESIGN.md, and live mode config (Jun 7 at 12:15 AM) 2465
-12:16a 🔵 Impeccable Plugin v3.5.0 Script Inventory 2466 " 🔵 Impeccable Requires PRODUCT.md Before Initialization 2467
-" 🔵 Impeccable Init Flow: 7-Step Process Documented 2468 " 🔵 sisu-plus Project Structure and Tech Stack Identified
-2469 12:17a 🔵 sisu-plus Design System: Dark Theme with Green Accent 2470 12:20a 🟣 PRODUCT.md Created for sisu-plus
-2471 12:21a 🔵 Impeccable document.md: DESIGN.md Generation Reference Loaded 2472 " 🔵 sisu-plus Component Inventory and
-Landing Page Design Patterns 2473 12:22a 🔵 sisu-plus Core Component Design Patterns: Button and CourseCard 2474 12:23a
-🔵 sisu-plus Navbar Component Design Pattern 2475 12:25a 🟣 DESIGN.md Created for sisu-plus: "The Research Console"
-Design System 2476 12:26a 🟣 .impeccable/design.json Sidecar Created for sisu-plus 2477 12:27a 🟣 Impeccable Live Mode
-Configured for sisu-plus Landing Page 2478 " 🔵 Impeccable critique.md Reference: Two-Assessment Design Review Flow 2479
-12:28a 🔵 Impeccable Critique Started on sisu-plus Landing Page 2480 " 🔵 Landing Page Full Structure and Detect.mjs
-Clean Result 2482 12:29a 🔵 Impeccable Critique Skill: Two-Assessment Architecture 2481 " 🔵 Undocumented Purple Accent
-Found in Landing Feature Card CSS 2483 " 🔵 Sisu+ Landing Page: Design System and Source Structure 2484 " 🔵 Sisu+
-Landing Page Component Architecture 2485 12:33a 🔵 Impeccable Critique: Sisu+ Landing Page Scored 27/40 S277 Impeccable
-critique of src/landing/ — design audit of the Sisu+ landing page with actionable findings and prioritized fix plan (Jun
-7 at 12:34 AM) 2486 12:34a 🔵 Impeccable Layout Reference Guide Loaded 2487 12:35a 🔵 Sisu+ Design System Context Loaded
-2488 " 🔵 Sisu+ Landing Page CSS Structure Mapped 2489 12:36a 🔵 Sisu+ Landing Page Component Structure Mapped
+S270 /grill-with-docs domain interview — Q21 cont: Completion Method definition confirmed, awaiting shortening
+preference (Jun 7 at 12:07 AM) S271 /grill-with-docs domain interview — Q22: Grade Scale naming and visibility to
+students (Jun 7 at 12:10 AM) S272 /grill-with-docs domain interview — Q23: Prerequisites visibility and location in
+Sisu+ UI (Jun 7 at 12:11 AM) S273 /grill-with-docs domain interview — Q24: Study Group vs Group canonical naming and
+enrolment selection (Jun 7 at 12:12 AM) S274 /grill-with-docs domain interview — final check: any uncovered terms before
+CONTEXT.md is declared complete (Jun 7 at 12:13 AM) S275 Setup matt-pocock-skills + /grill-with-docs domain interview —
+BOTH FULLY COMPLETE (Jun 7 at 12:14 AM) S276 Impeccable init — run /impeccable init on sisu-plus to produce PRODUCT.md,
+DESIGN.md, and live mode config (Jun 7 at 12:15 AM) S277 Impeccable critique of src/landing/ — design audit of the Sisu+
+landing page with actionable findings and prioritized fix plan (Jun 7 at 12:27 AM) S278 Impeccable layout pass on
+sisu-plus landing page — reducing kicker-label scaffolding and reordering sections (Jun 7 at 12:34 AM) 2489 12:36a 🔵
+Sisu+ Landing Page Component Structure Mapped 2490 1:49p 🔵 Impeccable Layout Skill Reference Loaded 2491 1:50p 🔵 Sisu+
+Landing Page CSS Architecture Mapped 2492 " 🔵 Sisu+ Dual-Surface Architecture Confirmed via Impeccable Context 2493 "
+🔵 Landing Page Component and Section Architecture Mapped 2494 1:54p ✅ Privacy Section Kicker Removed from LandingPage
+2495 " ✅ Roadmap Section Kicker Removed from LandingPage 2496 " ✅ Support Section Removed and Universities Kicker
+Stripped from Landing Page 2497 1:55p ✅ Support Section Re-added After Universities, Kicker-free and Reordered 2498 "
+🔵 Section Container CSS Verified — No Kicker-Dependent Spacing Found 2499 1:58p 🔵 Landing Page Responsive Architecture
+— Two Breakpoints Confirmed 2500 2:03p ⚖️ Widget Redesign Initiative Started for Impeccable/Sisu 2501 " 🔵 Sisu+ Design
+System Fully Documented in DESIGN.md and PRODUCT.md 2502 2:04p 🔵 Widget System File Structure Mapped in Sisu+ Dashboard
+2503 " 🔵 Existing Widget Components: Shell Architecture with Drag-Resize Support 2504 " 🔵 Dashboard Widget Inventory:
+10 Widgets Defined, 6 in Default Layout 2505 " 🔵 All Six Default Widget Content Components Audited Before Redesign 2506
+2:05p 🔵 Dashboard.view.tsx: Full Orchestration Architecture Audited 2507 2:06p 🔵 Mockup HTML Contains New Widget
+Proposals Beyond Current 10 2508 2:07p 🔵 Mockup Bundle Structure: 8 Meaningful JS Assets Identified 2509 " 🔵 Mockup
+WidgetShell API and Icon Set Extracted 2510 2:08p 🔵 Redesigned Widget Patterns and 5 New Widget Designs Fully Extracted
+from Mockup 2511 " 🔵 Widget Shell CSS Spec Extracted: Complete Token Set and Primitive Classes 2512 2:09p 🔵
+UpcomingRegistrations Widget Design Extracted — Seats, State, and Urgency Pattern 2513 2:11p 🟣 WidgetIcon Component
+Created — Shared Icon Registry for Redesigned Widgets 2514 " 🟣 Widget.comp.tsx Redesigned — New Shell with Eyebrow,
+Icon, Badge, and Top Sheen 2515 2:12p 🟣 DashboardWidgetShell Updated to Pass icon/eyebrow/badge to Widget; Edit
+Controls Get SVG Icons 2516 2:13p 🟣 DegreeCompletionContent Redesigned — Tighter Proportions, Module Dot Indicator,
+Glow on Completion 2517 " 🟣 SemesterStatsContent Redesigned — StatStrip Pattern with Icon Circles and Sparklines 2518
+2:14p 🟣 MoodleDeadlinesContent Redesigned — Timeline Connector Pattern 2519 2:16p 🟣 ActiveCoursesContent Redesigned —
+Color Stripe + Module/Credits Pill Pattern 2520 " 🟣 GradeTrendContent Redesigned — Area Gradient + Curve + Trend Line +
+Dots Chart 2521 " 🟣 CreditsVelocityContent Redesigned — Thinner Bars with Glow + Diagonal Stripe Pattern 2522 " 🟣
+WorkloadForecastContent Redesigned — Vertical Bars with Gradient Fill + Glow + Tone-Colored Labels 2523 2:17p 🟣
+GraduationCountdownContent Redesigned — 3-Tile Horizontal Layout with CountCell Component 2524 " 🟣
+RecentAchievementsContent Redesigned — Grade Badge Rows with Hover + Course Code Sub-label 2525 " 🟣 TimelinePeekContent
+Redesigned — Period Cards with Module Color Dot + Course Sub-row 2526 2:18p 🟣 GradeDonutContent — New Widget Component
+Created 2527 " 🟣 CreditPaceContent — New Widget Component Created 2528 " 🟣 widgetDefinitions.ts Updated — grade-donut
+and credit-pace Added 2530 2:19p 🟣 DashboardWidgetId.type.ts Updated — grade-donut and credit-pace Added 2532 2:20p 🟣
+Dashboard.view.tsx Major Overhaul — renderHeader() Removed, WIDGET_META + Badge Pattern Introduced S279 Full dashboard
+widget redesign for Sisu+ Chrome extension — unify all widgets visually, redesign existing ones, add new widget types
+based on extracted mockup (Jun 7 at 2:24 PM) 2544 2:29p 🔵 Three UI Bugs Identified in Grade Dashboard Component 2545 "
+🔵 Root Cause Found: Grade Trend Label Uses First/Last Delta, Not Regression Slope 2546 2:30p 🔵 GradeDonutContent
+Includes 'Pass' in Donut Segments and Total Count 2547 " 🔵 sisu-plus Uses Chrome Extension i18n Format for Translations
+2548 " 🔵 sisu-plus Translations Are TypeScript Files, Not JSON 2549 2:31p 🔴 Fixed Missing Bottom Padding in Widget
+Content Area 2550 2:32p 🔴 Fixed Grade Trend "Improving" Badge to Use Regression Slope Instead of First/Last Delta 2551
+" 🔴 Updated Grade Trend Numeric Label to Display Regression-Based slopeDelta
 
-Access 259k tokens of past work via get_observations([IDs]) or mem-search skill. </claude-mem-context>
+Access 491k tokens of past work via get_observations([IDs]) or mem-search skill. </claude-mem-context>

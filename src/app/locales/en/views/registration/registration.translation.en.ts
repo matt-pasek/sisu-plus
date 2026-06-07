@@ -6,6 +6,8 @@ export type RegistrationTranslation = {
     confirming: string;
     fixCourseRights: string;
     register: string;
+    saveSelection: string;
+    savingSelection: string;
     updateView: string;
   };
   dialog: {
@@ -16,6 +18,7 @@ export type RegistrationTranslation = {
     examTitle: string;
     explanation: string;
     registrationCloses: string;
+    registrationStarts: string;
     studyGroup: string;
     selectRange: string;
     selectAny: string;
@@ -43,18 +46,24 @@ export type RegistrationTranslation = {
     finished: string;
     noOpenOption: string;
     noOpenRegistration: string;
+    implementationOption: string;
+    implementationOptions: string;
     open: string;
     openOption: string;
     openOptions: string;
     registrationClosed: string;
+    registrationNotOpen: string;
+    registrationStarts: string;
     registrationProcessed: string;
     selected: string;
+    selectedUpcoming: string;
     selectedImplementation: string;
     selectImplementation: string;
     selectSitting: string;
     selectBeforeRegistering: string;
     showAttempts: string;
     totalCredits: string;
+    upcoming: string;
     withdrawing: string;
     withdraw: string;
     cancelling: string;
@@ -73,6 +82,7 @@ export type RegistrationTranslation = {
     refreshSent: string;
     refreshed: string;
     registrationSent: string;
+    selectionSaved: string;
     viewUpdated: string;
   };
   status: {
@@ -94,6 +104,8 @@ export const registrationTranslation: RegistrationTranslation = {
     confirming: 'Confirming',
     fixCourseRights: 'Fix course rights',
     register: 'Register',
+    saveSelection: 'Save selection',
+    savingSelection: 'Saving',
     updateView: 'Update view',
   },
   dialog: {
@@ -104,6 +116,7 @@ export const registrationTranslation: RegistrationTranslation = {
     examTitle: 'Select an exam sitting',
     explanation: 'Confirm the option you want Sisu to register for this course.',
     registrationCloses: 'Registration closes {{date}}',
+    registrationStarts: 'Registration starts {{date}}',
     studyGroup: 'Study group',
     selectRange: 'select {{range}}',
     selectAny: 'any',
@@ -133,18 +146,24 @@ export const registrationTranslation: RegistrationTranslation = {
     finished: 'Finished',
     noOpenOption: 'No open option',
     noOpenRegistration: 'No open registration',
+    implementationOption: '{{count}} implementation',
+    implementationOptions: '{{count}} implementations',
     open: 'Open',
     openOption: '{{count}} open option',
     openOptions: '{{count}} open options',
     registrationClosed: 'Registration is closed or no published implementations.',
+    registrationNotOpen: 'Not open yet',
+    registrationStarts: 'Registration starts {{date}}',
     registrationProcessed: 'Registration processed',
     selected: 'Selected',
+    selectedUpcoming: 'Selected',
     selectedImplementation: 'Selected implementation',
     selectBeforeRegistering: 'Select an implementation before registering.',
     selectImplementation: 'Select implementation',
     selectSitting: 'Select sitting',
     showAttempts: 'Show attempts',
     totalCredits: 'cr total',
+    upcoming: 'Upcoming',
     withdrawing: 'Withdrawing',
     withdraw: 'Withdraw',
     cancelling: 'Cancelling',
@@ -163,6 +182,7 @@ export const registrationTranslation: RegistrationTranslation = {
     refreshSent: 'Registration update sent to Sisu. Refreshing view...',
     refreshed: 'Registration view refreshed.',
     registrationSent: 'Registration sent to Sisu. Refreshing view...',
+    selectionSaved: 'Implementation selection saved. Refreshing view...',
     viewUpdated: 'Registration view updated.',
   },
   status: {

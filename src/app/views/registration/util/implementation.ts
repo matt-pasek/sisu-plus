@@ -22,6 +22,15 @@ export const isImplementationSelectable = (implementation: RegistrationImplement
   if (!implementation || isImplementationFinished(implementation)) return false;
   return (
     implementation.isEnrolmentOpen ||
+    implementation.isUpcoming ||
+    (implementation.usesExternalEnrolment && implementation.externalEnrolmentUrl != null)
+  );
+};
+
+export const isImplementationRegisterable = (implementation: RegistrationImplementation | null): boolean => {
+  if (!implementation || isImplementationFinished(implementation)) return false;
+  return (
+    implementation.isEnrolmentOpen ||
     (implementation.usesExternalEnrolment && implementation.externalEnrolmentUrl != null)
   );
 };

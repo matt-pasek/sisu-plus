@@ -6,11 +6,13 @@ import { CourseHeader } from './CourseHeader.comp';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import {
   formatImplementationDateRange,
+  formatDateTime,
   getCourseTone,
   getImplementationsForTab,
   getStatusClass,
   getStatusForTab,
   isCourseSelectionDraftForTab,
+  isImplementationRegisterable,
   isImplementationSelectable,
 } from '@/app/views/registration/util';
 import { RegistrationTab } from '@/app/views/registration/types';
@@ -29,16 +31,31 @@ export const AvailableCard: React.FC<Props> = ({ course, implementation, onSelec
   const selectableCount = implementations.filter(isImplementationSelectable).length;
   const status = getStatusForTab(course, tab);
   const selectedDraft = isCourseSelectionDraftForTab(course, tab);
-  const disabled = !isImplementationSelectable(implementation) || status === 'processing' || status === 'registered';
+  const registerable = isImplementationRegisterable(implementation);
+  const disabled =
+    (selectedDraft ? !registerable : !isImplementationSelectable(implementation)) ||
+    status === 'processing' ||
+    status === 'registered';
   const canChangeImplementation = selectedDraft && selectableCount > 1;
+  const startsLater = implementation?.isUpcoming === true && implementation.enrolmentStart != null;
+  const badgeClass =
+    selectedDraft && startsLater
+      ? 'bg-warn/15 text-warn shadow-[inset_0_0_0_1px_rgba(240,168,77,0.18)]'
+      : getStatusClass(implementation ? 'not-enrolled' : 'not-selected');
 
   return (
     <CourseCard
       badge={
-        <span
-          className={`shrink-0 rounded px-2 py-0.5 text-xs font-bold ${getStatusClass(implementation ? 'not-enrolled' : 'not-selected')}`}
-        >
-          {selectedDraft ? t('labels.selected') : implementation ? t('labels.open') : t('labels.closed')}
+        <span className={`shrink-0 rounded px-2 py-0.5 text-xs font-bold ${badgeClass}`}>
+          {selectedDraft
+            ? startsLater
+              ? t('labels.selectedUpcoming')
+              : t('labels.selected')
+            : registerable
+              ? t('labels.open')
+              : startsLater
+                ? t('labels.upcoming')
+                : t('labels.closed')}
         </span>
       }
       className={selectedDraft ? 'shadow-[0_0_0_1px_rgba(240,183,97,0.34)]' : ''}
@@ -54,17 +71,24 @@ export const AvailableCard: React.FC<Props> = ({ course, implementation, onSelec
               {selectedDraft
                 ? (implementation?.name ?? implementation?.typeLabel ?? t('labels.selectedImplementation'))
                 : implementation
-                  ? t(selectableCount === 1 ? 'labels.openOption' : 'labels.openOptions', { count: selectableCount })
+                  ? t(selectableCount === 1 ? 'labels.implementationOption' : 'labels.implementationOptions', {
+                      count: selectableCount,
+                    })
                   : t('labels.noOpenRegistration')}
             </p>
             {selectedDraft && (
               <p className="mt-1 text-xs text-darkishGrey">
                 {formatImplementationDateRange(implementation)}
-                {selectableCount > 1 && ` · ${t('labels.openOptions', { count: selectableCount })}`}
+                {selectableCount > 1 && ` · ${t('labels.implementationOptions', { count: selectableCount })}`}
               </p>
             )}
             {!implementation && <p className="mt-1 text-xs text-darkishGrey">{t('labels.registrationClosed')}</p>}
-            {implementation && !selectedDraft && (
+            {startsLater && (
+              <p className="mt-1 text-xs text-warn/90">
+                {t('labels.registrationStarts', { date: formatDateTime(implementation.enrolmentStart) })}
+              </p>
+            )}
+            {implementation && !selectedDraft && !startsLater && (
               <p className="mt-1 text-xs text-darkishGrey">{t('labels.selectBeforeRegistering')}</p>
             )}
           </div>
@@ -95,7 +119,9 @@ export const AvailableCard: React.FC<Props> = ({ course, implementation, onSelec
               }}
             >
               {selectedDraft
-                ? t('actions.register')
+                ? startsLater
+                  ? t('labels.registrationNotOpen')
+                  : t('actions.register')
                 : tab === 'exam'
                   ? t('labels.selectSitting')
                   : t('labels.selectImplementation')}

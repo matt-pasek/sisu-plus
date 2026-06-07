@@ -2,6 +2,7 @@ import { Outlet, useLocation, useNavigation } from 'react-router';
 import { SpinnerLoader } from '@/app/components/ui/SpinnerLoader.comp';
 import React from 'react';
 import { Navbar } from '@/app/components/ui/Navbar.comp';
+import { AppToaster } from '@/app/components/ui/AppToaster.comp';
 
 export const AppLayout: React.FC = () => {
   const navigation = useNavigation();
@@ -12,6 +13,7 @@ export const AppLayout: React.FC = () => {
   return (
     <div>
       {isNavigating && <SpinnerLoader />}
+      <AppToaster />
       <Navbar />
       <div className={`mx-auto w-full px-6 pt-6 ${isTimeline ? 'max-w-none' : 'max-w-6xl'}`}>
         <Outlet />

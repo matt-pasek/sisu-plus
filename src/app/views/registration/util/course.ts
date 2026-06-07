@@ -51,7 +51,7 @@ export const isCourseRegisteredForTab = (course: RegistrationCourse, tab: Regist
 };
 
 export const isCourseSelectionDraftForTab = (course: RegistrationCourse, tab: RegistrationTab): boolean =>
-  getStatusForTab(course, tab) === 'not-enrolled';
+  getDraftImplementation(course, tab) != null;
 
 export const courseMatchesPeriod = (course: RegistrationCourse, period: RegistrationPeriod | null): boolean => {
   if (!period) return false;

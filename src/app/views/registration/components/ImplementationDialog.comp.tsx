@@ -8,10 +8,13 @@ import { Button } from '@/app/components/ui/Button.comp';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import {
   formatDate,
+  formatDateTime,
   formatImplementationDateRange,
   getDefaultSelections,
   getImplementationsForTab,
   isExamImplementation,
+  isImplementationRegisterable,
+  isImplementationSelectable,
   isSelectionValid,
 } from '@/app/views/registration/util';
 import { SelectionState } from '@/app/views/registration/types';
@@ -43,6 +46,7 @@ export const ImplementationDialog: React.FC<Props> = ({
     implementationOptions.find((candidate) => candidate.id === selectedImplementationId) ?? initialImplementation;
   const [selections, setSelections] = useState<SelectionState>(() => getDefaultSelections(implementation));
   const isValid = isSelectionValid(implementation, selections);
+  const registerable = isImplementationRegisterable(implementation);
 
   useEffect(() => {
     setSelections(getDefaultSelections(implementation));
@@ -103,7 +107,7 @@ export const ImplementationDialog: React.FC<Props> = ({
             <div className="space-y-1.5">
               {implementationOptions.map((candidate) => {
                 const selected = candidate.id === implementation.id;
-                const disabled = !candidate.isEnrolmentOpen && !candidate.usesExternalEnrolment;
+                const disabled = !isImplementationSelectable(candidate);
 
                 return (
                   <button
@@ -131,11 +135,15 @@ export const ImplementationDialog: React.FC<Props> = ({
                       <span className="mt-1 block text-xs text-lightGrey">
                         {formatImplementationDateRange(candidate)}
                       </span>
-                      {candidate.enrolmentEnd && (
+                      {candidate.isUpcoming && candidate.enrolmentStart ? (
+                        <span className="mt-2 inline-flex rounded bg-warn/15 px-2 py-0.5 text-xs font-semibold text-warn">
+                          {t('dialog.registrationStarts', { date: formatDateTime(candidate.enrolmentStart) })}
+                        </span>
+                      ) : candidate.enrolmentEnd ? (
                         <span className="mt-2 inline-flex rounded bg-warn/15 px-2 py-0.5 text-xs font-semibold text-warn">
                           {t('dialog.registrationCloses', { date: formatDate(candidate.enrolmentEnd) })}
                         </span>
-                      )}
+                      ) : null}
                     </span>
                   </button>
                 );
@@ -206,7 +214,13 @@ export const ImplementationDialog: React.FC<Props> = ({
             className="min-h-10 min-w-32 text-sm font-semibold tracking-wide uppercase"
             onClick={() => onConfirm(implementation, selections)}
           >
-            {isPending ? t('actions.confirming') : t('actions.confirm')}
+            {isPending
+              ? registerable
+                ? t('actions.confirming')
+                : t('actions.savingSelection')
+              : registerable
+                ? t('actions.confirm')
+                : t('actions.saveSelection')}
           </Button>
         </footer>
       </div>

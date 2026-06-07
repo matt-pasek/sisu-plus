@@ -7,8 +7,10 @@ import {
 } from '@/app/api/dataPoints/getRegistrationCourses';
 import { Button } from '@/app/components/ui/Button.comp';
 import { InlineLoader } from '@/app/components/ui/InlineLoader.comp';
+import { notify } from '@/app/components/ui/notify';
 import { useSisuQuery } from '@/app/hooks/useSisuQuery';
 import { fetchStudyRights } from '@/app/api/endpoints/studyRights';
+import { fetchUserDetails } from '@/app/api/endpoints/userDetails';
 
 import { getRegistrationStatus } from '@/app/api/dataPoints/getRegistrationCourses';
 import { AvailableCard } from './components/AvailableCard.comp';
@@ -27,6 +29,7 @@ import {
   getPeriodState,
   getSelectableImplementation,
   getStatusForTab,
+  isImplementationRegisterable,
   isCourseRegisteredForTab,
   isCourseSelectionDraftForTab,
   sortAttemptsForTab,
@@ -39,6 +42,7 @@ const RegistrationView: React.FC = () => {
   const { t } = useTranslationWithPrefix('views.registration');
   const queryClient = useQueryClient();
   const { data: studyRight, isLoading: isStudyRightLoading } = useSisuQuery(['study-rights'], fetchStudyRights);
+  const { data: userDetails, isLoading: isUserDetailsLoading } = useSisuQuery(['user-details'], fetchUserDetails);
   const { courses, isLoading, periods, statusCourses } = getRegistrationCourses();
   const [selectedPeriodId, setSelectedPeriodId] = useState<string | null>(null);
   const [selectedTab, setSelectedTab] = useState<RegistrationTab>('course');
@@ -47,7 +51,6 @@ const RegistrationView: React.FC = () => {
     implementation: RegistrationImplementation;
   } | null>(null);
   const [showAllAttempts, setShowAllAttempts] = useState(false);
-  const [message, setMessage] = useState<{ tone: 'success' | 'error'; text: string } | null>(null);
   const periodScrollerRef = useRef<HTMLDivElement | null>(null);
   const periodButtonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const didScrollToInitialPeriod = useRef(false);
@@ -104,32 +107,38 @@ const RegistrationView: React.FC = () => {
       implementation,
       selections,
       studyRightId,
+      personId,
     }: {
       course: RegistrationCourse;
       implementation: RegistrationImplementation;
       selections: Record<string, string[]>;
       studyRightId?: string;
-    }) => submitRegistration(course, implementation, selections, studyRightId),
+      personId?: string;
+    }) => submitRegistration(course, implementation, selections, studyRightId, personId),
     onError: (error) => {
-      setMessage({ tone: 'error', text: error instanceof Error ? error.message : t('messages.registrationFailed') });
+      notify.error(error instanceof Error ? error.message : t('messages.registrationFailed'));
     },
-    onSuccess: async () => {
+    onSuccess: async (_enrolment, variables) => {
       setDialogState(null);
-      setMessage({ tone: 'success', text: t('messages.registrationSent') });
+      notify.success(
+        isImplementationRegisterable(variables.implementation)
+          ? t('messages.registrationSent')
+          : t('messages.selectionSaved'),
+      );
       await refreshRegistration({ settleDelayMs: 700 });
-      setMessage({ tone: 'success', text: t('messages.viewUpdated') });
+      notify.success(t('messages.viewUpdated'));
     },
   });
 
   const cancelMutation = useMutation({
     mutationFn: cancelRegistration,
     onError: (error) => {
-      setMessage({ tone: 'error', text: error instanceof Error ? error.message : t('messages.cancellationFailed') });
+      notify.error(error instanceof Error ? error.message : t('messages.cancellationFailed'));
     },
     onSuccess: async () => {
-      setMessage({ tone: 'success', text: t('messages.refreshSent') });
+      notify.success(t('messages.refreshSent'));
       await refreshRegistration({ settleDelayMs: 700 });
-      setMessage({ tone: 'success', text: t('messages.viewUpdated') });
+      notify.success(t('messages.viewUpdated'));
     },
   });
 
@@ -169,26 +178,12 @@ const RegistrationView: React.FC = () => {
         <Button
           className="min-h-10 min-w-32 rounded-lg px-3 py-2 text-xs font-semibold"
           onClick={() => {
-            void refreshRegistration();
-            setMessage({ tone: 'success', text: t('messages.refreshed') });
+            void refreshRegistration().then(() => notify.success(t('messages.refreshed')));
           }}
         >
           {t('actions.updateView')}
         </Button>
       </header>
-
-      {message && (
-        <div
-          className={`mb-4 rounded-[10px] px-3 py-2 text-xs font-semibold ${
-            message.tone === 'success'
-              ? 'bg-accent/15 text-lighterGreen shadow-[inset_0_0_0_1px_rgba(82,201,137,0.18)]'
-              : 'bg-danger/15 text-danger shadow-[inset_0_0_0_1px_rgba(240,107,107,0.18)]'
-          }`}
-          role={message.tone === 'error' ? 'alert' : 'status'}
-        >
-          {message.text}
-        </div>
-      )}
 
       <div ref={periodScrollerRef} className="-mx-1 mb-5 flex gap-2 overflow-x-auto px-1 pb-2">
         {periods.map((period) => {
@@ -337,7 +332,7 @@ const RegistrationView: React.FC = () => {
         <EmptyState title={t('empty.noPlanned')} body={t('empty.noPlannedBody')} />
       )}
 
-      {dialogState && !isStudyRightLoading && (
+      {dialogState && !isStudyRightLoading && !isUserDetailsLoading && (
         <ImplementationDialog
           course={dialogState.course}
           initialImplementation={dialogState.implementation}
@@ -348,6 +343,7 @@ const RegistrationView: React.FC = () => {
               course: dialogState.course,
               implementation,
               selections,
+              personId: userDetails?.id,
               studyRightId: studyRight?.[0].id,
             })
           }

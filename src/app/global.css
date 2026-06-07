@@ -64,3 +64,53 @@
 #app *::-webkit-scrollbar-thumb:hover {
   background: var(--color-lightGrey);
 }
+
+@keyframes sisu-toast-enter {
+  0% {
+    opacity: 0;
+    filter: blur(3px);
+    transform: translate3d(18px, -10px, 0) scale(0.96);
+  }
+  58% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(-2px, 0, 0) scale(1.01);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes sisu-toast-exit {
+  from {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    opacity: 0;
+    filter: blur(2px);
+    transform: translate3d(16px, -8px, 0) scale(0.97);
+  }
+}
+
+@keyframes sisu-toast-life {
+  from {
+    transform: scaleX(1);
+    opacity: 0.85;
+  }
+  to {
+    transform: scaleX(0);
+    opacity: 0.35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #app [class*='sisu-toast-enter'],
+  #app [class*='sisu-toast-exit'],
+  #app [class*='sisu-toast-life'] {
+    animation-duration: 1ms !important;
+  }
+}

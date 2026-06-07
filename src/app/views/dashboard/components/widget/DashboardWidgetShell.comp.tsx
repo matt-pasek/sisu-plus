@@ -3,9 +3,8 @@ import { useDraggable } from '@dnd-kit/react';
 import { AnimatePresence, motion, useAnimationControls } from 'motion/react';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { Widget } from './Widget.comp';
-import { DASHBOARD_COLUMNS } from '../util/widgetDefinitions';
-import { DASHBOARD_WIDGET_DRAG_TYPE, getDashboardWidgetDragData } from '../util/dndHandlers';
-import type { DashboardWidgetId, DashboardWidgetLayout } from '../types';
+import { DashboardWidgetId, DashboardWidgetLayout } from '@/app/views/dashboard/types';
+import { DASHBOARD_COLUMNS, DASHBOARD_WIDGET_DRAG_TYPE, getDashboardWidgetDragData } from '@/app/views/dashboard/util';
 
 type ResizeAxis = 'x' | 'y' | 'both';
 
@@ -20,14 +19,69 @@ const getResizeBlockedMotion = (axis: ResizeAxis) => {
 
 interface Props {
   children: React.ReactNode;
-  header: React.ReactNode;
+  icon?: React.ReactNode;
+  eyebrow?: string;
+  badge?: React.ReactNode;
   isEditMode: boolean;
   item: DashboardWidgetLayout;
   onRemove: (id: DashboardWidgetId) => void;
   onResize: (id: DashboardWidgetId, delta: Partial<Pick<DashboardWidgetLayout, 'w' | 'h'>>) => boolean;
+  shouldReduceMotion: boolean | null;
 }
 
-export const DashboardWidgetShell: React.FC<Props> = ({ children, header, isEditMode, item, onRemove, onResize }) => {
+const MinusIcon = () => (
+  <svg
+    aria-hidden="true"
+    className="size-3.5"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    viewBox="0 0 24 24"
+  >
+    <path d="M5 12h14" />
+  </svg>
+);
+
+const PlusIcon = () => (
+  <svg
+    aria-hidden="true"
+    className="size-3.5"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    viewBox="0 0 24 24"
+  >
+    <path d="M12 5v14M5 12h14" />
+  </svg>
+);
+
+const XIcon = () => (
+  <svg
+    aria-hidden="true"
+    className="size-3.5"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    viewBox="0 0 24 24"
+  >
+    <path d="M18 6 6 18M6 6l12 12" />
+  </svg>
+);
+
+export const DashboardWidgetShell: React.FC<Props> = ({
+  children,
+  icon,
+  eyebrow,
+  badge,
+  isEditMode,
+  item,
+  onRemove,
+  onResize,
+  shouldReduceMotion,
+}) => {
   const { t } = useTranslationWithPrefix('views.dashboard');
   const { ref, isDragging } = useDraggable({
     id: `dashboard-widget:${item.id}`,
@@ -94,33 +148,33 @@ export const DashboardWidgetShell: React.FC<Props> = ({ children, header, isEdit
     };
 
   const editActions = isEditMode ? (
-    <div className="flex items-center gap-1.5">
+    <div className="flex items-center gap-1">
       <button
         aria-label={t('widgets.actions.shrink', { title })}
-        className="flex size-9 items-center justify-center rounded-lg bg-container2 text-lightGrey transition-[background-color,color,transform] duration-150 hover:bg-offwhite/10 hover:text-offwhite active:scale-[0.96]"
+        className="flex size-8 items-center justify-center rounded-lg bg-container2 text-lightGrey transition-[background-color,color,transform] duration-150 hover:bg-offwhite/10 hover:text-offwhite active:scale-[0.96]"
         onClick={() => applyResize('both', { w: item.w - 1, h: item.h - 1 })}
         onPointerDown={(event) => event.stopPropagation()}
         type="button"
       >
-        -
+        <MinusIcon />
       </button>
       <button
         aria-label={t('widgets.actions.grow', { title })}
-        className="flex size-9 items-center justify-center rounded-lg bg-container2 text-lightGrey transition-[background-color,color,transform] duration-150 hover:bg-offwhite/10 hover:text-offwhite active:scale-[0.96]"
+        className="flex size-8 items-center justify-center rounded-lg bg-container2 text-lightGrey transition-[background-color,color,transform] duration-150 hover:bg-offwhite/10 hover:text-offwhite active:scale-[0.96]"
         onClick={() => applyResize('both', { w: item.w + 1, h: item.h + 1 })}
         onPointerDown={(event) => event.stopPropagation()}
         type="button"
       >
-        +
+        <PlusIcon />
       </button>
       <button
         aria-label={t('widgets.actions.remove', { title })}
-        className="flex size-9 items-center justify-center rounded-lg bg-danger/15 text-danger transition-[background-color,transform] duration-150 hover:bg-danger/25 active:scale-[0.96]"
+        className="flex size-8 items-center justify-center rounded-lg bg-danger/15 text-danger transition-[background-color,transform] duration-150 hover:bg-danger/25 active:scale-[0.96]"
         onClick={() => onRemove(item.id)}
         onPointerDown={(event) => event.stopPropagation()}
         type="button"
       >
-        x
+        <XIcon />
       </button>
     </div>
   ) : null;
@@ -133,6 +187,7 @@ export const DashboardWidgetShell: React.FC<Props> = ({ children, header, isEdit
       animate={blockedResizeControls}
       data-dashboard-widget-shell
       transition={{ type: 'spring', duration: 0.3, bounce: 0 }}
+      whileHover={!isEditMode && !shouldReduceMotion ? { y: -2 } : undefined}
       className={`relative min-h-0 transition-[opacity,scale,filter] duration-200 ${
         isEditMode ? 'cursor-grab touch-none active:scale-[0.96] active:cursor-grabbing' : ''
       } ${isDragging ? 'z-30 scale-[1.02] opacity-45' : 'z-10'}`}
@@ -141,7 +196,7 @@ export const DashboardWidgetShell: React.FC<Props> = ({ children, header, isEdit
         gridRow: `${item.y + 1} / span ${item.h}`,
       }}
     >
-      <Widget actions={editActions} header={header} loading={false}>
+      <Widget icon={icon} eyebrow={eyebrow} title={title} badge={badge} actions={editActions} loading={false}>
         {children}
       </Widget>
 
@@ -155,7 +210,7 @@ export const DashboardWidgetShell: React.FC<Props> = ({ children, header, isEdit
               initial={{ opacity: 0, scale: 0.96, filter: 'blur(4px)' }}
               transition={{ type: 'spring', duration: 0.3, bounce: 0 }}
             >
-              {item.w}x{item.h}
+              {item.w}×{item.h}
             </motion.div>
             <motion.div
               animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}

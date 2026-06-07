@@ -8,7 +8,7 @@ function formatCredits(value: number, unit: string): string {
   return `${Number.isInteger(rounded) ? rounded : rounded.toFixed(1)} ${unit}`;
 }
 
-const ProgressDial: React.FC<{ done: number; total: number }> = ({ done, total }) => {
+const Ring: React.FC<{ done: number; total: number }> = ({ done, total }) => {
   const { t } = useTranslationWithPrefix('views.dashboard');
   const pct = total > 0 ? Math.min(done / total, 1) : 0;
   const r = 46;
@@ -16,7 +16,7 @@ const ProgressDial: React.FC<{ done: number; total: number }> = ({ done, total }
   const dash = circ * pct;
 
   return (
-    <div className="relative grid size-36 shrink-0 place-items-center rounded-[28px] bg-background/45 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]">
+    <div className="relative grid size-28 shrink-0 place-items-center">
       <svg
         aria-label={t('widgets.degreeCompletion.aria', { percent: Math.round(pct * 100) })}
         className="size-28 -rotate-90"
@@ -33,58 +33,79 @@ const ProgressDial: React.FC<{ done: number; total: number }> = ({ done, total }
           strokeLinecap="round"
           strokeWidth="10"
           strokeDasharray={`${dash} ${circ - dash}`}
-          className="transition-[stroke-dasharray] duration-700 ease-out"
+          strokeDashoffset={0}
+          className="sisu-widget-ring transition-[stroke-dasharray] duration-700 ease-out"
+          style={
+            {
+              '--sisu-ring-from': `${circ}`,
+              '--sisu-ring-to': 0,
+            } as React.CSSProperties
+          }
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-3xl leading-none font-semibold text-offwhite tabular-nums">
+        <span className="text-[26px] leading-none font-bold text-offwhite tabular-nums">
           {total > 0 ? `${Math.round(pct * 100)}%` : '-'}
         </span>
-        <span className="mt-1 text-[11px] font-medium text-lightGrey">{t('widgets.degreeCompletion.complete')}</span>
+        <span className="mt-1 text-[10px] font-medium tracking-[0.08em] text-lightGrey uppercase">
+          {t('widgets.degreeCompletion.complete')}
+        </span>
       </div>
     </div>
   );
 };
 
-const MetricCard: React.FC<{ label: string; value: React.ReactNode; sub: string; tone?: 'default' | 'accent' }> = ({
+const MetricCard: React.FC<{ label: string; value: React.ReactNode; sub: string; accent?: boolean }> = ({
   label,
   value,
   sub,
-  tone = 'default',
+  accent = false,
 }) => (
   <div
-    className={`min-w-0 rounded-2xl px-4 py-3 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)] ${
-      tone === 'accent' ? 'bg-accent/10' : 'bg-container2'
+    className={`min-w-0 rounded-[14px] px-3.5 py-3 ${
+      accent
+        ? 'bg-accent/12 shadow-[inset_0_0_0_1px_rgba(82,201,137,0.22)]'
+        : 'bg-container2 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]'
     }`}
   >
-    <p className="truncate text-xs font-medium text-lightGrey">{label}</p>
-    <p className="mt-1 truncate text-2xl leading-none font-semibold text-offwhite tabular-nums">{value}</p>
-    <p className="mt-1 truncate text-xs text-lightGrey">{sub}</p>
+    <p className="truncate text-[11px] text-lightGrey">{label}</p>
+    <p
+      className={`mt-2 truncate text-[26px] leading-none font-semibold tabular-nums ${accent ? 'text-lighterGreen' : 'text-offwhite'}`}
+    >
+      {value}
+    </p>
+    <p className="mt-1.5 truncate text-[11px] text-lightGrey/80">{sub}</p>
   </div>
 );
 
-const ModuleProgressRow: React.FC<{ name: string; done: number; target: number; color: string }> = ({
+const ModuleBar: React.FC<{ name: string; done: number; target: number; color: string }> = ({
   name,
   done,
   target,
   color,
 }) => {
   const pct = target > 0 ? Math.min(done / target, 1) : 0;
+  const full = pct >= 1;
 
   return (
-    <div className="group grid grid-cols-[4px_minmax(0,1fr)_auto] items-center gap-x-3 rounded-xl bg-background/35 px-3 py-2 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.035)] transition-[background-color,box-shadow] duration-200 hover:bg-background/55 hover:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]">
-      <span className="row-span-2 h-8 w-1 self-center rounded-full" style={{ backgroundColor: color }} />
-      <div className="min-w-0">
-        <span className="truncate text-sm font-medium text-lightGrey">{name}</span>
+    <div className="grid grid-cols-[1fr_auto] items-center gap-x-2.5 gap-y-0.5 rounded-[11px] bg-background/35 px-3 py-2 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.035)] transition-[background-color] duration-200 hover:bg-background/55">
+      <div className="flex min-w-0 items-center gap-2">
+        <span
+          className="size-1.75 shrink-0 rounded-xs"
+          style={{
+            backgroundColor: color,
+            boxShadow: full ? `0 0 8px ${color}99` : 'none',
+          }}
+        />
+        <span className="truncate text-[12.5px] font-medium text-offwhite">{name}</span>
       </div>
-      <div className="text-right">
-        <span className="shrink-0 font-mono text-xs text-offwhite tabular-nums">
-          {done}/{target}
-        </span>
-      </div>
-      <div className="col-start-2 col-end-4 mt-2 h-1.5 overflow-hidden rounded-full bg-border2">
+      <span className="font-mono text-[11.5px] font-semibold" style={{ color: full ? color : undefined }}>
+        <span className={full ? '' : 'text-offwhite'}>{done}</span>
+        <span className="opacity-50">/{target}</span>
+      </span>
+      <div className="col-span-2 mt-1.5 h-1.25 overflow-hidden rounded-full bg-border2">
         <div
-          className="h-full rounded-full transition-[width] duration-700 ease-out"
+          className="sisu-widget-bar-x h-full rounded-full transition-[width] duration-700 ease-out"
           style={{ width: `${pct * 100}%`, backgroundColor: color }}
         />
       </div>
@@ -115,26 +136,29 @@ export const DegreeCompletionContent: React.FC<Props> = ({
   const unit = tUtil('credits.short');
 
   return (
-    <div className="flex h-full min-h-0 gap-5 overflow-hidden">
-      <section className="flex w-52 shrink-0 flex-col justify-between rounded-[28px] bg-container2 p-4 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]">
+    <div className="flex h-full min-h-0 gap-4 overflow-hidden">
+      <section className="flex w-47 shrink-0 flex-col justify-between rounded-[18px] bg-container2 p-4 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]">
         <div>
-          <p className="text-xs font-medium tracking-wide text-lightGrey uppercase">
+          <p className="text-[10px] font-semibold tracking-widest text-lightGrey uppercase">
             {t('widgets.degreeCompletion.paceLabel')}
           </p>
-          <p className="mt-1 text-sm leading-snug text-pretty text-offwhite">
-            {t('widgets.degreeCompletion.paceLeft', { credits: formatCredits(creditsRemaining, unit) })}
+          <p className="mt-1.5 text-[13.5px] leading-snug text-pretty text-offwhite">
+            <span className="font-semibold text-lighterGreen">{formatCredits(creditsRemaining, unit)}</span>{' '}
+            {t('widgets.degreeCompletion.paceLeft', { credits: '' }).trim()}
           </p>
         </div>
-        <ProgressDial done={creditsDone} total={totalTarget} />
+        <div className="flex items-center justify-center">
+          <Ring done={creditsDone} total={totalTarget} />
+        </div>
       </section>
 
-      <section className="flex min-w-0 flex-1 flex-col gap-4">
-        <div className="grid grid-cols-3 gap-3">
+      <section className="flex min-w-0 flex-1 flex-col gap-3">
+        <div className="grid grid-cols-3 gap-2.5">
           <MetricCard
             label={t('widgets.degreeCompletion.creditsLabel')}
             value={creditsDone}
             sub={totalTarget > 0 ? t('widgets.degreeCompletion.ofTarget', { target: totalTarget }) : '-'}
-            tone="accent"
+            accent
           />
           <MetricCard
             label={t('widgets.degreeCompletion.avgGradeLabel')}
@@ -153,9 +177,9 @@ export const DegreeCompletionContent: React.FC<Props> = ({
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto pr-1">
-          <div className="grid gap-2">
+          <div className="flex flex-col gap-1.5">
             {modules.map((mod, i) => (
-              <ModuleProgressRow
+              <ModuleBar
                 key={mod.moduleId}
                 name={mod.name}
                 done={mod.done}

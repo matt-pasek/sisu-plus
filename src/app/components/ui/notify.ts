@@ -42,8 +42,16 @@ export const getToasts = (): AppToast[] => toasts;
 export const dismissToast = dismiss;
 
 export const notify = {
-  error: (message: string) => show('error', message),
-  info: (message: string) => show('info', message),
-  success: (message: string) => show('success', message),
-  warning: (message: string) => show('warning', message),
+  error: (message: string) => {
+    show('error', message);
+  },
+  info: (message: string) => {
+    show('info', message);
+  },
+  success: (message: string) => {
+    show('success', message);
+  },
+  warning: (message: string) => {
+    show('warning', message);
+  },
 };

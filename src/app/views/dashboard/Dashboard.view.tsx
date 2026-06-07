@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { DragDropProvider, type DragEndEvent, type DragMoveEvent } from '@dnd-kit/react';
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { useNavigate } from 'react-router';
 import { fetchAttainments } from '@/app/api/endpoints/attainments';
 import { fetchPlans } from '@/app/api/endpoints/plans';
 import { getActiveCourses } from '@/app/api/dataPoints/getActiveCourses';
@@ -8,32 +9,21 @@ import { getCreditsByModule } from '@/app/api/dataPoints/getCreditsByModule';
 import { getCreditsByPeriod, getCreditsBySemester } from '@/app/api/dataPoints/getCreditsByPeriod';
 import { getDashboardStats } from '@/app/api/dataPoints/getDashboardStats';
 import { getMoodleDeadlines } from '@/app/api/dataPoints/getMoodleDeadlines';
+import { getRegistrationCourses } from '@/app/api/dataPoints/getRegistrationCourses';
 import { getStudyPeriodMap } from '@/app/api/dataPoints/getStudyPeriodMap';
 import { getTimelineCourses } from '@/app/api/dataPoints/getTimelineCourses';
 import { resolveCourseUnit } from '@/app/api/resolvers/resolveCourseUnit';
-import { Button } from '@/app/components/ui/Button.comp';
 import { InlineLoader } from '@/app/components/ui/InlineLoader.comp';
 import { daysUntil } from '@/app/helpers/daysUntilToday';
 import { useSisuQuery } from '@/app/hooks/useSisuQuery';
 import { useChromeStorage } from '@/app/hooks/useChromeStorage';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { MODULE_COLOR_VALUES } from '@/app/theme/moduleColors';
-import type { TFunction } from 'i18next';
 import { DashboardGridIcon } from './components/icons/DashboardGridIcon.comp';
+import { DashboardHero } from './components/hero/DashboardHero.comp';
+import { DashboardControlButton } from './components/DashboardControlButton.comp';
 import { DashboardCell } from './components/DashboardCell.comp';
-import { DashboardWidgetShell } from './components/DashboardWidgetShell.comp';
-import { EmptyWidgetState } from './components/EmptyWidgetState.comp';
 import { MoodleMissingToken } from './components/MoodleMissingToken.comp';
-import { ActiveCoursesContent } from './components/ActiveCoursesContent.comp';
-import { DegreeCompletionContent } from './components/DegreeCompletionContent.comp';
-import { MoodleDeadlinesContent } from './components/MoodleDeadlinesContent.comp';
-import { SemesterStatsContent } from './components/SemesterStatsContent.comp';
-import { GradeTrendContent } from './components/GradeTrendContent.comp';
-import { CreditsVelocityContent } from './components/CreditsVelocityContent.comp';
-import { TimelinePeekContent } from './components/TimelinePeekContent.comp';
-import { RecentAchievementsContent } from './components/RecentAchievementsContent.comp';
-import { WorkloadForecastContent } from './components/WorkloadForecastContent.comp';
-import { GraduationCountdownContent } from './components/GraduationCountdownContent.comp';
 import {
   canPlaceDashboardWidget,
   clampWidgetLayout,
@@ -43,57 +33,127 @@ import {
   type DashboardWidgetLayout,
   findOpenDashboardSlot,
   getHiddenWidgets,
+  sanitizeDashboardLayout,
 } from './util/widgetsHandlers';
+import { getOpenRegistrationCount } from './util/registrationWidgetData';
 import { isDashboardWidgetDragData } from './util/dndHandlers';
-import { getCurrentPeriodLabel, getCurrentSemester } from './util/periodLabel';
+import { getCurrentSemester } from './util/periodLabel';
 import { formatStudyRightEnd, isCourseUnitAttainment, getGrade } from './util/attainmentHelpers';
 import type { DashboardCompletedCourse } from './types/DashboardCompletedCourse.type';
+import { MoodleDeadlinesContent } from '@/app/views/dashboard/components/widget/contents/MoodleDeadlinesContent.comp';
+import { WidgetIcon } from '@/app/views/dashboard/components/widget/WidgetIcon.comp';
+import { DegreeCompletionContent } from '@/app/views/dashboard/components/widget/contents/DegreeCompletionContent.comp';
+import { ActiveCoursesContent } from '@/app/views/dashboard/components/widget/contents/ActiveCoursesContent.comp';
+import { SemesterStatsContent } from '@/app/views/dashboard/components/widget/contents/SemesterStatsContent.comp';
+import { GradeTrendContent } from '@/app/views/dashboard/components/widget/contents/GradeTrendContent.comp';
+import { CreditsVelocityContent } from '@/app/views/dashboard/components/widget/contents/CreditsVelocityContent.comp';
+import { TimelinePeekContent } from '@/app/views/dashboard/components/widget/contents/TimelinePeekContent.comp';
+import { RecentAchievementsContent } from '@/app/views/dashboard/components/widget/contents/RecentAchievementsContent.comp';
+import { WorkloadForecastContent } from '@/app/views/dashboard/components/widget/contents/WorkloadForecastContent.comp';
+import { GradeDonutContent } from '@/app/views/dashboard/components/widget/contents/GradeDonutContent.comp';
+import { CreditPaceContent } from '@/app/views/dashboard/components/widget/contents/CreditPaceContent.comp';
+import { NextExamContent } from '@/app/views/dashboard/components/widget/contents/NextExamContent.comp';
+import { UpcomingRegistrationsContent } from '@/app/views/dashboard/components/widget/contents/UpcomingRegistrationsContent.comp';
+import { DashboardWidgetShell } from '@/app/views/dashboard/components/widget/DashboardWidgetShell.comp';
+import { EmptyWidgetState } from '@/app/views/dashboard/components/widget/EmptyWidgetState.comp';
 
 interface DragTransform {
   x: number;
   y: number;
 }
 
-const renderHeader = (id: DashboardWidgetId, t: TFunction, missingToken: boolean): React.ReactNode => {
-  const title = t(`widgets.titles.${id.replace(/-([a-z])/g, (_, char: string) => char.toUpperCase())}`);
-  if (id === 'moodle-deadlines') {
-    return (
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-offwhite">{t('widgets.moodleDeadlines.title')}</span>
-        {!missingToken && (
-          <span className="rounded bg-danger/15 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-danger">
-            {t('widgets.moodleDeadlines.live')}
-          </span>
-        )}
-      </div>
-    );
-  }
-  if (id === 'active-courses') {
-    return (
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-offwhite">{t('widgets.activeCourses.title')}</span>
-        <span className="flex items-center gap-1.5 rounded-full bg-accent/10 px-2.5 py-1 text-xs font-medium text-accent">
-          <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent" />
-          {getCurrentSemester(t)}
-        </span>
-      </div>
-    );
-  }
+type WidgetIconName = Parameters<typeof WidgetIcon>[0]['name'];
+
+interface WidgetMeta {
+  icon: WidgetIconName;
+  eyebrowKey: string;
+}
+
+const WIDGET_META: Record<DashboardWidgetId, WidgetMeta> = {
+  'degree-completion': { icon: 'degree', eyebrowKey: 'degreeCompletion' },
+  'active-courses': { icon: 'courses', eyebrowKey: 'activeCourses' },
+  'moodle-deadlines': { icon: 'moodle', eyebrowKey: 'moodleDeadlines' },
+  'semester-stats': { icon: 'stats', eyebrowKey: 'semesterStats' },
+  'grade-trend': { icon: 'grade', eyebrowKey: 'gradeTrend' },
+  'credits-velocity': { icon: 'velocity', eyebrowKey: 'creditsVelocity' },
+  'timeline-peek': { icon: 'timeline', eyebrowKey: 'timelinePeek' },
+  'recent-achievements': { icon: 'trophy', eyebrowKey: 'recentAchievements' },
+  'workload-forecast': { icon: 'workload', eyebrowKey: 'workloadForecast' },
+  'grade-donut': { icon: 'donut', eyebrowKey: 'gradeDonut' },
+  'credit-pace': { icon: 'pace', eyebrowKey: 'creditPace' },
+  'next-exam': { icon: 'exam', eyebrowKey: 'nextExam' },
+  'upcoming-registrations': { icon: 'registration', eyebrowKey: 'upcomingRegistrations' },
+};
+
+type BadgeKind = 'accent' | 'live' | 'warn' | 'mut';
+
+const Badge: React.FC<{ kind?: BadgeKind; dot?: boolean; children: React.ReactNode }> = ({
+  kind = 'mut',
+  dot,
+  children,
+}) => {
+  const styles: Record<BadgeKind, string> = {
+    accent: 'bg-accent/13 text-lighterGreen',
+    live: 'bg-lighterGreen/12 text-lighterGreen',
+    warn: 'bg-warn/13 text-warn',
+    mut: 'bg-container2 text-lightGrey',
+  };
   return (
-    <div className="flex items-center gap-2">
-      <span className="text-sm font-medium text-offwhite">{title}</span>
-    </div>
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold whitespace-nowrap ${styles[kind]}`}
+    >
+      {dot && (
+        <span
+          className="size-[6px] rounded-full"
+          style={{
+            background: 'currentColor',
+            ...(kind === 'live'
+              ? { animation: 'sisuPulse 2s infinite', boxShadow: '0 0 0 0 rgba(82,201,137,0.6)' }
+              : {}),
+          }}
+        />
+      )}
+      {children}
+    </span>
   );
 };
 
+const HeaderLink: React.FC<{ children: React.ReactNode; onClick: () => void }> = ({ children, onClick }) => (
+  <button
+    className="flex items-center gap-1.5 rounded-lg px-2 py-1 font-mono text-[10px] font-semibold tracking-[0.12em] text-lightGrey uppercase transition-[background-color,color,transform] duration-150 hover:bg-offwhite/10 hover:text-offwhite active:scale-[0.96]"
+    onClick={(event) => {
+      event.stopPropagation();
+      onClick();
+    }}
+    type="button"
+  >
+    <span>{children}</span>
+    <svg
+      aria-hidden="true"
+      className="size-3"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      viewBox="0 0 24 24"
+    >
+      <path d="M7 17 17 7M9 7h8v8" />
+    </svg>
+  </button>
+);
+
 const DashboardView: React.FC = () => {
   const { t } = useTranslationWithPrefix('views.dashboard');
+  const shouldReduceMotion = useReducedMotion();
+  const navigate = useNavigate();
   const [prefs, setPrefs, isPrefsLoaded] = useChromeStorage();
   const [isEditMode, setIsEditMode] = useState(false);
-  const [layout, setLayout] = useState<DashboardWidgetLayout[]>(prefs.dashboardLayout);
+  const [layout, setLayout] = useState<DashboardWidgetLayout[]>(sanitizeDashboardLayout(prefs.dashboardLayout));
   const [previewLayout, setPreviewLayout] = useState<DashboardWidgetLayout | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const { deadlines, deadlinesLoading, missingToken } = getMoodleDeadlines();
+  const { courses: registrationCourses, isLoading: registrationCoursesLoading } = getRegistrationCourses();
   const { creditsDone, gradeAverage, gradedCount, studyRightEndDate, isLoading: statsLoading } = getDashboardStats();
   const { activeCourses, isLoading: coursesLoading } = getActiveCourses();
   const { modules, totalTarget, isLoading: modulesLoading } = getCreditsByModule();
@@ -149,11 +209,11 @@ const DashboardView: React.FC = () => {
   const previewValid = previewLayout ? canPlaceDashboardWidget(layout, previewLayout, previewLayout.id) : false;
 
   useEffect(() => {
-    if (isPrefsLoaded) setLayout(prefs.dashboardLayout);
+    if (isPrefsLoaded) setLayout(sanitizeDashboardLayout(prefs.dashboardLayout));
   }, [isPrefsLoaded]);
 
   useEffect(() => {
-    if (isPrefsLoaded) setPrefs({ dashboardLayout: layout });
+    if (isPrefsLoaded) setPrefs({ dashboardLayout: sanitizeDashboardLayout(layout) });
   }, [layout, setPrefs, isPrefsLoaded]);
 
   const updateLayoutItem = (id: DashboardWidgetId, patch: Partial<DashboardWidgetLayout>): boolean => {
@@ -212,6 +272,54 @@ const DashboardView: React.FC = () => {
 
   const removeWidget = (id: DashboardWidgetId) => {
     setLayout((current) => current.filter((item) => item.id !== id));
+  };
+
+  const getBadge = (id: DashboardWidgetId): React.ReactNode => {
+    if (id === 'next-exam') {
+      return (
+        <HeaderLink onClick={() => navigate('/student/enrolments')}>{t('widgets.actions.openRegistration')}</HeaderLink>
+      );
+    }
+    if (id === 'upcoming-registrations') {
+      const openCount = getOpenRegistrationCount(registrationCourses);
+      if (openCount > 0) {
+        return (
+          <Badge kind="warn" dot>
+            {t('widgets.registration.openNowCount', { count: openCount })}
+          </Badge>
+        );
+      }
+      return (
+        <HeaderLink onClick={() => navigate('/student/enrolments')}>{t('widgets.actions.openRegistration')}</HeaderLink>
+      );
+    }
+    if (id === 'timeline-peek') {
+      return (
+        <HeaderLink
+          onClick={() => navigate(selectedPlanId ? `/student/plan/${selectedPlanId}/timing` : '/student/plan')}
+        >
+          {t('widgets.actions.openTimeline')}
+        </HeaderLink>
+      );
+    }
+    if (id === 'moodle-deadlines' && !missingToken) {
+      return (
+        <Badge kind="live" dot>
+          LIVE
+        </Badge>
+      );
+    }
+    if (id === 'active-courses') {
+      return (
+        <Badge kind="accent" dot>
+          {getCurrentSemester(t)}
+        </Badge>
+      );
+    }
+    if (id === 'recent-achievements' && (completedCoursesQuery.data?.length ?? 0) > 0) {
+      return <Badge kind="accent">{completedCoursesQuery.data!.length} passed</Badge>;
+    }
+    return null;
   };
 
   const renderWidget = (id: DashboardWidgetId): React.ReactNode => {
@@ -283,66 +391,188 @@ const DashboardView: React.FC = () => {
         ) : (
           <WorkloadForecastContent periods={periodSummaries} />
         );
-      case 'graduation-countdown':
-        return statsLoading || modulesLoading || timelineLoading || periodsLoading ? (
+      case 'grade-donut':
+        return completedCoursesQuery.isLoading ? (
           <InlineLoader />
         ) : (
-          <GraduationCountdownContent
+          <GradeDonutContent courses={completedCoursesQuery.data ?? []} />
+        );
+      case 'credit-pace':
+        return statsLoading ? (
+          <InlineLoader />
+        ) : (
+          <CreditPaceContent
             creditsDone={creditsDone}
-            semesters={semesterSummaries}
             totalTarget={totalTarget}
+            studyRightEndDate={studyRightEndDate}
           />
+        );
+      case 'next-exam':
+        return registrationCoursesLoading ? <InlineLoader /> : <NextExamContent courses={registrationCourses} />;
+      case 'upcoming-registrations':
+        return registrationCoursesLoading ? (
+          <InlineLoader />
+        ) : (
+          <UpcomingRegistrationsContent courses={registrationCourses} />
         );
     }
   };
 
   return (
     <DragDropProvider onDragMove={handleDragMove} onDragEnd={handleDragEnd}>
-      <div className="flex flex-col gap-5 pb-8">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-semibold text-balance text-offwhite">{t('title')}</h1>
-            <p className="mt-0.5 text-sm text-balance text-lightGrey">{getCurrentPeriodLabel(t)}</p>
-          </div>
-          <Button
-            icon={<DashboardGridIcon />}
-            onClick={() => setIsEditMode((current) => !current)}
-            variant={isEditMode ? 'accent' : 'primary'}
-          >
-            {isEditMode ? t('actions.done') : t('actions.customize')}
-          </Button>
-        </div>
+      <style>{`
+        @keyframes sisuPulse {
+          0% { box-shadow: 0 0 0 0 rgba(82,201,137,0.5); }
+          70% { box-shadow: 0 0 0 5px rgba(82,201,137,0); }
+          100% { box-shadow: 0 0 0 0 rgba(82,201,137,0); }
+        }
 
-        <div className="grid">
-          <div
-            ref={gridRef}
-            className="grid w-full grid-cols-10 gap-4"
-            style={{ gridTemplateRows: `repeat(${DASHBOARD_ROWS}, 72px)` }}
-          >
-            {Array.from({ length: DASHBOARD_ROWS }).flatMap((_, y) =>
-              Array.from({ length: DASHBOARD_COLUMNS }).map((__, x) => (
-                <DashboardCell
-                  key={`${x}:${y}`}
-                  isEditMode={isEditMode}
-                  previewLayout={previewLayout}
-                  previewValid={previewValid}
-                  x={x}
-                  y={y}
-                />
-              )),
-            )}
-            {layout.map((item) => (
-              <DashboardWidgetShell
-                key={item.id}
-                header={renderHeader(item.id, t, missingToken ?? false)}
-                isEditMode={isEditMode}
-                item={item}
-                onRemove={removeWidget}
-                onResize={(id, delta) => updateLayoutItem(id, delta)}
+        @keyframes sisuWidgetBarRevealX {
+          from { transform: scaleX(0); opacity: 0.62; }
+          to { transform: scaleX(1); opacity: 1; }
+        }
+
+        @keyframes sisuWidgetBarRevealY {
+          from { transform: scaleY(0); opacity: 0.62; }
+          to { transform: scaleY(1); opacity: 1; }
+        }
+
+        @keyframes sisuWidgetLineDraw {
+          from { stroke-dashoffset: 1; opacity: 0.55; }
+          to { stroke-dashoffset: 0; opacity: 1; }
+        }
+
+        @keyframes sisuWidgetRingReveal {
+          from { stroke-dashoffset: var(--sisu-ring-from, 1); opacity: 0.45; }
+          to { stroke-dashoffset: var(--sisu-ring-to, 0); opacity: 1; }
+        }
+
+        @keyframes sisuWidgetFadeLift {
+          from { opacity: 0; transform: translateY(4px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes heroAurora1 {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          33% { transform: translate(40px, -20px) scale(1.05); }
+          66% { transform: translate(-20px, 30px) scale(0.97); }
+        }
+
+        @keyframes heroAurora2 {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          40% { transform: translate(-50px, 15px) scale(1.08); }
+          70% { transform: translate(25px, -25px) scale(0.95); }
+        }
+
+        @keyframes heroAurora3 {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          25% { transform: translate(30px, 40px) scale(1.03); }
+          75% { transform: translate(-35px, -10px) scale(1.06); }
+        }
+
+        .sisu-widget-bar-x {
+          animation: sisuWidgetBarRevealX 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+          transform-origin: left center;
+        }
+
+        .sisu-widget-bar-y {
+          animation: sisuWidgetBarRevealY 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+          transform-origin: center bottom;
+        }
+
+        .sisu-widget-line {
+          animation: sisuWidgetLineDraw 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+          stroke-dasharray: 1;
+          stroke-dashoffset: 0;
+        }
+
+        .sisu-widget-ring {
+          animation: sisuWidgetRingReveal 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
+          stroke-dashoffset: 0;
+        }
+
+        .sisu-widget-fade-lift {
+          animation: sisuWidgetFadeLift 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          [data-dashboard-widget-shell],
+          [data-dashboard-widget-shell] * {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+          }
+
+          [data-dashboard-hero],
+          [data-dashboard-hero] * {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+          }
+        }
+      `}</style>
+
+      <div className="mx-auto flex w-full flex-col gap-5 pb-8">
+        <DashboardHero
+          activeCoursesCount={activeCourses.length}
+          creditsDone={creditsDone}
+          gradeAverage={gradeAverage}
+          gradedCount={gradedCount}
+          studyRightEnd={studyRightEnd}
+          totalTarget={totalTarget}
+          upcomingDeadlines={upcomingDeadlines}
+        />
+
+        <div className="flex justify-center">
+          <div className="relative w-full">
+            <div className="absolute top-0 right-0 z-30">
+              <DashboardControlButton
+                active={isEditMode}
+                ariaLabel={isEditMode ? t('actions.done') : t('actions.customize')}
+                onClick={() => setIsEditMode((current) => !current)}
+                tooltip={isEditMode ? t('actions.done') : t('actions.customize')}
+                tooltipSide="bottom"
               >
-                {renderWidget(item.id)}
-              </DashboardWidgetShell>
-            ))}
+                <DashboardGridIcon />
+              </DashboardControlButton>
+            </div>
+
+            <div
+              ref={gridRef}
+              className="mx-auto grid w-full max-w-7xl grid-cols-10 gap-4"
+              style={{ gridTemplateRows: `repeat(${DASHBOARD_ROWS}, 72px)` }}
+            >
+              {Array.from({ length: DASHBOARD_ROWS }).flatMap((_, y) =>
+                Array.from({ length: DASHBOARD_COLUMNS }).map((__, x) => (
+                  <DashboardCell
+                    key={`${x}:${y}`}
+                    isEditMode={isEditMode}
+                    previewLayout={previewLayout}
+                    previewValid={previewValid}
+                    x={x}
+                    y={y}
+                  />
+                )),
+              )}
+              {layout.map((item) => {
+                const meta = WIDGET_META[item.id];
+                return (
+                  <DashboardWidgetShell
+                    key={item.id}
+                    icon={<WidgetIcon name={meta.icon} />}
+                    eyebrow={t(`widgets.eyebrows.${meta.eyebrowKey}`)}
+                    badge={getBadge(item.id)}
+                    isEditMode={isEditMode}
+                    item={item}
+                    onRemove={removeWidget}
+                    onResize={(id, delta) => updateLayoutItem(id, delta)}
+                    shouldReduceMotion={shouldReduceMotion}
+                  >
+                    {renderWidget(item.id)}
+                  </DashboardWidgetShell>
+                );
+              })}
+            </div>
           </div>
         </div>
 
@@ -350,7 +580,7 @@ const DashboardView: React.FC = () => {
           {isEditMode && (
             <motion.aside
               animate={{ x: 0, opacity: 1 }}
-              className="fixed top-[41px] right-0 z-40 flex h-[calc(100dvh-41px)] w-[320px] flex-col border-l border-border bg-container px-4 py-5 shadow-[-18px_0_40px_rgba(0,0,0,0.28)]"
+              className="fixed top-10.25 right-0 z-40 flex h-[calc(100dvh-41px)] w-[320px] flex-col border-l border-border bg-container px-4 py-5 shadow-[-18px_0_40px_rgba(0,0,0,0.28)]"
               exit={{ x: 28, opacity: 0 }}
               initial={{ x: 28, opacity: 0 }}
               transition={{ type: 'spring', duration: 0.34, bounce: 0 }}
@@ -366,13 +596,27 @@ const DashboardView: React.FC = () => {
                   onClick={() => setIsEditMode(false)}
                   type="button"
                 >
-                  ×
+                  <svg
+                    aria-hidden="true"
+                    className="size-4"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M18 6 6 18M6 6l12 12" />
+                  </svg>
                 </button>
               </div>
 
-              <div className="mt-5 flex flex-col gap-3 overflow-y-auto pr-1">
+              <div className="mt-5 flex flex-col gap-2.5 overflow-y-auto pr-1">
                 {hiddenWidgets.map((widget) => {
                   const openSlot = findOpenDashboardSlot(layout, widget.id);
+                  const meta = WIDGET_META[widget.id];
+                  const widgetTitle = t(
+                    `widgets.titles.${widget.id.replace(/-([a-z])/g, (_, char: string) => char.toUpperCase())}`,
+                  );
                   return (
                     <button
                       key={widget.id}
@@ -386,13 +630,17 @@ const DashboardView: React.FC = () => {
                       type="button"
                     >
                       <div className="flex items-center justify-between gap-3">
-                        <span className="flex items-center gap-2 text-sm font-semibold text-offwhite">
-                          {t(
-                            `widgets.titles.${widget.id.replace(/-([a-z])/g, (_, char: string) => char.toUpperCase())}`,
-                          )}
-                        </span>
+                        <div className="flex items-center gap-2.5">
+                          <WidgetIcon name={meta.icon} />
+                          <div>
+                            <p className="font-mono text-[9px] font-semibold tracking-widest text-lightGrey uppercase">
+                              {t(`widgets.eyebrows.${meta.eyebrowKey}`)}
+                            </p>
+                            <p className="text-sm font-semibold text-offwhite">{widgetTitle}</p>
+                          </div>
+                        </div>
                         <span className="rounded-full bg-background px-2 py-0.5 font-mono text-[10px] text-lightGrey">
-                          {openSlot ? `${widget.size.w}x${widget.size.h}` : t('widgets.actions.noSpace')}
+                          {openSlot ? `${widget.size.w}×${widget.size.h}` : t('widgets.actions.noSpace')}
                         </span>
                       </div>
                       <p className="mt-2 text-xs leading-relaxed text-lightGrey">

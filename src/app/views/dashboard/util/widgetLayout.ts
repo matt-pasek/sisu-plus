@@ -1,5 +1,11 @@
 import type { DashboardWidgetDefinition, DashboardWidgetId, DashboardWidgetLayout } from '../types';
-import { DASHBOARD_COLUMNS, DASHBOARD_ROWS, DASHBOARD_WIDGETS } from './widgetDefinitions';
+import { DASHBOARD_COLUMNS, DASHBOARD_ROWS, DASHBOARD_WIDGETS, DASHBOARD_WIDGET_IDS } from './widgetDefinitions';
+
+export const isDashboardWidgetId = (id: string): id is DashboardWidgetId =>
+  DASHBOARD_WIDGET_IDS.has(id as DashboardWidgetId);
+
+export const sanitizeDashboardLayout = (layout: DashboardWidgetLayout[]): DashboardWidgetLayout[] =>
+  layout.filter((item) => isDashboardWidgetId(item.id));
 
 export const getWidgetDefinition = (id: DashboardWidgetId): DashboardWidgetDefinition =>
   DASHBOARD_WIDGETS.find((widget) => widget.id === id)!;

@@ -3,6 +3,8 @@ export { DASHBOARD_COLUMNS, DASHBOARD_ROWS, DASHBOARD_WIDGETS, DEFAULT_DASHBOARD
 export {
   getWidgetDefinition,
   getHiddenWidgets,
+  isDashboardWidgetId,
+  sanitizeDashboardLayout,
   clampWidgetLayout,
   widgetsOverlap,
   canPlaceDashboardWidget,

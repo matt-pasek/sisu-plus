@@ -8,4 +8,7 @@ export type DashboardWidgetId =
   | 'timeline-peek'
   | 'recent-achievements'
   | 'workload-forecast'
-  | 'graduation-countdown';
+  | 'grade-donut'
+  | 'credit-pace'
+  | 'next-exam'
+  | 'upcoming-registrations';

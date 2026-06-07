@@ -33,7 +33,7 @@ export const DASHBOARD_WIDGETS: DashboardWidgetDefinition[] = [
     title: 'This Semester',
     description: 'Enrolled courses, active credits, and upcoming deadlines.',
     size: { w: 3, h: 4 },
-    minSize: { w: 3, h: 2 },
+    minSize: { w: 3, h: 3 },
     maxSize: { w: 4, h: 4 },
   },
   {
@@ -77,12 +77,36 @@ export const DASHBOARD_WIDGETS: DashboardWidgetDefinition[] = [
     maxSize: { w: 7, h: 4 },
   },
   {
-    id: 'graduation-countdown',
-    title: 'Graduation Countdown',
-    description: 'Credits remaining, days remaining, and pace pressure.',
-    size: { w: 3, h: 2 },
-    minSize: { w: 3, h: 2 },
-    maxSize: { w: 4, h: 3 },
+    id: 'grade-donut',
+    title: 'Grade Distribution',
+    description: 'All attainments by grade — donut chart with counts.',
+    size: { w: 4, h: 3 },
+    minSize: { w: 3, h: 3 },
+    maxSize: { w: 5, h: 4 },
+  },
+  {
+    id: 'credit-pace',
+    title: 'Credit Pace',
+    description: 'Actual credits vs degree target with daily pace.',
+    size: { w: 5, h: 3 },
+    minSize: { w: 4, h: 3 },
+    maxSize: { w: 7, h: 3 },
+  },
+  {
+    id: 'next-exam',
+    title: 'Next Exam',
+    description: 'Nearest upcoming exam sitting and the next two dates.',
+    size: { w: 3, h: 3 },
+    minSize: { w: 3, h: 3 },
+    maxSize: { w: 4, h: 4 },
+  },
+  {
+    id: 'upcoming-registrations',
+    title: 'Upcoming Registrations',
+    description: 'Open and upcoming course registrations from the current Study Plan.',
+    size: { w: 4, h: 6 },
+    minSize: { w: 4, h: 4 },
+    maxSize: { w: 6, h: 7 },
   },
 ];
 
@@ -94,3 +118,5 @@ export const DEFAULT_DASHBOARD_LAYOUT: DashboardWidgetLayout[] = [
   { id: 'grade-trend', x: 0, y: 8, w: 5, h: 4 },
   { id: 'credits-velocity', x: 5, y: 8, w: 5, h: 3 },
 ];
+
+export const DASHBOARD_WIDGET_IDS = new Set(DASHBOARD_WIDGETS.map((widget) => widget.id));

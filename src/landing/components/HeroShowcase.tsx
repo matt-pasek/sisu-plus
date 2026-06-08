@@ -2,12 +2,12 @@ import { ModuleProgress } from '@/app/api/dataPoints/getCreditsByModule';
 import type { TimelineCourse } from '@/app/api/dataPoints/getTimelineCourses';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { getModuleColorByIndex, MODULE_COLOR_VALUES } from '@/app/theme/moduleColors';
-import { Widget } from '@/app/views/dashboard/components/Widget.comp';
-import { DegreeCompletionContent } from '@/app/views/dashboard/components/DegreeCompletionContent.comp';
 import { CourseCard as StructureCourseCard } from '@/app/views/structure/components/CourseCard.comp';
 import type { CourseEntry } from '@/app/views/structure/types';
 import { TimelineCourseCard } from '@/app/views/timeline/components/TimelineCourseCard.comp';
 import type React from 'react';
+import { DegreeCompletionContent } from '@/app/views/dashboard/components/widget/contents/DegreeCompletionContent.comp';
+import { Widget } from '@/app/views/dashboard/components/widget/Widget.comp';
 
 const modules: ModuleProgress[] = [
   { moduleId: 'core', name: 'Core studies', done: 25, target: 31 },
@@ -82,7 +82,7 @@ export function HeroShowcase() {
       </div>
 
       <section className="app-showcase-panel app-showcase-dashboard">
-        <Widget header={<span className="text-sm font-semibold text-offwhite">{t('structure.meta')}</span>}>
+        <Widget title={t('structure.meta')}>
           <DegreeCompletionContent
             creditsDone={124}
             gradeAverage={4.1}

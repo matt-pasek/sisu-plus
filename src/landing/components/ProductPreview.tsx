@@ -4,11 +4,11 @@ import type { ModuleProgress } from '@/app/api/dataPoints/getCreditsByModule';
 import type { TimelineCourse } from '@/app/api/dataPoints/getTimelineCourses';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { MODULE_COLOR_VALUES } from '@/app/theme/moduleColors';
-import { Widget } from '@/app/views/dashboard/components/Widget.comp';
-import { DegreeCompletionContent } from '@/app/views/dashboard/components/DegreeCompletionContent.comp';
-import { ActiveCoursesContent } from '@/app/views/dashboard/components/ActiveCoursesContent.comp';
-import { SemesterStatsContent } from '@/app/views/dashboard/components/SemesterStatsContent.comp';
 import { TimelineCourseCard } from '@/app/views/timeline/components/TimelineCourseCard.comp';
+import { Widget } from '@/app/views/dashboard/components/widget/Widget.comp';
+import { DegreeCompletionContent } from '@/app/views/dashboard/components/widget/contents/DegreeCompletionContent.comp';
+import { ActiveCoursesContent } from '@/app/views/dashboard/components/widget/contents/ActiveCoursesContent.comp';
+import { SemesterStatsContent } from '@/app/views/dashboard/components/widget/contents/SemesterStatsContent.comp';
 
 const modules: ModuleProgress[] = [
   { moduleId: 'core', name: 'Core Studies', done: 25, target: 31 },
@@ -175,9 +175,9 @@ function DashboardPreview() {
   const { t } = useTranslationWithPrefix('landing.preview');
 
   return (
-    <div className="grid h-full min-h-[520px] grid-cols-10 grid-rows-10 gap-3">
+    <div className="grid h-full min-h-130 grid-cols-10 grid-rows-10 gap-3">
       <div className="col-span-7 row-span-4 flex min-w-0">
-        <Widget>
+        <Widget title={t('degreeCompletion')}>
           <DegreeCompletionContent
             creditsDone={52}
             gradeAverage={4.1}
@@ -191,13 +191,11 @@ function DashboardPreview() {
 
       <div className="col-span-3 row-span-5 flex min-w-0">
         <Widget
-          header={
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-offwhite">{t('moodleDeadlines')}</span>
-              <span className="rounded bg-danger/15 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-danger">
-                {t('live')}
-              </span>
-            </div>
+          title={t('moodleDeadlines')}
+          badge={
+            <span className="rounded bg-danger/15 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-danger">
+              {t('live')}
+            </span>
           }
         >
           <DeadlinesPreview />
@@ -206,14 +204,12 @@ function DashboardPreview() {
 
       <div className="col-span-7 row-span-4 flex min-w-0">
         <Widget
-          header={
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-offwhite">{t('activeCourses')}</span>
-              <span className="flex items-center gap-1.5 rounded-full bg-accent/10 px-2.5 py-1 text-xs font-medium text-accent">
-                <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent" />
-                {t('spring')}
-              </span>
-            </div>
+          title={t('activeCourses')}
+          badge={
+            <span className="flex items-center gap-1.5 rounded-full bg-accent/10 px-2.5 py-1 text-xs font-medium text-accent">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent" />
+              {t('spring')}
+            </span>
           }
         >
           <ActiveCoursesContent
@@ -225,7 +221,7 @@ function DashboardPreview() {
       </div>
 
       <div className="col-span-3 row-span-4 flex min-w-0">
-        <Widget header={<span className="text-sm font-medium text-offwhite">{t('thisSemester')}</span>}>
+        <Widget title={t('thisSemester')}>
           <SemesterStatsContent activeCoursesCount={13} semesterCredits={49} upcomingDeadlines={3} />
         </Widget>
       </div>

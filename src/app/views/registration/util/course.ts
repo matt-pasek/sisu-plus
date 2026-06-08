@@ -5,8 +5,12 @@ import {
   type RegistrationPeriod,
   RegistrationStatus,
 } from '@/app/api/dataPoints/getRegistrationCourses';
-import { getImplementationsForTab, getSelectableImplementation } from '@/app/views/registration/util/implementation';
-import { getEnrolmentForTab, getImplementationForEnrolment } from '@/app/views/registration/util';
+import {
+  getImplementationsForTab,
+  getSelectableImplementation,
+  getEnrolmentForTab,
+  getImplementationForEnrolment,
+} from '@/app/views/registration/util';
 import { RegistrationAttempt, RegistrationTab } from '@/app/views/registration/types/';
 
 export const getPreferredImplementation = (

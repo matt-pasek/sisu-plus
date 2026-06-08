@@ -9,11 +9,11 @@ import type { RegistrationCourse, RegistrationImplementation } from '@/app/api/d
 import type { Enrolment, EnrolmentStudySubGroup } from '@/app/api/generated/IlmoApi';
 import {
   canCancelImplementation,
-  getEnrolmentForImplementation,
-  isImplementationRegisterable,
   isImplementationFinished,
+  isImplementationRegisterable,
+  getEnrolmentForImplementation,
 } from '@/app/views/registration/util';
-import { SelectionState } from '@/app/views/registration/types';
+import type { SelectionState } from '@/app/views/registration/types';
 
 export const buildStudySubGroups = (selections: SelectionState): EnrolmentStudySubGroup[] =>
   Object.values(selections)

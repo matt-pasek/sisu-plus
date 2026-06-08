@@ -9,13 +9,15 @@ export const AppLayout: React.FC = () => {
   const location = useLocation();
   const isNavigating = Boolean(navigation.location);
   const isTimeline = location.pathname.startsWith('/student/plan');
+  const isDashboard = location.pathname === '/student/frontpage';
+  const isFullWidth = isTimeline || isDashboard;
 
   return (
     <div>
       {isNavigating && <SpinnerLoader />}
       <AppToaster />
       <Navbar />
-      <div className={`mx-auto w-full px-6 pt-6 ${isTimeline ? 'max-w-none' : 'max-w-6xl'}`}>
+      <div className={`mx-auto w-full px-6 pt-6 ${isFullWidth ? 'max-w-none' : 'max-w-6xl'}`}>
         <Outlet />
       </div>
     </div>

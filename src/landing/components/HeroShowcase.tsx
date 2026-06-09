@@ -83,14 +83,7 @@ export function HeroShowcase() {
 
       <section className="app-showcase-panel app-showcase-dashboard">
         <Widget title={t('structure.meta')}>
-          <DegreeCompletionContent
-            creditsDone={124}
-            gradeAverage={4.1}
-            gradedCount={18}
-            modules={modules}
-            studyRightEnd={{ year: '2032', until: 'until July' }}
-            totalTarget={180}
-          />
+          <DegreeCompletionContent creditsDone={124} modules={modules} totalTarget={180} />
         </Widget>
       </section>
 

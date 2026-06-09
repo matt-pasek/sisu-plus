@@ -192,8 +192,6 @@ const FRAGMENT = `
 
     vec3 col = vec3(spot) + base - vec3(stripe);
 
-    // film grain: single texture lookup + UV shift per-frame instead of
-    // per-pixel rand() that read iTime every fragment
     if (uNoise > 0.0) {
       float grain = texture2D(uNoiseTex, uv0 + uNoiseOffset).r;
       col += (grain - 0.5) * uNoise;

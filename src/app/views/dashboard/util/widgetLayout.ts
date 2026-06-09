@@ -1,5 +1,10 @@
 import type { DashboardWidgetDefinition, DashboardWidgetId, DashboardWidgetLayout } from '../types';
-import { DASHBOARD_COLUMNS, DASHBOARD_ROWS, DASHBOARD_WIDGETS, DASHBOARD_WIDGET_IDS } from './widgetDefinitions';
+import {
+  DASHBOARD_COLUMNS,
+  DASHBOARD_ROWS,
+  DASHBOARD_WIDGET_IDS,
+  DASHBOARD_WIDGETS,
+} from '@/app/views/dashboard/constants/widgetDefinitions.const';
 
 export const isDashboardWidgetId = (id: string): id is DashboardWidgetId =>
   DASHBOARD_WIDGET_IDS.has(id as DashboardWidgetId);

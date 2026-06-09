@@ -5,7 +5,7 @@
   "description": "__MSG_extDescription__",
   "default_locale": "en",
   "permissions": ["storage", "webRequest"],
-  "optional_host_permissions": ["https://*/*"],
+  "optional_host_permissions": ["https://*.fi/*"],
   "background": {
     "service_worker": "background/service-worker.js",
     "type": "module"

@@ -27,13 +27,34 @@ export type DashboardTranslation = {
     loadingName: string;
     studentFallback: string;
     creditsLabel: string;
+    editPanel: string;
     stats: {
       gradeAvg: string;
       activeCourses: string;
       creditsLeft: string;
       studyRight: string;
       urgentDeadlines: string;
+      completionPct: string;
+      creditsDone: string;
+      nextExam: string;
+      creditsThisPeriod: string;
     };
+    statSubs: {
+      enrolled: string;
+      toTarget: string;
+      thisWeek: string;
+      ofDegree: string;
+      ofCredits: string;
+      thisPeriod: string;
+    };
+    panel: {
+      ring: string;
+      upcoming: string;
+      gradeTrend: string;
+      creditVelocity: string;
+      calendar: string;
+    };
+    panelUpcomingEmpty: string;
   };
   widgets: {
     actions: {
@@ -227,13 +248,34 @@ export const dashboardTranslation: DashboardTranslation = {
     loadingName: 'Loading',
     studentFallback: 'student',
     creditsLabel: '{{done}} / {{total}} cr',
+    editPanel: 'Panel view',
     stats: {
       gradeAvg: 'Grade avg.',
       activeCourses: 'Active courses',
       creditsLeft: 'Credits left',
       studyRight: 'Study right',
       urgentDeadlines: 'Urgent deadlines',
+      completionPct: 'Completion',
+      creditsDone: 'Credits done',
+      nextExam: 'Next exam',
+      creditsThisPeriod: 'This period',
     },
+    statSubs: {
+      enrolled: 'enrolled',
+      toTarget: 'to target',
+      thisWeek: 'this week',
+      ofDegree: 'of degree',
+      ofCredits: 'of {{total}} cr',
+      thisPeriod: 'this period',
+    },
+    panel: {
+      ring: 'Progress ring',
+      upcoming: 'Upcoming',
+      gradeTrend: 'Grade trend',
+      creditVelocity: 'Credit velocity',
+      calendar: 'Calendar',
+    },
+    panelUpcomingEmpty: 'No upcoming deadlines',
   },
   widgets: {
     actions: {
@@ -301,7 +343,7 @@ export const dashboardTranslation: DashboardTranslation = {
       upcomingRegistrations: 'Upcoming Registrations',
     },
     descriptions: {
-      degreeCompletion: 'Target credits, study right, grade average, and module progress.',
+      degreeCompletion: 'Module progress and degree completion ring.',
       activeCourses: 'Current and future enrolments with module and credit badges.',
       courseMap: 'Active and completed courses grouped by module.',
       moodleDeadlines: 'Live deadline cards from Moodle calendar.',

@@ -3,6 +3,7 @@ import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { formatCredits } from '@/app/helpers/formatCredits';
 import { DashboardCompletedCourse } from '@/app/views/dashboard/types/DashboardCompletedCourse.type';
 import { formatCompactDate } from '@/app/views/dashboard/util';
+import { getSmoothPath } from '@/app/views/dashboard/util/getSmoothPath';
 
 const getNumericGrade = (course: DashboardCompletedCourse): number | null =>
   typeof course.grade === 'number' ? course.grade : null;
@@ -21,23 +22,6 @@ const getTrendLine = (
   const slope = (n * sumXY - sumX * sumY) / denominator;
   const intercept = (sumY - slope * sumX) / n;
   return { x1: 0, y1: intercept, x2: 1, y2: slope + intercept };
-};
-
-const getSmoothPath = (points: { x: number; y: number }[]): string => {
-  if (points.length === 0) return '';
-  if (points.length === 1) return `M${points[0].x} ${points[0].y}`;
-
-  const [first, ...rest] = points;
-  return rest.reduce((path, point, index) => {
-    const previous = points[index];
-    const next = points[index + 2] ?? point;
-    const controlDistance = (point.x - previous.x) / 2;
-    const c1x = previous.x + controlDistance;
-    const c1y = previous.y + (point.y - (points[index - 1]?.y ?? previous.y)) / 6;
-    const c2x = point.x - controlDistance;
-    const c2y = point.y - (next.y - previous.y) / 6;
-    return `${path} C${c1x} ${c1y}, ${c2x} ${c2y}, ${point.x} ${point.y}`;
-  }, `M${first.x} ${first.y}`);
 };
 
 export const GradeTrendContent: React.FC<{ courses: DashboardCompletedCourse[] }> = ({ courses }) => {

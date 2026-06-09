@@ -1,4 +1,4 @@
-import type { DashboardWidgetId } from '@/app/views/dashboard/util/widgetsHandlers';
+import { DashboardWidgetId } from '@/app/views/dashboard/types';
 
 export const DASHBOARD_WIDGET_DRAG_TYPE = 'dashboard-widget';
 

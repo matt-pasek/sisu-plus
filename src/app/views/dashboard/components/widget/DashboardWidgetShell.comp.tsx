@@ -4,7 +4,8 @@ import { AnimatePresence, motion, useAnimationControls } from 'motion/react';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { Widget } from './Widget.comp';
 import { DashboardWidgetId, DashboardWidgetLayout } from '@/app/views/dashboard/types';
-import { DASHBOARD_COLUMNS, DASHBOARD_WIDGET_DRAG_TYPE, getDashboardWidgetDragData } from '@/app/views/dashboard/util';
+import { DASHBOARD_WIDGET_DRAG_TYPE, getDashboardWidgetDragData } from '@/app/views/dashboard/util';
+import { DASHBOARD_COLUMNS } from '@/app/views/dashboard/constants/widgetDefinitions.const';
 
 type ResizeAxis = 'x' | 'y' | 'both';
 

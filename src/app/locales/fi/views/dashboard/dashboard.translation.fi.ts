@@ -29,13 +29,34 @@ export const dashboardTranslation: DashboardTranslation = {
     loadingName: 'Ladataan',
     studentFallback: 'opiskelija',
     creditsLabel: '{{done}} / {{total}} op',
+    editPanel: 'Paneelinäkymä',
     stats: {
       gradeAvg: 'Keskiarvo',
       activeCourses: 'Aktiiviset kurssit',
       creditsLeft: 'Op jäljellä',
       studyRight: 'Opinto-oikeus',
       urgentDeadlines: 'Kiireelliset määräajat',
+      completionPct: 'Valmistuminen',
+      creditsDone: 'Op suoritettu',
+      nextExam: 'Seuraava tentti',
+      creditsThisPeriod: 'Tällä periodilla',
     },
+    statSubs: {
+      enrolled: 'ilmoittautunut',
+      toTarget: 'tavoitteeseen',
+      thisWeek: 'tällä viikolla',
+      ofDegree: 'tutkinnosta',
+      ofCredits: '/ {{total}} op',
+      thisPeriod: 'tällä periodilla',
+    },
+    panel: {
+      ring: 'Etenemisrengas',
+      upcoming: 'Tulossa',
+      gradeTrend: 'Arvosanakehitys',
+      creditVelocity: 'Op-tahti',
+      calendar: 'Kalenteri',
+    },
+    panelUpcomingEmpty: 'Ei tulevia määräaikoja',
   },
   widgets: {
     actions: {
@@ -103,7 +124,7 @@ export const dashboardTranslation: DashboardTranslation = {
       upcomingRegistrations: 'Tulevat ilmoittautumiset',
     },
     descriptions: {
-      degreeCompletion: 'Tavoiteopintopisteet, opinto-oikeus, keskiarvo ja moduulien eteneminen.',
+      degreeCompletion: 'Moduulien eteneminen ja tutkinnon täyttymisrengas.',
       activeCourses: 'Nykyiset ja tulevat ilmoittautumiset moduuli- ja opintopistebadgella.',
       courseMap: 'Aktiiviset ja suoritetut kurssit moduuleittain.',
       moodleDeadlines: 'Määräaikakortit suoraan Moodle-kalenterista.',

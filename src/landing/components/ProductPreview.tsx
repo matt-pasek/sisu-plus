@@ -178,14 +178,7 @@ function DashboardPreview() {
     <div className="grid h-full min-h-130 grid-cols-10 grid-rows-10 gap-3">
       <div className="col-span-7 row-span-4 flex min-w-0">
         <Widget title={t('degreeCompletion')}>
-          <DegreeCompletionContent
-            creditsDone={52}
-            gradeAverage={4.1}
-            gradedCount={13}
-            modules={modules}
-            studyRightEnd={{ year: '2032', until: 'until July' }}
-            totalTarget={180}
-          />
+          <DegreeCompletionContent creditsDone={52} modules={modules} totalTarget={180} />
         </Widget>
       </div>
 

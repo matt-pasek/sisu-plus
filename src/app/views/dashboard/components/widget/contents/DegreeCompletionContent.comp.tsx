@@ -55,29 +55,6 @@ const Ring: React.FC<{ done: number; total: number }> = ({ done, total }) => {
   );
 };
 
-const MetricCard: React.FC<{ label: string; value: React.ReactNode; sub: string; accent?: boolean }> = ({
-  label,
-  value,
-  sub,
-  accent = false,
-}) => (
-  <div
-    className={`min-w-0 rounded-[14px] px-3.5 py-3 ${
-      accent
-        ? 'bg-accent/12 shadow-[inset_0_0_0_1px_rgba(82,201,137,0.22)]'
-        : 'bg-container2 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]'
-    }`}
-  >
-    <p className="truncate text-[11px] text-lightGrey">{label}</p>
-    <p
-      className={`mt-2 truncate text-[26px] leading-none font-semibold tabular-nums ${accent ? 'text-lighterGreen' : 'text-offwhite'}`}
-    >
-      {value}
-    </p>
-    <p className="mt-1.5 truncate text-[11px] text-lightGrey/80">{sub}</p>
-  </div>
-);
-
 const ModuleBar: React.FC<{ name: string; done: number; target: number; color: string }> = ({
   name,
   done,
@@ -116,20 +93,10 @@ const ModuleBar: React.FC<{ name: string; done: number; target: number; color: s
 interface Props {
   creditsDone: number;
   totalTarget: number;
-  gradeAverage: number | null;
-  gradedCount: number;
-  studyRightEnd: { year: string; until: string } | null;
   modules: ModuleProgress[];
 }
 
-export const DegreeCompletionContent: React.FC<Props> = ({
-  creditsDone,
-  gradeAverage,
-  gradedCount,
-  studyRightEnd,
-  totalTarget,
-  modules,
-}) => {
+export const DegreeCompletionContent: React.FC<Props> = ({ creditsDone, totalTarget, modules }) => {
   const { t } = useTranslationWithPrefix('views.dashboard');
   const { t: tUtil } = useTranslationWithPrefix('util');
   const creditsRemaining = Math.max(totalTarget - creditsDone, 0);
@@ -153,29 +120,6 @@ export const DegreeCompletionContent: React.FC<Props> = ({
       </section>
 
       <section className="flex min-w-0 flex-1 flex-col gap-3">
-        <div className="grid grid-cols-3 gap-2.5">
-          <MetricCard
-            label={t('widgets.degreeCompletion.creditsLabel')}
-            value={creditsDone}
-            sub={totalTarget > 0 ? t('widgets.degreeCompletion.ofTarget', { target: totalTarget }) : '-'}
-            accent
-          />
-          <MetricCard
-            label={t('widgets.degreeCompletion.avgGradeLabel')}
-            value={gradeAverage?.toFixed(1) ?? '-'}
-            sub={
-              gradedCount > 0
-                ? t('widgets.degreeCompletion.gradedCount', { count: gradedCount })
-                : t('widgets.degreeCompletion.noneYet')
-            }
-          />
-          <MetricCard
-            label={t('widgets.degreeCompletion.studyRightLabel')}
-            value={studyRightEnd?.year ?? '-'}
-            sub={studyRightEnd?.until ?? ''}
-          />
-        </div>
-
         <div className="min-h-0 flex-1 overflow-y-auto pr-1">
           <div className="flex flex-col gap-1.5">
             {modules.map((mod, i) => (

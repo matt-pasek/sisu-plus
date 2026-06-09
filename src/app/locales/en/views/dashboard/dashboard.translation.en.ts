@@ -70,6 +70,7 @@ export type DashboardTranslation = {
     };
     eyebrows: {
       activeCourses: string;
+      courseMap: string;
       creditPace: string;
       creditsVelocity: string;
       degreeCompletion: string;
@@ -86,6 +87,7 @@ export type DashboardTranslation = {
     titles: {
       degreeCompletion: string;
       activeCourses: string;
+      courseMap: string;
       moodleDeadlines: string;
       semesterStats: string;
       gradeTrend: string;
@@ -101,6 +103,7 @@ export type DashboardTranslation = {
     descriptions: {
       degreeCompletion: string;
       activeCourses: string;
+      courseMap: string;
       moodleDeadlines: string;
       semesterStats: string;
       gradeTrend: string;
@@ -112,6 +115,12 @@ export type DashboardTranslation = {
       creditPace: string;
       nextExam: string;
       upcomingRegistrations: string;
+    };
+    courseMap: {
+      done: string;
+      active: string;
+      planned: string;
+      noCourses: string;
     };
     degreeCompletion: {
       aria: string;
@@ -261,6 +270,7 @@ export const dashboardTranslation: DashboardTranslation = {
     },
     eyebrows: {
       activeCourses: 'Enrolled',
+      courseMap: 'Study plan',
       creditPace: 'Goal tracking',
       creditsVelocity: 'Pace',
       degreeCompletion: 'Progress',
@@ -277,6 +287,7 @@ export const dashboardTranslation: DashboardTranslation = {
     titles: {
       degreeCompletion: 'Degree Completion',
       activeCourses: 'Current & Upcoming Courses',
+      courseMap: 'Course Map',
       moodleDeadlines: 'Moodle Deadlines',
       semesterStats: 'This Semester',
       gradeTrend: 'Grade Trend',
@@ -292,6 +303,7 @@ export const dashboardTranslation: DashboardTranslation = {
     descriptions: {
       degreeCompletion: 'Target credits, study right, grade average, and module progress.',
       activeCourses: 'Current and future enrolments with module and credit badges.',
+      courseMap: 'Active and completed courses grouped by module.',
       moodleDeadlines: 'Live deadline cards from Moodle calendar.',
       semesterStats: 'Enrolled courses, active credits, and upcoming deadlines.',
       gradeTrend: 'Completed-course grade scatter plot with credit-weighted dots.',
@@ -303,6 +315,12 @@ export const dashboardTranslation: DashboardTranslation = {
       creditPace: 'Credits left and daily pace needed.',
       nextExam: 'Nearest upcoming exam sitting and the next two dates.',
       upcomingRegistrations: 'Open and upcoming course registrations from the current Study Plan.',
+    },
+    courseMap: {
+      done: 'done',
+      active: 'active',
+      planned: 'planned',
+      noCourses: 'No courses yet.',
     },
     degreeCompletion: {
       aria: 'Degree completion {{percent}} percent',

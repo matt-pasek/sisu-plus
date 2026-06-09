@@ -108,6 +108,14 @@ export const DASHBOARD_WIDGETS: DashboardWidgetDefinition[] = [
     minSize: { w: 4, h: 4 },
     maxSize: { w: 6, h: 7 },
   },
+  {
+    id: 'course-map',
+    title: 'Course Map',
+    description: 'Active and completed courses grouped by module.',
+    size: { w: 5, h: 5 },
+    minSize: { w: 4, h: 4 },
+    maxSize: { w: 10, h: 7 },
+  },
 ];
 
 export const DEFAULT_DASHBOARD_LAYOUT: DashboardWidgetLayout[] = [

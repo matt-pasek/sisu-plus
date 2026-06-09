@@ -72,6 +72,7 @@ export const dashboardTranslation: DashboardTranslation = {
     },
     eyebrows: {
       activeCourses: 'Ilmoittautumiset',
+      courseMap: 'Opintosuunnitelma',
       creditPace: 'Tavoiteseuranta',
       creditsVelocity: 'Tahti',
       degreeCompletion: 'Eteneminen',
@@ -88,6 +89,7 @@ export const dashboardTranslation: DashboardTranslation = {
     titles: {
       degreeCompletion: 'Tutkinnon eteneminen',
       activeCourses: 'Nykyiset ja tulevat kurssit',
+      courseMap: 'Kurssikarta',
       moodleDeadlines: 'Moodlen määräajat',
       semesterStats: 'Tämä lukukausi',
       gradeTrend: 'Arvosanakehitys',
@@ -103,6 +105,7 @@ export const dashboardTranslation: DashboardTranslation = {
     descriptions: {
       degreeCompletion: 'Tavoiteopintopisteet, opinto-oikeus, keskiarvo ja moduulien eteneminen.',
       activeCourses: 'Nykyiset ja tulevat ilmoittautumiset moduuli- ja opintopistebadgella.',
+      courseMap: 'Aktiiviset ja suoritetut kurssit moduuleittain.',
       moodleDeadlines: 'Määräaikakortit suoraan Moodle-kalenterista.',
       semesterStats: 'Ilmoittautuneet kurssit, aktiiviset opintopisteet ja tulevat määräajat.',
       gradeTrend: 'Suoritettujen kurssien arvosanakaavio opintopistepainotetuilla pisteillä.',
@@ -114,6 +117,12 @@ export const dashboardTranslation: DashboardTranslation = {
       creditPace: 'Jäljellä olevat opintopisteet ja tarvittava päivittäinen tahti.',
       nextExam: 'Lähin tuleva tentti ja kaksi seuraavaa päivämäärää.',
       upcomingRegistrations: 'Avoimet ja tulevat kurssi-ilmoittautumiset nykyisestä Study Planista.',
+    },
+    courseMap: {
+      done: 'suoritettu',
+      active: 'aktiivinen',
+      planned: 'suunniteltu',
+      noCourses: 'Ei kursseja vielä.',
     },
     degreeCompletion: {
       aria: 'Tutkinnon eteneminen {{percent}} prosenttia',

@@ -54,6 +54,7 @@ import { GradeDonutContent } from '@/app/views/dashboard/components/widget/conte
 import { CreditPaceContent } from '@/app/views/dashboard/components/widget/contents/CreditPaceContent.comp';
 import { NextExamContent } from '@/app/views/dashboard/components/widget/contents/NextExamContent.comp';
 import { UpcomingRegistrationsContent } from '@/app/views/dashboard/components/widget/contents/UpcomingRegistrationsContent.comp';
+import { CourseMapContent } from '@/app/views/dashboard/components/widget/contents/CourseMapContent.comp';
 import { DashboardWidgetShell } from '@/app/views/dashboard/components/widget/DashboardWidgetShell.comp';
 import { EmptyWidgetState } from '@/app/views/dashboard/components/widget/EmptyWidgetState.comp';
 
@@ -83,6 +84,7 @@ const WIDGET_META: Record<DashboardWidgetId, WidgetMeta> = {
   'credit-pace': { icon: 'pace', eyebrowKey: 'creditPace' },
   'next-exam': { icon: 'exam', eyebrowKey: 'nextExam' },
   'upcoming-registrations': { icon: 'registration', eyebrowKey: 'upcomingRegistrations' },
+  'course-map': { icon: 'map', eyebrowKey: 'courseMap' },
 };
 
 type BadgeKind = 'accent' | 'live' | 'warn' | 'mut';
@@ -149,6 +151,7 @@ const DashboardView: React.FC = () => {
   const navigate = useNavigate();
   const [prefs, setPrefs, isPrefsLoaded] = useChromeStorage();
   const [isEditMode, setIsEditMode] = useState(false);
+  const [isLibraryCollapsed, setIsLibraryCollapsed] = useState(false);
   const [layout, setLayout] = useState<DashboardWidgetLayout[]>(sanitizeDashboardLayout(prefs.dashboardLayout));
   const [previewLayout, setPreviewLayout] = useState<DashboardWidgetLayout | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
@@ -415,6 +418,12 @@ const DashboardView: React.FC = () => {
         ) : (
           <UpcomingRegistrationsContent courses={registrationCourses} />
         );
+      case 'course-map':
+        return timelineLoading || modulesLoading ? (
+          <InlineLoader />
+        ) : (
+          <CourseMapContent timelineCourses={timelineCourses} modules={modules} />
+        );
     }
   };
 
@@ -515,9 +524,12 @@ const DashboardView: React.FC = () => {
       <div className="mx-auto flex w-full flex-col gap-5 pb-8">
         <DashboardHero
           activeCoursesCount={activeCourses.length}
+          completedCourses={completedCoursesQuery.data}
           creditsDone={creditsDone}
+          deadlines={deadlines}
           gradeAverage={gradeAverage}
           gradedCount={gradedCount}
+          semesters={semesterSummaries}
           studyRightEnd={studyRightEnd}
           totalTarget={totalTarget}
           upcomingDeadlines={upcomingDeadlines}
@@ -580,83 +592,110 @@ const DashboardView: React.FC = () => {
           {isEditMode && (
             <motion.aside
               animate={{ x: 0, opacity: 1 }}
-              className="fixed top-10.25 right-0 z-40 flex h-[calc(100dvh-41px)] w-[320px] flex-col border-l border-border bg-container px-4 py-5 shadow-[-18px_0_40px_rgba(0,0,0,0.28)]"
+              className="fixed top-0 right-0 z-40 flex h-dvh flex-col border-l border-border bg-container shadow-[-18px_0_40px_rgba(0,0,0,0.28)]"
               exit={{ x: 28, opacity: 0 }}
               initial={{ x: 28, opacity: 0 }}
+              style={{ width: isLibraryCollapsed ? 40 : 320 }}
               transition={{ type: 'spring', duration: 0.34, bounce: 0 }}
             >
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <h2 className="text-lg font-semibold text-offwhite">{t('editor.libraryTitle')}</h2>
-                  <p className="mt-1 text-sm text-lightGrey">{t('editor.libraryDescription')}</p>
-                </div>
-                <button
-                  aria-label={t('widgets.actions.closeEditor')}
-                  className="flex size-10 items-center justify-center rounded-lg bg-container2 text-lightGrey transition-[background-color,color,transform] duration-150 hover:bg-offwhite/10 hover:text-offwhite active:scale-[0.96]"
-                  onClick={() => setIsEditMode(false)}
-                  type="button"
+              <button
+                aria-label={isLibraryCollapsed ? 'Expand widget library' : 'Collapse widget library'}
+                className="absolute top-1/2 -left-3 z-10 flex size-6 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-container2 text-lightGrey shadow-md transition-[background-color,color,transform] duration-150 hover:bg-offwhite/10 hover:text-offwhite active:scale-90"
+                onClick={() => setIsLibraryCollapsed((v) => !v)}
+                type="button"
+              >
+                <svg
+                  aria-hidden="true"
+                  className={`size-3 transition-transform duration-300 ${isLibraryCollapsed ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeWidth={2.5}
+                  viewBox="0 0 24 24"
                 >
-                  <svg
-                    aria-hidden="true"
-                    className="size-4"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    strokeLinecap="round"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M18 6 6 18M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
 
-              <div className="mt-5 flex flex-col gap-2.5 overflow-y-auto pr-1">
-                {hiddenWidgets.map((widget) => {
-                  const openSlot = findOpenDashboardSlot(layout, widget.id);
-                  const meta = WIDGET_META[widget.id];
-                  const widgetTitle = t(
-                    `widgets.titles.${widget.id.replace(/-([a-z])/g, (_, char: string) => char.toUpperCase())}`,
-                  );
-                  return (
+              {!isLibraryCollapsed && (
+                <div className="flex flex-1 flex-col overflow-hidden px-4 pt-[41px] pb-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h2 className="text-lg font-semibold text-offwhite">{t('editor.libraryTitle')}</h2>
+                      <p className="mt-1 text-sm text-lightGrey">{t('editor.libraryDescription')}</p>
+                    </div>
                     <button
-                      key={widget.id}
-                      className={`group rounded-xl p-3 text-left shadow-[0_0_0_1px_rgba(255,255,255,0.04)] transition-[background-color,box-shadow,opacity,transform] duration-200 ${
-                        openSlot
-                          ? 'cursor-pointer bg-container2 hover:bg-offwhite/10 hover:shadow-[0_0_0_1px_rgba(255,255,255,0.08)] active:scale-[0.96]'
-                          : 'cursor-not-allowed bg-container2/50 opacity-50'
-                      }`}
-                      disabled={!openSlot}
-                      onClick={() => addWidget(widget.id)}
+                      aria-label={t('widgets.actions.closeEditor')}
+                      className="flex size-10 items-center justify-center rounded-lg bg-container2 text-lightGrey transition-[background-color,color,transform] duration-150 hover:bg-offwhite/10 hover:text-offwhite active:scale-[0.96]"
+                      onClick={() => {
+                        setIsEditMode(false);
+                        setIsLibraryCollapsed(false);
+                      }}
                       type="button"
                     >
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-2.5">
-                          <WidgetIcon name={meta.icon} />
-                          <div>
-                            <p className="font-mono text-[9px] font-semibold tracking-widest text-lightGrey uppercase">
-                              {t(`widgets.eyebrows.${meta.eyebrowKey}`)}
-                            </p>
-                            <p className="text-sm font-semibold text-offwhite">{widgetTitle}</p>
-                          </div>
-                        </div>
-                        <span className="rounded-full bg-background px-2 py-0.5 font-mono text-[10px] text-lightGrey">
-                          {openSlot ? `${widget.size.w}×${widget.size.h}` : t('widgets.actions.noSpace')}
-                        </span>
-                      </div>
-                      <p className="mt-2 text-xs leading-relaxed text-lightGrey">
-                        {t(
-                          `widgets.descriptions.${widget.id.replace(/-([a-z])/g, (_, char: string) => char.toUpperCase())}`,
-                        )}
-                      </p>
+                      <svg
+                        aria-hidden="true"
+                        className="size-4"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        strokeLinecap="round"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M18 6 6 18M6 6l12 12" />
+                      </svg>
                     </button>
-                  );
-                })}
-                {hiddenWidgets.length === 0 && <EmptyWidgetState label={t('editor.emptyLibrary')} />}
-              </div>
+                  </div>
 
-              <div className="mt-auto rounded-xl bg-background/70 p-3 text-xs leading-relaxed text-lightGrey shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]">
-                {t('editor.footerHint')}
-              </div>
+                  <div className="mt-5 flex flex-col gap-2.5 overflow-y-auto pr-1">
+                    {hiddenWidgets.map((widget) => {
+                      const openSlot = findOpenDashboardSlot(layout, widget.id);
+                      const meta = WIDGET_META[widget.id];
+                      const widgetTitle = t(
+                        `widgets.titles.${widget.id.replace(/-([a-z])/g, (_, char: string) => char.toUpperCase())}`,
+                      );
+                      return (
+                        <button
+                          key={widget.id}
+                          className={`group rounded-xl p-3 text-left shadow-[0_0_0_1px_rgba(255,255,255,0.04)] transition-[background-color,box-shadow,opacity,transform] duration-200 ${
+                            openSlot
+                              ? 'cursor-pointer bg-container2 hover:bg-offwhite/10 hover:shadow-[0_0_0_1px_rgba(255,255,255,0.08)] active:scale-[0.96]'
+                              : 'cursor-not-allowed bg-container2/50 opacity-50'
+                          }`}
+                          disabled={!openSlot}
+                          onClick={() => addWidget(widget.id)}
+                          type="button"
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-2.5">
+                              <WidgetIcon name={meta.icon} />
+                              <div>
+                                <p className="font-mono text-[9px] font-semibold tracking-widest text-lightGrey uppercase">
+                                  {t(`widgets.eyebrows.${meta.eyebrowKey}`)}
+                                </p>
+                                <p className="text-sm font-semibold text-offwhite">{widgetTitle}</p>
+                              </div>
+                            </div>
+                            <span className="rounded-full bg-background px-2 py-0.5 font-mono text-[10px] text-lightGrey">
+                              {openSlot ? `${widget.size.w}×${widget.size.h}` : t('widgets.actions.noSpace')}
+                            </span>
+                          </div>
+                          <p className="mt-2 text-xs leading-relaxed text-lightGrey">
+                            {t(
+                              `widgets.descriptions.${widget.id.replace(/-([a-z])/g, (_, char: string) => char.toUpperCase())}`,
+                            )}
+                          </p>
+                        </button>
+                      );
+                    })}
+                    {hiddenWidgets.length === 0 && <EmptyWidgetState label={t('editor.emptyLibrary')} />}
+                  </div>
+
+                  <div className="mt-auto rounded-xl bg-background/70 p-3 text-xs leading-relaxed text-lightGrey shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]">
+                    {t('editor.footerHint')}
+                  </div>
+                </div>
+              )}
             </motion.aside>
           )}
         </AnimatePresence>

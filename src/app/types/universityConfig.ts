@@ -35,6 +35,20 @@ export const KNOWN_UNIVERSITIES: UniversityConfig[] = [
     sisuOrigin: 'https://sisu.aalto.fi',
     moodleOrigin: 'https://mycourses.aalto.fi',
   },
+  {
+    name: 'JYU University of Jyväskylä',
+    sisuDomain: 'sisu.jyu.fi',
+    moodleDomain: 'moodle.jyu.fi',
+    sisuOrigin: 'https://sisu.jyu.fi',
+    moodleOrigin: 'https://moodle.jyu.fi',
+  },
+  {
+    name: 'TUNI Tampere Universities',
+    sisuDomain: 'sisu.tuni.fi',
+    moodleDomain: 'moodle.tuni.fi',
+    sisuOrigin: 'https://sisu.tuni.fi',
+    moodleOrigin: 'https://moodle.tuni.fi',
+  },
 ];
 
 export function universityConfigFromSisuDomain(sisuDomain: string, name = ''): UniversityConfig {

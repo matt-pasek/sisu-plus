@@ -197,7 +197,14 @@ export const DashboardWidgetShell: React.FC<Props> = ({
         gridRow: `${item.y + 1} / span ${item.h}`,
       }}
     >
-      <Widget icon={icon} eyebrow={eyebrow} title={title} badge={badge} actions={editActions} loading={false}>
+      <Widget
+        icon={icon}
+        eyebrow={eyebrow}
+        title={title}
+        badge={!isEditMode && badge}
+        actions={editActions}
+        loading={false}
+      >
         {children}
       </Widget>
 

@@ -272,6 +272,7 @@ const DashboardView: React.FC = () => {
           deadlines={deadlines}
           gradeAverage={gradeAverage}
           gradedCount={gradedCount}
+          registrationCourses={registrationCourses}
           semesters={semesterSummaries}
           studyRightEnd={studyRightEnd}
           totalTarget={totalTarget}

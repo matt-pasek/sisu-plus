@@ -6,5 +6,5 @@ export type HeroStatId =
   | 'urgent-deadlines'
   | 'completion-pct'
   | 'credits-done'
-  | 'next-exam'
+  | 'next-due'
   | 'credits-this-period';

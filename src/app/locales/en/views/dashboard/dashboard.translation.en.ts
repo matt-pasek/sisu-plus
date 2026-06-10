@@ -36,7 +36,7 @@ export type DashboardTranslation = {
       urgentDeadlines: string;
       completionPct: string;
       creditsDone: string;
-      nextExam: string;
+      nextDue: string;
       creditsThisPeriod: string;
     };
     statSubs: {
@@ -257,7 +257,7 @@ export const dashboardTranslation: DashboardTranslation = {
       urgentDeadlines: 'Urgent deadlines',
       completionPct: 'Completion',
       creditsDone: 'Credits done',
-      nextExam: 'Next exam',
+      nextDue: 'Next due',
       creditsThisPeriod: 'This period',
     },
     statSubs: {

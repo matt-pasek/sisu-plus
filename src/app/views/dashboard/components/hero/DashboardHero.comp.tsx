@@ -2,6 +2,8 @@ import React, { useMemo, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { type IcsCalendar } from 'ts-ics';
 import { getUserDetails } from '@/app/api/dataPoints/getUserDetails';
+import type { RegistrationCourse } from '@/app/api/dataPoints/getRegistrationCourses';
+import { getCourseDisplayName, getUpcomingExamItems } from '@/app/views/dashboard/util/registrationWidgetData';
 import { useChromeStorage } from '@/app/hooks/useChromeStorage';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { getCurrentPeriodLabel } from '@/app/views/dashboard/util';
@@ -34,6 +36,7 @@ interface DashboardHeroProps {
   deadlines?: IcsCalendar;
   completedCourses?: DashboardCompletedCourse[];
   semesters?: SemesterCreditSummary[];
+  registrationCourses?: RegistrationCourse[];
 }
 
 const getPreferredName = (userDetails: { callName?: string; firstNames?: string } | undefined): string | null => {
@@ -109,6 +112,7 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
   deadlines,
   completedCourses,
   semesters,
+  registrationCourses,
 }) => {
   const { t } = useTranslationWithPrefix('views.dashboard');
   const { t: tUtil } = useTranslationWithPrefix('util');
@@ -124,15 +128,27 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
   const displayName = getPreferredName(userDetails) ?? t('hero.studentFallback');
   const creditsLeft = Math.max(totalTarget - creditsDone, 0);
 
-  const nextDeadline = useMemo(() => {
-    if (!deadlines?.events) return null;
+  const nextDue = useMemo(() => {
     const now = Date.now();
-    return (
-      Object.values(deadlines.events)
-        .filter((ev) => ev.end?.date && ev.end.date.getTime() > now)
-        .sort((a, b) => a.end!.date!.getTime() - b.end!.date!.getTime())[0] ?? null
-    );
-  }, [deadlines]);
+
+    const nextMoodle = deadlines?.events
+      ? (Object.values(deadlines.events)
+          .filter((ev) => ev.end?.date && ev.end.date.getTime() > now)
+          .sort((a, b) => a.end!.date!.getTime() - b.end!.date!.getTime())[0] ?? null)
+      : null;
+
+    const nextExamItem = getUpcomingExamItems(registrationCourses ?? []).at(0) ?? null;
+
+    const moodleTime = nextMoodle?.end?.date?.getTime() ?? Infinity;
+    const examTime = nextExamItem ? new Date(nextExamItem.startsAt).getTime() : Infinity;
+
+    if (moodleTime === Infinity && examTime === Infinity) return null;
+
+    if (examTime <= moodleTime) {
+      return { date: new Date(nextExamItem!.startsAt), label: getCourseDisplayName(nextExamItem!.course) };
+    }
+    return { date: nextMoodle!.end!.date!, label: nextMoodle!.summary ?? '' };
+  }, [deadlines, registrationCourses]);
 
   const completionPct = totalTarget > 0 ? Math.round((creditsDone / totalTarget) * 100) : 0;
 
@@ -188,10 +204,10 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
       tone: 'neutral',
     },
     {
-      id: 'next-exam',
-      label: t('hero.stats.nextExam'),
-      value: nextDeadline?.end?.date ? formatShortDate(nextDeadline.end.date) : '-',
-      sub: nextDeadline?.summary ?? '',
+      id: 'next-due',
+      label: t('hero.stats.nextDue'),
+      value: nextDue ? formatShortDate(nextDue.date) : '-',
+      sub: nextDue?.label ?? '',
       tone: 'neutral',
     },
     {

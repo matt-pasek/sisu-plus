@@ -38,7 +38,7 @@ export const dashboardTranslation: DashboardTranslation = {
       urgentDeadlines: 'Kiireelliset määräajat',
       completionPct: 'Valmistuminen',
       creditsDone: 'Op suoritettu',
-      nextExam: 'Seuraava tentti',
+      nextDue: 'Seuraava',
       creditsThisPeriod: 'Tällä periodilla',
     },
     statSubs: {

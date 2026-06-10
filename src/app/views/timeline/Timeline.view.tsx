@@ -233,7 +233,7 @@ function getValidationWarnings(
 }
 
 const TimelineView: React.FC = () => {
-  const { t } = useTranslationWithPrefix('views.timeline');
+  const { t, i18n } = useTranslationWithPrefix('views.timeline');
   const { planId } = useParams();
   const queryClient = useQueryClient();
   const [activeDragCourseId, setActiveDragCourseId] = useState<string | null>(null);
@@ -350,20 +350,18 @@ const TimelineView: React.FC = () => {
       if (!selectedPlan || !selectedPlanId) throw new Error('Plan not found.');
       return updatePlan(selectedPlanId, applyDraftToPlan(selectedPlan, draftPeriodsByCourseId));
     },
-    onSuccess: async (updatedPlan) => {
+    onSuccess: (updatedPlan) => {
+      const lang = i18n.language;
       queryClient.setQueryData<Plan[]>(
-        ['plans'],
+        ['plans', lang],
         (plans) => plans?.map((plan) => (plan.id === updatedPlan.id ? updatedPlan : plan)) ?? [updatedPlan],
       );
       queryClient.setQueryData<TimelineCourse[]>(
-        ['timeline-courses', selectedPlanId],
+        ['timeline-courses', selectedPlanId, lang],
         applyDraftToCourses(timelineCourses, draftPeriodsByCourseId, studyPeriodMap),
       );
       setDraftPeriodsByCourseId(new Map());
       setDismissedPrerequisiteWarningIds(new Set());
-      await new Promise((resolve) => window.setTimeout(resolve, 1500));
-      await queryClient.invalidateQueries({ queryKey: ['plans'] });
-      await queryClient.invalidateQueries({ queryKey: ['timeline-courses', selectedPlanId] });
     },
   });
 
@@ -548,6 +546,7 @@ const TimelineView: React.FC = () => {
             onDismissValidationWarning={(warningId) =>
               setDismissedPrerequisiteWarningIds((current) => new Set(current).add(warningId))
             }
+            onResizeCourse={stageCoursePeriods}
             validationWarnings={visibleValidationWarnings}
           />
         </div>

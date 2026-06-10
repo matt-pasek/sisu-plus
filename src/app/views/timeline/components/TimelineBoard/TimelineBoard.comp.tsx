@@ -22,6 +22,7 @@ interface Props {
   highlightedPeriodLocators?: Set<string>;
   isDragging?: boolean;
   onDismissValidationWarning?: (warningId: string) => void;
+  onResizeCourse?: (courseUnitId: string, newPeriodLocators: string[]) => void;
   semesters: SemesterCreditSummary[];
   moduleIds: string[];
   validationWarnings?: Map<string, TimelineValidationWarning[]>;
@@ -93,6 +94,7 @@ export const TimelineBoard: React.FC<Props> = ({
   highlightedPeriodLocators = new Set(),
   isDragging = false,
   onDismissValidationWarning,
+  onResizeCourse,
   semesters,
   moduleIds,
   validationWarnings = new Map(),
@@ -227,11 +229,37 @@ export const TimelineBoard: React.FC<Props> = ({
                       }}
                       course={block.course}
                       color={getModuleColor(block.course.moduleId, moduleIds)}
+                      compact={courseBlocks.some(
+                        (otherBlock) =>
+                          otherBlock.course.courseUnitId !== block.course.courseUnitId &&
+                          otherBlock.row === block.row &&
+                          ((otherBlock.startColumn >= block.startColumn && otherBlock.startColumn < block.endColumn) ||
+                            (otherBlock.endColumn > block.startColumn && otherBlock.endColumn <= block.endColumn)),
+                      )}
                       disabled={block.course.isPassed}
                       isDraft={draftCourseIds.has(block.course.courseUnitId)}
                       className="h-full min-h-18.5"
                       onDismissValidationWarning={onDismissValidationWarning}
                       validationWarnings={validationWarnings.get(block.course.courseUnitId)}
+                      onResizeRight={(delta) => {
+                        if (!onResizeCourse) return;
+                        const currentPeriodLocators = block.course.plannedPeriods.map((p) => p.locator);
+                        if (currentPeriodLocators.length === 0) return;
+
+                        const startLocator = currentPeriodLocators[0];
+                        const startIndex = visiblePeriods.findIndex((p) => p.period.periodLocator === startLocator);
+                        if (startIndex === -1) return;
+
+                        const newLength = Math.max(1, currentPeriodLocators.length + delta);
+                        const newPeriodLocators: string[] = [];
+
+                        for (let i = 0; i < newLength; i++) {
+                          const p = visiblePeriods[startIndex + i];
+                          if (p) newPeriodLocators.push(p.period.periodLocator);
+                        }
+
+                        onResizeCourse(block.course.courseUnitId, newPeriodLocators);
+                      }}
                     />
                   </div>
                 ))

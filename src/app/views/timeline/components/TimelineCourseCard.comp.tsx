@@ -19,6 +19,7 @@ export interface TimelineCourseCardProps {
   isDraft?: boolean;
   onDismissValidationWarning?: (warningId: string) => void;
   onPointerDown?: React.PointerEventHandler<HTMLDivElement>;
+  onResizeRight?: (delta: number) => void;
   style?: React.CSSProperties;
   validationWarnings?: TimelineValidationWarning[];
 }
@@ -34,6 +35,7 @@ export const TimelineCourseCard = React.forwardRef<HTMLDivElement, TimelineCours
       isDraft = false,
       onDismissValidationWarning,
       onPointerDown,
+      onResizeRight,
       style,
       validationWarnings = [],
     },
@@ -114,6 +116,50 @@ export const TimelineCourseCard = React.forwardRef<HTMLDivElement, TimelineCours
         {!compact && (
           <div className="mt-auto flex items-end justify-between gap-2 px-3.5 pb-2 text-xs text-lightGrey">
             <span className="truncate">{course.moduleName ?? t('course.noModule')}</span>
+          </div>
+        )}
+
+        {onResizeRight && (
+          <div
+            className="group/resize absolute inset-y-0 right-0 z-20 w-6 cursor-ew-resize rounded-r-lg transition-[background-color] duration-200 hover:bg-accent/10 active:bg-accent/15"
+            onPointerDown={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              const target = event.currentTarget;
+              target.setPointerCapture(event.pointerId);
+
+              const startX = event.clientX;
+              let lastDelta = 0;
+              const columnStep = 218;
+
+              const handleMove = (moveEvent: PointerEvent) => {
+                const deltaX = moveEvent.clientX - startX;
+                const deltaColumns = Math.round(deltaX / columnStep);
+                if (deltaColumns !== lastDelta) {
+                  lastDelta = deltaColumns;
+                  onResizeRight(deltaColumns);
+                }
+              };
+
+              const handleUp = () => {
+                target.releasePointerCapture(event.pointerId);
+                target.removeEventListener('pointermove', handleMove);
+                target.removeEventListener('pointerup', handleUp);
+                target.removeEventListener('pointercancel', handleUp);
+              };
+
+              target.addEventListener('pointermove', handleMove);
+              target.addEventListener('pointerup', handleUp);
+              target.addEventListener('pointercancel', handleUp);
+            }}
+          >
+            <div className="absolute inset-y-0 right-0 flex w-6 items-center justify-center">
+              <div className="flex flex-col gap-0.75">
+                <div className="h-1.25 w-0.75 origin-center scale-y-50 rounded-full bg-accent/70 opacity-0 transition-[opacity,transform] delay-0 duration-150 group-hover/resize:scale-y-100 group-hover/resize:opacity-100" />
+                <div className="h-1.25 w-0.75 origin-center scale-y-50 rounded-full bg-accent/80 opacity-0 transition-[opacity,transform] delay-40 duration-150 group-hover/resize:scale-y-100 group-hover/resize:opacity-100" />
+                <div className="h-1.25 w-0.75 origin-center scale-y-50 rounded-full bg-accent/70 opacity-0 transition-[opacity,transform] delay-80 duration-150 group-hover/resize:scale-y-100 group-hover/resize:opacity-100" />
+              </div>
+            </div>
           </div>
         )}
       </CourseCard>

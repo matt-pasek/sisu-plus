@@ -1,5 +1,6 @@
 import React from 'react';
 import { useDroppable } from '@dnd-kit/react';
+import { shapeIntersection } from '@dnd-kit/collision';
 import type { TimelineCourse } from '@/app/api/dataPoints/getTimelineCourses';
 import { DraggableTimelineCourseCard } from '@/app/views/timeline/components/DraggableTimelineCourseCard.comp';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
@@ -58,6 +59,7 @@ export const TimelineCoursePool: React.FC<Props> = ({
     id: 'course-pool',
     accept: TIMELINE_COURSE_DRAG_TYPE,
     data: { kind: 'timeline-pool' },
+    collisionDetector: shapeIntersection,
   });
 
   return (

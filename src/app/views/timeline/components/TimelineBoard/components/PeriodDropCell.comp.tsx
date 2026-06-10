@@ -1,5 +1,6 @@
 import React from 'react';
 import { useDroppable } from '@dnd-kit/react';
+import { shapeIntersection } from '@dnd-kit/collision';
 import { PeriodCreditSummary } from '@/app/api/dataPoints/getCreditsByPeriod';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { TIMELINE_COURSE_DRAG_TYPE } from '@/app/views/timeline/util/dndHandlers';
@@ -7,6 +8,7 @@ import { TIMELINE_COURSE_DRAG_TYPE } from '@/app/views/timeline/util/dndHandlers
 interface Props {
   index: number;
   hasHighlightedDropPeriods: boolean;
+  isActiveDropTarget: boolean;
   isHighlighted: boolean;
   isDragging: boolean;
   period: PeriodCreditSummary;
@@ -16,17 +18,21 @@ interface Props {
 export const PeriodDropCell: React.FC<Props> = ({
   index,
   hasHighlightedDropPeriods,
+  isActiveDropTarget,
   isHighlighted,
   isDragging,
   period,
   rowCount,
 }) => {
   const { t } = useTranslationWithPrefix('views.timeline');
-  const { ref, isDropTarget } = useDroppable({
+  const { ref, isDropTarget: isDirectDropTarget } = useDroppable({
     id: `period:${period.periodLocator}`,
     accept: TIMELINE_COURSE_DRAG_TYPE,
     data: { kind: 'timeline-period', periodLocator: period.periodLocator },
+    collisionDetector: shapeIntersection,
   });
+
+  const isDropTarget = isDirectDropTarget || isActiveDropTarget;
 
   return (
     <div

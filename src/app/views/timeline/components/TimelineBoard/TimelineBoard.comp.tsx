@@ -1,4 +1,5 @@
 import React from 'react';
+import { useDragOperation } from '@dnd-kit/react';
 import { useGridFlip } from '@/app/views/timeline/hooks/useGridFlip';
 import type { PeriodCreditSummary, SemesterCreditSummary } from '@/app/api/dataPoints/getCreditsByPeriod';
 import type { TimelineCourse } from '@/app/api/dataPoints/getTimelineCourses';
@@ -14,6 +15,7 @@ import { isCurrentPeriod, isCurrentSemester } from '@/app/views/timeline/util/ge
 import { formatPeriodRange } from '@/app/views/timeline/util/formatPeriodRange';
 import { getSemesterTitle } from '@/app/helpers/getSemesterTitle';
 import { getModuleColor } from '@/app/theme/moduleColors';
+import type { TimelineCourseDragData, TimelinePeriodDropData } from '@/app/views/timeline/util/dndHandlers';
 
 interface Props {
   draftCourseIds?: Set<string>;
@@ -104,6 +106,22 @@ export const TimelineBoard: React.FC<Props> = ({
   const hasHighlightedDropPeriods = highlightedPeriodLocators.size > 0;
   const flipKey = visiblePeriods.map(({ period }) => period.periodLocator).join(':');
   const flipRef = useGridFlip<HTMLDivElement>(flipKey);
+  const dragOperation = useDragOperation();
+  const sourceData = dragOperation.source?.data as TimelineCourseDragData | undefined;
+  const targetData = dragOperation.target?.data as TimelinePeriodDropData | undefined;
+
+  const activeDropLocators = new Set<string>();
+  if (targetData?.kind === 'timeline-period' && sourceData?.kind === 'timeline-course') {
+    const targetIndex = visiblePeriods.findIndex((p) => p.period.periodLocator === targetData.periodLocator);
+    if (targetIndex !== -1) {
+      const count = sourceData.periodCount || 1;
+      for (let i = 0; i < count; i++) {
+        const p = visiblePeriods[targetIndex + i];
+        if (p) activeDropLocators.add(p.period.periodLocator);
+      }
+    }
+  }
+
   let periodOffset = 0;
 
   return (
@@ -186,6 +204,7 @@ export const TimelineBoard: React.FC<Props> = ({
                   hasHighlightedDropPeriods={hasHighlightedDropPeriods}
                   isHighlighted={highlightedPeriodLocators.has(period.periodLocator)}
                   isDragging={isDragging}
+                  isActiveDropTarget={activeDropLocators.has(period.periodLocator)}
                   period={period}
                   rowCount={rowCount}
                 />

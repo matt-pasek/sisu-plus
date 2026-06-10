@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { getMoodleCalendarExportUrlFromConfig } from '@/shared/domains';
 import { OnboardingPanel } from '@/app/controlCenter/OnboardingPanel.comp';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
+import { getControlTip } from '@/app/controlCenter/controlTips';
 
 function Toggle({ checked, onChange }: { checked: boolean; onChange: (val: boolean) => void }) {
   return (
@@ -47,40 +48,6 @@ function isValidMoodleUrl(value: string): boolean {
   } catch {
     return false;
   }
-}
-
-interface ControlTip {
-  title: string;
-  body: string;
-  accentClass: string;
-}
-
-function getControlTip(
-  isActive: boolean,
-  pathname: string,
-  t: ReturnType<typeof useTranslationWithPrefix>['t'],
-): ControlTip {
-  if (!isActive) {
-    return {
-      title: t('tip.dormantTitle'),
-      body: t('tip.dormantBody'),
-      accentClass: 'text-warn bg-warn/15 shadow-[inset_0_0_0_1px_rgba(246,185,86,0.18)]',
-    };
-  }
-
-  if (pathname.startsWith('/student/plan')) {
-    return {
-      title: t('tip.planningTitle'),
-      body: t('tip.planningBody'),
-      accentClass: 'text-blue-300 bg-blue-400/15 shadow-[inset_0_0_0_1px_rgba(102,142,255,0.18)]',
-    };
-  }
-
-  return {
-    title: t('tip.dashboardTitle'),
-    body: t('tip.dashboardBody'),
-    accentClass: 'text-accent bg-accent/15 shadow-[inset_0_0_0_1px_rgba(65,150,72,0.18)]',
-  };
 }
 
 export function ControlCenter() {
@@ -249,7 +216,7 @@ export function ControlCenter() {
                     </span>
                   </div>
                   <div
-                    className={`rounded-2xl bg-container2 px-3 py-2 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)] transition-[box-shadow] duration-200 ${
+                    className={`rounded-2xl bg-container2 px-3 py-2 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)] transition-shadow duration-200 ${
                       validMoodleUrl
                         ? 'focus-within:shadow-[inset_0_0_0_1px_rgba(65,150,72,0.65)]'
                         : 'shadow-[inset_0_0_0_1px_rgba(240,107,107,0.45)]'
@@ -320,7 +287,7 @@ export function ControlCenter() {
                 transition: { duration: 0.12 },
               }}
               transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
-              className="mr-1 w-[290px] rounded-3xl p-3 text-left shadow-[0_14px_38px_rgba(0,0,0,0.32),inset_0_0_0_1px_rgba(255,255,255,0.06)]"
+              className="mr-1 w-72.5 rounded-3xl p-3 text-left shadow-[0_14px_38px_rgba(0,0,0,0.32),inset_0_0_0_1px_rgba(255,255,255,0.06)]"
             >
               <div className="flex gap-3">
                 <span

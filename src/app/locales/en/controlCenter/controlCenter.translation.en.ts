@@ -75,6 +75,10 @@ export type ControlCenterTranslation = {
     dormantBody: string;
     planningTitle: string;
     planningBody: string;
+    structureTitle: string;
+    structureBody: string;
+    enrolmentsTitle: string;
+    enrolmentsBody: string;
     dashboardTitle: string;
     dashboardBody: string;
   };
@@ -161,6 +165,10 @@ export const controlCenterTranslation: ControlCenterTranslation = {
     dormantBody: 'SISU+ stays dormant while paused, letting you interact with Sisu as usual.',
     planningTitle: 'Planning made easy',
     planningBody: 'SISU+ keeps track of prerequisites and planned teaching periods.',
+    structureTitle: 'Know your degree',
+    structureBody: 'Required modules and credits at a glance — spot gaps early.',
+    enrolmentsTitle: 'Enrol with confidence',
+    enrolmentsBody: 'Browse implementations, pick the right one, and enrol.',
     dashboardTitle: 'Make it your own',
     dashboardBody: 'Dashboard widgets can be resized from their edges in edit mode.',
   },

@@ -122,17 +122,22 @@ export const getOpenRegistrationCount = (courses: RegistrationCourse[]): number 
 export const getUpcomingExamItems = (courses: RegistrationCourse[]): DashboardExamItem[] =>
   courses
     .flatMap((course) =>
-      getImplementationsForTab(course, 'exam').map((implementation): DashboardExamItem | null => {
-        if (!implementation.activityStart) return null;
-        const daysUntil = getDaysUntilDate(implementation.activityStart);
-        if (daysUntil == null) return null;
-        return {
-          course,
-          daysUntil,
-          implementation,
-          startsAt: implementation.activityStart,
-        };
-      }),
+      getImplementationsForTab(course, 'exam')
+        .filter((implementation) =>
+          course.enrolments.some((enrolment) => enrolment.courseUnitRealisationId === implementation.id),
+        )
+        .map((implementation): DashboardExamItem | null => {
+          if (!implementation.activityStart) return null;
+          if (implementation.activityStart < new Date().toISOString()) return null;
+          const daysUntil = getDaysUntilDate(implementation.activityStart);
+          if (daysUntil == null) return null;
+          return {
+            course,
+            daysUntil,
+            implementation,
+            startsAt: implementation.activityStart,
+          };
+        }),
     )
     .filter((item): item is DashboardExamItem => item != null)
     .sort((first, second) => first.startsAt.localeCompare(second.startsAt));

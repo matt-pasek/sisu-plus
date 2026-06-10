@@ -2,6 +2,7 @@ import {
   abortOwnEnrolment,
   cancelEnrolment,
   createOwnEnrolment,
+  deleteOwnEnrolment,
   enrol,
   updateOwnEnrolment,
 } from '@/app/api/endpoints/enrolments';
@@ -95,6 +96,20 @@ export const submitRegistration = async (
     studyRightId: studyRightId ?? course.studyRightId ?? currentEnrolment.studyRightId,
     studySubGroups,
   });
+};
+
+export const removeOldEnrolment = async (
+  enrolment: Enrolment,
+  implementation: RegistrationImplementation,
+): Promise<void> => {
+  if (!enrolment.id) return;
+  const canDelete =
+    canCancelImplementation(implementation) || implementation.isUpcoming || implementation.enrolmentStart == null;
+  if (canDelete) {
+    await deleteOwnEnrolment(enrolment.id);
+  } else {
+    await abortOwnEnrolment(enrolment.id);
+  }
 };
 
 export const cancelRegistration = async ({

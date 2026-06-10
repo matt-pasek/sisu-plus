@@ -22,6 +22,7 @@ import {
   courseMatchesPeriod,
   getDefaultPeriodId,
   getDraftImplementation,
+  getEnrolmentForImplementation,
   getEnrolmentForTab,
   getEnrolmentsForTab,
   getImplementationForEnrolment,
@@ -36,7 +37,7 @@ import {
   sortCoursesForTab,
 } from '@/app/views/registration/util';
 import { RegistrationAttempt, RegistrationTab } from '@/app/views/registration/types';
-import { cancelRegistration, submitRegistration } from '@/app/views/registration/util/actions';
+import { cancelRegistration, removeOldEnrolment, submitRegistration } from '@/app/views/registration/util/actions';
 
 const RegistrationView: React.FC = () => {
   const { t } = useTranslationWithPrefix('views.registration');
@@ -102,19 +103,29 @@ const RegistrationView: React.FC = () => {
   };
 
   const registerMutation = useMutation({
-    mutationFn: ({
+    mutationFn: async ({
       course,
       implementation,
+      previousImplementation,
       selections,
       studyRightId,
       personId,
     }: {
       course: RegistrationCourse;
       implementation: RegistrationImplementation;
+      previousImplementation?: RegistrationImplementation;
       selections: Record<string, string[]>;
       studyRightId?: string;
       personId?: string;
-    }) => submitRegistration(course, implementation, selections, studyRightId, personId),
+    }) => {
+      if (previousImplementation) {
+        const oldEnrolment = getEnrolmentForImplementation(course, previousImplementation);
+        if (oldEnrolment) {
+          await removeOldEnrolment(oldEnrolment, previousImplementation);
+        }
+      }
+      return submitRegistration(course, implementation, selections, studyRightId, personId);
+    },
     onError: (error) => {
       notify.error(error instanceof Error ? error.message : t('messages.registrationFailed'));
     },
@@ -342,6 +353,8 @@ const RegistrationView: React.FC = () => {
             registerMutation.mutate({
               course: dialogState.course,
               implementation,
+              previousImplementation:
+                implementation.id !== dialogState.implementation.id ? dialogState.implementation : undefined,
               selections,
               personId: userDetails?.id,
               studyRightId: studyRight?.[0].id,

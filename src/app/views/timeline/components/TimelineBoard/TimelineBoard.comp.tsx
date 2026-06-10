@@ -1,4 +1,5 @@
 import React from 'react';
+import { useGridFlip } from '@/app/views/timeline/hooks/useGridFlip';
 import type { PeriodCreditSummary, SemesterCreditSummary } from '@/app/api/dataPoints/getCreditsByPeriod';
 import type { TimelineCourse } from '@/app/api/dataPoints/getTimelineCourses';
 import { DraggableTimelineCourseCard } from '@/app/views/timeline/components/DraggableTimelineCourseCard.comp';
@@ -98,15 +99,18 @@ export const TimelineBoard: React.FC<Props> = ({
   const visiblePeriods = semesters.flatMap((semester) => semester.periods.map((period) => ({ period, semester })));
   const courseBlocks = getCourseBlocks(semesters, visiblePeriods);
   const rowCount = Math.max(courseBlocks.length > 0 ? Math.max(...courseBlocks.map((block) => block.row)) + 1 : 1, 3);
-  const gridTemplateColumns = `repeat(${visiblePeriods.length}, ${PERIOD_WIDTH}px)`;
+  const columnWidth = `${PERIOD_WIDTH}px`;
+  const gridTemplateColumns = visiblePeriods.map(() => columnWidth).join(' ');
   const hasHighlightedDropPeriods = highlightedPeriodLocators.size > 0;
+  const flipKey = visiblePeriods.map(({ period }) => period.periodLocator).join(':');
+  const flipRef = useGridFlip<HTMLDivElement>(flipKey);
   let periodOffset = 0;
 
   return (
     <main className="min-w-0 flex-1 overflow-auto bg-background">
       <div className="min-h-full w-max px-5 py-5">
         {semesters.length > 0 ? (
-          <>
+          <div ref={flipRef}>
             <div className="grid gap-2" style={{ gridTemplateColumns }}>
               {semesters.map((semester) => {
                 const startColumn = periodOffset + 1;
@@ -115,7 +119,8 @@ export const TimelineBoard: React.FC<Props> = ({
                 return (
                   <div
                     key={`${semester.studyYear}:${semester.termName}`}
-                    className={`rounded-lg border px-4 py-2 ${
+                    data-flip-id={`semester:${semester.studyYear}:${semester.termName}`}
+                    className={`overflow-hidden rounded-lg border px-4 py-2 ${
                       isCurrentSemester(semester)
                         ? 'border-accent/70 bg-accent/10 shadow-[0_0_0_1px_rgba(65,150,72,0.2)]'
                         : 'border-border bg-container'
@@ -188,20 +193,28 @@ export const TimelineBoard: React.FC<Props> = ({
 
               {courseBlocks.length > 0 ? (
                 courseBlocks.map((block) => (
-                  <DraggableTimelineCourseCard
+                  <div
                     key={getCourseKey(block.course)}
-                    course={block.course}
-                    color={getModuleColor(block.course.moduleId, moduleIds)}
-                    disabled={block.course.isPassed}
-                    isDraft={draftCourseIds.has(block.course.courseUnitId)}
-                    className="z-10 min-h-18.5"
-                    onDismissValidationWarning={onDismissValidationWarning}
-                    validationWarnings={validationWarnings.get(block.course.courseUnitId)}
+                    data-flip-id={`course:${getCourseKey(block.course)}`}
+                    className="z-10"
                     style={{
                       gridColumn: `${block.startColumn + 1} / ${block.endColumn + 1}`,
                       gridRow: block.row + 1,
                     }}
-                  />
+                  >
+                    <DraggableTimelineCourseCard
+                      style={{
+                        height: '100%',
+                      }}
+                      course={block.course}
+                      color={getModuleColor(block.course.moduleId, moduleIds)}
+                      disabled={block.course.isPassed}
+                      isDraft={draftCourseIds.has(block.course.courseUnitId)}
+                      className="h-full min-h-18.5"
+                      onDismissValidationWarning={onDismissValidationWarning}
+                      validationWarnings={validationWarnings.get(block.course.courseUnitId)}
+                    />
+                  </div>
                 ))
               ) : (
                 <div
@@ -212,7 +225,7 @@ export const TimelineBoard: React.FC<Props> = ({
                 </div>
               )}
             </div>
-          </>
+          </div>
         ) : (
           <div className="flex h-64 w-[70vw] items-center justify-center rounded-xl border border-dashed border-border text-sm text-lightGrey">
             {t('board.noPeriods')}

@@ -1,7 +1,7 @@
+import React from 'react';
+import { useDroppable } from '@dnd-kit/react';
 import { PeriodCreditSummary } from '@/app/api/dataPoints/getCreditsByPeriod';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
-import { useDroppable } from '@dnd-kit/react';
-import React from 'react';
 import { TIMELINE_COURSE_DRAG_TYPE } from '@/app/views/timeline/util/dndHandlers';
 
 interface Props {
@@ -31,6 +31,7 @@ export const PeriodDropCell: React.FC<Props> = ({
   return (
     <div
       ref={ref}
+      data-flip-id={`drop-cell:${period.periodLocator}`}
       className={`relative overflow-hidden rounded-lg border border-dashed transition-[border-color,background-color,box-shadow,scale] duration-200 ease-out ${
         isDropTarget
           ? 'z-30 scale-[1.01] border-accent bg-accent/10 shadow-[0_0_0_1px_rgba(65,150,72,0.28),inset_0_0_24px_rgba(65,150,72,0.06)]'

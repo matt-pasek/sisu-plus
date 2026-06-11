@@ -4,19 +4,12 @@
   "version": "1.1.0",
   "description": "__MSG_extDescription__",
   "default_locale": "en",
-  "permissions": ["storage", "webRequest"],
+  "permissions": ["storage", "webRequest", "scripting"],
   "optional_host_permissions": ["https://*.fi/*"],
   "background": {
     "service_worker": "background/service-worker.js",
     "type": "module"
   },
-  "content_scripts": [
-    {
-      "matches": ["*://*.fi/*"],
-      "js": ["content/index.js"],
-      "run_at": "document_start"
-    }
-  ],
   "web_accessible_resources": [
     {
       "resources": ["onboarding.html", "assets/*"],

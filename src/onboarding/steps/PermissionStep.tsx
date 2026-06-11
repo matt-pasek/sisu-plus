@@ -47,24 +47,32 @@ export function PermissionStep({ config, onGranted, onBack, showBack = true, isR
   const [status, setStatus] = useState<Status>('idle');
   const [granted, setGranted] = useState(false);
 
-  async function requestPermission() {
+  const requestPermission = async () => {
     setStatus('requesting');
+
     try {
       const ok = await chrome.permissions.request({
         origins: [`${config.sisuOrigin}/*`, `${config.moodleOrigin}/*`],
       });
 
-      if (ok) {
-        setGranted(true);
-        await chrome.storage.sync.set({ universityConfig: config });
-        setTimeout(onGranted, 420);
-      } else {
+      if (!ok) {
         setStatus('denied');
+        return;
       }
+
+      setGranted(true);
+
+      await chrome.storage.sync.set({ universityConfig: config });
+
+      await chrome.runtime.sendMessage({
+        type: 'SYNC_CONTENT_SCRIPT',
+      });
+
+      setTimeout(onGranted, 420);
     } catch {
       setStatus('denied');
     }
-  }
+  };
 
   const headlineKey = isRe ? 'onboarding.permission.headlineRe' : 'onboarding.permission.headline';
   const body = isRe

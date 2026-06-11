@@ -5,13 +5,14 @@ import globalCss from '@/app/global.css?inline';
 import type { UniversityConfig } from '@/app/types/universityConfig';
 
 const SISU_PLUS_ROOT_ID = 'sisu-plus-root';
+const SISU_PLUS_CONTROLS_ID = 'sisu-plus-controls';
 
 const origPushState = history.pushState;
 const origReplaceState = history.replaceState;
 
 let appMounted = false;
-let controlCenterMounted = false;
 let initStarted = false;
+let waitingForToken = false;
 
 const isStudentPage = (pathname = window.location.pathname) =>
   pathname === '/student' || pathname.startsWith('/student/');
@@ -34,6 +35,15 @@ const getPrefs = async (): Promise<SisuPrefs> => {
   return stored as SisuPrefs;
 };
 
+const getStoredSisuToken = async () => {
+  const { sisuToken } = await chrome.runtime.sendMessage({
+    type: 'GET_TOKEN',
+    origin: window.location.origin,
+  });
+
+  return sisuToken as string | undefined;
+};
+
 const clearStoredSessionForCurrentOrigin = async () => {
   await chrome.runtime.sendMessage({
     type: 'CLEAR_SESSION_FOR_ORIGIN',
@@ -41,18 +51,31 @@ const clearStoredSessionForCurrentOrigin = async () => {
   });
 };
 
+const hasSisuPlusRoot = () => Boolean(document.getElementById(SISU_PLUS_ROOT_ID));
+const hasControlCenterRoot = () => Boolean(document.getElementById(SISU_PLUS_CONTROLS_ID));
+
+const reloadToRestoreNativeSisu = () => {
+  window.location.reload();
+};
+
 const removeSisuPlus = () => {
   document.getElementById(SISU_PLUS_ROOT_ID)?.remove();
   appMounted = false;
 };
 
-const handOffToSisuLogin = async () => {
+const handOffToSisuLogin = () => {
+  waitingForToken = false;
+  removeSisuPlus();
+};
+
+const handleSessionExpired = async () => {
+  waitingForToken = false;
   await clearStoredSessionForCurrentOrigin();
   removeSisuPlus();
 };
 
 const mountSisuPlus = () => {
-  if (appMounted || document.getElementById(SISU_PLUS_ROOT_ID)) {
+  if (appMounted || hasSisuPlusRoot()) {
     appMounted = true;
     return;
   }
@@ -79,17 +102,16 @@ const mountSisuPlus = () => {
 };
 
 const mountControlCenterOnce = () => {
-  if (controlCenterMounted) return;
+  if (hasControlCenterRoot()) return;
 
   mountControlCenter();
-  controlCenterMounted = true;
 };
 
 const reconcileRoute = async () => {
   await ensureBodyReady();
 
   if (isStudentLoginPage()) {
-    await handOffToSisuLogin();
+    handOffToSisuLogin();
     return;
   }
 
@@ -97,12 +119,28 @@ const reconcileRoute = async () => {
 
   const prefs = await getPrefs();
 
-  if (prefs.sisuPlusActive) {
-    mountSisuPlus();
-  } else {
-    removeSisuPlus();
+  if (!prefs.sisuPlusActive) {
+    waitingForToken = false;
+
+    if (hasSisuPlusRoot()) {
+      reloadToRestoreNativeSisu();
+      return;
+    }
+
+    mountControlCenterOnce();
+    return;
   }
 
+  const token = await getStoredSisuToken();
+
+  if (!token) {
+    waitingForToken = true;
+    mountControlCenterOnce();
+    return;
+  }
+
+  waitingForToken = false;
+  mountSisuPlus();
   mountControlCenterOnce();
 };
 
@@ -134,7 +172,15 @@ const init = async () => {
   await reconcileRoute();
 
   window.addEventListener('sisuplus:session-expired', () => {
-    void handOffToSisuLogin();
+    void handleSessionExpired();
+  });
+
+  chrome.runtime.onMessage.addListener((message) => {
+    if (message.type !== 'SISU_TOKEN_CAPTURED') return;
+    if (message.origin !== window.location.origin) return;
+    if (!waitingForToken) return;
+
+    void reconcileRoute();
   });
 
   chrome.storage.onChanged.addListener((changes, area) => {

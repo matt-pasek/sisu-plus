@@ -51,10 +51,13 @@ export const KNOWN_UNIVERSITIES: UniversityConfig[] = [
   },
 ];
 
-export function universityConfigFromSisuDomain(sisuDomain: string, name = ''): UniversityConfig {
-  const moodleDomain = sisuDomain.replace(/^sisu\./, 'moodle.');
+export function universityConfigFromSisuDomain(sisuDomain: string, name?: string): UniversityConfig {
+  const known = KNOWN_UNIVERSITIES.find((u) => u.sisuDomain === sisuDomain);
+  const resolvedName = name ?? known?.name ?? '';
+  const moodleDomain = known?.moodleDomain ?? sisuDomain.replace(/^sisu\./, 'moodle.');
+
   return {
-    name,
+    name: resolvedName,
     sisuDomain,
     moodleDomain,
     sisuOrigin: `https://${sisuDomain}`,

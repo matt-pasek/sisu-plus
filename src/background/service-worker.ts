@@ -20,7 +20,7 @@ chrome.runtime.onInstalled.addListener((details) => {
   }
 });
 
-function getOrigin(value?: string): string | null {
+const getOrigin = (value?: string): string | null => {
   if (!value) return null;
 
   try {
@@ -28,13 +28,34 @@ function getOrigin(value?: string): string | null {
   } catch {
     return null;
   }
-}
+};
 
-async function patchOriginSessionData(key: string, origin: string, value: string | Record<string, string>) {
+const patchOriginSessionData = async (key: string, origin: string, value: string | Record<string, string>) => {
   const stored = await chrome.storage.session.get(key);
   const current = (stored[key] ?? {}) as OriginSessionData;
-  await chrome.storage.session.set({ [key]: { ...current, [origin]: value } });
-}
+
+  await chrome.storage.session.set({
+    [key]: {
+      ...current,
+      [origin]: value,
+    },
+  });
+};
+
+const clearOriginSessionData = async (origin: string) => {
+  const stored = await chrome.storage.session.get(['sisuTokensByOrigin', 'sisuCookiesByOrigin']);
+
+  const tokens = { ...((stored.sisuTokensByOrigin ?? {}) as Record<string, string>) };
+  const cookies = { ...((stored.sisuCookiesByOrigin ?? {}) as Record<string, Record<string, string>>) };
+
+  delete tokens[origin];
+  delete cookies[origin];
+
+  await chrome.storage.session.set({
+    sisuTokensByOrigin: tokens,
+    sisuCookiesByOrigin: cookies,
+  });
+};
 
 chrome.webRequest.onBeforeSendHeaders.addListener(
   (details) => {
@@ -47,6 +68,7 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
       if (origin !== cachedConfig.sisuOrigin && origin !== cachedConfig.moodleOrigin) return;
 
       const headers = details.requestHeaders ?? [];
+
       const authHeader = headers.find((h) => h.name.toLowerCase() === 'authorization');
       if (authHeader?.value?.startsWith('Bearer ')) {
         const token = authHeader.value.slice(7);
@@ -56,13 +78,16 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
       const cookieHeader = headers.find((h) => h.name.toLowerCase() === 'cookie');
       if (cookieHeader?.value) {
         const cookies: Record<string, string> = {};
+
         cookieHeader.value.split(';').forEach((part) => {
           const [k, ...v] = part.trim().split('=');
           const key = k?.trim();
+
           if (key === 'AWSALB' || key === 'AWSALBCORS') {
             cookies[key] = v.join('=');
           }
         });
+
         if (Object.keys(cookies).length > 0) {
           void patchOriginSessionData('sisuCookiesByOrigin', origin, cookies);
         }
@@ -81,6 +106,22 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       const tokens = (sisuTokensByOrigin ?? {}) as Record<string, string>;
       sendResponse({ sisuToken: origin ? tokens[origin] : undefined });
     });
+
+    return true;
+  }
+
+  if (message.type === 'CLEAR_SESSION_FOR_ORIGIN') {
+    const origin = getOrigin(message.origin);
+
+    if (!origin) {
+      sendResponse({ ok: false });
+      return false;
+    }
+
+    clearOriginSessionData(origin)
+      .then(() => sendResponse({ ok: true }))
+      .catch((err) => sendResponse({ ok: false, err }));
+
     return true;
   }
 
@@ -98,6 +139,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
           sendResponse({ err });
         });
     });
+
     return true;
   }
 });

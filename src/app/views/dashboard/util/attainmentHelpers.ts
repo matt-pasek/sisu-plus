@@ -1,4 +1,3 @@
-import type { Attainment } from '@/app/api/endpoints/attainments';
 import type { CourseUnitAttainmentRestricted } from '@/app/api/generated/OriApi';
 import { getCurrentLocale } from '@/app/i18n';
 
@@ -14,9 +13,6 @@ export const formatStudyRightEnd = (
     until: `${untilLabel} ${d.toLocaleString(getCurrentLocale(), { month: 'long' })}`,
   };
 };
-
-export const isCourseUnitAttainment = (attainment: Attainment): attainment is CourseUnitAttainmentRestricted =>
-  attainment.type === 'CourseUnitAttainment';
 
 export const getGrade = (attainment: CourseUnitAttainmentRestricted): number | string | null => {
   if (attainment.gradeScaleId.includes('hyl-hyv')) return attainment.gradeId != null ? 'pass' : null;

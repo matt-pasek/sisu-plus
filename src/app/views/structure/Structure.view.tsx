@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { getStructureData } from '@/app/api/dataPoints/getStructureData';
 import { InlineError } from '@/app/components/InlineError.comp';
-import { SpinnerLoader } from '@/app/components/ui/SpinnerLoader.comp';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { getModuleColorObject } from '@/app/theme/moduleColors';
 import { CategorySidebar } from '@/app/views/structure/components/CategorySidebar.comp';
@@ -18,6 +17,7 @@ import { BulkVersionUpdatePanel } from '@/app/views/structure/components/BulkVer
 import type { Plan } from '@/app/api/generated/OsuvaApi';
 import { useStructurePlanMutation } from '@/app/views/structure/hooks/useStructurePlanMutation';
 import { CourseEntry } from '@/app/views/structure/types';
+import { PageLoader } from '@/app/components/PageLoader.comp';
 
 const StructureView: React.FC = () => {
   const { t } = useTranslationWithPrefix('views.structure');
@@ -41,7 +41,7 @@ const StructureView: React.FC = () => {
     if (!isEditing) setDraftPlan(data?.plan ?? null);
   }, [data?.plan, isEditing]);
 
-  if (isLoading) return <SpinnerLoader />;
+  if (isLoading) return <PageLoader />;
 
   if (!data || data.sections.length === 0) {
     return (

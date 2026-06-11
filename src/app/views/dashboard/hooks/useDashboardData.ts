@@ -10,12 +10,13 @@ import { getStudyPeriodMap } from '@/app/api/dataPoints/getStudyPeriodMap';
 import { getModuleColor } from '@/app/theme/moduleColors';
 import { useMemo } from 'react';
 import { getCreditsByPeriod, getCreditsBySemester } from '@/app/api/dataPoints/getCreditsByPeriod';
-import { getGrade, isCourseUnitAttainment } from '@/app/views/dashboard/util';
+import { getGrade } from '@/app/views/dashboard/util';
 import type { DashboardCompletedCourse } from '@/app/views/dashboard/types';
 import { fetchAttainments } from '@/app/api/endpoints/attainments';
 import { resolveCourseUnit } from '@/app/api/resolvers/resolveCourseUnit';
 import { t } from 'i18next';
 import { daysUntil } from '@/app/helpers/daysUntilToday';
+import { isCourseUnitAttainment } from '@/app/helpers/isCourseUnitAttainment';
 
 export const useDashboardData = () => {
   const { deadlines, deadlinesLoading, missingToken } = getMoodleDeadlines();

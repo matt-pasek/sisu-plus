@@ -6,7 +6,6 @@ import {
   type RegistrationImplementation,
 } from '@/app/api/dataPoints/getRegistrationCourses';
 import { Button } from '@/app/components/ui/Button.comp';
-import { InlineLoader } from '@/app/components/ui/InlineLoader.comp';
 import { notify } from '@/app/components/ui/notify';
 import { useSisuQuery } from '@/app/hooks/useSisuQuery';
 import { fetchStudyRights } from '@/app/api/endpoints/studyRights';
@@ -38,6 +37,7 @@ import {
 } from '@/app/views/registration/util';
 import { RegistrationAttempt, RegistrationTab } from '@/app/views/registration/types';
 import { cancelRegistration, removeOldEnrolment, submitRegistration } from '@/app/views/registration/util/actions';
+import { PageLoader } from '@/app/components/PageLoader.comp';
 
 const RegistrationView: React.FC = () => {
   const { t } = useTranslationWithPrefix('views.registration');
@@ -171,13 +171,7 @@ const RegistrationView: React.FC = () => {
     });
   }, [selectedPeriod?.id]);
 
-  if (isLoading) {
-    return (
-      <div className="flex min-h-80 items-center justify-center">
-        <InlineLoader />
-      </div>
-    );
-  }
+  if (isLoading) return <PageLoader />;
 
   return (
     <section className="mx-auto max-w-275 pb-10">

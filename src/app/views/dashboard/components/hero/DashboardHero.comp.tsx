@@ -277,7 +277,7 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
             {t(getGreetingKey())} <span className="text-lighterGreen">{displayName}.</span>
           </h1>
 
-          <div className="mt-8 flex flex-wrap items-stretch gap-1.5 backdrop-blur-[2px]">
+          <div className="mt-8 flex w-fit flex-wrap items-stretch gap-1.5 backdrop-blur-[2px]">
             {featuredStat && <FeaturedStatTile stat={featuredStat} />}
             {plainStats.map((stat) => (
               <PlainStatTile key={stat.id} stat={stat} />

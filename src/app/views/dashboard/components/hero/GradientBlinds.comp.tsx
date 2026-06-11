@@ -68,10 +68,11 @@ const prepStops = (stops?: string[]) => {
 };
 
 const NOISE_SIZE = 256;
-let noiseTextureSingleton: WebGLTexture | null = null;
+const noiseTextureCache = new WeakMap<OGLRenderingContext, WebGLTexture>();
 
-function getOrCreateNoiseTexture(gl: OGLRenderingContext): WebGLTexture {
-  if (noiseTextureSingleton) return noiseTextureSingleton;
+const getOrCreateNoiseTexture = (gl: OGLRenderingContext) => {
+  const cached = noiseTextureCache.get(gl);
+  if (cached) return cached;
 
   const data = new Uint8Array(NOISE_SIZE * NOISE_SIZE);
   for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 255) | 0;
@@ -85,9 +86,9 @@ function getOrCreateNoiseTexture(gl: OGLRenderingContext): WebGLTexture {
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
   gl.bindTexture(gl.TEXTURE_2D, null);
 
-  noiseTextureSingleton = tex;
+  noiseTextureCache.set(gl, tex);
   return tex;
-}
+};
 
 const VERTEX = `
   attribute vec2 position;
@@ -107,6 +108,7 @@ const FRAGMENT = `
   uniform vec3  iResolution;
   uniform vec2  uSpotlightPosition;
   uniform vec2  uNoiseOffset;
+  uniform float uTime;
 
   uniform float uAngle;
   uniform float uNoise;
@@ -117,6 +119,7 @@ const FRAGMENT = `
   uniform float uMirror;
   uniform float uDistort;
   uniform float uShineFlip;
+  uniform float uWave;
 
   uniform vec3  uColor0;
   uniform vec3  uColor1;
@@ -131,6 +134,10 @@ const FRAGMENT = `
   uniform sampler2D uNoiseTex;
 
   varying vec2 vUv;
+
+  float rand(vec2 co) {
+    return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
+  }
 
   vec2 rotate2D(vec2 p, float a) {
     float c = cos(a), s = sin(a);
@@ -190,10 +197,18 @@ const FRAGMENT = `
     float stripe = fract(uvMod.x * max(uBlindCount, 1.0));
     if (uShineFlip > 0.5) stripe = 1.0 - stripe;
 
-    vec3 col = vec3(spot) + base - vec3(stripe);
+    float waveCenter = uWave;
+    float waveDist = abs(uvMod.x - waveCenter);
+    float wavePulse = smoothstep(0.18, 0.0, waveDist) * 0.12;
+
+    vec3 col = vec3(spot) + base - vec3(stripe) + vec3(wavePulse);
 
     if (uNoise > 0.0) {
-      float grain = texture2D(uNoiseTex, uv0 + uNoiseOffset).r;
+      float n1 = texture2D(uNoiseTex, uv0 * 1.2 + uNoiseOffset).r;
+      float n2 = texture2D(uNoiseTex, uv0 * 2.4 - uNoiseOffset.yx * 0.7).r;
+      float texGrain = mix(n1, n2, 0.4);
+      float filmGrain = rand(gl_FragCoord.xy + uTime * 1.3);
+      float grain = mix(texGrain, filmGrain, 0.4);
       col += (grain - 0.5) * uNoise;
     }
 
@@ -260,6 +275,7 @@ const GradientBlinds: React.FC<GradientBlindsProps> = ({
       iResolution: { value: [gl.drawingBufferWidth, gl.drawingBufferHeight, 1] as [number, number, number] },
       uSpotlightPosition: { value: getSpotlightPosition(spotlightX, spotlightY) },
       uNoiseOffset: { value: [0, 0] as [number, number] },
+      uTime: { value: 0 },
       uAngle: { value: (angle * Math.PI) / 180 },
       uNoise: { value: noise },
       uBlindCount: { value: Math.max(1, blindCount) },
@@ -269,6 +285,7 @@ const GradientBlinds: React.FC<GradientBlindsProps> = ({
       uMirror: { value: mirrorGradient ? 1 : 0 },
       uDistort: { value: distortAmount },
       uShineFlip: { value: shineDirection === 'right' ? 1 : 0 },
+      uWave: { value: -0.3 },
       uColorCount: { value: colorCount },
       uNoiseTex: { value: noiseTex },
     };
@@ -298,15 +315,32 @@ const GradientBlinds: React.FC<GradientBlindsProps> = ({
     const ro = new ResizeObserver(resize);
     ro.observe(container);
 
-    let grainT = 0;
+    const WAVE_CYCLE = 8.0;
+    const WAVE_SWEEP = 6.0;
+    const WAVE_START = -0.3;
+    const WAVE_END = 1.3;
+
     const loop = (ts: number) => {
       rafRef.current = requestAnimationFrame(loop);
 
       if (pausedRef.current) return;
 
-      grainT = ts * 0.0002;
+      const tSec = ts * 0.001;
+
+      const grainT = tSec * 0.04;
       (uniforms.uNoiseOffset.value as number[])[0] = grainT % 1;
       (uniforms.uNoiseOffset.value as number[])[1] = (grainT * 0.7) % 1;
+
+      uniforms.uTime.value = tSec;
+
+      const cyclePos = (tSec % WAVE_CYCLE) / WAVE_CYCLE;
+      const sweepPhase = cyclePos * (WAVE_CYCLE / WAVE_SWEEP);
+      if (sweepPhase <= 1.0) {
+        const eased = sweepPhase * sweepPhase * (3.0 - 2.0 * sweepPhase);
+        uniforms.uWave.value = WAVE_START + eased * (WAVE_END - WAVE_START);
+      } else {
+        uniforms.uWave.value = -10.0;
+      }
 
       renderer.render({ scene: meshRef.current! });
     };
@@ -322,6 +356,9 @@ const GradientBlinds: React.FC<GradientBlindsProps> = ({
       };
       tryCall(programRef.current, 'remove' as keyof Program);
       tryCall(geometryRef.current, 'remove' as keyof Triangle);
+
+      const ext = glRef.current?.getExtension('WEBGL_lose_context');
+      ext?.loseContext();
 
       programRef.current = null;
       geometryRef.current = null;

@@ -33,7 +33,7 @@ export const useDashboardData = () => {
       const attainments = (await fetchAttainments())
         .filter(isCourseUnitAttainment)
         .filter((attainment) => attainment.primary && attainment.state !== 'FAILED')
-        .sort((a, b) => b.registrationDate.localeCompare(a.registrationDate));
+        .sort((a, b) => b.attainmentDate.localeCompare(a.attainmentDate));
 
       return Promise.all(
         attainments.map(async (attainment): Promise<DashboardCompletedCourse> => {
@@ -46,6 +46,7 @@ export const useDashboardData = () => {
             credits: attainment.credits,
             grade: getGrade(attainment),
             registrationDate: attainment.registrationDate,
+            attainmentDate: attainment.attainmentDate,
           };
         }),
       );

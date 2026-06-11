@@ -27,14 +27,14 @@ const getTrendLine = (
 export const GradeTrendContent: React.FC<{ courses: DashboardCompletedCourse[] }> = ({ courses }) => {
   const { t } = useTranslationWithPrefix('views.dashboard');
   const graded = courses
-    .filter((course) => getNumericGrade(course) != null && course.registrationDate)
-    .sort((a, b) => a.registrationDate.localeCompare(b.registrationDate));
-  const minDate = Math.min(...graded.map((course) => new Date(course.registrationDate).getTime()));
-  const maxDate = Math.max(...graded.map((course) => new Date(course.registrationDate).getTime()));
+    .filter((course) => getNumericGrade(course) != null && course.attainmentDate)
+    .sort((a, b) => a.attainmentDate.localeCompare(b.attainmentDate));
+  const minDate = Math.min(...graded.map((course) => new Date(course.attainmentDate).getTime()));
+  const maxDate = Math.max(...graded.map((course) => new Date(course.attainmentDate).getTime()));
   const range = Math.max(maxDate - minDate, 1);
   const points = graded.map((course) => ({
     course,
-    x: (new Date(course.registrationDate).getTime() - minDate) / range,
+    x: (new Date(course.attainmentDate).getTime() - minDate) / range,
     y: (getNumericGrade(course) ?? 1) / 5,
   }));
   const trend = getTrendLine(points.map((p) => ({ x: p.x, y: p.y })));
@@ -177,8 +177,8 @@ export const GradeTrendContent: React.FC<{ courses: DashboardCompletedCourse[] }
           ))}
         </svg>
         <div className="pointer-events-none absolute inset-x-5 bottom-2 flex justify-between text-[10px] text-lightGrey">
-          <span>{formatCompactDate(graded[0].registrationDate)}</span>
-          <span>{formatCompactDate(graded[graded.length - 1].registrationDate)}</span>
+          <span>{formatCompactDate(graded[0].attainmentDate)}</span>
+          <span>{formatCompactDate(graded[graded.length - 1].attainmentDate)}</span>
         </div>
       </div>
     </div>

@@ -13,7 +13,6 @@ import { getModuleColor } from '@/app/theme/moduleColors';
 
 interface Props {
   semester: SemesterCreditSummary;
-  moduleIds: string[];
 }
 
 interface SemesterCourseBlock {
@@ -51,7 +50,7 @@ function getSemesterCourseBlocks(semester: SemesterCreditSummary): SemesterCours
   });
 }
 
-export const TimelineSemesterColumn: React.FC<Props> = ({ semester, moduleIds }) => {
+export const TimelineSemesterColumn: React.FC<Props> = ({ semester }) => {
   const { t } = useTranslationWithPrefix('views.timeline');
   const current = isCurrentSemester(semester);
   const courseBlocks = getSemesterCourseBlocks(semester);
@@ -134,7 +133,7 @@ export const TimelineSemesterColumn: React.FC<Props> = ({ semester, moduleIds })
             <TimelineCourseCard
               key={getCourseKey(block.course)}
               course={block.course}
-              color={getModuleColor(block.course.moduleId, moduleIds)}
+              color={getModuleColor(block.course.moduleId)}
               className="z-10 min-h-24"
               style={{
                 gridColumn: `${block.startColumn + 1} / ${block.endColumn + 1}`,

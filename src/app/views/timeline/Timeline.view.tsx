@@ -506,6 +506,7 @@ const TimelineView: React.FC = () => {
     <DragDropProvider onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="-mx-6 -mt-6 flex h-[calc(100dvh-41px)] flex-col overflow-hidden bg-background text-offwhite">
         <TimelineToolbar
+          moduleIds={moduleIds}
           moduleNames={moduleNames}
           autoScheduleDisabled={!selectedPlanId || draftTimelineCourses.length === 0}
           autoSchedulePending={isAutoScheduling}
@@ -528,7 +529,6 @@ const TimelineView: React.FC = () => {
             hidePreviousPeriods={hidePreviousPeriods}
             isDragging={isDragging}
             unscheduledCourses={unscheduledCourses}
-            moduleIds={moduleIds}
             onHidePreviousPeriodsChange={setHidePreviousPeriods}
             onDismissValidationWarning={(warningId) =>
               setDismissedPrerequisiteWarningIds((current) => new Set(current).add(warningId))
@@ -542,7 +542,6 @@ const TimelineView: React.FC = () => {
             highlightedPeriodLocators={highlightedPeriodLocators}
             isDragging={isDragging}
             semesters={semesters}
-            moduleIds={moduleIds}
             onDismissValidationWarning={(warningId) =>
               setDismissedPrerequisiteWarningIds((current) => new Set(current).add(warningId))
             }

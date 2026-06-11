@@ -1,9 +1,10 @@
 import React from 'react';
 import { Button } from '@/app/components/ui/Button.comp';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
-import { MODULE_COLOR_VALUES } from '@/app/theme/moduleColors';
+import { getModuleColor } from '@/app/theme/moduleColors';
 
 interface Props {
+  moduleIds: string[];
   moduleNames: string[];
   autoScheduleDisabled?: boolean;
   autoSchedulePending?: boolean;
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export const TimelineToolbar: React.FC<Props> = ({
+  moduleIds,
   moduleNames,
   autoScheduleDisabled = false,
   autoSchedulePending = false,
@@ -55,7 +57,10 @@ export const TimelineToolbar: React.FC<Props> = ({
             key={name}
             className="flex min-w-0 items-center gap-1.5 text-xs font-medium text-lightGrey transition-opacity duration-200"
           >
-            <span className="size-2 shrink-0 rounded-sm" style={{ backgroundColor: MODULE_COLOR_VALUES[index] }} />
+            <span
+              className="size-2 shrink-0 rounded-sm"
+              style={{ backgroundColor: getModuleColor(moduleIds[index]) }}
+            />
             <span className="max-w-fit truncate">{name}</span>
           </div>
         ))}

@@ -3,7 +3,7 @@ import { getStructureData } from '@/app/api/dataPoints/getStructureData';
 import { InlineError } from '@/app/components/InlineError.comp';
 import { SpinnerLoader } from '@/app/components/ui/SpinnerLoader.comp';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
-import { MODULE_COLORS } from '@/app/theme/moduleColors';
+import { getModuleColorObject } from '@/app/theme/moduleColors';
 import { CategorySidebar } from '@/app/views/structure/components/CategorySidebar.comp';
 import { PlanHeader } from '@/app/views/structure/components/PlanHeader.comp';
 import { SectionBody } from '@/app/views/structure/components/SectionBody.comp';
@@ -116,7 +116,7 @@ const StructureView: React.FC = () => {
                 totalCompleted={data.totalCompleted}
                 totalTarget={data.totalTarget}
               />
-              <CategorySidebar colors={MODULE_COLORS} sections={data.sections} onSectionClick={focusSection} />
+              <CategorySidebar sections={data.sections} onSectionClick={focusSection} />
             </div>
 
             <div className="flex flex-col gap-3">
@@ -127,8 +127,8 @@ const StructureView: React.FC = () => {
                   onOpen={() => setBulkDialogOpen(true)}
                 />
               )}
-              {data.sections.map((section, index) => {
-                const color = MODULE_COLORS[index % MODULE_COLORS.length];
+              {data.sections.map((section) => {
+                const color = getModuleColorObject(section.moduleId);
                 const isOpen = expandedSections.has(section.moduleId);
 
                 return (

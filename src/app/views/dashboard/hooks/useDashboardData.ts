@@ -7,7 +7,7 @@ import { useSisuQuery } from '@/app/hooks/useSisuQuery';
 import { fetchPlans } from '@/app/api/endpoints/plans';
 import { getTimelineCourses } from '@/app/api/dataPoints/getTimelineCourses';
 import { getStudyPeriodMap } from '@/app/api/dataPoints/getStudyPeriodMap';
-import { MODULE_COLOR_VALUES } from '@/app/theme/moduleColors';
+import { getModuleColor } from '@/app/theme/moduleColors';
 import { useMemo } from 'react';
 import { getCreditsByPeriod, getCreditsBySemester } from '@/app/api/dataPoints/getCreditsByPeriod';
 import { getGrade, isCourseUnitAttainment } from '@/app/views/dashboard/util';
@@ -53,18 +53,8 @@ export const useDashboardData = () => {
   );
 
   const semesterCredits = activeCourses.reduce((s, c) => s + (c.credits ?? 0), 0);
-  const moduleColorMap = new Map(
-    modules.map((m, i) => [m.moduleId, MODULE_COLOR_VALUES[i % MODULE_COLOR_VALUES.length]]),
-  );
+  const moduleColorMap = new Map(modules.map((m) => [m.moduleId, getModuleColor(m.moduleId)]));
   const moduleNameMap = new Map(modules.map((m) => [m.moduleId, m.name]));
-  const moduleIds = useMemo(
-    () => [
-      ...new Set(
-        timelineCourses.map((course) => course.moduleId).filter((moduleId): moduleId is string => moduleId != null),
-      ),
-    ],
-    [timelineCourses],
-  );
   const periodSummaries = useMemo(
     () => getCreditsByPeriod(timelineCourses, studyPeriodMap),
     [studyPeriodMap, timelineCourses],
@@ -86,7 +76,6 @@ export const useDashboardData = () => {
     gradedCount,
     missingToken,
     moduleColorMap,
-    moduleIds,
     moduleNameMap,
     modules,
     modulesLoading,

@@ -5,9 +5,8 @@ import { formatCredits } from '@/app/helpers/formatCredits';
 import { getModuleColor } from '@/app/theme/moduleColors';
 
 export const TimelinePeekContent: React.FC<{
-  moduleIds: string[];
   periods: PeriodCreditSummary[];
-}> = ({ moduleIds, periods }) => {
+}> = ({ periods }) => {
   const { t } = useTranslationWithPrefix('views.dashboard');
   const now = new Date();
   const upcoming = periods
@@ -30,7 +29,7 @@ export const TimelinePeekContent: React.FC<{
               .filter((course) => !course.isPassed)
               .slice(0, 4)
               .map((course) => {
-                const color = getModuleColor(course.moduleId, moduleIds);
+                const color = getModuleColor(course.moduleId);
                 return (
                   <div
                     key={course.courseUnitId}

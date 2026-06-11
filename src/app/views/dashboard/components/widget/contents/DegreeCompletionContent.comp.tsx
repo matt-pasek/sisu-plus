@@ -1,7 +1,7 @@
 import React from 'react';
 import { ModuleProgress } from '@/app/api/dataPoints/getCreditsByModule';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
-import { MODULE_COLOR_VALUES } from '@/app/theme/moduleColors';
+import { getModuleColor } from '@/app/theme/moduleColors';
 
 function formatCredits(value: number, unit: string): string {
   const rounded = Math.round(value * 10) / 10;
@@ -122,13 +122,13 @@ export const DegreeCompletionContent: React.FC<Props> = ({ creditsDone, totalTar
       <section className="flex min-w-0 flex-1 flex-col gap-3">
         <div className="min-h-0 flex-1 overflow-y-auto pr-1">
           <div className="flex flex-col gap-1.5">
-            {modules.map((mod, i) => (
+            {modules.map((mod) => (
               <ModuleBar
                 key={mod.moduleId}
                 name={mod.name}
                 done={mod.done}
                 target={mod.target}
-                color={MODULE_COLOR_VALUES[i % MODULE_COLOR_VALUES.length]}
+                color={getModuleColor(mod.moduleId)}
               />
             ))}
             {modules.length === 0 && (

@@ -33,7 +33,6 @@ export interface WidgetContentContext {
   deadlinesLoading: boolean;
   missingToken: boolean | undefined;
   moduleColorMap: Map<string, string>;
-  moduleIds: string[];
   moduleNameMap: Map<string, string>;
   modules: ModuleProgress[];
   modulesLoading: boolean;
@@ -62,7 +61,6 @@ export const renderWidgetContent = (id: DashboardWidgetId, ctx: WidgetContentCon
     deadlinesLoading,
     missingToken,
     moduleColorMap,
-    moduleIds,
     moduleNameMap,
     modules,
     modulesLoading,
@@ -120,11 +118,7 @@ export const renderWidgetContent = (id: DashboardWidgetId, ctx: WidgetContentCon
         <CreditsVelocityContent semesters={semesterSummaries} />
       );
     case 'timeline-peek':
-      return timelineLoading || periodsLoading ? (
-        <InlineLoader />
-      ) : (
-        <TimelinePeekContent moduleIds={moduleIds} periods={periodSummaries} />
-      );
+      return timelineLoading || periodsLoading ? <InlineLoader /> : <TimelinePeekContent periods={periodSummaries} />;
     case 'recent-achievements':
       return completedCoursesLoading ? <InlineLoader /> : <RecentAchievementsContent courses={completedCourses} />;
     case 'workload-forecast':

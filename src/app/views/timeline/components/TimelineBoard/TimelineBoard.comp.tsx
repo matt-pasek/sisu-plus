@@ -24,7 +24,6 @@ interface Props {
   onDismissValidationWarning?: (warningId: string) => void;
   onResizeCourse?: (courseUnitId: string, newPeriodLocators: string[]) => void;
   semesters: SemesterCreditSummary[];
-  moduleIds: string[];
   validationWarnings?: Map<string, TimelineValidationWarning[]>;
 }
 
@@ -96,7 +95,6 @@ export const TimelineBoard: React.FC<Props> = ({
   onDismissValidationWarning,
   onResizeCourse,
   semesters,
-  moduleIds,
   validationWarnings = new Map(),
 }) => {
   const { t } = useTranslationWithPrefix('views.timeline');
@@ -228,7 +226,7 @@ export const TimelineBoard: React.FC<Props> = ({
                         height: '100%',
                       }}
                       course={block.course}
-                      color={getModuleColor(block.course.moduleId, moduleIds)}
+                      color={getModuleColor(block.course.moduleId)}
                       compact={courseBlocks.some(
                         (otherBlock) =>
                           otherBlock.course.courseUnitId !== block.course.courseUnitId &&

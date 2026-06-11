@@ -1,23 +1,22 @@
 import React from 'react';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
-import type { ModuleColor } from '@/app/theme/moduleColors';
+import { getModuleColorObject } from '@/app/theme/moduleColors';
 import { SectionData } from '@/app/views/structure/types';
 
 interface Props {
   sections: SectionData[];
-  colors: ModuleColor[];
   onSectionClick: (moduleId: string) => void;
 }
 
-export const CategorySidebar: React.FC<Props> = ({ sections, colors, onSectionClick }) => {
+export const CategorySidebar: React.FC<Props> = ({ sections, onSectionClick }) => {
   const { t } = useTranslationWithPrefix('views.structure');
 
   return (
     <aside className="w-full shrink-0 rounded-[10px] bg-container px-5 py-4 shadow-[0_0_0_1px_rgba(255,255,255,0.07),0_18px_50px_rgba(0,0,0,0.18)] lg:w-87.5">
       <div className="mb-4 text-xs font-bold tracking-[0.14em] text-lightGrey uppercase">{t('sidebar.byCategory')}</div>
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
-        {sections.map((section, index) => {
-          const color = colors[index % colors.length];
+        {sections.map((section) => {
+          const color = getModuleColorObject(section.moduleId);
           return (
             <button
               key={section.moduleId}

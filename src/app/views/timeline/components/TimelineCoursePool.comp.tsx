@@ -20,7 +20,6 @@ interface Props {
   onShowHiddenSummerPeriodsChange?: (value: boolean) => void;
   showHiddenSummerPeriods?: boolean;
   unscheduledCourses: TimelineCourse[];
-  moduleIds: string[];
   validationWarnings?: Map<string, TimelineValidationWarning[]>;
 }
 
@@ -50,7 +49,6 @@ export const TimelineCoursePool: React.FC<Props> = ({
   onShowHiddenSummerPeriodsChange,
   showHiddenSummerPeriods = false,
   unscheduledCourses,
-  moduleIds,
   validationWarnings = new Map(),
 }) => {
   const { t } = useTranslationWithPrefix('views.timeline');
@@ -113,7 +111,7 @@ export const TimelineCoursePool: React.FC<Props> = ({
             <DraggableTimelineCourseCard
               key={getCourseKey(course)}
               course={course}
-              color={getModuleColor(course.moduleId, moduleIds)}
+              color={getModuleColor(course.moduleId)}
               disabled={course.isPassed}
               dragPeriodCount={draftOriginalPeriodCounts.get(course.courseUnitId)}
               isDraft={draftCourseIds.has(course.courseUnitId)}

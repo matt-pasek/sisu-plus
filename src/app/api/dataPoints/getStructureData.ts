@@ -254,7 +254,7 @@ export const getStructureData = (): { data: StructureData | undefined; isLoading
   const { data, isLoading: structureLoading } = useSisuQuery(
     ['structure-data'],
     async (): Promise<StructureData> => {
-      const plan = plansQuery.data?.[0] as StructurePlan | undefined;
+      const plan = (plansQuery.data?.find((p) => p.primary) ?? plansQuery.data?.[0]) as StructurePlan | undefined;
       if (!plan) {
         return {
           planId: '',

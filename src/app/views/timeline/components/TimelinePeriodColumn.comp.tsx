@@ -11,10 +11,9 @@ import { getModuleColor } from '@/app/theme/moduleColors';
 
 interface Props {
   period: PeriodCreditSummary;
-  moduleIds: string[];
 }
 
-export const TimelinePeriodColumn: React.FC<Props> = ({ period, moduleIds }) => {
+export const TimelinePeriodColumn: React.FC<Props> = ({ period }) => {
   const { t } = useTranslationWithPrefix('views.timeline');
   const current = isCurrentPeriod(period);
   const courses = sortCourses(period.courses);
@@ -40,11 +39,7 @@ export const TimelinePeriodColumn: React.FC<Props> = ({ period, moduleIds }) => 
       <div className="flex min-h-45 flex-1 flex-col gap-2 rounded-lg border border-dashed border-border bg-background/30 p-2">
         {courses.length > 0 ? (
           courses.map((course) => (
-            <TimelineCourseCard
-              key={getCourseKey(course)}
-              course={course}
-              color={getModuleColor(course.moduleId, moduleIds)}
-            />
+            <TimelineCourseCard key={getCourseKey(course)} course={course} color={getModuleColor(course.moduleId)} />
           ))
         ) : (
           <div className="flex flex-1 items-center justify-center text-xs text-darkishGrey">{t('board.noCourses')}</div>

@@ -262,7 +262,7 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
       <div className="relative flex min-h-80 flex-col gap-7 px-7 py-8 md:min-h-90 md:px-10 md:py-10 lg:flex-row lg:items-center lg:justify-between lg:gap-10 xl:px-12">
         <div className="min-w-0 flex-1">
           <div className="flex max-w-4xl flex-wrap items-center gap-3 lg:pr-6">
-            <p className="font-mono text-[11px] font-semibold tracking-[0.14em] text-lightGrey/80 uppercase">
+            <p className="font-mono text-[13px] font-semibold tracking-[0.02em] text-lightGrey/80 uppercase">
               {prefs.universityConfig && (
                 <>
                   <span className="text-lighterGreen/70">{prefs.universityConfig.name}</span>

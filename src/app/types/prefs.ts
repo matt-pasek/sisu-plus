@@ -11,6 +11,7 @@ export interface SisuPrefs {
   dashboardLayout: DashboardWidgetLayout[];
   heroStats: HeroStatId[];
   heroPanel: HeroPanelId;
+  lastSeenChangelogVersion: string | null;
   sisuPlusOnboardingCompleted: boolean;
   sisuPlusOnboardingStep: number;
   universityConfig: UniversityConfig | null;
@@ -23,6 +24,7 @@ export const DEFAULT_PREFS: SisuPrefs = {
   dashboardLayout: DEFAULT_DASHBOARD_LAYOUT,
   heroStats: DEFAULT_HERO_STATS,
   heroPanel: DEFAULT_HERO_PANEL,
+  lastSeenChangelogVersion: null,
   sisuPlusOnboardingCompleted: false,
   sisuPlusOnboardingStep: 0,
   universityConfig: null,

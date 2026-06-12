@@ -1,0 +1,78 @@
+import type { ChangelogTranslation } from '@/app/locales/en/components/changelog.translation.en';
+
+export const changelogTranslation: ChangelogTranslation = {
+  ui: {
+    whatsNew: 'Uutta',
+    close: 'Sulje muutosloki',
+    prevPage: 'Edellinen sivu',
+    nextPage: 'Seuraava sivu',
+    pause: 'Keskeytä muutosloki',
+    resume: 'Jatka muutoslokin toistoa',
+    exploreNew: 'Tutustu uusiin ominaisuuksiin',
+    maybeLater: 'Ehkä myöhemmin',
+    linkCopied: 'Linkki kopioitu!',
+    tellFriends: 'Kerro kavereille',
+    done: 'Valmis',
+    replay: 'Toista uudelleen',
+    allOtherUniversities: '+ kaikki muut yliopistot',
+    shareText:
+      'Oletko kuullut Sisu+:sta? Se parantaa Sisua ja tekee kokemuksesta sujuvamman! Ja nyt se toimii kaikissa suomalaisissa Sisu-yliopistoissa. Parempi opintosuunnittelu, ja se on ilmainen.',
+  },
+  pages: {
+    intro: {
+      eyebrow: 'Uutta',
+      titlePrefix: 'Suurin päivitys',
+      title: 'Sisu+ 2.0.',
+      body: 'Neljä uutta tapaa nähdä koko tutkintoasi — aikajana, rakenne, kurssit ja viikkonäkymä. Kaikki yhdessä paikassa.',
+      tag0: 'Suuri julkaisu',
+      tag1: 'Kesäkuu 2026',
+      badge: 'SUURI JULKAISU · KESÄKUU 2026',
+    },
+    universities: {
+      eyebrow: 'Kaikille',
+      title: 'Rakennettu jokaiselle yliopistolle',
+      body: 'Sisu+ toimii nyt Aallossa, Tampereella, Helsingissä, Jyväskylässä ja kaikissa muissa suomalaisissa Sisu-yliopistoissa. Yksi laajennus, joka yliopistolle.',
+      tag0: 'Kaikki yliopistot',
+      tag1: 'Ilmainen',
+      tag2: 'Yksi asennus',
+    },
+    dashboard: {
+      eyebrow: 'Etusivu',
+      title: 'Suunniteltu alusta asti uudelleen',
+      body: 'Uudet widgetit näyttävät opintopistekehityksesi, aktiiviset ilmoittautumiset, tulevat deadlinet ja opiskelujakson yhteenvedon — kaikki yhdellä näytöllä, ilman kaivelemista.',
+      tag0: 'Uudet widgetit',
+      tag1: 'Opintopisteseuranta',
+      tag2: 'Jaksonäkymä',
+    },
+    structure: {
+      eyebrow: 'Rakenne',
+      title: 'Tutkintorakenteesi, selkeästi',
+      body: 'Jokainen moduuli, jokainen vaatimus, jokainen opintopiste — esitetty selattavana puuna. Näe tarkalleen, mitä on tehty, mitä puuttuu ja mitä on vielä mahdollista.',
+      tag0: 'Tutkintokartta',
+      tag1: 'Vaatimukset',
+      tag2: 'Edistyminen',
+    },
+    registration: {
+      eyebrow: 'Ilmoittautuminen',
+      title: 'Ilmoittaudu, selkeästi',
+      body: 'Sisu+ käy läpi avoimet toteutukset, tarkistaa aikatauluristiriidat ja antaa sinun ilmoittautua vaihtamatta välilehtiä. Sama ilmoittautumisprosessi, viimein sujuvana.',
+      tag0: 'Kurssille ilmoittautuminen',
+      tag1: 'Ristiriidantarkistus',
+      tag2: 'Nopeampi prosessi',
+    },
+    notifications: {
+      eyebrow: 'Tulossa pian',
+      title: 'Älä koskaan missaa ilmoittautumisaikaa',
+      body: 'Ilmoitukset varoittavat sinua, kun ilmoittautuminen aukeaa, deadlinet lähestyvät tai suunnitelmasi muuttuu. Aina ajan tasalla — ilman manuaalista tarkistamista.',
+      tag0: 'Hälytykset',
+      tag1: 'Deadlinet',
+    },
+    outro: {
+      eyebrow: 'Tässä on Sisu+ 2.0',
+      titlePrefix: 'Valmiina kun',
+      title: 'sinä ',
+      titleSuffix: 'olet.',
+      primaryCta: 'Tutustu uusiin ominaisuuksiin',
+    },
+  },
+};

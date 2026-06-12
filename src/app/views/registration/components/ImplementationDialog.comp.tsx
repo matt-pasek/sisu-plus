@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { motion, useReducedMotion } from 'motion/react';
 import type {
   RegistrationCourse,
   RegistrationImplementation,
@@ -7,7 +8,6 @@ import type {
 import { Button } from '@/app/components/ui/Button.comp';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import {
-  formatDate,
   formatDateTime,
   formatImplementationDateRange,
   getDefaultSelections,
@@ -29,6 +29,8 @@ interface Props {
   onConfirm: (implementation: RegistrationImplementation, selections: SelectionState) => void;
 }
 
+const DIALOG_EASE = [0.22, 1, 0.36, 1] as const;
+
 export const ImplementationDialog: React.FC<Props> = ({
   course,
   initialImplementation,
@@ -37,6 +39,7 @@ export const ImplementationDialog: React.FC<Props> = ({
   onConfirm,
 }) => {
   const { t } = useTranslationWithPrefix('views.registration');
+  const shouldReduceMotion = useReducedMotion() === true;
   const implementationOptions = getImplementationsForTab(
     course,
     isExamImplementation(initialImplementation) ? 'exam' : 'course',
@@ -67,13 +70,23 @@ export const ImplementationDialog: React.FC<Props> = ({
   };
 
   return (
-    <div
+    <motion.div
+      animate={{ opacity: 1 }}
       className="fixed inset-0 z-1000 flex items-center justify-center bg-black/65 px-4 py-6 backdrop-blur-sm"
+      exit={{ opacity: 0 }}
+      initial={{ opacity: 0 }}
       role="dialog"
       aria-modal="true"
       aria-labelledby="registration-dialog-title"
+      transition={{ duration: shouldReduceMotion ? 0.01 : 0.16, ease: DIALOG_EASE }}
     >
-      <div className="flex max-h-[min(44rem,calc(100dvh-3rem))] w-full max-w-3xl flex-col overflow-hidden rounded-[14px] bg-container shadow-[0_28px_80px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.10)]">
+      <motion.div
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        className="flex max-h-[min(44rem,calc(100dvh-3rem))] w-full max-w-3xl flex-col overflow-hidden rounded-[14px] bg-container shadow-[0_28px_80px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.10)]"
+        exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.985, y: 6 }}
+        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.985, y: 8 }}
+        transition={{ duration: shouldReduceMotion ? 0.01 : 0.2, ease: DIALOG_EASE }}
+      >
         <header className="flex items-start justify-between gap-5 border-b border-border px-5 py-5">
           <div>
             <h2 id="registration-dialog-title" className="text-lg font-semibold text-balance text-offwhite">
@@ -141,7 +154,7 @@ export const ImplementationDialog: React.FC<Props> = ({
                         </span>
                       ) : candidate.enrolmentEnd ? (
                         <span className="mt-2 inline-flex rounded bg-warn/15 px-2 py-0.5 text-xs font-semibold text-warn">
-                          {t('dialog.registrationCloses', { date: formatDate(candidate.enrolmentEnd) })}
+                          {t('dialog.registrationCloses', { date: formatDateTime(candidate.enrolmentEnd) })}
                         </span>
                       ) : null}
                     </span>
@@ -223,7 +236,7 @@ export const ImplementationDialog: React.FC<Props> = ({
                 : t('actions.saveSelection')}
           </Button>
         </footer>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };

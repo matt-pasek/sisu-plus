@@ -68,6 +68,7 @@ export type RegistrationTranslation = {
     withdraw: string;
     cancelling: string;
     checkSisuLater: string;
+    courseExamRegistration: string;
     courseImplementation: string;
     datesNotPublished: string;
     examDateNotPublished: string;
@@ -168,6 +169,7 @@ export const registrationTranslation: RegistrationTranslation = {
     withdraw: 'Withdraw',
     cancelling: 'Cancelling',
     checkSisuLater: 'Check Sisu later',
+    courseExamRegistration: 'Course & Exam Registration',
     courseImplementation: 'Course implementation',
     datesNotPublished: 'Dates not published',
     examDateNotPublished: 'Exam date not published',

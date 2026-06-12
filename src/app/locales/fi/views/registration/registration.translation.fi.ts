@@ -72,6 +72,7 @@ export const registrationTranslation: RegistrationTranslation = {
     withdraw: 'Poistu',
     cancelling: 'Perutaan',
     checkSisuLater: 'Tarkista myöhemmin Sisusta',
+    courseExamRegistration: 'Kurssi- ja tentti-ilmoittautuminen',
     courseImplementation: 'Kurssitoteutus',
     datesNotPublished: 'Päiviä ei ole julkaistu',
     examDateNotPublished: 'Tenttipäivää ei ole julkaistu',

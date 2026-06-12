@@ -3,35 +3,27 @@ import type {
   RegistrationImplementation,
   RegistrationStatus,
 } from '@/app/api/dataPoints/getRegistrationCourses';
+import { formatAppDate } from '@/app/helpers/formatAppDate';
 import i18n, { getCurrentLocale, I18N_NAMESPACE } from '@/app/i18n';
 
 export const courseColors = ['bg-[#6f95ff]', 'bg-[#9b7cff]', 'bg-[#6ed39a]', 'bg-[#f0b761]'];
-
-export const formatDate = (value: string | null): string => {
-  if (!value) return '-';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString(getCurrentLocale(), { day: 'numeric', month: 'numeric', year: 'numeric' });
-};
 
 export const formatDateTime = (value: string | null): string => {
   if (!value) return '-';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleString(getCurrentLocale(), {
-    day: 'numeric',
+  const time = date.toLocaleTimeString(getCurrentLocale(), {
     hour: '2-digit',
     minute: '2-digit',
-    month: 'numeric',
-    year: 'numeric',
   });
+  return `${formatAppDate(date)} ${time}`;
 };
 
 export const formatDateRange = (start: string | null, end: string | null): string => {
   if (!start && !end) return i18n.t('views.registration.labels.datesNotPublished', { ns: I18N_NAMESPACE });
-  if (!start) return i18n.t('views.registration.labels.untilDate', { ns: I18N_NAMESPACE, date: formatDate(end) });
-  if (!end) return i18n.t('views.registration.labels.fromDate', { ns: I18N_NAMESPACE, date: formatDate(start) });
-  return `${formatDate(start)}-${formatDate(end)}`;
+  if (!start) return i18n.t('views.registration.labels.untilDate', { ns: I18N_NAMESPACE, date: formatAppDate(end) });
+  if (!end) return i18n.t('views.registration.labels.fromDate', { ns: I18N_NAMESPACE, date: formatAppDate(start) });
+  return `${formatAppDate(start)}-${formatAppDate(end)}`;
 };
 
 export const isExamImplementation = (implementation: RegistrationImplementation | null): boolean =>
@@ -41,7 +33,9 @@ export const formatImplementationDateRange = (implementation: RegistrationImplem
   if (!implementation) return i18n.t('views.registration.labels.checkSisuLater', { ns: I18N_NAMESPACE });
   const { activityStart: start, activityEnd: end } = implementation;
   if (isExamImplementation(implementation)) {
-    return start ? formatDate(start) : i18n.t('views.registration.labels.examDateNotPublished', { ns: I18N_NAMESPACE });
+    return start
+      ? formatAppDate(start)
+      : i18n.t('views.registration.labels.examDateNotPublished', { ns: I18N_NAMESPACE });
   }
   return formatDateRange(start, end);
 };

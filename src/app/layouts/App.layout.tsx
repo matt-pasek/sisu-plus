@@ -17,7 +17,7 @@ export const AppLayout: React.FC = () => {
       {isNavigating && <SpinnerLoader />}
       <AppToaster />
       <Navbar />
-      <div className={`mx-auto w-full px-6 pt-6 ${isFullWidth ? 'max-w-none' : 'max-w-6xl'}`}>
+      <div className={`mx-auto w-full px-6 pt-6 ${isFullWidth ? 'max-w-none' : 'max-w-7xl'}`}>
         <Outlet />
       </div>
     </div>

@@ -64,3 +64,232 @@
 #app *::-webkit-scrollbar-thumb:hover {
   background: var(--color-lightGrey);
 }
+
+.sisu-structure {
+  --structure-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --structure-ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sisu-structure__glow {
+  animation: structureGlowBreathe 8s var(--structure-ease-out) infinite;
+}
+
+.sisu-structure__grid {
+  animation: structureGridDrift 18s linear infinite;
+}
+
+.sisu-structure__category:hover .sisu-structure__category-arrow,
+.sisu-structure__category:focus-visible .sisu-structure__category-arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.sisu-structure__category-arrow {
+  opacity: 0;
+  transform: translateX(-4px);
+  transition:
+    opacity 160ms var(--structure-ease-out),
+    transform 160ms var(--structure-ease-out);
+}
+
+.sisu-structure__update-sheen {
+  animation: structureSheen 5.8s var(--structure-ease-out) infinite;
+}
+
+.sisu-structure__update-icon::after {
+  position: absolute;
+  inset: -6px;
+  border: 1.5px solid rgb(82 201 137 / 40%);
+  border-radius: 20px;
+  animation: structurePulse 2.4s var(--structure-ease-out) infinite;
+  content: '';
+}
+
+.sisu-widget-bar-x {
+  transform-origin: left center;
+  animation: sisuWidgetBarRevealX 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.sisu-widget-bar-y {
+  transform-origin: center bottom;
+  animation: sisuWidgetBarRevealY 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.sisu-widget-line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  animation: sisuWidgetLineDraw 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.sisu-widget-ring {
+  stroke-dashoffset: 0;
+  animation: sisuWidgetRingReveal 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.sisu-widget-fade-lift {
+  animation: sisuWidgetFadeLift 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes sisuPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgb(82 201 137 / 50%);
+  }
+  70% {
+    box-shadow: 0 0 0 5px rgb(82 201 137 / 0%);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgb(82 201 137 / 0%);
+  }
+}
+
+@keyframes sisuWidgetBarRevealX {
+  from {
+    opacity: 0.62;
+    transform: scaleX(0);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes sisuWidgetBarRevealY {
+  from {
+    opacity: 0.62;
+    transform: scaleY(0);
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+@keyframes sisuWidgetLineDraw {
+  from {
+    opacity: 0.55;
+    stroke-dashoffset: 1;
+  }
+  to {
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes sisuWidgetRingReveal {
+  from {
+    opacity: 0.45;
+    stroke-dashoffset: var(--sisu-ring-from, 1);
+  }
+  to {
+    opacity: 1;
+    stroke-dashoffset: var(--sisu-ring-to, 0);
+  }
+}
+
+@keyframes sisuWidgetFadeLift {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes structureGlowBreathe {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    opacity: 0.78;
+    transform: translateX(-50%) scale(1.04);
+  }
+}
+
+@keyframes structureGridDrift {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 44px 44px;
+  }
+}
+
+@keyframes structureSheen {
+  0%,
+  100% {
+    transform: translateX(-45%);
+  }
+  50% {
+    transform: translateX(45%);
+  }
+}
+
+@keyframes structurePulse {
+  0% {
+    opacity: 0.8;
+    transform: scale(0.96);
+  }
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(1.18);
+  }
+}
+
+@keyframes heroAurora1 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(40px, -20px) scale(1.05);
+  }
+  66% {
+    transform: translate(-20px, 30px) scale(0.97);
+  }
+}
+
+@keyframes heroAurora2 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  40% {
+    transform: translate(-50px, 15px) scale(1.08);
+  }
+  70% {
+    transform: translate(25px, -25px) scale(0.95);
+  }
+}
+
+@keyframes heroAurora3 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  25% {
+    transform: translate(30px, 40px) scale(1.03);
+  }
+  75% {
+    transform: translate(-35px, -10px) scale(1.06);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-dashboard-widget-shell],
+  [data-dashboard-widget-shell] *,
+  [data-dashboard-hero],
+  [data-dashboard-hero] *,
+  .sisu-structure *,
+  .sisu-structure *::before,
+  .sisu-structure *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

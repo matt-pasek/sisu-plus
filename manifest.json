@@ -4,7 +4,7 @@
   "version": "1.1.0",
   "description": "__MSG_extDescription__",
   "default_locale": "en",
-  "permissions": ["storage", "webRequest", "scripting"],
+  "permissions": ["storage", "webRequest", "scripting", "alarms", "notifications"],
   "optional_host_permissions": ["https://*.fi/*"],
   "background": {
     "service_worker": "background/service-worker.js",

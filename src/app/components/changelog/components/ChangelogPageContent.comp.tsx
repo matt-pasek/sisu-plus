@@ -12,7 +12,6 @@ interface Props {
   copied: boolean;
   exploreNewLabel: string;
   linkCopiedLabel: string;
-  maybeLaterLabel: string;
   page: InAppChangelogPage;
   tellFriendsLabel: string;
   onClose: () => void;
@@ -25,7 +24,6 @@ export const ChangelogPageContent: React.FC<Props> = ({
   copied,
   exploreNewLabel,
   linkCopiedLabel,
-  maybeLaterLabel,
   page,
   tellFriendsLabel,
   onClose,
@@ -88,16 +86,6 @@ export const ChangelogPageContent: React.FC<Props> = ({
           >
             {page.primaryCta ?? exploreNewLabel}
             <ChevronRightIcon />
-          </motion.button>
-          <motion.button
-            type="button"
-            className="inline-flex cursor-pointer items-center rounded-[14px] border-0 bg-white/10 px-[2.2cqw] py-[1.2cqw] font-sans text-[clamp(13px,1.6cqw,16px)] font-semibold text-[rgba(243,243,255,0.78)] hover:bg-white/16"
-            onClick={onClose}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.96 }}
-            transition={{ ease: EASE, duration: 0.2 }}
-          >
-            {maybeLaterLabel}
           </motion.button>
         </motion.div>
       ) : (

@@ -171,7 +171,6 @@ export const InAppChangelog: React.FC<Props> = ({ release, onClose }) => {
               copied={copied}
               exploreNewLabel={t('ui.exploreNew')}
               linkCopiedLabel={t('ui.linkCopied')}
-              maybeLaterLabel={t('ui.maybeLater')}
               page={page}
               tellFriendsLabel={t('ui.tellFriends')}
               onClose={onClose}

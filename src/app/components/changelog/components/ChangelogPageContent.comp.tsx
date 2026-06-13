@@ -14,7 +14,6 @@ interface Props {
   linkCopiedLabel: string;
   maybeLaterLabel: string;
   page: InAppChangelogPage;
-  pageIndex: number;
   tellFriendsLabel: string;
   onClose: () => void;
   onShare: () => void;
@@ -28,13 +27,11 @@ export const ChangelogPageContent: React.FC<Props> = ({
   linkCopiedLabel,
   maybeLaterLabel,
   page,
-  pageIndex,
   tellFriendsLabel,
   onClose,
   onShare,
 }) => (
   <motion.div
-    key={pageIndex}
     className="absolute inset-0 z-3 grid items-center gap-[3cqw] p-[9cqw_5.5cqw_9cqw_5.5cqw] max-[720px]:content-center max-[720px]:gap-6 max-[720px]:p-[82px_24px_88px]"
     style={{
       gridTemplateColumns: page.mockup === 'none' ? '1fr' : '1.08fr 0.92fr',

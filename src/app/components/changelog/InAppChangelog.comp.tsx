@@ -165,6 +165,7 @@ export const InAppChangelog: React.FC<Props> = ({ release, onClose }) => {
 
           <AnimatePresence mode="wait" initial={false}>
             <ChangelogPageContent
+              key={pageIndex}
               accentStyles={accentStyles}
               allOtherUniversitiesLabel={t('ui.allOtherUniversities')}
               copied={copied}
@@ -172,7 +173,6 @@ export const InAppChangelog: React.FC<Props> = ({ release, onClose }) => {
               linkCopiedLabel={t('ui.linkCopied')}
               maybeLaterLabel={t('ui.maybeLater')}
               page={page}
-              pageIndex={pageIndex}
               tellFriendsLabel={t('ui.tellFriends')}
               onClose={onClose}
               onShare={handleShare}

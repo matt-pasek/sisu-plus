@@ -1,6 +1,7 @@
 import React from 'react';
 import { useDroppable } from '@dnd-kit/react';
 import { shapeIntersection } from '@dnd-kit/collision';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { PeriodCreditSummary } from '@/app/api/dataPoints/getCreditsByPeriod';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { TIMELINE_COURSE_DRAG_TYPE } from '@/app/views/timeline/util/dndHandlers';
@@ -25,6 +26,7 @@ export const PeriodDropCell: React.FC<Props> = ({
   rowCount,
 }) => {
   const { t } = useTranslationWithPrefix('views.timeline');
+  const shouldReduceMotion = useReducedMotion();
   const { ref, isDropTarget: isDirectDropTarget } = useDroppable({
     id: `period:${period.periodLocator}`,
     accept: TIMELINE_COURSE_DRAG_TYPE,
@@ -51,15 +53,20 @@ export const PeriodDropCell: React.FC<Props> = ({
       }`}
       style={{ gridColumn: index + 1, gridRow: `1 / span ${rowCount}` }}
     >
-      <div
-        className={`pointer-events-none absolute inset-x-3 top-2 z-40 rounded-md border border-accent/60 bg-accent px-2 py-1.5 text-center text-xs font-semibold text-offwhite shadow-[0_8px_20px_rgba(0,0,0,0.28)] transition-[opacity,scale,filter] duration-200 ease-[cubic-bezier(0.2,0,0,1)] ${
-          isDropTarget || (isDragging && isHighlighted)
-            ? 'blur-0 scale-100 opacity-100'
-            : 'scale-[0.25] opacity-0 blur-xs'
-        }`}
-      >
-        {isDropTarget ? t('board.dropHere') : t('board.offeredHere')}
-      </div>
+      <AnimatePresence initial={false}>
+        {(isDropTarget || (isDragging && isHighlighted)) && (
+          <motion.div
+            key={isDropTarget ? 'drop-here' : 'offered-here'}
+            animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
+            className="pointer-events-none absolute inset-x-3 top-2 z-40 rounded-md border border-accent/60 bg-accent px-2 py-1.5 text-center text-xs font-semibold text-offwhite shadow-[0_8px_20px_rgba(0,0,0,0.28)]"
+            exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: -3, filter: 'blur(2px)' }}
+            initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: -3, filter: 'blur(2px)' }}
+            transition={{ duration: shouldReduceMotion ? 0.01 : 0.18, ease: [0.22, 1, 0.36, 1] }}
+          >
+            {isDropTarget ? t('board.dropHere') : t('board.offeredHere')}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

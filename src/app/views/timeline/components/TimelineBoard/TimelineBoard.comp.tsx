@@ -39,6 +39,12 @@ interface CourseBlock {
   row: number;
 }
 
+interface CourseSpan {
+  course: TimelineCourse;
+  startColumn: number;
+  endColumn: number;
+}
+
 const PERIOD_WIDTH = 210;
 
 function getTotalCredits(
@@ -58,7 +64,9 @@ function getCourseBlocks(semesters: SemesterCreditSummary[], periods: VisiblePer
     }
   }
 
-  return sortCourses([...uniqueCourses.values()]).flatMap((course) => {
+  const sortedCourses = sortCourses([...uniqueCourses.values()]);
+  const courseSortOrder = new Map(sortedCourses.map((course, index) => [getCourseKey(course), index]));
+  const courseSpans: CourseSpan[] = sortedCourses.flatMap((course) => {
     const plannedPeriodIndexes = course.plannedPeriods
       .map((period) => periodIndexByLocator.get(period.locator))
       .filter((index): index is number => index != null);
@@ -76,16 +84,30 @@ function getCourseBlocks(semesters: SemesterCreditSummary[], periods: VisiblePer
 
     const startColumn = Math.min(...periodIndexes);
     const endColumn = Math.max(...periodIndexes) + 1;
-    const row = rowEndColumns.findIndex((endColumnForRow) => startColumn >= endColumnForRow);
-
-    if (row >= 0) {
-      rowEndColumns[row] = endColumn;
-      return [{ course, startColumn, endColumn, row }];
-    }
-
-    rowEndColumns.push(endColumn);
-    return [{ course, startColumn, endColumn, row: rowEndColumns.length - 1 }];
+    return [{ course, startColumn, endColumn }];
   });
+
+  return courseSpans
+    .sort((a, b) => {
+      if (a.startColumn !== b.startColumn) return a.startColumn - b.startColumn;
+
+      const aSpan = a.endColumn - a.startColumn;
+      const bSpan = b.endColumn - b.startColumn;
+      if (aSpan !== bSpan) return bSpan - aSpan;
+
+      return (courseSortOrder.get(getCourseKey(a.course)) ?? 0) - (courseSortOrder.get(getCourseKey(b.course)) ?? 0);
+    })
+    .map((courseSpan) => {
+      const row = rowEndColumns.findIndex((endColumnForRow) => courseSpan.startColumn >= endColumnForRow);
+
+      if (row >= 0) {
+        rowEndColumns[row] = courseSpan.endColumn;
+        return { ...courseSpan, row };
+      }
+
+      rowEndColumns.push(courseSpan.endColumn);
+      return { ...courseSpan, row: rowEndColumns.length - 1 };
+    });
 }
 
 export const TimelineBoard: React.FC<Props> = ({
@@ -126,12 +148,13 @@ export const TimelineBoard: React.FC<Props> = ({
 
   return (
     <main className="min-w-0 flex-1 overflow-auto bg-background">
-      <div className="min-h-full w-max px-5 py-5">
+      <div className="min-h-full w-max py-5">
         {semesters.length > 0 ? (
           <div ref={flipRef}>
             <div className="grid gap-2" style={{ gridTemplateColumns }}>
               {semesters.map((semester) => {
                 const startColumn = periodOffset + 1;
+                const isCompactSemesterHeader = semester.periods.length === 1;
                 periodOffset += semester.periods.length;
 
                 return (
@@ -154,7 +177,12 @@ export const TimelineBoard: React.FC<Props> = ({
                           <CreditChip label={t('board.done')} credits={semester.completedCredits} variant="completed" />
                         )}
                         {semester.plannedCredits > 0 && (
-                          <CreditChip label={t('board.planned')} credits={semester.plannedCredits} variant="planned" />
+                          <CreditChip
+                            label={t('board.planned')}
+                            credits={semester.plannedCredits}
+                            hideLabel={isCompactSemesterHeader}
+                            variant="planned"
+                          />
                         )}
                       </div>
                     </div>
@@ -227,13 +255,17 @@ export const TimelineBoard: React.FC<Props> = ({
                       }}
                       course={block.course}
                       color={getModuleColor(block.course.moduleId)}
-                      compact={courseBlocks.some(
-                        (otherBlock) =>
-                          otherBlock.course.courseUnitId !== block.course.courseUnitId &&
-                          otherBlock.row === block.row &&
-                          ((otherBlock.startColumn >= block.startColumn && otherBlock.startColumn < block.endColumn) ||
-                            (otherBlock.endColumn > block.startColumn && otherBlock.endColumn <= block.endColumn)),
-                      )}
+                      compact={
+                        block.endColumn - block.startColumn <= 1 ||
+                        courseBlocks.some(
+                          (otherBlock) =>
+                            otherBlock.course.courseUnitId !== block.course.courseUnitId &&
+                            otherBlock.row === block.row &&
+                            ((otherBlock.startColumn >= block.startColumn &&
+                              otherBlock.startColumn < block.endColumn) ||
+                              (otherBlock.endColumn > block.startColumn && otherBlock.endColumn <= block.endColumn)),
+                        )
+                      }
                       disabled={block.course.isPassed}
                       isDraft={draftCourseIds.has(block.course.courseUnitId)}
                       className="h-full min-h-18.5"

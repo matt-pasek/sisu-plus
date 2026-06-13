@@ -1,4 +1,6 @@
 import React from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import type { Transition } from 'motion/react';
 import { Button } from '@/app/components/ui/Button.comp';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { getModuleColor } from '@/app/theme/moduleColors';
@@ -6,11 +8,8 @@ import { getModuleColor } from '@/app/theme/moduleColors';
 interface Props {
   moduleIds: string[];
   moduleNames: string[];
-  autoScheduleDisabled?: boolean;
-  autoSchedulePending?: boolean;
   confirmDisabled?: boolean;
   confirmPending?: boolean;
-  onAutoSchedule?: () => void;
   onConfirm?: () => void;
   onReset?: () => void;
   pendingChangesCount?: number;
@@ -18,14 +17,13 @@ interface Props {
   validationIssueCount?: number;
 }
 
+const TIMELINE_EASE = [0.22, 1, 0.36, 1] as const;
+
 export const TimelineToolbar: React.FC<Props> = ({
   moduleIds,
   moduleNames,
-  autoScheduleDisabled = false,
-  autoSchedulePending = false,
   confirmDisabled = true,
   confirmPending = false,
-  onAutoSchedule,
   onConfirm,
   onReset,
   pendingChangesCount = 0,
@@ -33,24 +31,17 @@ export const TimelineToolbar: React.FC<Props> = ({
   validationIssueCount = 0,
 }) => {
   const { t } = useTranslationWithPrefix('views.timeline');
+  const shouldReduceMotion = useReducedMotion();
+  const chipTransition: Transition = { duration: shouldReduceMotion ? 0.01 : 0.18, ease: TIMELINE_EASE };
+  const chipMotion = {
+    animate: shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' },
+    exit: shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: -3, filter: 'blur(2px)' },
+    initial: shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: -3, filter: 'blur(2px)' },
+    transition: chipTransition,
+  };
+
   return (
     <header className="flex min-h-14 shrink-0 items-center gap-3 border-b border-solid border-border bg-container px-6 shadow-[0_1px_0_rgba(255,255,255,0.03)]">
-      <Button
-        disabled
-        variant="accent"
-        icon={
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-3">
-            <path
-              fillRule="evenodd"
-              d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z"
-              clipRule="evenodd"
-            />
-          </svg>
-        }
-      >
-        {t('actions.addCourse')}
-      </Button>
-
       <div className="ml-2 flex min-w-0 items-center gap-5">
         {moduleNames.slice(0, 6).map((name, index) => (
           <div
@@ -67,29 +58,30 @@ export const TimelineToolbar: React.FC<Props> = ({
       </div>
 
       <div className="ml-auto flex shrink-0 items-center gap-2">
-        <div
-          className={`flex min-h-8 items-center gap-2 rounded-lg border px-3 text-xs font-semibold tabular-nums transition-[opacity,scale,filter,border-color,background-color] duration-200 ease-[cubic-bezier(0.2,0,0,1)] ${
-            pendingChangesCount > 0
-              ? 'blur-0 scale-100 border-accent/30 bg-accent/10 text-accent opacity-100'
-              : 'pointer-events-none scale-[0.25] border-border bg-container2 text-lightGrey opacity-0 blur-xs'
-          }`}
-        >
-          <span className="size-1.5 rounded-full bg-accent" />
-          {t('toolbar.unsaved', { count: pendingChangesCount })}
-        </div>
-        <div
-          className={`flex min-h-8 items-center gap-2 rounded-lg border px-3 text-xs font-semibold tabular-nums transition-[opacity,scale,filter,border-color,background-color] duration-200 ease-[cubic-bezier(0.2,0,0,1)] ${
-            validationIssueCount > 0
-              ? 'blur-0 scale-100 border-amber-300/40 bg-amber-300/10 text-amber-100 opacity-100'
-              : 'pointer-events-none scale-[0.25] border-border bg-container2 text-lightGrey opacity-0 blur-xs'
-          }`}
-        >
-          <span className="size-1.5 rounded-full bg-amber-300" />
-          {t('toolbar.issue', { count: validationIssueCount })}
-        </div>
-        <Button disabled={autoScheduleDisabled || autoSchedulePending} onClick={onAutoSchedule}>
-          {autoSchedulePending ? t('actions.scheduling') : t('actions.autoSchedule')}
-        </Button>
+        <AnimatePresence initial={false}>
+          {pendingChangesCount > 0 && (
+            <motion.div
+              key="pending-changes"
+              {...chipMotion}
+              className="flex min-h-8 items-center gap-2 rounded-lg border border-accent/30 bg-accent/10 px-3 text-xs font-semibold text-accent tabular-nums"
+            >
+              <span className="size-1.5 rounded-full bg-accent" />
+              {t('toolbar.unsaved', { count: pendingChangesCount })}
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <AnimatePresence initial={false}>
+          {validationIssueCount > 0 && (
+            <motion.div
+              key="validation-issues"
+              {...chipMotion}
+              className="flex min-h-8 items-center gap-2 rounded-lg border border-amber-300/40 bg-amber-300/10 px-3 text-xs font-semibold text-amber-100 tabular-nums"
+            >
+              <span className="size-1.5 rounded-full bg-amber-300" />
+              {t('toolbar.issue', { count: validationIssueCount })}
+            </motion.div>
+          )}
+        </AnimatePresence>
         <Button disabled={confirmDisabled || confirmPending} variant="accent" onClick={onConfirm}>
           {confirmPending ? t('actions.confirming') : t('actions.confirm')}
         </Button>

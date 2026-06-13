@@ -21,15 +21,21 @@ export type TimelineTranslation = {
     fallback: string;
     dismissPrerequisite: string;
     noModule: string;
+    periodWarning: string;
+    prerequisiteWarning: string;
     unnamed: string;
+    warningCount: string;
   };
   pool: {
     empty: string;
     hidePrevious: string;
     outsideTimeline: string;
     searchPlaceholder: string;
+    schedulingIssue: string;
+    schedulingIssues: string;
     showSummer: string;
     title: string;
+    unscheduled: string;
     unscheduleDrop: string;
     withoutVisiblePeriod: string;
   };
@@ -41,6 +47,7 @@ export type TimelineTranslation = {
   status: {
     active: string;
     done: string;
+    grade: string;
     planned: string;
   };
   toolbar: {
@@ -79,17 +86,23 @@ export const timelineTranslation: TimelineTranslation = {
     fallback: 'Course',
     dismissPrerequisite: 'I have similar prerequisite',
     noModule: 'No module',
+    periodWarning: 'Timing',
+    prerequisiteWarning: 'Prereq',
     unnamed: 'Unnamed course',
+    warningCount: '{{count}} issues',
   },
   pool: {
     empty: 'Every planned course has a study period.',
-    hidePrevious: 'Hide previous',
+    hidePrevious: 'Hide previous periods',
     outsideTimeline: 'Outside shown timeline',
-    searchPlaceholder: 'Search...',
-    showSummer: 'Show summer',
+    searchPlaceholder: 'Search courses...',
+    schedulingIssue: '{{count}} scheduling issue',
+    schedulingIssues: '{{count}} scheduling issues',
+    showSummer: 'Show summer periods',
     title: 'Course Pool',
+    unscheduled: 'Unscheduled',
     unscheduleDrop: 'Drop to unschedule',
-    withoutVisiblePeriod: '{{count}} course without a visible timing period.',
+    withoutVisiblePeriod: '{{count}} courses have no visible timing period - drag them onto a period to schedule.',
   },
   semester: {
     autumn: 'Autumn',
@@ -99,6 +112,7 @@ export const timelineTranslation: TimelineTranslation = {
   status: {
     active: 'Active',
     done: 'Done',
+    grade: 'Grade {{grade}}',
     planned: 'Planned',
   },
   toolbar: {

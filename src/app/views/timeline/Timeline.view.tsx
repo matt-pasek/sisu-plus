@@ -250,6 +250,7 @@ const TimelineView: React.FC = () => {
     [selectedPlanId, stageCoursePeriods, studyPeriodMap],
   );
 
+  // TODO: rewrite this, make it smart auto-schedule
   const handleAutoSchedule = useCallback(() => {
     if (!selectedPlanId || isAutoScheduling) return;
 
@@ -298,15 +299,12 @@ const TimelineView: React.FC = () => {
 
   return (
     <DragDropProvider onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      <div className="-mx-6 -mt-6 flex h-[calc(100dvh-41px)] flex-col overflow-hidden bg-background text-offwhite">
+      <div className="-mx-6 -mt-6 flex h-[calc(100dvh-3rem)] flex-col overflow-hidden bg-background text-offwhite">
         <TimelineToolbar
           moduleIds={moduleIds}
           moduleNames={moduleNames}
-          autoScheduleDisabled={!selectedPlanId || draftTimelineCourses.length === 0}
-          autoSchedulePending={isAutoScheduling}
           confirmDisabled={draftPeriodsByCourseId.size === 0 || prerequisiteQuery.isLoading || validationIssueCount > 0}
           confirmPending={confirmTimeline.isPending}
-          onAutoSchedule={handleAutoSchedule}
           onConfirm={() => confirmTimeline.mutate()}
           onReset={() => {
             setDraftPeriodsByCourseId(new Map());

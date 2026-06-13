@@ -18,6 +18,16 @@ export type DashboardTranslation = {
   studyRight: {
     until: string;
   };
+  notificationNudge: {
+    dismiss: string;
+    eyebrow: string;
+    openSetup: string;
+    openUnread: string;
+    setupBody: string;
+    setupTitle: string;
+    unreadBody: string;
+    unreadTitle: string;
+  };
   hero: {
     greetingMorning: string;
     greetingAfternoon: string;
@@ -238,6 +248,16 @@ export const dashboardTranslation: DashboardTranslation = {
   },
   studyRight: {
     until: 'until',
+  },
+  notificationNudge: {
+    dismiss: 'Not now',
+    eyebrow: 'Reminders',
+    openSetup: 'Choose reminders',
+    openUnread: 'Open notifications',
+    setupBody: 'Sisu+ can turn Moodle deadlines and registration windows into in-app or desktop reminders.',
+    setupTitle: 'Set up study reminders from this dashboard.',
+    unreadBody: 'Open the Control Center to review what fired while you were away.',
+    unreadTitle: '{{count}} reminder waiting',
   },
   hero: {
     greetingMorning: 'Good morning,',

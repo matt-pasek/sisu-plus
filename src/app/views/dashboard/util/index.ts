@@ -1,4 +1,5 @@
 export * from './analyticsHelpers';
+export * from './notificationSync';
 export * from './attainmentHelpers';
 export * from './dndHandlers';
 export * from './getWidgetBadge';

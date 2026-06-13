@@ -8,6 +8,7 @@ import { DashboardGridIcon } from './components/icons/DashboardGridIcon.comp';
 import { DashboardHero } from './components/hero/DashboardHero.comp';
 import { DashboardControlButton } from './components/DashboardControlButton.comp';
 import { DashboardCell } from './components/DashboardCell.comp';
+import { NotificationNudgeBanner } from '@/app/views/dashboard/components/NotificationNudgeBanner.comp';
 import { isDashboardWidgetDragData } from './util/dndHandlers';
 import { formatStudyRightEnd } from './util/attainmentHelpers';
 import { WidgetIcon } from '@/app/views/dashboard/components/widget/WidgetIcon.comp';
@@ -21,6 +22,7 @@ import {
   clampWidgetLayout,
   getWidgetBadge,
   sanitizeDashboardLayout,
+  syncDashboardNotifications,
   WidgetBadgeContext,
 } from '@/app/views/dashboard/util';
 import { DashboardWidgetId, DashboardWidgetLayout } from '@/app/views/dashboard/types';
@@ -117,6 +119,12 @@ const DashboardView: React.FC = () => {
     if (isPrefsLoaded) setPrefs({ dashboardLayout: sanitizeDashboardLayout(layout) });
   }, [layout, setPrefs, isPrefsLoaded]);
 
+  useEffect(() => {
+    if (!registrationCoursesLoading && registrationCourses.length > 0) {
+      syncDashboardNotifications(registrationCourses);
+    }
+  }, [registrationCourses, registrationCoursesLoading]);
+
   const updateLayoutItem = (id: DashboardWidgetId, patch: Partial<DashboardWidgetLayout>): boolean => {
     const currentItem = layout.find((item) => item.id === id);
     if (!currentItem) return false;
@@ -183,6 +191,11 @@ const DashboardView: React.FC = () => {
           studyRightEnd={studyRightEnd}
           totalTarget={totalTarget}
           upcomingDeadlines={upcomingDeadlines}
+        />
+
+        <NotificationNudgeBanner
+          hasMoodleToken={Boolean(prefs.moodleToken)}
+          hasRegistrationData={registrationCourses.length > 0}
         />
 
         <div className="flex justify-center">

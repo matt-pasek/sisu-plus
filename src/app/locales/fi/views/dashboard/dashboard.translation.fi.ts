@@ -20,6 +20,16 @@ export const dashboardTranslation: DashboardTranslation = {
   studyRight: {
     until: 'asti',
   },
+  notificationNudge: {
+    dismiss: 'Ei nyt',
+    eyebrow: 'Muistutukset',
+    openSetup: 'Valitse muistutukset',
+    openUnread: 'Avaa ilmoitukset',
+    setupBody: 'SISU+ voi muuttaa Moodlen määräajat ja ilmoittautumisikkunat SISU+ tai työpöytämuistutuksiksi.',
+    setupTitle: 'Ota opiskelumuistutukset käyttöön tältä etusivulta.',
+    unreadBody: 'Avaa ohjain ja tarkista, mitä tapahtui poissa ollessasi.',
+    unreadTitle: '{{count}} muistutus odottaa',
+  },
   hero: {
     greetingMorning: 'Hyvää huomenta,',
     greetingAfternoon: 'Hyvää päivää,',

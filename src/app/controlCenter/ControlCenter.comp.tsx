@@ -4,8 +4,13 @@ import CircularText from '@/app/components/CircularText.comp';
 import { motion, AnimatePresence } from 'motion/react';
 import { getMoodleCalendarExportUrlFromConfig } from '@/shared/domains';
 import { OnboardingPanel } from '@/app/controlCenter/OnboardingPanel.comp';
+import { NotificationSettingsPanel } from '@/app/controlCenter/NotificationSettingsPanel.comp';
+import { OPEN_NOTIFICATION_SETTINGS_EVENT } from '@/app/controlCenter/notificationSettingsEvents';
+import { useNotificationCache } from '@/app/hooks/useNotificationCache';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { getControlTip } from '@/app/controlCenter/controlTips';
+import { DEFAULT_NOTIFICATION_PREFS } from '@/app/types/prefs';
+import type { NotificationPayload } from '@/background/notifications/types';
 
 function Toggle({ checked, onChange }: { checked: boolean; onChange: (val: boolean) => void }) {
   return (
@@ -39,6 +44,25 @@ function SparkleIcon({ className = 'size-5' }: { className?: string }) {
   );
 }
 
+function BellIcon({ className = 'size-4' }: { className?: string }) {
+  return (
+    <svg
+      aria-hidden="true"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      viewBox="0 0 24 24"
+    >
+      <path d="M15.5 18.25a3.5 3.5 0 0 1-7 0" strokeLinecap="round" />
+      <path
+        d="M18.5 16.75h-13c1.15-1.25 1.8-2.75 1.8-4.5V10a4.7 4.7 0 0 1 9.4 0v2.25c0 1.75.65 3.25 1.8 4.5Z"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 function isValidMoodleUrl(value: string): boolean {
   if (!value.trim()) return true;
 
@@ -54,23 +78,54 @@ export function ControlCenter() {
   const { t } = useTranslationWithPrefix('controlCenter');
   const [isOpen, setIsOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [activeView, setActiveView] = useState<'main' | 'notifications'>('main');
+  const [liveNotification, setLiveNotification] = useState<NotificationPayload | null>(null);
   const [prefs, setPrefs, prefsLoaded] = useChromeStorage();
+  const { unreadCount } = useNotificationCache();
   const isActive = prefs.sisuPlusActive;
   const moodleToken = prefs.moodleToken ?? '';
+  const notificationPrefs = {
+    delivery: {
+      ...DEFAULT_NOTIFICATION_PREFS.delivery,
+      ...(prefs.notificationPrefs?.delivery ?? {}),
+    },
+    registrationOpenLeadMinutes:
+      prefs.notificationPrefs?.registrationOpenLeadMinutes ?? DEFAULT_NOTIFICATION_PREFS.registrationOpenLeadMinutes,
+  };
   const validMoodleUrl = isValidMoodleUrl(moodleToken);
   const moodleCalendarPlaceholder = prefs.universityConfig
     ? `${getMoodleCalendarExportUrlFromConfig(prefs.universityConfig).replace('/export.php?', '/export_execute.php?')}...`
     : 'https://moodle.youruni.fi/calendar/export_execute.php?...';
   const onboardingActive = prefsLoaded && !prefs.sisuPlusOnboardingCompleted;
   const size = 80;
-  const openWidth = onboardingActive ? 520 : 360;
-  const openHeight = onboardingActive ? 640 : 420;
+  const notificationsActive = !onboardingActive && activeView === 'notifications';
+  const notificationNudgeVisible = prefsLoaded && !onboardingActive && !prefs.notificationNudgeDismissed;
+  const openWidth = notificationsActive ? 720 : onboardingActive ? 520 : 360;
+  const openHeight = notificationsActive ? 720 : onboardingActive ? 640 : 500;
   const hoverWidth = 382;
   const controlTip = getControlTip(isActive, window.location.pathname, t);
 
   useEffect(() => {
     if (onboardingActive) setIsOpen(true);
   }, [onboardingActive]);
+
+  useEffect(() => {
+    const listener = (message: { notification?: NotificationPayload; type?: string }) => {
+      if (message.type !== 'SISU_PLUS_NOTIFICATION' || !message.notification) return;
+      setLiveNotification(message.notification);
+      window.setTimeout(() => setLiveNotification(null), 7000);
+    };
+
+    chrome.runtime.onMessage.addListener(listener);
+    return () => chrome.runtime.onMessage.removeListener(listener);
+  }, []);
+
+  useEffect(() => {
+    const listener = () => openNotificationSettings();
+
+    window.addEventListener(OPEN_NOTIFICATION_SETTINGS_EVENT, listener);
+    return () => window.removeEventListener(OPEN_NOTIFICATION_SETTINGS_EVENT, listener);
+  });
 
   function setOnboardingStep(step: number) {
     setPrefs({ sisuPlusOnboardingStep: Math.min(Math.max(step, 0), 4) });
@@ -90,6 +145,20 @@ export function ControlCenter() {
 
   function openOnboarding() {
     void chrome.tabs.create({ url: chrome.runtime.getURL('onboarding.html') });
+  }
+
+  function updateNotificationPrefs(nextPrefs: typeof notificationPrefs) {
+    setPrefs({ notificationPrefs: nextPrefs });
+  }
+
+  function dismissNotificationNudge() {
+    setPrefs({ notificationNudgeDismissed: true });
+  }
+
+  function openNotificationSettings() {
+    setIsOpen(true);
+    setActiveView('notifications');
+    setPrefs({ notificationNudgeDismissed: true });
   }
 
   if (prefsLoaded && !prefs.universityConfig) {
@@ -167,6 +236,13 @@ export function ControlCenter() {
                 step={prefs.sisuPlusOnboardingStep}
                 validMoodleUrl={validMoodleUrl}
               />
+            ) : notificationsActive ? (
+              <NotificationSettingsPanel
+                notificationPrefs={notificationPrefs}
+                onBack={() => setActiveView('main')}
+                onPrefsChange={updateNotificationPrefs}
+                t={t}
+              />
             ) : (
               <>
                 <div className="flex items-start justify-between gap-3">
@@ -196,6 +272,63 @@ export function ControlCenter() {
                     <Toggle checked={prefs.sisuPlusActive} onChange={(val) => setPrefs({ sisuPlusActive: val })} />
                   </div>
                 </div>
+
+                <button
+                  className="flex min-h-12 cursor-pointer items-center justify-between gap-3 rounded-2xl bg-container p-3 text-left shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)] transition-[background-color,transform] duration-200 hover:bg-container2 active:scale-[0.99]"
+                  onClick={openNotificationSettings}
+                  type="button"
+                >
+                  <span className="flex min-w-0 items-center gap-3">
+                    <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-accent/14 text-accent">
+                      <BellIcon />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block text-sm font-medium text-offwhite">{t('notifications.entry.title')}</span>
+                      <span className="mt-0.5 block truncate text-xs text-lightGrey">
+                        {t('notifications.entry.body')}
+                      </span>
+                    </span>
+                  </span>
+                  <span className="text-lg leading-none text-lightGrey">›</span>
+                </button>
+
+                {notificationNudgeVisible && (
+                  <div className="relative overflow-hidden rounded-2xl bg-container p-3 shadow-[inset_0_0_0_1px_rgba(82,201,137,0.2),0_18px_40px_rgba(0,0,0,0.18)]">
+                    <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-lighterGreen/50 to-transparent" />
+                    <div className="flex items-start gap-3">
+                      <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-xl bg-lighterGreen text-background shadow-[0_0_20px_rgba(82,201,137,0.24)]">
+                        <BellIcon />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold text-offwhite">{t('notifications.nudge.title')}</p>
+                        <p className="mt-1 text-xs leading-relaxed text-lightGrey">{t('notifications.nudge.body')}</p>
+                        <div className="mt-3 flex gap-2">
+                          <button
+                            className="min-h-8 cursor-pointer rounded-lg bg-accent px-3 text-xs font-semibold text-background transition-[background-color,transform] duration-150 hover:bg-lighterGreen active:scale-[0.96]"
+                            onClick={openNotificationSettings}
+                            type="button"
+                          >
+                            {t('notifications.nudge.open')}
+                          </button>
+                          <button
+                            className="min-h-8 cursor-pointer rounded-lg px-3 text-xs font-semibold text-lightGrey transition-[background-color,color,transform] duration-150 hover:bg-offwhite/10 hover:text-offwhite active:scale-[0.96]"
+                            onClick={dismissNotificationNudge}
+                            type="button"
+                          >
+                            {t('notifications.nudge.dismiss')}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {liveNotification && (
+                  <div className="rounded-2xl bg-accent/10 p-3 text-xs leading-relaxed text-lighterGreen shadow-[inset_0_0_0_1px_rgba(82,201,137,0.18)]">
+                    <p className="font-semibold text-offwhite">{liveNotification.title}</p>
+                    <p className="mt-1 text-lightGrey">{liveNotification.body}</p>
+                  </div>
+                )}
 
                 {!isActive && (
                   <div className="rounded-2xl bg-warn/10 p-3 text-xs leading-relaxed text-warn shadow-[inset_0_0_0_1px_rgba(240,168,77,0.16)]">
@@ -312,6 +445,16 @@ export function ControlCenter() {
           className="flex h-20 w-20 cursor-pointer items-center justify-center rounded-full p-2 text-offwhite transition-[transform,opacity] duration-200 active:scale-[0.96]"
           type="button"
         >
+          {unreadCount > 0 ? (
+            <span className="absolute top-2 right-2 z-20 flex min-w-5 items-center justify-center rounded-full bg-warn px-1.5 py-0.5 text-[10px] font-bold text-background shadow-[0_0_18px_rgba(240,168,77,0.36)]">
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          ) : notificationNudgeVisible ? (
+            <span className="absolute top-3 right-3 z-20 flex size-3">
+              <span className="absolute inline-flex size-full animate-ping rounded-full bg-lighterGreen opacity-60" />
+              <span className="relative inline-flex size-3 rounded-full bg-lighterGreen shadow-[0_0_16px_rgba(82,201,137,0.5)]" />
+            </span>
+          ) : null}
           <CircularText text="SISU PLUS * CONTROLS * " onHover="slowDown" spinDuration={20} />
         </button>
       </div>

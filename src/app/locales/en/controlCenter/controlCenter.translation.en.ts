@@ -17,6 +17,50 @@ export type ControlCenterTranslation = {
     label: string;
     validUrl: string;
   };
+  notifications: {
+    back: string;
+    body: string;
+    delivery: {
+      both: string;
+      'in-app': string;
+      off: string;
+      'out-of-app': string;
+    };
+    entry: {
+      body: string;
+      title: string;
+    };
+    eyebrow: string;
+    lead: {
+      body: string;
+      options: Record<0 | 15 | 30 | 60 | 120 | 1440, string>;
+      title: string;
+    };
+    never: string;
+    nudge: {
+      body: string;
+      dismiss: string;
+      open: string;
+      title: string;
+    };
+    stats: {
+      moodle: string;
+      sisu: string;
+      unread: string;
+    };
+    title: string;
+    types: {
+      'moodle-deadline': { body: string; title: string };
+      'registration-close': { body: string; title: string };
+      'registration-open': { body: string; title: string };
+      'sisu-sync': { body: string; title: string };
+    };
+    unread: {
+      empty: string;
+      markAll: string;
+      title: string;
+    };
+  };
   onboarding: {
     back: string;
     complete: string;
@@ -106,6 +150,69 @@ export const controlCenterTranslation: ControlCenterTranslation = {
     connectedHelper: 'Paste Moodle’s exported calendar link once. SISU+ uses it only for deadline widgets.',
     label: 'Moodle Sync',
     validUrl: 'Calendar URL',
+  },
+  notifications: {
+    back: 'Back',
+    body: 'Choose which study events can interrupt you, and where they should appear.',
+    delivery: {
+      both: 'Both',
+      'in-app': 'In-app',
+      off: 'Off',
+      'out-of-app': 'Desktop',
+    },
+    entry: {
+      body: 'Delivery modes, unread items, and sync status',
+      title: 'Notification settings',
+    },
+    eyebrow: 'Notifications',
+    lead: {
+      body: 'How early SISU+ should warn before a registration window opens.',
+      options: {
+        0: 'At opening',
+        15: '15 min before',
+        30: '30 min before',
+        60: '1 hour before',
+        120: '2 hours before',
+        1440: '1 day before',
+      },
+      title: 'Registration-open lead time',
+    },
+    never: 'Never',
+    nudge: {
+      body: 'Pick which deadlines and registration windows should become reminders before the first one fires.',
+      dismiss: 'Later',
+      open: 'Set up',
+      title: 'Study reminders are ready.',
+    },
+    stats: {
+      moodle: 'Moodle fetch',
+      sisu: 'Sisu sync',
+      unread: 'Unread',
+    },
+    title: 'Notification dashboard',
+    types: {
+      'moodle-deadline': {
+        body: 'Deadline reminders from the Moodle calendar export, 24 hours and 1 hour before due time.',
+        title: 'Moodle deadlines',
+      },
+      'registration-close': {
+        body: 'A 24-hour warning before a registration window closes when you are not enrolled.',
+        title: 'Registration closes',
+      },
+      'registration-open': {
+        body: 'Grouped reminders when one or more planned courses open for registration.',
+        title: 'Registration opens',
+      },
+      'sisu-sync': {
+        body: 'A quiet reminder to open Sisu when cached registration data is more than five days old.',
+        title: 'Sisu sync nudge',
+      },
+    },
+    unread: {
+      empty: 'No unread in-app notifications.',
+      markAll: 'Mark all read',
+      title: 'Unread in-app',
+    },
   },
   onboarding: {
     back: 'Back',

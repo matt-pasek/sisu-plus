@@ -19,6 +19,69 @@ export const controlCenterTranslation: ControlCenterTranslation = {
     label: 'Moodle-synkronointi',
     validUrl: 'Kalenterin URL',
   },
+  notifications: {
+    back: 'Takaisin',
+    body: 'Valitse, mitkä opiskelutapahtumat saavat keskeyttää ja missä ne näkyvät.',
+    delivery: {
+      both: 'Molemmat',
+      'in-app': 'SISU+',
+      off: 'Pois',
+      'out-of-app': 'Työpöytä',
+    },
+    entry: {
+      body: 'Toimitustavat, lukemattomat ja synkronoinnin tila',
+      title: 'Ilmoitusasetukset',
+    },
+    eyebrow: 'Ilmoitukset',
+    lead: {
+      body: 'Kuinka aikaisin SISU+ muistuttaa ennen ilmoittautumisikkunan avautumista.',
+      options: {
+        0: 'Avautuessa',
+        15: '15 min ennen',
+        30: '30 min ennen',
+        60: '1 h ennen',
+        120: '2 h ennen',
+        1440: '1 päivä ennen',
+      },
+      title: 'Ilmoittautumisen ennakkomuistutus',
+    },
+    never: 'Ei koskaan',
+    nudge: {
+      body: 'Valitse, mitkä määräajat ja ilmoittautumisikkunat muuttuvat muistutuksiksi ennen ensimmäistä ilmoitusta.',
+      dismiss: 'Myöhemmin',
+      open: 'Määritä',
+      title: 'Opiskelumuistutukset ovat valmiina.',
+    },
+    stats: {
+      moodle: 'Moodle-haku',
+      sisu: 'Sisu-synk.',
+      unread: 'Lukematta',
+    },
+    title: 'Ilmoitusten hallinta',
+    types: {
+      'moodle-deadline': {
+        body: 'Määräaikamuistutukset Moodlen kalenteriviennistä 24 tuntia ja 1 tunti ennen määräaikaa.',
+        title: 'Moodlen määräajat',
+      },
+      'registration-close': {
+        body: '24 tunnin varoitus ennen ilmoittautumisikkunan sulkeutumista, jos et ole ilmoittautunut.',
+        title: 'Ilmoittautuminen sulkeutuu',
+      },
+      'registration-open': {
+        body: 'Kootut muistutukset, kun yksi tai useampi suunniteltu kurssi avautuu ilmoittautumiselle.',
+        title: 'Ilmoittautuminen avautuu',
+      },
+      'sisu-sync': {
+        body: 'Rauhallinen muistutus avata Sisu, kun välimuistissa oleva ilmoittautumisdata on yli viisi päivää vanhaa.',
+        title: 'Sisu-synkronoinnin muistutus',
+      },
+    },
+    unread: {
+      empty: 'Ei lukemattomia SISU+ ilmoituksia.',
+      markAll: 'Merkitse luetuiksi',
+      title: 'Lukemattomat',
+    },
+  },
   onboarding: {
     back: 'Takaisin',
     complete: 'Vahvista',

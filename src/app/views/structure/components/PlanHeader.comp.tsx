@@ -49,33 +49,36 @@ export const PlanHeader: React.FC<Props> = ({
           className="absolute inset-0"
           style={{
             background:
-              'linear-gradient(135deg, rgba(65,150,72,0.07) 0%, transparent 40%, rgba(45,130,90,0.04) 70%, rgba(65,150,72,0.06) 100%)',
+              'linear-gradient(135deg, rgba(65,150,72,0.07) 0%, transparent 40%, rgba(45,180,160,0.04) 70%, rgba(65,150,72,0.06) 100%)',
           }}
         />
         <div
           className="absolute -top-1/4 right-[-8%] h-[75%] w-[45%]"
           style={{
             background:
-              'radial-gradient(ellipse at center, rgba(65,150,72,0.14) 0%, rgba(65,150,72,0.04) 45%, transparent 70%)',
+              'radial-gradient(ellipse at center, rgba(45,180,160,0.12) 0%, rgba(45,180,160,0.03) 45%, transparent 70%)',
             filter: 'blur(40px)',
+            animation: 'heroAurora1 14s ease-in-out infinite',
           }}
         />
         <div
           className="absolute bottom-[-15%] left-[-5%] h-[55%] w-[35%]"
           style={{
             background:
-              'radial-gradient(ellipse at center, rgba(50,140,80,0.09) 0%, rgba(40,100,60,0.03) 50%, transparent 70%)',
+              'radial-gradient(ellipse at center, rgba(65,150,72,0.10) 0%, rgba(40,100,60,0.03) 50%, transparent 70%)',
             filter: 'blur(50px)',
+            animation: 'heroAurora2 18s ease-in-out infinite',
           }}
         />
         <div
           className="absolute bottom-0 left-1/4 h-[30%] w-[50%]"
           style={{
-            background: 'radial-gradient(ellipse at center bottom, rgba(40,180,120,0.06) 0%, transparent 60%)',
+            background: 'radial-gradient(ellipse at center bottom, rgba(45,180,160,0.08) 0%, transparent 60%)',
             filter: 'blur(30px)',
+            animation: 'heroAurora3 12s ease-in-out infinite',
           }}
         />
-        <Threads color={[65, 150, 72]} amplitude={3} distance={0.5} />
+        <Threads color={[65, 150, 72]} color2={[45, 180, 160]} amplitude={3} distance={0.5} glow={1} />
       </div>
       <div className="relative px-5 py-7 sm:px-8 sm:py-8 lg:px-10">
         <motion.div

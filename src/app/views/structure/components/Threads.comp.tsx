@@ -3,8 +3,12 @@ import { Renderer, Program, Mesh, Triangle, Color } from 'ogl';
 
 interface ThreadsProps {
   color?: [number, number, number];
+  color2?: [number, number, number];
   amplitude?: number;
   distance?: number;
+  lineCount?: number;
+  fps?: number;
+  glow?: number;
 }
 
 const vertexShader = `
@@ -17,18 +21,20 @@ const vertexShader = `
   }
 `;
 
-const fragmentShader = `
+const createFragmentShader = (lineCount: number) => `
   precision highp float;
   
   uniform float iTime;
   uniform vec3 iResolution;
   uniform vec3 uColor;
+  uniform vec3 uColor2;
   uniform float uAmplitude;
   uniform float uDistance;
+  uniform float uGlow;
   
   #define PI 3.1415926538
   
-  const int u_line_count = 30;
+  const int u_line_count = ${lineCount};
   const float u_line_width = 7.0;
   const float u_line_blur = 10.0;
   
@@ -113,7 +119,18 @@ const fragmentShader = `
       }
   
       float colorVal = 1.0 - line_strength;
-      fragColor = vec4(uColor * colorVal, colorVal);
+
+      float colorShift = smoothstep(0.15, 0.85, uv.x);
+      vec3 blended = mix(uColor, uColor2, colorShift);
+
+      float pulse = 1.0 + uGlow * 0.3 * sin(iTime * 0.4 + uv.x * 2.5);
+      float bloom = 1.0 + uGlow * 0.5 * pow(colorVal, 0.6);
+      float brightness = pulse * bloom;
+
+      float vignette = smoothstep(0.0, 0.12, uv.x) * smoothstep(1.0, 0.88, uv.x);
+      colorVal *= vignette;
+
+      fragColor = vec4(blended * colorVal * brightness, colorVal);
   }
   
   void main() {
@@ -123,10 +140,22 @@ const fragmentShader = `
 
 const MAX_DPR = 1.5;
 
-const Threads: React.FC<ThreadsProps> = ({ color = [65, 150, 72], amplitude = 1, distance = 0, ...rest }) => {
+const Threads: React.FC<ThreadsProps> = ({
+  color = [65, 150, 72],
+  color2 = [45, 180, 160],
+  amplitude = 1,
+  distance = 0,
+  lineCount = 30,
+  fps = 30,
+  glow = 0,
+  ...rest
+}) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const animationFrameId = useRef<number>(0);
   const isVisible = useRef(true);
+  const lastFrameTime = useRef(0);
+  const [red, green, blue] = color;
+  const [red2, green2, blue2] = color2;
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -139,20 +168,23 @@ const Threads: React.FC<ThreadsProps> = ({ color = [65, 150, 72], amplitude = 1,
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     container.appendChild(gl.canvas);
 
-    const normalizedColor = new Color(color[0] / 255, color[1] / 255, color[2] / 255);
+    const normalizedColor = new Color(red / 255, green / 255, blue / 255);
+    const normalizedColor2 = new Color(red2 / 255, green2 / 255, blue2 / 255);
 
     const geometry = new Triangle(gl);
     const program = new Program(gl, {
       vertex: vertexShader,
-      fragment: fragmentShader,
+      fragment: createFragmentShader(lineCount),
       uniforms: {
         iTime: { value: 0 },
         iResolution: {
           value: new Color(gl.canvas.width, gl.canvas.height, gl.canvas.width / gl.canvas.height),
         },
         uColor: { value: normalizedColor },
+        uColor2: { value: normalizedColor2 },
         uAmplitude: { value: amplitude },
         uDistance: { value: distance },
+        uGlow: { value: glow },
       },
     });
 
@@ -170,22 +202,34 @@ const Threads: React.FC<ThreadsProps> = ({ color = [65, 150, 72], amplitude = 1,
     });
     resizeObserver.observe(container);
 
+    const frameInterval = 1000 / fps;
+
+    const update = (t: number) => {
+      if (!isVisible.current) return;
+
+      if (t - lastFrameTime.current < frameInterval) {
+        animationFrameId.current = requestAnimationFrame(update);
+        return;
+      }
+      lastFrameTime.current = t;
+
+      program.uniforms.iTime.value = t * 0.001;
+      renderer.render({ scene: mesh });
+      animationFrameId.current = requestAnimationFrame(update);
+    };
+
     const intersectionObserver = new IntersectionObserver(
       ([entry]) => {
+        const wasVisible = isVisible.current;
         isVisible.current = entry.isIntersecting;
+        if (!wasVisible && entry.isIntersecting) {
+          animationFrameId.current = requestAnimationFrame(update);
+        }
       },
       { threshold: 0 },
     );
     intersectionObserver.observe(container);
 
-    const update = (t: number) => {
-      animationFrameId.current = requestAnimationFrame(update);
-
-      if (!isVisible.current) return;
-
-      program.uniforms.iTime.value = t * 0.001;
-      renderer.render({ scene: mesh });
-    };
     animationFrameId.current = requestAnimationFrame(update);
 
     return () => {
@@ -195,7 +239,7 @@ const Threads: React.FC<ThreadsProps> = ({ color = [65, 150, 72], amplitude = 1,
       if (container.contains(gl.canvas)) container.removeChild(gl.canvas);
       gl.getExtension('WEBGL_lose_context')?.loseContext();
     };
-  }, [color, amplitude, distance]);
+  }, [red, green, blue, red2, green2, blue2, amplitude, distance, lineCount, fps, glow]);
 
   return <div ref={containerRef} className="relative h-full w-full" {...rest} />;
 };

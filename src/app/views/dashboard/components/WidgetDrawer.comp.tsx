@@ -147,17 +147,17 @@ export const WidgetDrawer: React.FC<Props> = ({ isEditMode, shouldReduceMotion, 
                           variants={widgetItemVariants}
                           whileTap={openSlot ? { scale: 0.97 } : undefined}
                         >
-                          <div className="flex items-center justify-between gap-3">
-                            <div className="flex items-center gap-2.5">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex min-w-0 items-center gap-2.5">
                               <WidgetIcon name={meta.icon} />
-                              <div>
+                              <div className="min-w-0">
                                 <p className="font-mono text-[9px] font-semibold tracking-widest text-lightGrey uppercase">
                                   {t(`widgets.eyebrows.${meta.eyebrowKey}`)}
                                 </p>
-                                <p className="text-sm font-semibold text-offwhite">{widgetTitle}</p>
+                                <p className="text-sm leading-snug font-semibold text-offwhite">{widgetTitle}</p>
                               </div>
                             </div>
-                            <span className="rounded-full bg-background px-2 py-0.5 font-mono text-[10px] text-lightGrey">
+                            <span className="flex-none rounded-full bg-background px-2 py-0.5 font-mono text-[10px] whitespace-nowrap text-lightGrey">
                               {openSlot ? `${widget.size.w}×${widget.size.h}` : t('widgets.actions.noSpace')}
                             </span>
                           </div>

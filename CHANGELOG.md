@@ -1,5 +1,36 @@
 # Changelog
 
+## [1.2.0](https://github.com/matt-pasek/sisu-plus/compare/sisu-plus-v1.1.0...sisu-plus-v1.2.0) (2026-05-31)
+
+
+### Features
+
+* attainment redesign, fetch all data for attainments and course details ([1f77380](https://github.com/matt-pasek/sisu-plus/commit/1f77380a890c130da80fc23a5d2f9031cb3ef1a3))
+* edit structure - add courses, change minors, change alternatives ([7451313](https://github.com/matt-pasek/sisu-plus/commit/74513137420df1482cc5fe98d13fbb22f5428588))
+* enhance course structure with completion methods and enrollment status ([b8ca8f1](https://github.com/matt-pasek/sisu-plus/commit/b8ca8f1dfd6ffc11d2380859e0ee8455fb33a17b))
+* enhanced landing page layout, new hero ([51d0289](https://github.com/matt-pasek/sisu-plus/commit/51d0289e953076d8b7520bfa28bf1cdd12a49c8e))
+* full finnish translation for structures ([ca84562](https://github.com/matt-pasek/sisu-plus/commit/ca84562ffa26b269ad6aeebdc01f67c3d305610e))
+* implement bulk version update panel and dialog for course versions; improved UX and copywrite ([b3c6ddf](https://github.com/matt-pasek/sisu-plus/commit/b3c6ddf521f170696aae019b8b477ac6abea772b))
+* initial app internationalization, finnish (AI-supported, in verification) ([60c3119](https://github.com/matt-pasek/sisu-plus/commit/60c311966bf320ad333312dc98a69c5ad240e694))
+* initial landing page internationalization, finnish (AI-supported, in verification) ([cdbe5cf](https://github.com/matt-pasek/sisu-plus/commit/cdbe5cf3511dfb200a174f91355f7391673a5bc0))
+* ongoing and future courses widget ([bdde319](https://github.com/matt-pasek/sisu-plus/commit/bdde3191b08fb0f9b94a1fed6a0d69ae73fc5a2f))
+* registration view ([21c69de](https://github.com/matt-pasek/sisu-plus/commit/21c69de313f75edd8d33457e5dc2c8e1f5280d0f))
+* structure of studies, course details and attainment, update course version dialog ([910f96c](https://github.com/matt-pasek/sisu-plus/commit/910f96ce53ad842fdb2bde9dc577df5562635cf5))
+* view-only english-only structure of studies ([627e1df](https://github.com/matt-pasek/sisu-plus/commit/627e1dfa1c30ee1cbc9cbe18e99bab38d6a35b21))
+
+
+### Bug Fixes
+
+* allow withdrawing enrolment and cancellation; filter out final states ([18f1fd9](https://github.com/matt-pasek/sisu-plus/commit/18f1fd9b9fcafe4ae50f2a29de4f25dc299e2315))
+* auto-hide previous periods on timeline ([99bb142](https://github.com/matt-pasek/sisu-plus/commit/99bb142050645f736ac4a5f4cfa044aa8ada183d))
+* cache and switch between system labels depending on language ([a7ea8b2](https://github.com/matt-pasek/sisu-plus/commit/a7ea8b21d4f9789c1805752d158a4b282e916391))
+* correctly resolve to login page and load extension back after login ([9c18de8](https://github.com/matt-pasek/sisu-plus/commit/9c18de850894a394f6891692bb5e2ffc12b7bd6f))
+* fix borders sometimes not rendering properly ([89547e4](https://github.com/matt-pasek/sisu-plus/commit/89547e4b34362697cc40605ee55748ce94b4e323))
+* fixed DND sizes ([58dcf66](https://github.com/matt-pasek/sisu-plus/commit/58dcf6688d01009e7061a6f9bce15a3d7718feae))
+* made landing background animation more efficient ([7d8fc09](https://github.com/matt-pasek/sisu-plus/commit/7d8fc091da41e1c27f2552123f1dfb9006b9cf5f))
+* show course versions as proper academic years ([c673ec5](https://github.com/matt-pasek/sisu-plus/commit/c673ec55e5a44fccc644a678877b133fe94ab074))
+* show exam date not as range ([6eea3ed](https://github.com/matt-pasek/sisu-plus/commit/6eea3edc6eb1278e403011950424c97a3d969df9))
+
 ## [1.1.0](https://github.com/matt-pasek/sisu-plus/compare/sisu-plus-v1.0.2...sisu-plus-v1.1.0) (2026-04-28)
 
 

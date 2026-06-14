@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { type IcsCalendar } from 'ts-ics';
 import { getUserDetails } from '@/app/api/dataPoints/getUserDetails';
 import type { RegistrationCourse } from '@/app/api/dataPoints/getRegistrationCourses';
@@ -221,6 +221,10 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
 
   const visibleStats = stats.filter((stat) => selectedSet.has(stat.id));
   const [featuredStat, ...plainStats] = visibleStats;
+  const panelTransition = {
+    duration: prefersReducedMotion ? 0.01 : 0.24,
+    ease: [0.22, 1, 0.36, 1],
+  } as const;
 
   const toggleStat = (id: HeroStatId) => {
     const isSelected = selectedSet.has(id);
@@ -419,15 +423,34 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
         </div>
 
         <div className="flex shrink-0 items-center justify-center self-center lg:self-auto">
-          <HeroPanel
-            mode={selectedPanel}
-            done={creditsDone}
-            total={totalTarget}
-            deadlines={deadlines}
-            completedCourses={completedCourses}
-            semesters={semesters}
-            gradeAverage={gradeAverage}
-          />
+          <AnimatePresence initial={false} mode="wait">
+            <motion.div
+              key={selectedPanel}
+              animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+              exit={{
+                opacity: 0,
+                x: prefersReducedMotion ? 0 : -10,
+                filter: prefersReducedMotion ? 'blur(0px)' : 'blur(4px)',
+                transition: { ...panelTransition, duration: prefersReducedMotion ? 0.01 : 0.16 },
+              }}
+              initial={{
+                opacity: 0,
+                x: prefersReducedMotion ? 0 : 12,
+                filter: prefersReducedMotion ? 'blur(0px)' : 'blur(4px)',
+              }}
+              transition={panelTransition}
+            >
+              <HeroPanel
+                mode={selectedPanel}
+                done={creditsDone}
+                total={totalTarget}
+                deadlines={deadlines}
+                completedCourses={completedCourses}
+                semesters={semesters}
+                gradeAverage={gradeAverage}
+              />
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
 

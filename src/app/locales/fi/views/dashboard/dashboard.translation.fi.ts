@@ -64,9 +64,13 @@ export const dashboardTranslation: DashboardTranslation = {
       upcoming: 'Tulossa',
       gradeTrend: 'Arvosanakehitys',
       creditVelocity: 'Op-tahti',
-      calendar: 'Kalenteri',
+      creditTrajectory: 'Opintopolku',
     },
     panelUpcomingEmpty: 'Ei tulevia määräaikoja',
+    trajectoryNow: 'Nyt',
+    trajectoryEarned: 'suoritettu',
+    trajectoryPlanned: 'suunniteltu',
+    trajectoryGraduates: 'valmistuu',
   },
   widgets: {
     actions: {

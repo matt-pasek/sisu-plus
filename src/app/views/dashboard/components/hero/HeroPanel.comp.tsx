@@ -5,7 +5,7 @@ import type { SemesterCreditSummary } from '@/app/api/dataPoints/getCreditsByPer
 import { Upcoming } from '@/app/views/dashboard/components/hero/panels/Upcoming.comp';
 import { GradeTrend } from '@/app/views/dashboard/components/hero/panels/GradeTrend.comp';
 import { CreditVelocity } from '@/app/views/dashboard/components/hero/panels/CreditVelocity.comp';
-import { Calendar } from '@/app/views/dashboard/components/hero/panels/Calendar.comp';
+import { CreditTrajectory } from '@/app/views/dashboard/components/hero/panels/CreditTrajectory.comp';
 import { Ring } from '@/app/views/dashboard/components/hero/panels/Ring.comp';
 
 interface Props {
@@ -33,9 +33,9 @@ export const HeroPanel: React.FC<Props> = ({
     case 'grade-trend':
       return <GradeTrend courses={completedCourses} gradeAverage={gradeAverage} />;
     case 'credit-velocity':
-      return <CreditVelocity semesters={semesters} />;
-    case 'calendar':
-      return <Calendar />;
+      return <CreditVelocity semesters={semesters} done={done} />;
+    case 'credit-trajectory':
+      return <CreditTrajectory done={done} total={total} semesters={semesters} />;
     case 'ring':
     default:
       return <Ring done={done} total={total} />;

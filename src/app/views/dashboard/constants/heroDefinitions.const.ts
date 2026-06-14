@@ -13,7 +13,7 @@ export const PANEL_MODES: { id: HeroPanelId; labelKey: string }[] = [
   { id: 'upcoming', labelKey: 'hero.panel.upcoming' },
   { id: 'grade-trend', labelKey: 'hero.panel.gradeTrend' },
   { id: 'credit-velocity', labelKey: 'hero.panel.creditVelocity' },
-  { id: 'calendar', labelKey: 'hero.panel.calendar' },
+  { id: 'credit-trajectory', labelKey: 'hero.panel.creditTrajectory' },
 ];
 
 export const DEFAULT_HERO_STATS: HeroStatId[] = ['grade-avg', 'active-courses', 'credits-left'];

@@ -62,9 +62,13 @@ export type DashboardTranslation = {
       upcoming: string;
       gradeTrend: string;
       creditVelocity: string;
-      calendar: string;
+      creditTrajectory: string;
     };
     panelUpcomingEmpty: string;
+    trajectoryNow: string;
+    trajectoryEarned: string;
+    trajectoryPlanned: string;
+    trajectoryGraduates: string;
   };
   widgets: {
     actions: {
@@ -293,9 +297,13 @@ export const dashboardTranslation: DashboardTranslation = {
       upcoming: 'Upcoming',
       gradeTrend: 'Grade trend',
       creditVelocity: 'Credit velocity',
-      calendar: 'Calendar',
+      creditTrajectory: 'Credit trajectory',
     },
     panelUpcomingEmpty: 'No upcoming deadlines',
+    trajectoryNow: 'Now',
+    trajectoryEarned: 'earned',
+    trajectoryPlanned: 'planned ahead',
+    trajectoryGraduates: 'graduates',
   },
   widgets: {
     actions: {

@@ -1355,7 +1355,7 @@ a {
 
 .landing-feature-list article,
 .landing-feature-card-active,
-.landing-roadmap-grid article,
+.landing-roadmap-card,
 .landing-privacy-panel,
 .landing-live-university-chip,
 .landing-request-card {
@@ -1578,65 +1578,336 @@ a {
 .landing-roadmap-grid {
   grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1px;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.08);
+  gap: clamp(1.4rem, 4vw, 2.6rem);
+  position: relative;
+  padding-top: 1rem;
 }
 
-.landing-roadmap-grid article {
+.landing-roadmap-grid::before {
+  content: '';
+  position: absolute;
+  top: 20%;
+  left: 28%;
+  right: 28%;
+  bottom: -10%;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 30%, rgba(82, 201, 137, 0.09), transparent 65%);
+  z-index: 0;
+}
+
+.landing-roadmap-rail {
   position: relative;
-  border: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: center;
+  width: min(74%, 920px);
+  margin: 0 auto -0.8rem;
+}
+
+.landing-roadmap-rail::before,
+.landing-roadmap-rail::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: calc(100% / 6);
+  left: calc(100% / 6);
+  height: 2px;
+  transform: translateY(-50%);
+}
+
+.landing-roadmap-rail::before {
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(139, 137, 176, 0.22) 0,
+    rgba(139, 137, 176, 0.22) 7px,
+    transparent 7px,
+    transparent 16px
+  );
+}
+
+.landing-roadmap-rail::after {
+  right: 50%;
+  background: linear-gradient(90deg, rgba(82, 201, 137, 0.25), rgba(127, 218, 143, 0.95));
+  box-shadow: 0 0 24px rgba(82, 201, 137, 0.28);
+}
+
+.landing-roadmap-node {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  justify-self: center;
+  width: 3.9rem;
+  height: 3.9rem;
+  border: 1px solid rgba(139, 137, 176, 0.2);
+  border-radius: 999px;
+  background: rgba(31, 31, 42, 0.9);
+  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.25);
+}
+
+.landing-roadmap-node::before {
+  content: '';
+  width: 0.68rem;
+  height: 0.68rem;
+  border-radius: 999px;
+  background: rgba(139, 137, 176, 0.55);
+}
+
+.landing-roadmap-node.is-shipped {
+  border-color: rgba(105, 216, 143, 0.42);
+  background: rgba(23, 56, 40, 0.9);
+}
+
+.landing-roadmap-node.is-shipped::before {
+  width: 1rem;
+  height: 0.55rem;
+  border-bottom: 3px solid rgba(127, 218, 143, 0.95);
+  border-left: 3px solid rgba(127, 218, 143, 0.95);
   border-radius: 0;
-  padding: 1.5rem;
-  background: var(--color-background);
+  background: transparent;
+  transform: rotate(-45deg) translateY(-1px);
+}
+
+.landing-roadmap-node.is-current {
+  width: 4.8rem;
+  height: 4.8rem;
+  border-color: rgba(127, 218, 143, 0.38);
+  background: #4f9656;
+  box-shadow:
+    0 0 0 10px rgba(82, 201, 137, 0.15),
+    0 24px 58px rgba(82, 201, 137, 0.25);
+}
+
+.landing-roadmap-node.is-current::before {
+  width: 1.5rem;
+  height: 1.5rem;
+  background: transparent;
+  border-radius: 999px;
+  border: 2.5px solid rgba(255, 255, 255, 0.22);
+  border-top-color: rgba(255, 255, 255, 0.95);
+  animation: landingNodeSpin 900ms linear infinite;
+}
+
+.landing-roadmap-node.is-current::after {
+  content: '';
+  position: absolute;
+  inset: -12px;
+  border-radius: 999px;
+  border: 2px solid rgba(82, 201, 137, 0.52);
+  animation: landingNodeRing 2200ms ease-in-out infinite;
+}
+
+.landing-roadmap-node.is-planned::before {
+  content: '→';
+  width: auto;
+  height: auto;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  color: rgba(139, 137, 176, 0.72);
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.landing-roadmap-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1rem, 2.4vw, 1.5rem);
 }
 
 .landing-roadmap-card {
+  position: relative;
+  display: flex;
+  min-height: 24rem;
+  flex-direction: column;
   overflow: hidden;
+  padding: clamp(1.45rem, 2.4vw, 1.9rem);
+  background: radial-gradient(circle at 72% 10%, rgba(82, 201, 137, 0.05), transparent 44%), rgba(20, 20, 28, 0.76);
   transition:
+    border-color 220ms ease,
     background-color 220ms ease,
-    box-shadow 220ms ease;
+    box-shadow 220ms ease,
+    transform 220ms ease;
+}
+
+.landing-roadmap-card.is-current {
+  border-color: rgba(105, 216, 143, 0.38);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(127, 218, 143, 0.22), transparent 52%),
+    radial-gradient(circle at 50% 100%, rgba(82, 201, 137, 0.08), transparent 50%),
+    linear-gradient(180deg, rgba(38, 70, 48, 0.72), rgba(16, 26, 22, 0.9));
+  box-shadow:
+    0 0 0 1px rgba(82, 201, 137, 0.18),
+    0 28px 80px rgba(82, 201, 137, 0.18),
+    0 8px 24px rgba(0, 0, 0, 0.28);
+  transform: translateY(-4px);
+}
+
+.landing-roadmap-card.is-planned {
+  background: rgba(20, 20, 28, 0.54);
+}
+
+.landing-roadmap-card.is-planned li {
+  color: rgba(173, 170, 205, 0.65);
+}
+
+.landing-roadmap-card li.is-featured {
+  list-style-type: none;
+  margin: -0.08rem 0 0.2rem;
+  border: 1px solid rgba(127, 218, 143, 0.28);
+  border-radius: 0.62rem;
+  background: linear-gradient(135deg, rgba(82, 201, 137, 0.18), rgba(82, 201, 137, 0.055)), rgba(82, 201, 137, 0.045);
+  padding: 0.55rem 0.7rem;
+  color: rgba(218, 255, 223, 0.98);
+  font-weight: 800;
+  box-shadow:
+    0 12px 30px rgba(82, 201, 137, 0.12),
+    inset 0 0 0 1px rgba(127, 218, 143, 0.08);
+}
+
+.landing-roadmap-card.is-planned li:not(.is-featured)::before {
+  border-color: rgba(139, 137, 176, 0.32);
+  background: transparent;
+}
+
+.landing-roadmap-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(82, 201, 137, 0.2);
+  background-color: rgba(23, 23, 31, 0.9);
+  box-shadow:
+    0 22px 62px rgba(0, 0, 0, 0.24),
+    inset 0 0 0 1px rgba(82, 201, 137, 0.045);
 }
 
 .landing-roadmap-card::before {
   content: '';
   position: absolute;
-  inset: 0;
+  inset: -20%;
   pointer-events: none;
-  background: radial-gradient(circle at 70% 14%, rgba(82, 201, 137, 0.045), transparent 48%);
+  background: radial-gradient(circle at 64% 2%, rgba(82, 201, 137, 0.1), transparent 38%);
   opacity: 0;
   transition: opacity 220ms ease;
-}
-
-.landing-roadmap-card:hover {
-  background-color: #121217;
-  box-shadow: inset 0 0 0 1px rgba(82, 201, 137, 0.045);
 }
 
 .landing-roadmap-card:hover::before {
   opacity: 1;
 }
 
-.landing-roadmap-version {
-  color: var(--color-lighterGreen);
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  font-weight: 600;
+.landing-roadmap-card-top {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-bottom: 1.45rem;
 }
 
-.landing-roadmap-grid span {
+.landing-roadmap-status {
   display: inline-flex;
-  margin-top: 0.85rem;
+  align-items: center;
+  gap: 0.45rem;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.055);
-  padding: 0.2rem 0.6rem;
-  color: var(--color-lightGrey);
+  padding: 0.32rem 0.7rem;
+  color: rgba(221, 221, 240, 0.68);
   font-size: 0.72rem;
-  font-weight: 600;
-  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.landing-roadmap-status::before {
+  content: '';
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.landing-roadmap-card.is-shipped .landing-roadmap-status {
+  background: rgba(82, 201, 137, 0.12);
+  color: rgba(127, 218, 143, 0.95);
+}
+
+.landing-roadmap-card.is-shipped .landing-roadmap-status::before {
+  width: 0.58rem;
+  height: 0.33rem;
+  background: none;
+  border-bottom: 2px solid currentColor;
+  border-left: 2px solid currentColor;
+  border-radius: 0;
+  transform: rotate(-45deg) translateY(-2px);
+}
+
+.landing-roadmap-card.is-current .landing-roadmap-status {
+  background: rgba(82, 201, 137, 0.9);
+  color: rgba(8, 22, 13, 0.95);
+  font-weight: 800;
+}
+
+.landing-roadmap-card.is-current .landing-roadmap-status::before {
+  background: rgba(8, 22, 13, 0.5);
+}
+
+.landing-roadmap-card.is-planned .landing-roadmap-status {
+  color: rgba(139, 137, 176, 0.75);
+}
+
+.landing-roadmap-card.is-planned .landing-roadmap-status::before {
+  background: transparent;
+  border: 1.5px solid currentColor;
+  width: 0.38rem;
+  height: 0.38rem;
+}
+
+.landing-roadmap-card h3,
+.landing-roadmap-card ul,
+.landing-roadmap-version {
+  position: relative;
+  z-index: 1;
+}
+
+.landing-roadmap-card h3 {
+  font-size: clamp(1.22rem, 2vw, 1.55rem);
+  line-height: 1.15;
+}
+
+.landing-roadmap-card.is-current h3 {
+  font-size: clamp(1.35rem, 2.4vw, 1.8rem);
+}
+
+.landing-roadmap-card-body {
+  position: relative;
+  z-index: 1;
+  margin: 0.45rem 0 0;
+  color: rgba(173, 170, 205, 0.62);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.landing-roadmap-card.is-current .landing-roadmap-card-body {
+  color: rgba(186, 235, 196, 0.72);
+}
+
+.landing-roadmap-version {
+  display: inline-flex;
+  border: 1px solid rgba(127, 218, 143, 0.26);
+  border-radius: 0.5rem;
+  background: rgba(82, 201, 137, 0.08);
+  padding: 0.34rem 0.68rem;
+  color: rgba(236, 245, 232, 0.95);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.landing-roadmap-card.is-planned .landing-roadmap-version {
+  border-color: rgba(139, 137, 176, 0.22);
+  background: rgba(139, 137, 176, 0.08);
+  color: rgba(221, 221, 240, 0.72);
+}
+
+.landing-roadmap-card {
+  overflow: hidden;
 }
 
 .landing-roadmap-grid ul {
@@ -1649,15 +1920,24 @@ a {
   list-style: none;
 }
 
-.landing-roadmap-grid li::before {
+.landing-roadmap-grid li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.62rem;
+}
+
+.landing-roadmap-grid li:not(.is-featured)::before {
   content: '';
-  display: inline-block;
-  width: 0.42rem;
-  height: 0.42rem;
-  margin-right: 0.55rem;
-  border-radius: 999px;
-  background: var(--color-lighterGreen);
-  vertical-align: 0.08rem;
+  flex: 0 0 auto;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-top: 0.14rem;
+  border-radius: 0.28rem;
+  border: 1.5px solid rgba(82, 201, 137, 0.55);
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpolyline points='2,6.5 4.8,9.2 10,3' stroke='%237fda8f' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+      center / 72% no-repeat,
+    rgba(82, 201, 137, 0.12);
 }
 
 .landing-support {
@@ -1773,20 +2053,6 @@ a {
   width: min(1120px, calc(100% - 2.5rem));
   margin: 0 auto;
   padding: 5rem 0;
-}
-
-.landing-universities::before {
-  content: '';
-  position: absolute;
-  top: 1rem;
-  right: -7rem;
-  width: min(72vw, 900px);
-  height: 24rem;
-  border-radius: 999px;
-  background: rgba(82, 201, 137, 0.055);
-  filter: blur(2px);
-  transform: rotate(-16deg);
-  pointer-events: none;
 }
 
 .landing-university-heading {
@@ -2144,6 +2410,10 @@ a {
     min-height: 230px;
   }
 
+  .landing-roadmap-card {
+    min-height: 20rem;
+  }
+
   .landing-preview-stage {
     --landing-preview-scale: 0.78;
   }
@@ -2468,7 +2738,35 @@ a {
   }
 
   .landing-roadmap-grid {
+    gap: 1rem;
+    padding-top: 0;
+  }
+
+  .landing-roadmap-rail {
+    display: none;
+  }
+
+  .landing-roadmap-cards {
     grid-template-columns: 1fr;
+  }
+
+  .landing-roadmap-card {
+    min-height: 0;
+  }
+
+  .landing-roadmap-card::after {
+    content: '';
+    position: absolute;
+    top: 1.9rem;
+    bottom: 1.9rem;
+    left: 0;
+    width: 3px;
+    background: rgba(139, 137, 176, 0.14);
+  }
+
+  .landing-roadmap-card.is-shipped::after,
+  .landing-roadmap-card.is-current::after {
+    background: linear-gradient(180deg, rgba(127, 218, 143, 0.9), rgba(82, 201, 137, 0.18));
   }
 
   .landing-support {
@@ -2490,13 +2788,6 @@ a {
   .landing-universities {
     width: min(100% - 1.7rem, 1120px);
     padding-block: 4.5rem;
-  }
-
-  .landing-universities::before {
-    top: 2rem;
-    right: -2rem;
-    width: min(100%, 28rem);
-    height: 16rem;
   }
 
   .landing-university-heading h2 {
@@ -2524,6 +2815,24 @@ a {
   .privacy-document {
     width: min(100% - 1.7rem, 860px);
     padding: 7.5rem 0 4rem;
+  }
+
+  .landing-roadmap-rail {
+    display: none;
+  }
+
+  .landing-roadmap-cards {
+    grid-template-columns: 1fr;
+    gap: 0.9rem;
+  }
+
+  .landing-roadmap-card {
+    min-height: auto;
+  }
+
+  .landing-roadmap-card.is-current {
+    transform: none;
+    order: -1;
   }
 }
 
@@ -2618,6 +2927,30 @@ a {
   }
 }
 
+@keyframes landingRoadmapPulse {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+@keyframes landingNodeRing {
+  0%,
+  100% {
+    opacity: 0.52;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.18;
+    transform: scale(1.18);
+  }
+}
+
+@keyframes landingNodeSpin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
 @keyframes appDropTargetPulse {
   0%,
   34% {
@@ -2686,5 +3019,19 @@ a {
     opacity: 1 !important;
     transform: none !important;
     filter: none !important;
+  }
+
+  .landing-roadmap-node.is-current::before {
+    animation: none;
+    border-top-color: rgba(255, 255, 255, 0.65);
+  }
+
+  .landing-roadmap-node.is-current::after {
+    animation: none;
+    opacity: 0.35;
+  }
+
+  .landing-roadmap-card.is-current {
+    transform: none;
   }
 }

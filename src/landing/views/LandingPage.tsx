@@ -114,21 +114,30 @@ export function LandingPage({ route }: { route: LandingRoute }) {
           <p className="landing-section-copy">{t('roadmap.body')}</p>
         </div>
         <div className="landing-roadmap-grid">
-          {roadmap.map((column) => (
-            <article
-              className={column.current ? 'is-current landing-roadmap-card' : 'landing-roadmap-card'}
-              key={column.version}
-            >
-              <div className="landing-roadmap-version">{column.version}</div>
-              <h3>{column.title}</h3>
-              <span>{column.status}</span>
-              <ul>
-                {column.items.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </article>
-          ))}
+          <div className="landing-roadmap-rail" aria-hidden="true">
+            {roadmap.map((column) => (
+              <span className={`landing-roadmap-node is-${column.tone}`} key={column.version} />
+            ))}
+          </div>
+          <div className="landing-roadmap-cards">
+            {roadmap.map((column) => (
+              <article className={`landing-roadmap-card is-${column.tone}`} key={column.version}>
+                <div className="landing-roadmap-card-top">
+                  <div className="landing-roadmap-version">{column.version}</div>
+                  <span className="landing-roadmap-status">{column.status}</span>
+                </div>
+                <h3>{column.title}</h3>
+                {column.body && <p className="landing-roadmap-card-body">{column.body}</p>}
+                <ul>
+                  {column.items.map((item) => (
+                    <li className={item.featured ? 'is-featured' : undefined} key={item.label}>
+                      {item.label}
+                    </li>
+                  ))}
+                </ul>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
 

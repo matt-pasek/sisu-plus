@@ -20,8 +20,8 @@ const timelineCourses: TimelineCourse[] = [
   {
     courseUnitId: 'cs-a1110',
     courseUnitGroupId: null,
-    courseCode: 'CS-A1110',
-    courseName: 'Programming Studio',
+    courseCode: 'LANG-A1110',
+    courseName: 'Finnish 101',
     credits: 5,
     moduleId: 'major',
     moduleName: 'Major studies',

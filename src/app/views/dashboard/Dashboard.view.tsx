@@ -8,7 +8,6 @@ import { DashboardGridIcon } from './components/icons/DashboardGridIcon.comp';
 import { DashboardHero } from './components/hero/DashboardHero.comp';
 import { DashboardControlButton } from './components/DashboardControlButton.comp';
 import { DashboardCell } from './components/DashboardCell.comp';
-import { NotificationNudgeBanner } from '@/app/views/dashboard/components/NotificationNudgeBanner.comp';
 import { isDashboardWidgetDragData } from './util/dndHandlers';
 import { formatStudyRightEnd } from './util/attainmentHelpers';
 import { WidgetIcon } from '@/app/views/dashboard/components/widget/WidgetIcon.comp';
@@ -191,11 +190,6 @@ const DashboardView: React.FC = () => {
           studyRightEnd={studyRightEnd}
           totalTarget={totalTarget}
           upcomingDeadlines={upcomingDeadlines}
-        />
-
-        <NotificationNudgeBanner
-          hasMoodleToken={Boolean(prefs.moodleToken)}
-          hasRegistrationData={registrationCourses.length > 0}
         />
 
         <div className="flex justify-center">

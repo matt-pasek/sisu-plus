@@ -4,6 +4,7 @@ import { getCreditsByModule } from '@/app/api/dataPoints/getCreditsByModule';
 import { getUserDetails } from '@/app/api/dataPoints/getUserDetails';
 import { fetchPlans } from '@/app/api/endpoints/plans';
 import { AccountDropdown } from '@/app/components/ui/AccountDropdown.comp';
+import { NavbarNotificationBell } from '@/app/components/ui/NavbarNotificationBell.comp';
 import { useSisuQuery } from '@/app/hooks/useSisuQuery';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { SisuPlusLogo } from '@/shared/SisuPlusLogo';
@@ -41,6 +42,7 @@ export const Navbar: React.FC = () => {
             {modules.map((m) => m.done).reduce((a, b) => a + b, 0)} / {totalTarget} {t('creditsUnit')}
           </span>
         )}
+        <NavbarNotificationBell />
         {!loadingDetails && userDetails && <AccountDropdown userDetails={userDetails} />}
       </div>
     </nav>

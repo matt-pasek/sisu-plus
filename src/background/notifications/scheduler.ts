@@ -12,6 +12,11 @@ import type {
   SisuNotificationSyncPayload,
 } from '@/background/notifications/types';
 import type { NotificationType } from '@/app/types/NotificationType.type';
+import {
+  getBackgroundLocale,
+  getNotificationStrings,
+  type NotificationStrings,
+} from '@/background/notifications/backgroundStrings';
 
 const ALARM_PREFIX = 'sisu-plus-notification';
 const MOODLE_FETCH_ALARM = `${ALARM_PREFIX}:moodle-fetch`;
@@ -152,7 +157,12 @@ export const syncSisuNotificationCache = async (payload: SisuNotificationSyncPay
   await scheduleNotificationAlarms();
 };
 
-const getMoodlePayload = (cache: NotificationCache, eventId: string, trigger: string): NotificationPayload | null => {
+const getMoodlePayload = (
+  cache: NotificationCache,
+  eventId: string,
+  trigger: string,
+  s: NotificationStrings,
+): NotificationPayload | null => {
   const deadline = cache.moodle.deadlines.find((item) => item.id === eventId);
   if (!deadline) return null;
 
@@ -160,7 +170,7 @@ const getMoodlePayload = (cache: NotificationCache, eventId: string, trigger: st
     body: `${deadline.title}${deadline.course ? ` (${deadline.course})` : ''}`,
     eventId: `${deadline.id}:${trigger}`,
     source: 'moodle',
-    title: trigger === '1h' ? 'Moodle deadline in 1 hour' : 'Moodle deadline tomorrow',
+    title: trigger === '1h' ? s.moodleTitleHour : s.moodleTitleTomorrow,
     type: 'moodle-deadline',
   };
 };
@@ -169,44 +179,52 @@ const getRegistrationOpenPayload = (
   cache: NotificationCache,
   opensAt: string,
   trigger: string,
+  leadMinutes: number,
+  s: NotificationStrings,
 ): NotificationPayload | null => {
   const registrations = getRegistrationOpenGroups(cache.sisu.registrations).get(opensAt) ?? [];
   if (registrations.length === 0) return null;
 
+  const lead = leadMinutes > 0 ? s.leadTime(leadMinutes) : '';
+  const single = registrations.length === 1;
+
   return {
-    body:
-      registrations.length === 1
-        ? `${registrations[0].name} opens for registration.`
-        : `${registrations.length} courses open for registration.`,
+    body: single
+      ? s.registrationOpenBodySingle(registrations[0].name, lead)
+      : s.registrationOpenBodyMulti(registrations.length, lead),
     eventId: `${opensAt}:${trigger}`,
     source: 'sisu',
-    title: registrations.length === 1 ? 'Registration opens' : 'Registrations open',
+    title: single ? s.registrationOpenTitleSingle(lead) : s.registrationOpenTitleMulti(lead),
     type: 'registration-open',
   };
 };
 
-const getRegistrationClosePayload = (cache: NotificationCache, eventId: string): NotificationPayload | null => {
+const getRegistrationClosePayload = (
+  cache: NotificationCache,
+  eventId: string,
+  s: NotificationStrings,
+): NotificationPayload | null => {
   const registration = cache.sisu.registrations.find((item) => item.id === eventId && !item.enrolled);
   if (!registration) return null;
 
   return {
-    body: `${registration.name} closes for registration tomorrow.`,
+    body: s.registrationCloseBody(registration.name),
     eventId: registration.id,
     source: 'sisu',
-    title: 'Registration closes soon',
+    title: s.registrationCloseTitle,
     type: 'registration-close',
   };
 };
 
-const getSisuSyncPayload = (cache: NotificationCache): NotificationPayload | null => {
+const getSisuSyncPayload = (cache: NotificationCache, s: NotificationStrings): NotificationPayload | null => {
   const lastSync = cache.sisu.lastSync;
   if (lastSync && Date.now() - lastSync < SISU_SYNC_STALE_DAYS * MS_PER_DAY) return null;
 
   return {
-    body: 'Open Sisu to refresh registration windows and course data.',
+    body: s.sisuSyncBody,
     eventId: `sisu-sync:${Math.floor(Date.now() / MS_PER_DAY)}`,
     source: 'sisu',
-    title: 'Sisu+ needs a fresh sync',
+    title: s.sisuSyncTitle,
     type: 'sisu-sync',
   };
 };
@@ -217,10 +235,15 @@ export const handleNotificationAlarm = async (alarmName: string) => {
     return;
   }
 
-  const cache = await getNotificationCache();
+  const [cache, prefs, locale] = await Promise.all([
+    getNotificationCache(),
+    getNotificationPrefs(),
+    getBackgroundLocale(),
+  ]);
+  const s = getNotificationStrings(locale);
 
   if (alarmName === SISU_SYNC_CHECK_ALARM) {
-    const payload = getSisuSyncPayload(cache);
+    const payload = getSisuSyncPayload(cache, s);
     if (payload) await deliverNotification(payload);
     return;
   }
@@ -233,11 +256,11 @@ export const handleNotificationAlarm = async (alarmName: string) => {
   const eventId = decodePart(encodedEventId);
   const payload =
     type === 'moodle-deadline'
-      ? getMoodlePayload(cache, eventId, trigger)
+      ? getMoodlePayload(cache, eventId, trigger, s)
       : type === 'registration-open'
-        ? getRegistrationOpenPayload(cache, eventId, trigger)
+        ? getRegistrationOpenPayload(cache, eventId, trigger, prefs.registrationOpenLeadMinutes, s)
         : type === 'registration-close'
-          ? getRegistrationClosePayload(cache, eventId)
+          ? getRegistrationClosePayload(cache, eventId, s)
           : null;
 
   if (payload) await deliverNotification(payload);

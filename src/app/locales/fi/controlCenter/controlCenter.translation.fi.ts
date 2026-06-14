@@ -28,6 +28,21 @@ export const controlCenterTranslation: ControlCenterTranslation = {
       off: 'Pois',
       'out-of-app': 'Työpöytä',
     },
+    dev: {
+      desktop: 'Lähetä työpöytäilmoitus',
+      inApp: 'Näytä SISU+ ilmoitus',
+      permission: {
+        check: 'Tarkista tila',
+        current: 'Nykyinen: {{status}}',
+        queueUnread: 'Lisää lukematon',
+        queued: 'Testi-ilmoitus lisätty lukemattomiin',
+        request: 'Pyydä',
+        result: 'Tulos: {{status}}',
+        title: 'Lupa',
+      },
+      send: 'Lähetä',
+      title: 'Dev-työkalut',
+    },
     entry: {
       body: 'Toimitustavat, lukemattomat ja synkronoinnin tila',
       title: 'Ilmoitusasetukset',
@@ -54,8 +69,11 @@ export const controlCenterTranslation: ControlCenterTranslation = {
     },
     stats: {
       moodle: 'Moodle-haku',
+      moodleValue: 'Moodle: {{value}}',
       sisu: 'Sisu-synk.',
+      sisuValue: 'Sisu: {{value}}',
       unread: 'Lukematta',
+      unreadCount: '{{count}} lukematta',
     },
     title: 'Ilmoitusten hallinta',
     types: {
@@ -90,14 +108,13 @@ export const controlCenterTranslation: ControlCenterTranslation = {
     continue: 'Jatka',
     progressLabel: 'Käyttöönoton eteneminen',
     skip: 'Ohita',
-    steps: ['Tervetuloa', 'Ohjain', 'Käyttöön', 'Näkymät', 'Moodle'],
+    steps: ['Tervetuloa', 'Ohjain', 'Käyttöön', 'Muistutukset', 'Näkymät', 'Moodle'],
     turnOn: 'Ota SISU+ käyttöön',
     welcome: {
       title: 'Sisu pysyy koskemattomana, kunnes päätät vaihtaa.',
       body: 'Asennuksen jälkeen SISU+ käynnistyy keskeytettynä. Tästä ohjaimesta voit ottaa parannetun käyttöliittymän käyttöön, määrittää Moodlen määräajat ja palata alkuperäiseen Sisuun tarvittaessa.',
       cardTitle: 'Sinä päätät',
       cardBody: 'Parannettu etusivu korvaa opiskelijasivut vasta, kun otat sen käyttöön.',
-      syncNotice: 'Ensikäynnistyksen tila ja käyttöönoton eteneminen tallennetaan Chrome synciin.',
     },
     control: {
       title: 'Tutustu ohjaimeen',
@@ -113,13 +130,37 @@ export const controlCenterTranslation: ControlCenterTranslation = {
       active: 'SISU+ on jo käytössä.',
       paused: 'SISU+ on tällä hetkellä keskeytetty.',
     },
+    notifications: {
+      body: 'SISU+ voi muistuttaa, kun ilmoittautumiset avautuvat, sulkeutuvat tai Moodlen määräajat lähestyvät. Ota selainilmoitukset käyttöön, jotta saat muistutukset myös silloin, kun Sisu ei ole auki.',
+      delivery: {
+        desktop: 'Työpöytä',
+        inApp: 'SISU+',
+      },
+      enable: 'Ota selainilmoitukset käyttöön',
+      enabledTitle: 'Ilmoitukset käytössä',
+      enabledBody: 'Saat muistutukset määräajoista ja ilmoittautumisista, vaikka Sisu ei olisi auki.',
+      enabledButton: 'Selainilmoitukset käytössä',
+      manageHint: 'Voit muuttaa toimitusasetuksia milloin tahansa ohjaimesta.',
+      looksGood: 'Näyttää hyvältä',
+      title: 'Pysy määräaikojen tasalla',
+      types: {
+        'moodle-deadline': { title: 'Moodlen määräajat' },
+        'registration-close': { title: 'Ilmoittautuminen sulkeutuu' },
+        'registration-open': { title: 'Ilmoittautuminen avautuu' },
+        'sisu-sync': { title: 'Sisu-synkronoinnin muistutus' },
+      },
+    },
     views: {
-      title: 'Kaksi näkymää, yksi opintosuunnitelma.',
+      title: 'Neljä näkymää, yksi opintosuunnitelma.',
       dashboardTitle: 'Etusivu',
       dashboardBody:
         'Muokattava yhteenveto aktiivisista kursseista, opintopisteistä, määräajoista, arvosanoista ja opiskelutahdista.',
       timelineTitle: 'Aikajana',
       timelineBody: 'Lukukausittainen suunnittelutaulu, jossa voit siirtää kursseja ja huomata esitietojen ongelmat.',
+      structureTitle: 'Rakenne',
+      structureBody: 'Tutkintomoduulisi, vaatimukset ja opintopisterakenne yhdessä hierarkkisessa näkymässä.',
+      registrationTitle: 'Ilmoittautuminen',
+      registrationBody: 'Selaa kurssin toteutuksia, tarkista saatavuus ja ilmoittaudu yhdessä paikassa.',
     },
     moodle: {
       title: 'Yhdistä Moodlen määräajat',

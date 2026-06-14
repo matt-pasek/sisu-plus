@@ -4,6 +4,7 @@ export interface AppToast {
   durationMs: number;
   id: number;
   message: string;
+  subtitle?: string;
   tone: ToastTone;
 }
 
@@ -22,12 +23,12 @@ const dismiss = (id: number) => {
   emit();
 };
 
-const show = (tone: ToastTone, message: string) => {
+const show = (tone: ToastTone, message: string, subtitle?: string) => {
   const id = nextToastId;
   nextToastId += 1;
   const durationMs = tone === 'error' ? 6200 : 3800;
 
-  toasts = [{ durationMs, id, message, tone }, ...toasts.slice(0, 3)];
+  toasts = [{ durationMs, id, message, subtitle, tone }, ...toasts.slice(0, 3)];
   emit();
   window.setTimeout(() => dismiss(id), durationMs);
 };
@@ -47,6 +48,9 @@ export const notify = {
   },
   info: (message: string) => {
     show('info', message);
+  },
+  notification: (title: string, body: string) => {
+    show('info', title, body);
   },
   success: (message: string) => {
     show('success', message);

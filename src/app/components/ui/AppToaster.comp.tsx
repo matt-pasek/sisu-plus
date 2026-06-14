@@ -72,6 +72,7 @@ const ToastItem: React.FC<{ toast: AppToast }> = ({ toast }) => {
             {tone.label}
           </p>
           <p className="mt-1.5 text-sm leading-snug font-semibold text-pretty text-offwhite">{toast.message}</p>
+          {toast.subtitle && <p className="mt-1 text-xs leading-relaxed text-lightGrey">{toast.subtitle}</p>}
         </div>
         <motion.button
           type="button"

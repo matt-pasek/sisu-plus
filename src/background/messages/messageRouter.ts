@@ -4,12 +4,14 @@ import {
   markAllNotificationsRead,
   markNotificationRead,
   getNotificationCache,
+  queueUnreadNotification,
 } from '@/background/notifications/storage';
 import { scheduleNotificationAlarms, syncSisuNotificationCache } from '@/background/notifications/scheduler';
 import type { SisuNotificationSyncPayload } from '@/background/notifications/types';
 import { clearSessionForOrigin, syncRuntimeForConfig } from '@/background/runtime/sisuRuntime';
 import { getSisuTokenForOrigin } from '@/background/session/sessionStore';
 import { getOrigin } from '@/background/util/origin';
+import { DEV_TEST_NOTIFICATION_PAYLOADS, isNotificationType } from '@/shared/notifications/devTestPayloads';
 
 export interface MessageRouterOptions {
   setCachedConfig: (config: UniversityConfig | null) => void;
@@ -107,6 +109,50 @@ export const createMessageRouter =
 
     if (message.type === 'RESCHEDULE_NOTIFICATIONS') {
       scheduleNotificationAlarms()
+        .then(() => sendResponse({ ok: true }))
+        .catch((err) => sendResponse({ ok: false, err }));
+
+      return true;
+    }
+
+    if (message.type === 'TRIGGER_TEST_NOTIFICATION') {
+      const notificationType: unknown = message.notificationType;
+      if (!isNotificationType(notificationType)) {
+        sendResponse({ ok: false, err: 'Unknown notification type' });
+        return false;
+      }
+
+      const payload = DEV_TEST_NOTIFICATION_PAYLOADS[notificationType];
+
+      chrome.notifications.create(
+        `sisu-plus-notification:${payload.type}:dev-test`,
+        {
+          iconUrl: chrome.runtime.getURL('favicon.png'),
+          message: payload.body,
+          title: payload.title,
+          type: 'basic',
+        },
+        () => {
+          const err = chrome.runtime.lastError;
+          sendResponse(err ? { ok: false, err: err.message } : { ok: true });
+        },
+      );
+
+      return true;
+    }
+
+    if (message.type === 'QUEUE_TEST_UNREAD') {
+      const createdAt = Date.now();
+      queueUnreadNotification({
+        body: 'This is a test unread notification queued from dev tools.',
+        createdAt,
+        eventId: `dev-test-unread-${createdAt}`,
+        id: `sisu-plus-notification:moodle-deadline:dev-test-unread-${createdAt}`,
+        read: false,
+        source: 'moodle',
+        title: 'Dev: test unread',
+        type: 'moodle-deadline',
+      })
         .then(() => sendResponse({ ok: true }))
         .catch((err) => sendResponse({ ok: false, err }));
 

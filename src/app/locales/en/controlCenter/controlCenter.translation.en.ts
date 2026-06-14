@@ -26,6 +26,21 @@ export type ControlCenterTranslation = {
       off: string;
       'out-of-app': string;
     };
+    dev: {
+      desktop: string;
+      inApp: string;
+      permission: {
+        check: string;
+        current: string;
+        queueUnread: string;
+        queued: string;
+        request: string;
+        result: string;
+        title: string;
+      };
+      send: string;
+      title: string;
+    };
     entry: {
       body: string;
       title: string;
@@ -45,8 +60,11 @@ export type ControlCenterTranslation = {
     };
     stats: {
       moodle: string;
+      moodleValue: string;
       sisu: string;
+      sisuValue: string;
       unread: string;
+      unreadCount: string;
     };
     title: string;
     types: {
@@ -76,7 +94,6 @@ export type ControlCenterTranslation = {
       body: string;
       cardTitle: string;
       cardBody: string;
-      syncNotice: string;
     };
     control: {
       title: string;
@@ -92,12 +109,36 @@ export type ControlCenterTranslation = {
       active: string;
       paused: string;
     };
+    notifications: {
+      body: string;
+      delivery: {
+        desktop: string;
+        inApp: string;
+      };
+      enable: string;
+      enabledTitle: string;
+      enabledBody: string;
+      enabledButton: string;
+      manageHint: string;
+      looksGood: string;
+      title: string;
+      types: {
+        'moodle-deadline': { title: string };
+        'registration-close': { title: string };
+        'registration-open': { title: string };
+        'sisu-sync': { title: string };
+      };
+    };
     views: {
       title: string;
       dashboardTitle: string;
       dashboardBody: string;
       timelineTitle: string;
       timelineBody: string;
+      structureTitle: string;
+      structureBody: string;
+      registrationTitle: string;
+      registrationBody: string;
     };
     moodle: {
       title: string;
@@ -160,6 +201,21 @@ export const controlCenterTranslation: ControlCenterTranslation = {
       off: 'Off',
       'out-of-app': 'Desktop',
     },
+    dev: {
+      desktop: 'Fire desktop notification',
+      inApp: 'Fire in-app toast',
+      permission: {
+        check: 'Check status',
+        current: 'Current: {{status}}',
+        queueUnread: 'Queue unread',
+        queued: 'Test unread queued',
+        request: 'Request',
+        result: 'Result: {{status}}',
+        title: 'Permission',
+      },
+      send: 'Send',
+      title: 'Dev tools',
+    },
     entry: {
       body: 'Delivery modes, unread items, and sync status',
       title: 'Notification settings',
@@ -186,8 +242,11 @@ export const controlCenterTranslation: ControlCenterTranslation = {
     },
     stats: {
       moodle: 'Moodle fetch',
+      moodleValue: 'Moodle: {{value}}',
       sisu: 'Sisu sync',
+      sisuValue: 'Sisu: {{value}}',
       unread: 'Unread',
+      unreadCount: '{{count}} unread',
     },
     title: 'Notification dashboard',
     types: {
@@ -222,14 +281,13 @@ export const controlCenterTranslation: ControlCenterTranslation = {
     continue: 'Continue',
     progressLabel: 'Onboarding progress',
     skip: 'Skip',
-    steps: ['Welcome', 'Control', 'Switch on', 'Views', 'Moodle'],
+    steps: ['Welcome', 'Control', 'Switch on', 'Alerts', 'Views', 'Moodle'],
     turnOn: 'Turn on SISU+',
     welcome: {
       title: 'Sisu stays untouched until you choose to switch.',
       body: 'After installation, SISU+ starts paused. This control center lets you turn the enhanced interface on, configure Moodle deadlines, and come back to native Sisu whenever you need it.',
       cardTitle: 'You are in control',
       cardBody: 'The enhanced dashboard only replaces student pages after you activate it.',
-      syncNotice: 'First-run state and setup progress are saved in Chrome sync.',
     },
     control: {
       title: 'Meet the control center',
@@ -245,12 +303,36 @@ export const controlCenterTranslation: ControlCenterTranslation = {
       active: 'SISU+ is already active.',
       paused: 'SISU+ is currently paused.',
     },
+    notifications: {
+      body: "SISU+ can alert you when registrations open, close, or when Moodle deadlines approach. Enable browser notifications to get alerts even when Sisu isn't open.",
+      delivery: {
+        desktop: 'Desktop',
+        inApp: 'In-app',
+      },
+      enable: 'Enable browser notifications',
+      enabledTitle: 'Notifications on',
+      enabledBody: "You'll get alerts for deadlines and registrations even when Sisu isn't open.",
+      enabledButton: 'Browser notifications on',
+      manageHint: 'You can adjust delivery settings anytime from the control center.',
+      looksGood: 'Looks good',
+      title: 'Stay on top of deadlines',
+      types: {
+        'moodle-deadline': { title: 'Moodle deadlines' },
+        'registration-close': { title: 'Registration closes' },
+        'registration-open': { title: 'Registration opens' },
+        'sisu-sync': { title: 'Sisu sync nudge' },
+      },
+    },
     views: {
-      title: 'Two views, one study plan.',
+      title: 'Four views, one study plan.',
       dashboardTitle: 'Dashboard',
       dashboardBody: 'A customizable overview for active courses, credits, deadlines, grade progress, and study pace.',
       timelineTitle: 'Timeline',
       timelineBody: 'A semester-by-semester planning board where you can move courses and catch prerequisite issues.',
+      structureTitle: 'Structure',
+      structureBody: 'Your degree modules, requirements, and credit progress laid out in one hierarchical view.',
+      registrationTitle: 'Registration',
+      registrationBody: 'Browse course implementations, check availability, and enrol in one place.',
     },
     moodle: {
       title: 'Connect Moodle deadlines',

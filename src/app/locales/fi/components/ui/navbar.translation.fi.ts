@@ -8,4 +8,16 @@ export const navbarTranslation: NavbarTranslation = {
     structure: 'Rakenne',
     registration: 'Ilmoittautuminen',
   },
+  notificationBell: {
+    aria: 'Ilmoitukset',
+    empty: 'Ei ilmoituksia',
+    markAll: 'Merkitse luetuiksi',
+    relative: {
+      daysAgo: '{{count}} pv sitten',
+      hoursAgo: '{{count}} h sitten',
+      justNow: 'Juuri nyt',
+      minutesAgo: '{{count}} min sitten',
+    },
+    title: 'Ilmoitukset',
+  },
 };

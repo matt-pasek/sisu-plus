@@ -1,19 +1,32 @@
 {
   "manifest_version": 3,
   "name": "__MSG_extName__",
-  "version": "1.2.0",
+  "version": "2.0.0",
   "description": "__MSG_extDescription__",
   "default_locale": "en",
-  "permissions": ["storage", "webRequest", "scripting", "alarms", "notifications"],
-  "optional_host_permissions": ["https://*.fi/*"],
+  "permissions": [
+    "storage",
+    "webRequest",
+    "scripting",
+    "alarms",
+    "notifications"
+  ],
+  "optional_host_permissions": [
+    "https://*.fi/*"
+  ],
   "background": {
     "service_worker": "background/service-worker.js",
     "type": "module"
   },
   "web_accessible_resources": [
     {
-      "resources": ["onboarding.html", "assets/*"],
-      "matches": ["<all_urls>"]
+      "resources": [
+        "onboarding.html",
+        "assets/*"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
     }
   ]
 }

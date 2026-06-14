@@ -1,0 +1,250 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-07T00:00:00Z",
+  "title": "Design System: Sisu+",
+  "extensions": {
+    "colorMeta": {
+      "night-canvas": {
+        "role": "neutral",
+        "displayName": "Night Canvas",
+        "canonical": "#0d0d11",
+        "tonalRamp": ["#0d0d11", "#111116", "#16161c", "#1d1d28", "#252534", "#323246", "#464660", "#5c5c7c"]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Surface",
+        "canonical": "#15151c",
+        "tonalRamp": ["#0d0d11", "#111116", "#15151c", "#1d1d28", "#25252e", "#323240", "#464655", "#787893"]
+      },
+      "surface-raised": {
+        "role": "neutral",
+        "displayName": "Surface Raised",
+        "canonical": "#1d1d28",
+        "tonalRamp": ["#0d0d11", "#15151c", "#1d1d28", "#252534", "#303046", "#404060", "#555578", "#7070a0"]
+      },
+      "offwhite": {
+        "role": "neutral",
+        "displayName": "Offwhite",
+        "canonical": "#ddddf0",
+        "tonalRamp": ["#1a1a2a", "#282838", "#383850", "#4a4a68", "#626280", "#8080a0", "#aaaacc", "#ddddf0"]
+      },
+      "border-subtle": {
+        "role": "neutral",
+        "displayName": "Border Subtle",
+        "canonical": "#222228",
+        "tonalRamp": ["#111116", "#17171e", "#222228", "#2e2e36", "#3a3a46", "#484858", "#585868", "#7878a0"]
+      },
+      "border-visible": {
+        "role": "neutral",
+        "displayName": "Border Visible",
+        "canonical": "#34343d",
+        "tonalRamp": ["#111116", "#1d1d24", "#28282e", "#34343d", "#424250", "#525265", "#686880", "#9090b0"]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted",
+        "canonical": "#7878a0",
+        "tonalRamp": ["#20202e", "#2c2c40", "#3c3c58", "#4e4e70", "#626288", "#7878a0", "#9898c0", "#c0c0e0"]
+      },
+      "shadow-grey": {
+        "role": "neutral",
+        "displayName": "Shadow Grey",
+        "canonical": "#454565",
+        "tonalRamp": ["#181826", "#222238", "#303050", "#454565", "#585880", "#6e6e9c", "#8e8eb8", "#b4b4d8"]
+      },
+      "accent-green": {
+        "role": "secondary",
+        "displayName": "Accent Green",
+        "canonical": "#419648",
+        "tonalRamp": ["#0e2210", "#183820", "#234f2e", "#316640", "#419648", "#56b85e", "#78d082", "#a8e8ac"]
+      },
+      "thesis-green": {
+        "role": "primary",
+        "displayName": "Thesis Green",
+        "canonical": "#52c989",
+        "tonalRamp": ["#0f2e1c", "#164228", "#1f5e38", "#2e7e4e", "#41a86a", "#52c989", "#7adaa6", "#b0eece"]
+      },
+      "credit-blue": {
+        "role": "tertiary",
+        "displayName": "Credit Blue",
+        "canonical": "#7ea0ff",
+        "tonalRamp": ["#101830", "#182444", "#263a68", "#3a5490", "#5878c8", "#7ea0ff", "#a8c0ff", "#d0e0ff"]
+      },
+      "warn-amber": {
+        "role": "tertiary",
+        "displayName": "Warn Amber",
+        "canonical": "#f0a84d",
+        "tonalRamp": ["#2e1a08", "#482a10", "#6a3e18", "#8c5620", "#b47030", "#d48c3e", "#f0a84d", "#f8cc88"]
+      },
+      "danger-red": {
+        "role": "tertiary",
+        "displayName": "Danger Red",
+        "canonical": "#f06b6b",
+        "tonalRamp": ["#2e1010", "#481818", "#6a2222", "#8c3232", "#b04444", "#d05858", "#f06b6b", "#f8a0a0"]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Landing page hero headlines only. Never used inside the app."
+      },
+      "headline": { "displayName": "Headline", "purpose": "Section titles and view headings inside the app." },
+      "title": { "displayName": "Title", "purpose": "Card headings, modal titles, widget names." },
+      "body": {
+        "displayName": "Body",
+        "purpose": "All prose, widget content, descriptions. Max 72ch line length where layout permits."
+      },
+      "label": {
+        "displayName": "Label / Mono",
+        "purpose": "Course codes, credit values, numeric academic data. Monospace for tabular alignment."
+      }
+    },
+    "shadows": [
+      {
+        "name": "ring-rest",
+        "value": "0 0 0 1px rgba(255,255,255,0.055)",
+        "purpose": "All cards and containers at rest. Defines boundary without asserting depth."
+      },
+      {
+        "name": "ring-hover",
+        "value": "0 0 0 1px rgba(255,255,255,0.10), 0 10px 28px rgba(0,0,0,0.18)",
+        "purpose": "Cards on hover. Ring brightens; ambient shadow appears beneath."
+      },
+      {
+        "name": "ring-selected",
+        "value": "0 0 0 1px rgba(82,201,137,0.24)",
+        "purpose": "Selected course cards. Ring shifts to Thesis Green tint."
+      },
+      {
+        "name": "landing-glow",
+        "value": "0 0 36px rgba(82,201,137,0.24)",
+        "purpose": "Landing page primary CTAs only. Not used inside the app."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-standard",
+        "value": "ease",
+        "purpose": "Default for state transitions (color, opacity, border)."
+      },
+      { "name": "duration-fast", "value": "150ms", "purpose": "Card hover transitions. Snap-fast for dense views." },
+      { "name": "duration-base", "value": "200ms", "purpose": "Button transitions, nav link color changes." },
+      { "name": "duration-reveal", "value": "520ms", "purpose": "Landing page entrance animations (landingFadeUp)." },
+      {
+        "name": "active-press",
+        "value": "scale(0.96)",
+        "purpose": "All interactive elements on :active for tactile feedback."
+      }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" },
+      { "name": "2xl", "value": "1440px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Button — Primary",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Default action button. Dark surface, offwhite text, barely-visible border.",
+      "html": "<button class=\"ds-btn-primary\">Confirm plan</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 4px; min-height: 2.5rem; padding: 8px 12px; background: #15151c; color: #ddddf0; border: 1px solid #222228; border-radius: 8px; font-family: 'Fira Sans', system-ui, sans-serif; font-size: 0.75rem; font-weight: 500; cursor: pointer; user-select: none; transition: background-color 200ms ease, border-color 200ms ease, transform 200ms ease; } .ds-btn-primary:hover { background: rgba(221,221,240,0.10); } .ds-btn-primary:focus-visible { outline: 2px solid rgba(82,201,137,0.75); outline-offset: 3px; } .ds-btn-primary:active { transform: scale(0.96); } .ds-btn-primary:disabled { background: #15151c; color: rgba(120,120,160,0.9); border-color: #222228; cursor: not-allowed; }"
+    },
+    {
+      "name": "Button — Accent",
+      "kind": "button",
+      "refersTo": "button-accent",
+      "description": "Confirmable action button. Used for enrol, confirm, and other irreversible primary actions.",
+      "html": "<button class=\"ds-btn-accent\">Enrol</button>",
+      "css": ".ds-btn-accent { display: inline-flex; align-items: center; justify-content: center; gap: 4px; min-height: 2.5rem; padding: 8px 12px; background: rgba(65,150,72,0.20); color: #419648; border: 1px solid #419648; border-radius: 8px; font-family: 'Fira Sans', system-ui, sans-serif; font-size: 0.75rem; font-weight: 500; cursor: pointer; user-select: none; transition: background-color 200ms ease, transform 200ms ease; } .ds-btn-accent:hover { background: rgba(65,150,72,0.30); } .ds-btn-accent:focus-visible { outline: 2px solid rgba(82,201,137,0.75); outline-offset: 3px; } .ds-btn-accent:active { transform: scale(0.96); }"
+    },
+    {
+      "name": "Course Card",
+      "kind": "card",
+      "refersTo": "card-course",
+      "description": "Primary information unit for Registration and Timeline views. Color stripe identifies module category.",
+      "html": "<article class=\"ds-course-card\"><div class=\"ds-course-card__header\"><span class=\"ds-course-card__stripe\" style=\"background:#52c989\"></span><div class=\"ds-course-card__copy\"><h3 class=\"ds-course-card__title\">Advanced Mathematics</h3><p class=\"ds-course-card__meta\"><span>CS-E1234</span><span aria-hidden=\"true\">·</span><span class=\"ds-course-card__credits\">5 cr</span></p></div></div></article>",
+      "css": ".ds-course-card { position: relative; display: flex; flex-direction: column; width: 100%; min-width: 0; overflow: hidden; border-radius: 10px; background: #15151c; box-shadow: 0 0 0 1px rgba(255,255,255,0.055); transition: box-shadow 150ms ease-out, background-color 150ms ease-out; } .ds-course-card:hover { background: rgba(21,21,28,0.95); box-shadow: 0 0 0 1px rgba(255,255,255,0.10), 0 10px 28px rgba(0,0,0,0.18); } .ds-course-card__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; min-height: 6rem; padding: 12px 14px; } .ds-course-card__stripe { flex-shrink: 0; width: 4px; margin-top: 2px; align-self: stretch; border-radius: 999px; background: #454565; } .ds-course-card__copy { min-width: 0; } .ds-course-card__title { margin: 0; font-family: 'Fira Sans', system-ui, sans-serif; font-size: 0.875rem; font-weight: 600; line-height: 1.35; color: #ddddf0; text-wrap: balance; } .ds-course-card__meta { margin: 4px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-family: 'Fira Code', ui-monospace, monospace; font-size: 0.75rem; color: #454565; } .ds-course-card__credits { font-weight: 600; color: #7ea0ff; }"
+    },
+    {
+      "name": "Nav Link (App)",
+      "kind": "nav",
+      "refersTo": "nav-link",
+      "description": "App navigation pill. Resting state is muted; active and hover shift to offwhite with a faint background tint.",
+      "html": "<nav class=\"ds-nav\"><a href=\"#\" class=\"ds-nav__link ds-nav__link--active\">Dashboard</a><a href=\"#\" class=\"ds-nav__link\">Timeline</a><a href=\"#\" class=\"ds-nav__link\">Structure</a><a href=\"#\" class=\"ds-nav__link\">Registration</a></nav>",
+      "css": ".ds-nav { display: flex; align-items: center; gap: 8px; } .ds-nav__link { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 6px; font-family: 'Fira Sans', system-ui, sans-serif; font-size: 0.875rem; color: #7878a0; text-decoration: none; transition: color 200ms ease, background-color 200ms ease; } .ds-nav__link:hover { color: #ddddf0; background: rgba(221,221,240,0.05); } .ds-nav__link--active { color: #ddddf0; background: rgba(221,221,240,0.05); } .ds-nav__link:focus-visible { outline: 2px solid rgba(82,201,137,0.75); outline-offset: 3px; }"
+    },
+    {
+      "name": "Credit Badge",
+      "kind": "chip",
+      "description": "Navbar pill showing cumulative credits. Thesis Green tint background, Thesis Green text, tabular numerals.",
+      "html": "<span class=\"ds-credit-badge\">68 / 180 cr</span>",
+      "css": ".ds-credit-badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 12px; background: rgba(82,201,136,0.20); color: #52c989; font-family: 'Fira Sans', system-ui, sans-serif; font-size: 0.75rem; font-weight: 300; font-variant-numeric: tabular-nums; transition: color 200ms ease; white-space: nowrap; }"
+    },
+    {
+      "name": "Landing CTA — Primary",
+      "kind": "button",
+      "description": "Landing page primary call-to-action. Thesis Green fill, glow, dark text.",
+      "html": "<a href=\"#\" class=\"ds-landing-cta\">Add to Chrome — free</a>",
+      "css": ".ds-landing-cta { display: inline-flex; align-items: center; justify-content: center; min-height: 2.75rem; padding: 0.7rem 1.1rem; background: #52c989; color: #0d0d11; border: 1px solid rgba(82,201,137,0.5); border-radius: 10px; font-family: 'Fira Sans', system-ui, sans-serif; font-size: 0.9rem; font-weight: 600; text-decoration: none; box-shadow: 0 0 36px rgba(82,201,137,0.24); transition: transform 160ms ease, background-color 160ms ease, box-shadow 160ms ease; } .ds-landing-cta:hover { transform: translateY(-1px); } .ds-landing-cta:active { transform: scale(0.96); } .ds-landing-cta:focus-visible { outline: 2px solid rgba(82,201,137,0.75); outline-offset: 3px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Research Console",
+    "overview": "Sisu+ is a serious instrument for academic work. Its visual language is built around the idea of a well-designed information console: dark enough to recede, structured enough to handle density, and composed enough to inspire confidence rather than anxiety. The palette borrows from high-contrast developer tooling (Fira's humanist sans paired with its own monospace companion) and applies it to a domain where clarity has real stakes.\n\nThe system does not decorate. Containers are layered by tonal lightness alone, never using shadows to claim importance. The single bright accent (Thesis Green) is strictly rationed — it marks completed states, confirmed actions, and progress — because its rarity is what makes it meaningful.\n\nThe system explicitly rejects SaaS-dashboard aesthetics (purple gradients, identical card grids), OG Sisu's institutional clunkiness, juvenile student-app playfulness, and dark-mode IDE monoculture.",
+    "keyCharacteristics": [
+      "Near-void background with fine-grained tonal layering (no drop shadows at rest)",
+      "Single accent color (Thesis Green) used for confirmable states only",
+      "Fira humanist sans + Fira mono — one type family, two registers",
+      "Ring shadows (single-pixel at low opacity) instead of ambient drop shadows",
+      "Tonal hover: interactivity communicated through luminance shift, not hue change",
+      "Finnish/English bilingual; layouts sized for the longer string"
+    ],
+    "rules": [
+      {
+        "name": "The One Accent Rule",
+        "body": "Thesis Green is used on ≤10% of any given screen. If a second element wants to be green, it is not important enough to be green.",
+        "section": "colors"
+      },
+      {
+        "name": "The Temperature Rule",
+        "body": "Text is offwhite (#ddddf0), not warm white. Backgrounds are cool-shifted dark, not warm neutral. No beige, cream, or sand tones.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Family Rule",
+        "body": "Do not introduce a third typeface. Weight contrast within Fira Sans (300/400/600/700) provides all the hierarchy needed.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat-By-Default Rule",
+        "body": "Shadows only appear as a response to state (hover, selection). At rest, containers are defined by tonal layering alone.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do use ring shadows (0 0 0 1px rgba(255,255,255,0.055)) as container boundaries at rest.",
+      "Do communicate interactivity through luminance shifts only — bg-offwhite/5 for hover, text-offwhite for active.",
+      "Do use Fira Code for all numeric academic values (credits, course codes, grades).",
+      "Do use text-wrap: balance on h1–h3 for even line lengths.",
+      "Do size layouts for Finnish text — it runs ~40% longer than English equivalents.",
+      "Do respect prefers-reduced-motion: all transitions need a reduced-motion fallback.",
+      "Do keep Thesis Green below 10% of any screen's surface area."
+    ],
+    "donts": [
+      "Don't introduce a second accent color.",
+      "Don't use warm neutrals (beige, cream, sand, any warm near-white).",
+      "Don't use border-left as a colored stripe on cards or callouts.",
+      "Don't use drop shadows to establish hierarchy at rest.",
+      "Don't use gradient text (background-clip: text).",
+      "Don't make Sisu+ look like a SaaS dashboard — no purple gradients, no identical-card grids.",
+      "Don't replicate OG Sisu's aesthetic — no institutional gray, no form-heavy table-heavy layouts.",
+      "Don't use playful student-app patterns — no cartoon illustrations, no confetti.",
+      "Don't make the dark theme feel like a terminal emulator.",
+      "Don't add unnecessary motion to data-heavy views. Inside the app, state transitions ≤200ms."
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Sisu+",
+    "description": "Extension name"
+  },
+  "extDescription": {
+    "message": "Sisu, but usable. Cleaner UI, study timeline, and Moodle sync; works with any university running Sisu.",
+    "description": "Extension description shown in Chrome Web Store"
+  }
+}

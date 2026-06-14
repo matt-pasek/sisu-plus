@@ -1,10 +1,11 @@
 import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
+import { createRoot, hydrateRoot } from 'react-dom/client';
 import { Analytics } from '@vercel/analytics/react';
 import '@/app/global.css';
 import '@/landing/landing.css';
-import '@/app/i18n';
-import { LandingPage, PrivacyPolicyPage } from '@/landing/LandingPage';
+import i18n from '@/app/i18n';
+import { getLandingRoute } from '@/landing/landingSeo';
+import { LandingApp } from '@/landing/LandingApp';
 
 const root = document.getElementById('landing-root');
 
@@ -12,11 +13,22 @@ if (!root) {
   throw new Error('Missing #landing-root');
 }
 
-const isPrivacyRoute = window.location.pathname.replace(/\/$/, '') === '/privacy';
+const landingRoot = root;
+const route = getLandingRoute(window.location.pathname);
 
-createRoot(root).render(
+const app = (
   <StrictMode>
-    {isPrivacyRoute ? <PrivacyPolicyPage /> : <LandingPage />}
+    <LandingApp route={route} />
     <Analytics />
-  </StrictMode>,
+  </StrictMode>
 );
+
+function renderLandingApp() {
+  if (landingRoot.hasChildNodes()) {
+    hydrateRoot(landingRoot, app);
+  } else {
+    createRoot(landingRoot).render(app);
+  }
+}
+
+void i18n.changeLanguage(route.locale).finally(renderLandingApp);

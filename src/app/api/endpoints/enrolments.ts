@@ -26,6 +26,10 @@ export async function enrol(enrolmentId: string, request: EnrolRequest): Promise
   return response.data;
 }
 
+export async function deleteOwnEnrolment(enrolmentId: string): Promise<void> {
+  await ilmoApi.api.deleteOwnEnrolment(enrolmentId);
+}
+
 export async function cancelEnrolment(enrolmentId: string): Promise<Enrolment> {
   const response = await ilmoApi.api.cancelEnrolment(enrolmentId);
   return response.data;

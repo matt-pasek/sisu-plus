@@ -1347,8 +1347,15 @@ a {
   gap: 0.9rem;
 }
 
+.landing-feature-carousel {
+  display: grid;
+  gap: 1rem;
+  align-self: center;
+}
+
 .landing-feature-list article,
-.landing-roadmap-grid article,
+.landing-feature-card-active,
+.landing-roadmap-card,
 .landing-privacy-panel,
 .landing-live-university-chip,
 .landing-request-card {
@@ -1381,7 +1388,18 @@ a {
     0 0 0 1px rgba(82, 201, 137, 0.04);
 }
 
-.landing-feature-list article::before {
+.landing-feature-card-active {
+  position: relative;
+  display: flex;
+  height: clamp(18.5rem, 28vw, 22rem);
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+  padding: clamp(1.45rem, 3vw, 2.25rem);
+}
+
+.landing-feature-list article::before,
+.landing-feature-card-active::before {
   content: '';
   position: absolute;
   inset: -18%;
@@ -1394,12 +1412,34 @@ a {
     transform 260ms ease;
 }
 
-.landing-feature-list article:hover::before {
+.landing-feature-list article:hover::before,
+.landing-feature-card-active:hover::before {
   opacity: 1;
   transform: scale(1);
 }
 
+.landing-feature-card-active::before {
+  inset: -30%;
+  background:
+    radial-gradient(circle at 12% 16%, rgba(82, 201, 137, 0.16), transparent 30%),
+    radial-gradient(circle at 86% 0%, rgba(126, 101, 255, 0.1), transparent 34%);
+  opacity: 0.95;
+}
+
+.landing-feature-card-active > span {
+  position: absolute;
+  top: clamp(1.45rem, 3vw, 2.25rem);
+  left: clamp(1.45rem, 3vw, 2.25rem);
+  display: inline-flex;
+  color: rgba(120, 213, 150, 0.78);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
 .landing-feature-list h3,
+.landing-feature-card-active h3,
 .landing-roadmap-grid h3,
 .landing-live-university-chip h3,
 .landing-request-card h3 {
@@ -1409,12 +1449,95 @@ a {
   font-weight: 650;
 }
 
+.landing-feature-card-active h3 {
+  position: relative;
+  max-width: 24rem;
+  font-size: clamp(1.65rem, 3vw, 2.45rem);
+  line-height: 1.05;
+  text-wrap: balance;
+}
+
 .landing-feature-list p,
+.landing-feature-card-active p,
 .landing-request-card p,
 .landing-live-university-chip p {
   margin: 0.65rem 0 0;
   color: rgba(221, 221, 240, 0.52);
   line-height: 1.65;
+}
+
+.landing-feature-card-active p {
+  position: relative;
+  max-width: 35rem;
+  margin-top: 1rem;
+  font-size: 1.02rem;
+  text-wrap: pretty;
+}
+
+.landing-feature-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.landing-feature-controls button {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  min-height: 3.15rem;
+  align-items: center;
+  gap: 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.065);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.022);
+  padding: 0.72rem 0.82rem;
+  color: rgba(221, 221, 240, 0.62);
+  cursor: pointer;
+  text-align: left;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    transform 180ms ease;
+}
+
+.landing-feature-controls button:hover {
+  border-color: rgba(82, 201, 137, 0.16);
+  background: rgba(255, 255, 255, 0.038);
+  color: rgba(221, 221, 240, 0.82);
+  transform: translateY(-1px);
+}
+
+.landing-feature-controls button:active {
+  transform: scale(0.96);
+}
+
+.landing-feature-controls button:focus-visible {
+  outline: 2px solid rgba(82, 201, 137, 0.75);
+  outline-offset: 2px;
+}
+
+.landing-feature-controls button.is-active {
+  border-color: rgba(82, 201, 137, 0.3);
+  background: rgba(82, 201, 137, 0.09);
+  color: var(--color-offwhite);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.16);
+}
+
+.landing-feature-controls button span {
+  color: rgba(120, 213, 150, 0.62);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.landing-feature-controls button strong {
+  overflow: hidden;
+  font-size: 0.88rem;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .landing-privacy {
@@ -1455,65 +1578,336 @@ a {
 .landing-roadmap-grid {
   grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1px;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.08);
+  gap: clamp(1.4rem, 4vw, 2.6rem);
+  position: relative;
+  padding-top: 1rem;
 }
 
-.landing-roadmap-grid article {
+.landing-roadmap-grid::before {
+  content: '';
+  position: absolute;
+  top: 20%;
+  left: 28%;
+  right: 28%;
+  bottom: -10%;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 30%, rgba(82, 201, 137, 0.09), transparent 65%);
+  z-index: 0;
+}
+
+.landing-roadmap-rail {
   position: relative;
-  border: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: center;
+  width: min(74%, 920px);
+  margin: 0 auto -0.8rem;
+}
+
+.landing-roadmap-rail::before,
+.landing-roadmap-rail::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: calc(100% / 6);
+  left: calc(100% / 6);
+  height: 2px;
+  transform: translateY(-50%);
+}
+
+.landing-roadmap-rail::before {
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(139, 137, 176, 0.22) 0,
+    rgba(139, 137, 176, 0.22) 7px,
+    transparent 7px,
+    transparent 16px
+  );
+}
+
+.landing-roadmap-rail::after {
+  right: 50%;
+  background: linear-gradient(90deg, rgba(82, 201, 137, 0.25), rgba(127, 218, 143, 0.95));
+  box-shadow: 0 0 24px rgba(82, 201, 137, 0.28);
+}
+
+.landing-roadmap-node {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  justify-self: center;
+  width: 3.9rem;
+  height: 3.9rem;
+  border: 1px solid rgba(139, 137, 176, 0.2);
+  border-radius: 999px;
+  background: rgba(31, 31, 42, 0.9);
+  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.25);
+}
+
+.landing-roadmap-node::before {
+  content: '';
+  width: 0.68rem;
+  height: 0.68rem;
+  border-radius: 999px;
+  background: rgba(139, 137, 176, 0.55);
+}
+
+.landing-roadmap-node.is-shipped {
+  border-color: rgba(105, 216, 143, 0.42);
+  background: rgba(23, 56, 40, 0.9);
+}
+
+.landing-roadmap-node.is-shipped::before {
+  width: 1rem;
+  height: 0.55rem;
+  border-bottom: 3px solid rgba(127, 218, 143, 0.95);
+  border-left: 3px solid rgba(127, 218, 143, 0.95);
   border-radius: 0;
-  padding: 1.5rem;
-  background: var(--color-background);
+  background: transparent;
+  transform: rotate(-45deg) translateY(-1px);
+}
+
+.landing-roadmap-node.is-current {
+  width: 4.8rem;
+  height: 4.8rem;
+  border-color: rgba(127, 218, 143, 0.38);
+  background: #4f9656;
+  box-shadow:
+    0 0 0 10px rgba(82, 201, 137, 0.15),
+    0 24px 58px rgba(82, 201, 137, 0.25);
+}
+
+.landing-roadmap-node.is-current::before {
+  width: 1.5rem;
+  height: 1.5rem;
+  background: transparent;
+  border-radius: 999px;
+  border: 2.5px solid rgba(255, 255, 255, 0.22);
+  border-top-color: rgba(255, 255, 255, 0.95);
+  animation: landingNodeSpin 900ms linear infinite;
+}
+
+.landing-roadmap-node.is-current::after {
+  content: '';
+  position: absolute;
+  inset: -12px;
+  border-radius: 999px;
+  border: 2px solid rgba(82, 201, 137, 0.52);
+  animation: landingNodeRing 2200ms ease-in-out infinite;
+}
+
+.landing-roadmap-node.is-planned::before {
+  content: '→';
+  width: auto;
+  height: auto;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  color: rgba(139, 137, 176, 0.72);
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.landing-roadmap-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1rem, 2.4vw, 1.5rem);
 }
 
 .landing-roadmap-card {
+  position: relative;
+  display: flex;
+  min-height: 24rem;
+  flex-direction: column;
   overflow: hidden;
+  padding: clamp(1.45rem, 2.4vw, 1.9rem);
+  background: radial-gradient(circle at 72% 10%, rgba(82, 201, 137, 0.05), transparent 44%), rgba(20, 20, 28, 0.76);
   transition:
+    border-color 220ms ease,
     background-color 220ms ease,
-    box-shadow 220ms ease;
+    box-shadow 220ms ease,
+    transform 220ms ease;
+}
+
+.landing-roadmap-card.is-current {
+  border-color: rgba(105, 216, 143, 0.38);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(127, 218, 143, 0.22), transparent 52%),
+    radial-gradient(circle at 50% 100%, rgba(82, 201, 137, 0.08), transparent 50%),
+    linear-gradient(180deg, rgba(38, 70, 48, 0.72), rgba(16, 26, 22, 0.9));
+  box-shadow:
+    0 0 0 1px rgba(82, 201, 137, 0.18),
+    0 28px 80px rgba(82, 201, 137, 0.18),
+    0 8px 24px rgba(0, 0, 0, 0.28);
+  transform: translateY(-4px);
+}
+
+.landing-roadmap-card.is-planned {
+  background: rgba(20, 20, 28, 0.54);
+}
+
+.landing-roadmap-card.is-planned li {
+  color: rgba(173, 170, 205, 0.65);
+}
+
+.landing-roadmap-card li.is-featured {
+  list-style-type: none;
+  margin: -0.08rem 0 0.2rem;
+  border: 1px solid rgba(127, 218, 143, 0.28);
+  border-radius: 0.62rem;
+  background: linear-gradient(135deg, rgba(82, 201, 137, 0.18), rgba(82, 201, 137, 0.055)), rgba(82, 201, 137, 0.045);
+  padding: 0.55rem 0.7rem;
+  color: rgba(218, 255, 223, 0.98);
+  font-weight: 800;
+  box-shadow:
+    0 12px 30px rgba(82, 201, 137, 0.12),
+    inset 0 0 0 1px rgba(127, 218, 143, 0.08);
+}
+
+.landing-roadmap-card.is-planned li:not(.is-featured)::before {
+  border-color: rgba(139, 137, 176, 0.32);
+  background: transparent;
+}
+
+.landing-roadmap-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(82, 201, 137, 0.2);
+  background-color: rgba(23, 23, 31, 0.9);
+  box-shadow:
+    0 22px 62px rgba(0, 0, 0, 0.24),
+    inset 0 0 0 1px rgba(82, 201, 137, 0.045);
 }
 
 .landing-roadmap-card::before {
   content: '';
   position: absolute;
-  inset: 0;
+  inset: -20%;
   pointer-events: none;
-  background: radial-gradient(circle at 70% 14%, rgba(82, 201, 137, 0.045), transparent 48%);
+  background: radial-gradient(circle at 64% 2%, rgba(82, 201, 137, 0.1), transparent 38%);
   opacity: 0;
   transition: opacity 220ms ease;
-}
-
-.landing-roadmap-card:hover {
-  background-color: #121217;
-  box-shadow: inset 0 0 0 1px rgba(82, 201, 137, 0.045);
 }
 
 .landing-roadmap-card:hover::before {
   opacity: 1;
 }
 
-.landing-roadmap-version {
-  color: var(--color-lighterGreen);
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  font-weight: 600;
+.landing-roadmap-card-top {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-bottom: 1.45rem;
 }
 
-.landing-roadmap-grid span {
+.landing-roadmap-status {
   display: inline-flex;
-  margin-top: 0.85rem;
+  align-items: center;
+  gap: 0.45rem;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.055);
-  padding: 0.2rem 0.6rem;
-  color: var(--color-lightGrey);
+  padding: 0.32rem 0.7rem;
+  color: rgba(221, 221, 240, 0.68);
   font-size: 0.72rem;
-  font-weight: 600;
-  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.landing-roadmap-status::before {
+  content: '';
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.landing-roadmap-card.is-shipped .landing-roadmap-status {
+  background: rgba(82, 201, 137, 0.12);
+  color: rgba(127, 218, 143, 0.95);
+}
+
+.landing-roadmap-card.is-shipped .landing-roadmap-status::before {
+  width: 0.58rem;
+  height: 0.33rem;
+  background: none;
+  border-bottom: 2px solid currentColor;
+  border-left: 2px solid currentColor;
+  border-radius: 0;
+  transform: rotate(-45deg) translateY(-2px);
+}
+
+.landing-roadmap-card.is-current .landing-roadmap-status {
+  background: rgba(82, 201, 137, 0.9);
+  color: rgba(8, 22, 13, 0.95);
+  font-weight: 800;
+}
+
+.landing-roadmap-card.is-current .landing-roadmap-status::before {
+  background: rgba(8, 22, 13, 0.5);
+}
+
+.landing-roadmap-card.is-planned .landing-roadmap-status {
+  color: rgba(139, 137, 176, 0.75);
+}
+
+.landing-roadmap-card.is-planned .landing-roadmap-status::before {
+  background: transparent;
+  border: 1.5px solid currentColor;
+  width: 0.38rem;
+  height: 0.38rem;
+}
+
+.landing-roadmap-card h3,
+.landing-roadmap-card ul,
+.landing-roadmap-version {
+  position: relative;
+  z-index: 1;
+}
+
+.landing-roadmap-card h3 {
+  font-size: clamp(1.22rem, 2vw, 1.55rem);
+  line-height: 1.15;
+}
+
+.landing-roadmap-card.is-current h3 {
+  font-size: clamp(1.35rem, 2.4vw, 1.8rem);
+}
+
+.landing-roadmap-card-body {
+  position: relative;
+  z-index: 1;
+  margin: 0.45rem 0 0;
+  color: rgba(173, 170, 205, 0.62);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.landing-roadmap-card.is-current .landing-roadmap-card-body {
+  color: rgba(186, 235, 196, 0.72);
+}
+
+.landing-roadmap-version {
+  display: inline-flex;
+  border: 1px solid rgba(127, 218, 143, 0.26);
+  border-radius: 0.5rem;
+  background: rgba(82, 201, 137, 0.08);
+  padding: 0.34rem 0.68rem;
+  color: rgba(236, 245, 232, 0.95);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.landing-roadmap-card.is-planned .landing-roadmap-version {
+  border-color: rgba(139, 137, 176, 0.22);
+  background: rgba(139, 137, 176, 0.08);
+  color: rgba(221, 221, 240, 0.72);
+}
+
+.landing-roadmap-card {
+  overflow: hidden;
 }
 
 .landing-roadmap-grid ul {
@@ -1526,34 +1920,44 @@ a {
   list-style: none;
 }
 
-.landing-roadmap-grid li::before {
+.landing-roadmap-grid li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.62rem;
+}
+
+.landing-roadmap-grid li:not(.is-featured)::before {
   content: '';
-  display: inline-block;
-  width: 0.42rem;
-  height: 0.42rem;
-  margin-right: 0.55rem;
-  border-radius: 999px;
-  background: var(--color-lighterGreen);
-  vertical-align: 0.08rem;
+  flex: 0 0 auto;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-top: 0.14rem;
+  border-radius: 0.28rem;
+  border: 1.5px solid rgba(82, 201, 137, 0.55);
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpolyline points='2,6.5 4.8,9.2 10,3' stroke='%237fda8f' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+      center / 72% no-repeat,
+    rgba(82, 201, 137, 0.12);
 }
 
 .landing-support {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(16rem, 20rem);
+  grid-template-columns: minmax(0, 1fr) minmax(17rem, 22rem);
   align-items: center;
   gap: clamp(1.25rem, 4vw, 3rem);
   width: min(1120px, calc(100% - 2.5rem));
   margin: 0 auto;
-  padding: clamp(1.25rem, 3vw, 1.75rem);
+  padding: clamp(1.4rem, 3vw, 2rem);
   overflow: hidden;
-  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
   background:
-    radial-gradient(circle at 18% 0%, rgba(204, 255, 115, 0.14), transparent 22rem),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.025));
+    radial-gradient(circle at 12% 0%, rgba(82, 201, 137, 0.1), transparent 24rem),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.024));
   box-shadow:
-    0 30px 100px rgba(0, 0, 0, 0.28),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.09);
+    0 24px 80px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .landing-support::before {
@@ -1561,8 +1965,8 @@ a {
   position: absolute;
   inset: 1px;
   pointer-events: none;
-  border-radius: 21px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border-radius: 17px;
+  background: linear-gradient(120deg, rgba(82, 201, 137, 0.08), transparent 42%);
 }
 
 .landing-support-copy {
@@ -1593,37 +1997,38 @@ a {
   position: relative;
   z-index: 1;
   box-sizing: border-box;
-  gap: 0.8rem;
+  gap: 0.9rem;
   width: 100%;
-  min-height: 4.6rem;
+  min-height: 4.35rem;
   justify-content: flex-start;
   justify-self: end;
-  border: 1px solid rgba(204, 255, 115, 0.28);
-  background: rgba(204, 255, 115, 0.12);
+  border: 1px solid rgba(82, 201, 137, 0.24);
+  background: rgba(82, 201, 137, 0.075);
   color: var(--color-offwhite);
   box-shadow:
-    0 18px 60px rgba(0, 0, 0, 0.26),
-    0 0 36px rgba(204, 255, 115, 0.08);
+    0 16px 50px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .landing-support-card:hover {
-  border-color: rgba(204, 255, 115, 0.42);
-  background: rgba(204, 255, 115, 0.16);
+  border-color: rgba(82, 201, 137, 0.42);
+  background: rgba(82, 201, 137, 0.11);
   box-shadow:
-    0 24px 70px rgba(0, 0, 0, 0.3),
-    0 0 44px rgba(204, 255, 115, 0.12);
+    0 22px 60px rgba(0, 0, 0, 0.26),
+    0 0 38px rgba(82, 201, 137, 0.08);
 }
 
 .landing-support-icon {
   display: grid;
-  width: 2.65rem;
-  height: 2.65rem;
+  width: 2.55rem;
+  height: 2.55rem;
   flex: 0 0 auto;
   place-items: center;
-  border-radius: 12px;
-  background: var(--color-lighterGreen);
-  color: var(--color-background);
-  box-shadow: 0 12px 32px rgba(82, 201, 137, 0.22);
+  border: 1px solid rgba(82, 201, 137, 0.24);
+  border-radius: 10px;
+  background: rgba(82, 201, 137, 0.14);
+  color: var(--color-lighterGreen);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
 }
 
 .landing-support-card strong,
@@ -1632,13 +2037,13 @@ a {
 }
 
 .landing-support-card strong {
-  font-size: 0.95rem;
+  font-size: 0.98rem;
   line-height: 1.2;
 }
 
 .landing-support-card small {
   margin-top: 0.25rem;
-  color: rgba(221, 221, 240, 0.58);
+  color: rgba(221, 221, 240, 0.52);
   font-size: 0.78rem;
   font-weight: 500;
 }
@@ -1648,20 +2053,6 @@ a {
   width: min(1120px, calc(100% - 2.5rem));
   margin: 0 auto;
   padding: 5rem 0;
-}
-
-.landing-universities::before {
-  content: '';
-  position: absolute;
-  top: 1rem;
-  right: -7rem;
-  width: min(72vw, 900px);
-  height: 24rem;
-  border-radius: 999px;
-  background: rgba(82, 201, 137, 0.055);
-  filter: blur(2px);
-  transform: rotate(-16deg);
-  pointer-events: none;
 }
 
 .landing-university-heading {
@@ -1681,189 +2072,142 @@ a {
   text-wrap: balance;
 }
 
-.landing-university-panel {
+.landing-install-banner {
   position: relative;
   z-index: 1;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.03);
-  box-shadow: 0 40px 120px rgba(0, 0, 0, 0.28);
-  backdrop-filter: blur(12px);
+  border: 1px solid rgba(82, 201, 137, 0.14);
+  border-radius: 14px;
+  padding: 1.75rem 2rem 1.5rem;
+  background: linear-gradient(135deg, rgba(82, 201, 137, 0.06), rgba(82, 201, 137, 0.02) 50%, transparent 100%);
 }
 
-.landing-university-left,
-.landing-request-card {
-  min-height: 330px;
-  padding: clamp(1.5rem, 2.8vw, 2.25rem);
+.landing-install-banner::before {
+  content: '';
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(82, 201, 137, 0.1), transparent 70%);
+  pointer-events: none;
 }
 
-.landing-university-left {
-  border-right: 1px solid rgba(255, 255, 255, 0.09);
-}
-
-.landing-live-label {
+.landing-install-banner-top {
   display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  margin-bottom: 1.25rem;
-  color: var(--color-lighterGreen);
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.landing-live-label span {
-  width: 0.45rem;
-  height: 0.45rem;
-  border-radius: 999px;
-  background: var(--color-lighterGreen);
-  box-shadow: 0 0 18px rgba(82, 201, 137, 0.95);
-}
-
-.landing-live-universities {
-  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 2rem;
   flex-wrap: wrap;
-  gap: 0.75rem;
-  width: 100%;
 }
 
-.landing-live-university-chip {
+.landing-install-copy {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.landing-install-copy .landing-kicker {
+  margin-bottom: 0.5rem;
+  color: var(--color-offwhite);
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.2;
+  text-transform: none;
+}
+
+.landing-install-body {
+  margin: 0 0 1rem;
+  color: rgba(200, 200, 220, 0.72);
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+
+.landing-install-steps {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
-  width: 100%;
-  padding: 0.85rem 0.9rem;
-  border: 1px solid rgba(82, 201, 137, 0.26);
-  border-radius: 14px;
-  background: rgba(82, 201, 137, 0.055);
-  transition:
-    transform 200ms ease,
-    border-color 200ms ease,
-    background-color 200ms ease,
-    box-shadow 200ms ease;
+  flex-wrap: wrap;
+  gap: 0.4rem;
 }
 
-.landing-live-university-chip:hover {
-  transform: translateY(-2px);
-  border-color: rgba(82, 201, 137, 0.38);
-  background: rgba(82, 201, 137, 0.075);
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.22);
+.landing-install-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.65rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(185, 185, 210, 0.82);
+  font-size: 0.78rem;
 }
 
-.landing-live-university-chip > span {
-  display: grid;
-  width: 2.25rem;
-  height: 2.25rem;
-  flex: 0 0 auto;
-  place-items: center;
-  border-radius: 10px;
-  border: 1px solid rgba(82, 201, 137, 0.25);
-  background: rgba(82, 201, 137, 0.1);
+.landing-install-step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: rgba(82, 201, 137, 0.15);
   color: var(--color-lighterGreen);
-  font-weight: 800;
-  font-size: 0.72rem;
-}
-
-.landing-live-university-chip h3 {
-  color: var(--color-offwhite);
-  font-size: 0.96rem;
-  font-weight: 650;
-}
-
-.landing-live-university-chip p {
-  margin-top: 0.25rem;
-  color: rgba(221, 221, 240, 0.5);
-  font-size: 0.82rem;
-}
-
-.landing-live-university-chip svg {
-  margin-left: auto;
-}
-
-.landing-university-note {
-  margin-top: 1rem;
-  width: min(100%, 340px);
-  padding: 0.9rem;
-  border: 1px dashed rgba(255, 255, 255, 0.12);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.018);
-}
-
-.landing-university-note p {
-  margin: 0;
-  color: rgba(221, 221, 240, 0.38);
-  font-size: 0.86rem;
-  line-height: 1.55;
-}
-
-.landing-request-card {
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-}
-
-.landing-request-card h3 {
-  color: var(--color-offwhite);
-  font-size: clamp(1.4rem, 2.4vw, 2rem);
-  line-height: 1.08;
+  font-size: 0.62rem;
   font-weight: 700;
 }
 
-.landing-request-card > p {
-  max-width: 520px;
-  margin-top: 1rem;
-  color: rgba(221, 221, 240, 0.55);
-  font-size: 0.95rem;
-  line-height: 1.7;
+.landing-install-step-arrow {
+  color: rgba(120, 120, 145, 0.5);
+  font-size: 0.75rem;
+  user-select: none;
 }
 
-.landing-request-steps {
-  display: grid;
-  gap: 0.75rem;
-  margin-top: 1.45rem;
+.landing-install-sep {
+  height: 1px;
+  margin: 1.25rem 0 1rem;
+  background: rgba(255, 255, 255, 0.06);
 }
 
-.landing-request-steps div {
+.landing-install-confirmed {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  flex-wrap: wrap;
+  gap: 0.85rem;
 }
 
-.landing-request-steps span {
-  display: grid;
-  width: 1.75rem;
-  height: 1.75rem;
-  flex: 0 0 auto;
-  place-items: center;
+.landing-install-confirmed-label {
+  color: rgba(120, 120, 145, 0.65);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.landing-install-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.landing-install-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.7rem;
   border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 999px;
-  color: rgba(221, 221, 240, 0.34);
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(200, 200, 220, 0.82);
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
-.landing-request-steps p {
-  margin: 0;
-  color: rgba(221, 221, 240, 0.55);
-  font-size: 0.9rem;
-  font-weight: 500;
-  line-height: 1.45;
-}
-
-.landing-request-steps strong {
-  color: rgba(221, 221, 240, 0.88);
-}
-
-.landing-request-card a {
-  gap: 0.65rem;
-  width: min(100%, 280px);
-  min-height: 2.55rem;
-  margin-top: 1.7rem;
-  font-size: 0.86rem;
+.landing-install-chip svg {
+  width: 0.75rem;
+  height: 0.75rem;
+  color: var(--color-lighterGreen);
 }
 
 .landing-footer {
@@ -2066,6 +2410,10 @@ a {
     min-height: 230px;
   }
 
+  .landing-roadmap-card {
+    min-height: 20rem;
+  }
+
   .landing-preview-stage {
     --landing-preview-scale: 0.78;
   }
@@ -2156,6 +2504,10 @@ a {
 
   .landing-mobile-note {
     display: block;
+  }
+
+  .landing-preview-wrap {
+    display: none;
   }
 
   .app-showcase {
@@ -2358,6 +2710,10 @@ a {
     flex-direction: row;
   }
 
+  .landing-feature-card-active {
+    height: 18rem;
+  }
+
   .landing-preview-stage {
     --landing-preview-scale: 0.36;
     height: 350px;
@@ -2382,7 +2738,35 @@ a {
   }
 
   .landing-roadmap-grid {
+    gap: 1rem;
+    padding-top: 0;
+  }
+
+  .landing-roadmap-rail {
+    display: none;
+  }
+
+  .landing-roadmap-cards {
     grid-template-columns: 1fr;
+  }
+
+  .landing-roadmap-card {
+    min-height: 0;
+  }
+
+  .landing-roadmap-card::after {
+    content: '';
+    position: absolute;
+    top: 1.9rem;
+    bottom: 1.9rem;
+    left: 0;
+    width: 3px;
+    background: rgba(139, 137, 176, 0.14);
+  }
+
+  .landing-roadmap-card.is-shipped::after,
+  .landing-roadmap-card.is-current::after {
+    background: linear-gradient(180deg, rgba(127, 218, 143, 0.9), rgba(82, 201, 137, 0.18));
   }
 
   .landing-support {
@@ -2406,45 +2790,16 @@ a {
     padding-block: 4.5rem;
   }
 
-  .landing-universities::before {
-    top: 2rem;
-    right: -2rem;
-    width: min(100%, 28rem);
-    height: 16rem;
-  }
-
   .landing-university-heading h2 {
     font-size: clamp(2rem, 12vw, 3.4rem);
   }
 
-  .landing-university-panel {
-    grid-template-columns: 1fr;
+  .landing-install-banner-top {
+    flex-direction: column;
   }
 
-  .landing-university-left,
-  .landing-request-card {
-    min-height: 0;
-    padding: 1.4rem;
-  }
-
-  .landing-university-left {
-    border-right: 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.09);
-  }
-
-  .landing-request-card > p {
-    font-size: 0.95rem;
-    line-height: 1.6;
-  }
-
-  .landing-request-steps {
-    gap: 0.65rem;
-    margin-top: 1.25rem;
-  }
-
-  .landing-request-card a {
-    width: 100%;
-    margin-top: 1.35rem;
+  .landing-install-step-arrow {
+    display: none;
   }
 
   .landing-footer {
@@ -2460,6 +2815,24 @@ a {
   .privacy-document {
     width: min(100% - 1.7rem, 860px);
     padding: 7.5rem 0 4rem;
+  }
+
+  .landing-roadmap-rail {
+    display: none;
+  }
+
+  .landing-roadmap-cards {
+    grid-template-columns: 1fr;
+    gap: 0.9rem;
+  }
+
+  .landing-roadmap-card {
+    min-height: auto;
+  }
+
+  .landing-roadmap-card.is-current {
+    transform: none;
+    order: -1;
   }
 }
 
@@ -2554,6 +2927,30 @@ a {
   }
 }
 
+@keyframes landingRoadmapPulse {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+@keyframes landingNodeRing {
+  0%,
+  100% {
+    opacity: 0.52;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.18;
+    transform: scale(1.18);
+  }
+}
+
+@keyframes landingNodeSpin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
 @keyframes appDropTargetPulse {
   0%,
   34% {
@@ -2622,5 +3019,19 @@ a {
     opacity: 1 !important;
     transform: none !important;
     filter: none !important;
+  }
+
+  .landing-roadmap-node.is-current::before {
+    animation: none;
+    border-top-color: rgba(255, 255, 255, 0.65);
+  }
+
+  .landing-roadmap-node.is-current::after {
+    animation: none;
+    opacity: 0.35;
+  }
+
+  .landing-roadmap-card.is-current {
+    transform: none;
   }
 }

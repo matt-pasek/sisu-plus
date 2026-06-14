@@ -4,8 +4,10 @@ import { getCreditsByModule } from '@/app/api/dataPoints/getCreditsByModule';
 import { getUserDetails } from '@/app/api/dataPoints/getUserDetails';
 import { fetchPlans } from '@/app/api/endpoints/plans';
 import { AccountDropdown } from '@/app/components/ui/AccountDropdown.comp';
+import { NavbarNotificationBell } from '@/app/components/ui/NavbarNotificationBell.comp';
 import { useSisuQuery } from '@/app/hooks/useSisuQuery';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
+import { SisuPlusLogo } from '@/shared/SisuPlusLogo';
 
 const NaviLink: React.FC<{ to: string; name: string }> = ({ to, name }) => (
   <NavLink
@@ -27,10 +29,7 @@ export const Navbar: React.FC = () => {
 
   return (
     <nav className="sticky z-50 flex w-full gap-5 border-b border-solid border-border bg-container px-6 py-2">
-      <div className="flex items-center gap-1 text-lg font-medium">
-        <div className="size-2 rounded-full bg-accent" />
-        SISU <span className="mb-1 text-xl text-accent">+</span>
-      </div>
+      <SisuPlusLogo />
       <div className="flex items-center gap-2 text-sm font-medium">
         <NaviLink to={'/student/frontpage'} name={t('links.dashboard')} />
         <NaviLink to={planId ? `/student/plan/${planId}/timing` : '/student/plan'} name={t('links.timeline')} />
@@ -43,6 +42,7 @@ export const Navbar: React.FC = () => {
             {modules.map((m) => m.done).reduce((a, b) => a + b, 0)} / {totalTarget} {t('creditsUnit')}
           </span>
         )}
+        <NavbarNotificationBell />
         {!loadingDetails && userDetails && <AccountDropdown userDetails={userDetails} />}
       </div>
     </nav>

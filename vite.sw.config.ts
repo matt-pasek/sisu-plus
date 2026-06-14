@@ -1,8 +1,9 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
-import { copyFileSync } from 'fs';
+import { copyFileSync, cpSync } from 'fs';
 
 export default defineConfig({
+  resolve: { alias: { '@': resolve(__dirname, 'src') } },
   build: {
     outDir: 'dist',
     emptyOutDir: true,
@@ -21,6 +22,8 @@ export default defineConfig({
       name: 'copy-manifest',
       closeBundle() {
         copyFileSync(resolve(__dirname, 'manifest.json'), resolve(__dirname, 'dist/manifest.json'));
+        copyFileSync(resolve(__dirname, 'favicon.png'), resolve(__dirname, 'dist/favicon.png'));
+        cpSync(resolve(__dirname, '_locales'), resolve(__dirname, 'dist/_locales'), { recursive: true });
       },
     },
   ],

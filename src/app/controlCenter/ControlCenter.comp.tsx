@@ -2,9 +2,15 @@ import { useEffect, useState } from 'react';
 import { useChromeStorage } from '@/app/hooks/useChromeStorage';
 import CircularText from '@/app/components/CircularText.comp';
 import { motion, AnimatePresence } from 'motion/react';
-import { getMoodleCalendarExportUrl } from '@/shared/domains';
+import { getMoodleCalendarExportUrlFromConfig } from '@/shared/domains';
 import { OnboardingPanel } from '@/app/controlCenter/OnboardingPanel.comp';
+import { NotificationSettingsPanel } from '@/app/controlCenter/NotificationSettingsPanel.comp';
+import { OPEN_NOTIFICATION_SETTINGS_EVENT } from '@/app/controlCenter/notificationSettingsEvents';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
+import { getControlTip } from '@/app/controlCenter/controlTips';
+import { DEFAULT_NOTIFICATION_PREFS } from '@/app/types/prefs';
+import { notify } from '@/app/components/ui/notify';
+import type { NotificationPayload } from '@/background/notifications/types';
 
 function Toggle({ checked, onChange }: { checked: boolean; onChange: (val: boolean) => void }) {
   return (
@@ -38,6 +44,25 @@ function SparkleIcon({ className = 'size-5' }: { className?: string }) {
   );
 }
 
+function BellIcon({ className = 'size-4' }: { className?: string }) {
+  return (
+    <svg
+      aria-hidden="true"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      viewBox="0 0 24 24"
+    >
+      <path d="M15.5 18.25a3.5 3.5 0 0 1-7 0" strokeLinecap="round" />
+      <path
+        d="M18.5 16.75h-13c1.15-1.25 1.8-2.75 1.8-4.5V10a4.7 4.7 0 0 1 9.4 0v2.25c0 1.75.65 3.25 1.8 4.5Z"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 function isValidMoodleUrl(value: string): boolean {
   if (!value.trim()) return true;
 
@@ -49,53 +74,31 @@ function isValidMoodleUrl(value: string): boolean {
   }
 }
 
-interface ControlTip {
-  title: string;
-  body: string;
-  accentClass: string;
-}
-
-function getControlTip(
-  isActive: boolean,
-  pathname: string,
-  t: ReturnType<typeof useTranslationWithPrefix>['t'],
-): ControlTip {
-  if (!isActive) {
-    return {
-      title: t('tip.dormantTitle'),
-      body: t('tip.dormantBody'),
-      accentClass: 'text-warn bg-warn/15 shadow-[inset_0_0_0_1px_rgba(246,185,86,0.18)]',
-    };
-  }
-
-  if (pathname.startsWith('/student/plan')) {
-    return {
-      title: t('tip.planningTitle'),
-      body: t('tip.planningBody'),
-      accentClass: 'text-blue-300 bg-blue-400/15 shadow-[inset_0_0_0_1px_rgba(102,142,255,0.18)]',
-    };
-  }
-
-  return {
-    title: t('tip.dashboardTitle'),
-    body: t('tip.dashboardBody'),
-    accentClass: 'text-accent bg-accent/15 shadow-[inset_0_0_0_1px_rgba(65,150,72,0.18)]',
-  };
-}
-
 export function ControlCenter() {
   const { t } = useTranslationWithPrefix('controlCenter');
   const [isOpen, setIsOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [activeView, setActiveView] = useState<'main' | 'notifications'>('main');
   const [prefs, setPrefs, prefsLoaded] = useChromeStorage();
   const isActive = prefs.sisuPlusActive;
   const moodleToken = prefs.moodleToken ?? '';
+  const notificationPrefs = {
+    delivery: {
+      ...DEFAULT_NOTIFICATION_PREFS.delivery,
+      ...(prefs.notificationPrefs?.delivery ?? {}),
+    },
+    registrationOpenLeadMinutes:
+      prefs.notificationPrefs?.registrationOpenLeadMinutes ?? DEFAULT_NOTIFICATION_PREFS.registrationOpenLeadMinutes,
+  };
   const validMoodleUrl = isValidMoodleUrl(moodleToken);
-  const moodleCalendarPlaceholder = `${getMoodleCalendarExportUrl().replace('/export.php?', '/export_execute.php?')}...`;
+  const moodleCalendarPlaceholder = prefs.universityConfig
+    ? `${getMoodleCalendarExportUrlFromConfig(prefs.universityConfig).replace('/export.php?', '/export_execute.php?')}...`
+    : 'https://moodle.youruni.fi/calendar/export_execute.php?...';
   const onboardingActive = prefsLoaded && !prefs.sisuPlusOnboardingCompleted;
   const size = 80;
-  const openWidth = onboardingActive ? 520 : 360;
-  const openHeight = onboardingActive ? 640 : 420;
+  const notificationsActive = !onboardingActive && activeView === 'notifications';
+  const openWidth = notificationsActive ? 720 : onboardingActive ? 520 : 360;
+  const openHeight = notificationsActive ? 720 : onboardingActive ? 640 : 500;
   const hoverWidth = 382;
   const controlTip = getControlTip(isActive, window.location.pathname, t);
 
@@ -103,8 +106,25 @@ export function ControlCenter() {
     if (onboardingActive) setIsOpen(true);
   }, [onboardingActive]);
 
+  useEffect(() => {
+    const listener = (message: { notification?: NotificationPayload; type?: string }) => {
+      if (message.type !== 'SISU_PLUS_NOTIFICATION' || !message.notification) return;
+      notify.notification(message.notification.title, message.notification.body);
+    };
+
+    chrome.runtime.onMessage.addListener(listener);
+    return () => chrome.runtime.onMessage.removeListener(listener);
+  }, []);
+
+  useEffect(() => {
+    const listener = () => openNotificationSettings();
+
+    window.addEventListener(OPEN_NOTIFICATION_SETTINGS_EVENT, listener);
+    return () => window.removeEventListener(OPEN_NOTIFICATION_SETTINGS_EVENT, listener);
+  });
+
   function setOnboardingStep(step: number) {
-    setPrefs({ sisuPlusOnboardingStep: Math.min(Math.max(step, 0), 4) });
+    setPrefs({ sisuPlusOnboardingStep: Math.min(Math.max(step, 0), 5) });
   }
 
   function skipOnboarding() {
@@ -117,6 +137,59 @@ export function ControlCenter() {
 
   function activateFromOnboarding() {
     setPrefs({ sisuPlusActive: true, sisuPlusOnboardingStep: 3 });
+  }
+
+  function openOnboarding() {
+    void chrome.tabs.create({ url: chrome.runtime.getURL('onboarding.html') });
+  }
+
+  function updateNotificationPrefs(nextPrefs: typeof notificationPrefs) {
+    setPrefs({ notificationPrefs: nextPrefs });
+  }
+
+  function openNotificationSettings() {
+    setIsOpen(true);
+    setActiveView('notifications');
+  }
+
+  if (prefsLoaded && !prefs.universityConfig) {
+    return (
+      <div
+        style={{
+          position: 'fixed',
+          right: 16,
+          bottom: 16,
+          zIndex: 30,
+          background: 'var(--color-background)',
+          border: '1px solid rgba(255,255,255,0.08)',
+          borderRadius: 16,
+          padding: '16px 18px',
+          maxWidth: 280,
+          fontFamily: 'var(--font-sans)',
+          color: 'var(--color-offwhite)',
+          boxShadow: '0 12px 32px rgba(0,0,0,0.4)',
+        }}
+      >
+        <p style={{ fontSize: 13, marginBottom: 10, color: 'var(--color-lightGrey)' }}>Sisu+ isn't configured yet.</p>
+        <button
+          onClick={openOnboarding}
+          style={{
+            background: 'var(--color-accent)',
+            border: 'none',
+            borderRadius: 8,
+            color: '#fff',
+            cursor: 'pointer',
+            fontSize: 13,
+            fontWeight: 600,
+            padding: '7px 14px',
+            width: '100%',
+          }}
+          type="button"
+        >
+          Set up now
+        </button>
+      </div>
+    );
   }
 
   return (
@@ -154,6 +227,13 @@ export function ControlCenter() {
                 step={prefs.sisuPlusOnboardingStep}
                 validMoodleUrl={validMoodleUrl}
               />
+            ) : notificationsActive ? (
+              <NotificationSettingsPanel
+                notificationPrefs={notificationPrefs}
+                onBack={() => setActiveView('main')}
+                onPrefsChange={updateNotificationPrefs}
+                t={t}
+              />
             ) : (
               <>
                 <div className="flex items-start justify-between gap-3">
@@ -184,6 +264,25 @@ export function ControlCenter() {
                   </div>
                 </div>
 
+                <button
+                  className="flex min-h-12 cursor-pointer items-center justify-between gap-3 rounded-2xl bg-container p-3 text-left shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)] transition-[background-color,transform] duration-200 hover:bg-container2 active:scale-[0.99]"
+                  onClick={openNotificationSettings}
+                  type="button"
+                >
+                  <span className="flex min-w-0 items-center gap-3">
+                    <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-accent/14 text-accent">
+                      <BellIcon />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block text-sm font-medium text-offwhite">{t('notifications.entry.title')}</span>
+                      <span className="mt-0.5 block truncate text-xs text-lightGrey">
+                        {t('notifications.entry.body')}
+                      </span>
+                    </span>
+                  </span>
+                  <span className="text-lg leading-none text-lightGrey">›</span>
+                </button>
+
                 {!isActive && (
                   <div className="rounded-2xl bg-warn/10 p-3 text-xs leading-relaxed text-warn shadow-[inset_0_0_0_1px_rgba(240,168,77,0.16)]">
                     {t('pausedNotice')}
@@ -203,7 +302,7 @@ export function ControlCenter() {
                     </span>
                   </div>
                   <div
-                    className={`rounded-2xl bg-container2 px-3 py-2 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)] transition-[box-shadow] duration-200 ${
+                    className={`rounded-2xl bg-container2 px-3 py-2 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)] transition-shadow duration-200 ${
                       validMoodleUrl
                         ? 'focus-within:shadow-[inset_0_0_0_1px_rgba(65,150,72,0.65)]'
                         : 'shadow-[inset_0_0_0_1px_rgba(240,107,107,0.45)]'
@@ -222,6 +321,13 @@ export function ControlCenter() {
                     {isActive ? t('moodle.connectedHelper') : ''}
                   </p>
                 </div>
+                <button
+                  type="button"
+                  className="mt-auto w-full cursor-pointer rounded-xl border border-dashed border-white/10 py-2 font-mono text-[11px] text-lightGrey/50 transition-colors hover:border-white/20 hover:text-lightGrey"
+                  onClick={() => setPrefs({ lastSeenChangelogVersion: '' })}
+                >
+                  ↩ reset changelog
+                </button>
               </>
             )}
           </motion.div>
@@ -274,7 +380,7 @@ export function ControlCenter() {
                 transition: { duration: 0.12 },
               }}
               transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
-              className="mr-1 w-[290px] rounded-3xl p-3 text-left shadow-[0_14px_38px_rgba(0,0,0,0.32),inset_0_0_0_1px_rgba(255,255,255,0.06)]"
+              className="mr-1 w-72.5 rounded-3xl p-3 text-left shadow-[0_14px_38px_rgba(0,0,0,0.32),inset_0_0_0_1px_rgba(255,255,255,0.06)]"
             >
               <div className="flex gap-3">
                 <span

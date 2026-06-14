@@ -5,7 +5,7 @@ import { fetchEnrolments } from '@/app/api/endpoints/enrolments';
 import { useSisuQuery } from '@/app/hooks/useSisuQuery';
 import type { CourseUnit } from '@/app/api/generated/KoriApi';
 import type { Plan } from '@/app/api/generated/OsuvaApi';
-import type { CourseEntry, SectionData } from '@/app/views/structure/structureTypes';
+import { CourseEntry, SectionData } from '@/app/views/structure/types';
 
 export type VersionUpdate = {
   course: CourseEntry;

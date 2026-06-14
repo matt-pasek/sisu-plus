@@ -92,6 +92,12 @@ function isFutureDateTime(value: string | null): boolean {
   return value != null && new Date().toISOString() < value;
 }
 
+function isEnrolmentOpen(realisation: RealisationResult, effectiveEnrolmentEnd: string | null): boolean {
+  const hasEnrolmentWindow = realisation.enrolmentStart != null || effectiveEnrolmentEnd != null;
+  if (hasEnrolmentWindow) return isDateTimeInRange(realisation.enrolmentStart, effectiveEnrolmentEnd);
+  return realisation.continuousEnrolment;
+}
+
 function toRegistrationImplementation(realisation: RealisationResult): RegistrationImplementation | null {
   if (!realisation.id) return null;
 
@@ -108,8 +114,7 @@ function toRegistrationImplementation(realisation: RealisationResult): Registrat
     enrolmentStart: realisation.enrolmentStart,
     externalEnrolmentUrl: realisation.externalEnrolmentUrl,
     flowState: realisation.flowState,
-    isEnrolmentOpen:
-      realisation.continuousEnrolment || isDateTimeInRange(realisation.enrolmentStart, effectiveEnrolmentEnd),
+    isEnrolmentOpen: isEnrolmentOpen(realisation, effectiveEnrolmentEnd),
     isExam: isExamType(realisation.typeUrn),
     isUpcoming: isFutureDateTime(realisation.enrolmentStart),
     studyGroupSetCount: realisation.studyGroupSets.length,
@@ -164,7 +169,6 @@ function getUniqueEnrolments(enrolments: Enrolment[]): Enrolment[] {
 
 function isInactiveEnrolment(enrolment: Enrolment): boolean {
   return (
-    enrolment.state === 'NOT_ENROLLED' ||
     enrolment.state === 'ABORTED_BY_STUDENT' ||
     enrolment.state === 'ABORTED_BY_TEACHER' ||
     enrolment.status === 'CANCELLED' ||

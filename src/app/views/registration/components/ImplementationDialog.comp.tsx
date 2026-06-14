@@ -1,20 +1,25 @@
 import React, { useEffect, useState } from 'react';
+import { motion, useReducedMotion } from 'motion/react';
 import type {
   RegistrationCourse,
   RegistrationImplementation,
   RegistrationStudyGroupSet,
 } from '@/app/api/dataPoints/getRegistrationCourses';
 import { Button } from '@/app/components/ui/Button.comp';
-import {
-  formatCredits,
-  formatDate,
-  formatImplementationDateRange,
-  isExamImplementation,
-} from '../registrationFormatters';
-import { getDefaultSelections, getImplementationsForTab, isSelectionValid } from '../registrationUtils';
-import type { SelectionState } from '../registrationTypes';
-import { CheckIcon, CloseIcon } from './RegistrationIcons';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
+import {
+  formatDateTime,
+  formatImplementationDateRange,
+  getDefaultSelections,
+  getImplementationsForTab,
+  isExamImplementation,
+  isImplementationRegisterable,
+  isImplementationSelectable,
+  isSelectionValid,
+} from '@/app/views/registration/util';
+import { SelectionState } from '@/app/views/registration/types';
+import { formatCredits } from '@/app/helpers/formatCredits';
+import { CheckIcon, CloseIcon } from '@/app/views/registration/components/icons';
 
 interface Props {
   course: RegistrationCourse;
@@ -24,6 +29,8 @@ interface Props {
   onConfirm: (implementation: RegistrationImplementation, selections: SelectionState) => void;
 }
 
+const DIALOG_EASE = [0.22, 1, 0.36, 1] as const;
+
 export const ImplementationDialog: React.FC<Props> = ({
   course,
   initialImplementation,
@@ -32,6 +39,7 @@ export const ImplementationDialog: React.FC<Props> = ({
   onConfirm,
 }) => {
   const { t } = useTranslationWithPrefix('views.registration');
+  const shouldReduceMotion = useReducedMotion() === true;
   const implementationOptions = getImplementationsForTab(
     course,
     isExamImplementation(initialImplementation) ? 'exam' : 'course',
@@ -41,6 +49,7 @@ export const ImplementationDialog: React.FC<Props> = ({
     implementationOptions.find((candidate) => candidate.id === selectedImplementationId) ?? initialImplementation;
   const [selections, setSelections] = useState<SelectionState>(() => getDefaultSelections(implementation));
   const isValid = isSelectionValid(implementation, selections);
+  const registerable = isImplementationRegisterable(implementation);
 
   useEffect(() => {
     setSelections(getDefaultSelections(implementation));
@@ -61,13 +70,23 @@ export const ImplementationDialog: React.FC<Props> = ({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/65 px-4 py-6 backdrop-blur-sm"
+    <motion.div
+      animate={{ opacity: 1 }}
+      className="fixed inset-0 z-1000 flex items-center justify-center bg-black/65 px-4 py-6 backdrop-blur-sm"
+      exit={{ opacity: 0 }}
+      initial={{ opacity: 0 }}
       role="dialog"
       aria-modal="true"
       aria-labelledby="registration-dialog-title"
+      transition={{ duration: shouldReduceMotion ? 0.01 : 0.16, ease: DIALOG_EASE }}
     >
-      <div className="flex max-h-[min(44rem,calc(100dvh-3rem))] w-full max-w-3xl flex-col overflow-hidden rounded-[14px] bg-container shadow-[0_28px_80px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.10)]">
+      <motion.div
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        className="flex max-h-[min(44rem,calc(100dvh-3rem))] w-full max-w-3xl flex-col overflow-hidden rounded-[14px] bg-container shadow-[0_28px_80px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.10)]"
+        exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.985, y: 6 }}
+        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.985, y: 8 }}
+        transition={{ duration: shouldReduceMotion ? 0.01 : 0.2, ease: DIALOG_EASE }}
+      >
         <header className="flex items-start justify-between gap-5 border-b border-border px-5 py-5">
           <div>
             <h2 id="registration-dialog-title" className="text-lg font-semibold text-balance text-offwhite">
@@ -101,7 +120,7 @@ export const ImplementationDialog: React.FC<Props> = ({
             <div className="space-y-1.5">
               {implementationOptions.map((candidate) => {
                 const selected = candidate.id === implementation.id;
-                const disabled = !candidate.isEnrolmentOpen && !candidate.usesExternalEnrolment;
+                const disabled = !isImplementationSelectable(candidate);
 
                 return (
                   <button
@@ -129,11 +148,15 @@ export const ImplementationDialog: React.FC<Props> = ({
                       <span className="mt-1 block text-xs text-lightGrey">
                         {formatImplementationDateRange(candidate)}
                       </span>
-                      {candidate.enrolmentEnd && (
+                      {candidate.isUpcoming && candidate.enrolmentStart ? (
                         <span className="mt-2 inline-flex rounded bg-warn/15 px-2 py-0.5 text-xs font-semibold text-warn">
-                          {t('dialog.registrationCloses', { date: formatDate(candidate.enrolmentEnd) })}
+                          {t('dialog.registrationStarts', { date: formatDateTime(candidate.enrolmentStart) })}
                         </span>
-                      )}
+                      ) : candidate.enrolmentEnd ? (
+                        <span className="mt-2 inline-flex rounded bg-warn/15 px-2 py-0.5 text-xs font-semibold text-warn">
+                          {t('dialog.registrationCloses', { date: formatDateTime(candidate.enrolmentEnd) })}
+                        </span>
+                      ) : null}
                     </span>
                   </button>
                 );
@@ -176,7 +199,7 @@ export const ImplementationDialog: React.FC<Props> = ({
                             name={set.id}
                             checked={checked}
                             onChange={() => toggleSubGroup(set, subGroup.id)}
-                            className="size-5 accent-[var(--color-accent)]"
+                            className="size-5 accent-accent"
                           />
                           <span className="text-xs font-semibold text-offwhite">{subGroup.name ?? subGroup.id}</span>
                         </label>
@@ -204,10 +227,16 @@ export const ImplementationDialog: React.FC<Props> = ({
             className="min-h-10 min-w-32 text-sm font-semibold tracking-wide uppercase"
             onClick={() => onConfirm(implementation, selections)}
           >
-            {isPending ? t('actions.confirming') : t('actions.confirm')}
+            {isPending
+              ? registerable
+                ? t('actions.confirming')
+                : t('actions.savingSelection')
+              : registerable
+                ? t('actions.confirm')
+                : t('actions.saveSelection')}
           </Button>
         </footer>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };

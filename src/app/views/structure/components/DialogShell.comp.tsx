@@ -18,7 +18,7 @@ export const DialogShell: React.FC<Props> = ({ labelId, onClose, children, maxWi
 
   return (
     <div
-      className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/65 px-4 py-6 backdrop-blur-sm"
+      className="fixed inset-0 z-1000 flex items-center justify-center bg-black/65 px-4 py-6 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-labelledby={labelId}
@@ -34,16 +34,3 @@ export const DialogShell: React.FC<Props> = ({ labelId, onClose, children, maxWi
     </div>
   );
 };
-
-export const DialogCloseButton: React.FC<{ label: string; onClose: () => void }> = ({ label, onClose }) => (
-  <button
-    type="button"
-    aria-label={label}
-    onClick={onClose}
-    className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-lg bg-container2 text-lightGrey transition-[background-color,color,transform] duration-150 hover:bg-offwhite/10 hover:text-offwhite active:scale-[0.96]"
-  >
-    <svg className="size-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-      <path d="M3 3l10 10M13 3L3 13" />
-    </svg>
-  </button>
-);

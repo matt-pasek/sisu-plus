@@ -2,20 +2,17 @@ import React from 'react';
 import type { SemesterCreditSummary } from '@/app/api/dataPoints/getCreditsByPeriod';
 import type { TimelineCourse } from '@/app/api/dataPoints/getTimelineCourses';
 import { TimelineCourseCard } from '@/app/views/timeline/components/TimelineCourseCard.comp';
-import {
-  formatCredits,
-  formatPeriodRange,
-  getCourseKey,
-  getModuleColor,
-  getSemesterTitle,
-  isCurrentPeriod,
-  isCurrentSemester,
-} from '@/app/views/timeline/components/timelineUtils';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
+import { getCourseKey } from '@/app/views/timeline/util/getCourseKey';
+import { isCurrentPeriod, isCurrentSemester } from '@/app/views/timeline/util/getVisibleSemesters';
+import { formatCredits } from '@/app/helpers/formatCredits';
+import { sortCourses } from '@/app/views/timeline/util/sortCourses';
+import { formatPeriodRange } from '@/app/views/timeline/util/formatPeriodRange';
+import { getSemesterTitle } from '@/app/helpers/getSemesterTitle';
+import { getModuleColor } from '@/app/theme/moduleColors';
 
 interface Props {
   semester: SemesterCreditSummary;
-  moduleIds: string[];
 }
 
 interface SemesterCourseBlock {
@@ -23,14 +20,6 @@ interface SemesterCourseBlock {
   startColumn: number;
   endColumn: number;
   row: number;
-}
-
-function sortCourses(courses: TimelineCourse[]): TimelineCourse[] {
-  return [...courses].sort((a, b) => {
-    if (a.isPassed !== b.isPassed) return a.isPassed ? -1 : 1;
-    if (a.isEnrolled !== b.isEnrolled) return a.isEnrolled ? -1 : 1;
-    return (a.courseName ?? '').localeCompare(b.courseName ?? '');
-  });
 }
 
 function getSemesterCourseBlocks(semester: SemesterCreditSummary): SemesterCourseBlock[] {
@@ -61,7 +50,7 @@ function getSemesterCourseBlocks(semester: SemesterCreditSummary): SemesterCours
   });
 }
 
-export const TimelineSemesterColumn: React.FC<Props> = ({ semester, moduleIds }) => {
+export const TimelineSemesterColumn: React.FC<Props> = ({ semester }) => {
   const { t } = useTranslationWithPrefix('views.timeline');
   const current = isCurrentSemester(semester);
   const courseBlocks = getSemesterCourseBlocks(semester);
@@ -144,7 +133,7 @@ export const TimelineSemesterColumn: React.FC<Props> = ({ semester, moduleIds })
             <TimelineCourseCard
               key={getCourseKey(block.course)}
               course={block.course}
-              color={getModuleColor(block.course.moduleId, moduleIds)}
+              color={getModuleColor(block.course.moduleId)}
               className="z-10 min-h-24"
               style={{
                 gridColumn: `${block.startColumn + 1} / ${block.endColumn + 1}`,

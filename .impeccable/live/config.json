@@ -1,0 +1,8 @@
+{
+  "files": ["index.html"],
+  "insertBefore": "</body>",
+  "commentSyntax": "html",
+  "cspChecked": true,
+  "devCommand": "bun run dev:landing",
+  "devUrl": "http://localhost:5173"
+}

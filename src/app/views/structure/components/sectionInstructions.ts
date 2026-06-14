@@ -1,13 +1,13 @@
-import type { StructureSelectionGroup } from '@/app/views/structure/structureTypes';
+import { StructureSelectionGroup } from '@/app/views/structure/types';
 
-function normalizeInstructions(value: string): string {
+const normalizeInstructions = (value: string) => {
   return value.replace(/\s+/g, ' ').trim().toLocaleLowerCase();
-}
+};
 
-export function getSectionInstructionsForEdit(
+export const getSectionInstructionsForEdit = (
   sectionInstructions: string | null,
   groups: StructureSelectionGroup[],
-): string | null {
+) => {
   if (!sectionInstructions) return null;
 
   const normalizedSectionInstructions = normalizeInstructions(sectionInstructions);
@@ -16,4 +16,4 @@ export function getSectionInstructionsForEdit(
   );
 
   return hasSameGroupInstructions ? null : sectionInstructions;
-}
+};

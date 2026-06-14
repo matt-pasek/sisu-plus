@@ -3,13 +3,14 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/app/components/ui/Button.comp';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { useCourseUnit } from '@/app/views/structure/hooks/useCourseUnit';
-import { useStructurePlanMutation } from '@/app/views/structure/editing/useStructurePlanMutation';
-import { setCompletionMethod } from '@/app/views/structure/editing/structurePlanDraft';
-import { DialogShell, DialogCloseButton } from './DialogShell.comp';
-import type { CourseEntry } from '@/app/views/structure/structureTypes';
+import { DialogCloseButton } from './DialogCloseButton.comp';
+import { DialogShell } from './DialogShell.comp';
 import type { CompletionMethod } from '@/app/api/generated/KoriApi';
 import type { Plan } from '@/app/api/generated/OsuvaApi';
 import { pickLabel } from '@/app/api/resolvers/helpers/pickLabel';
+import { CourseEntry } from '@/app/views/structure/types';
+import { useStructurePlanMutation } from '@/app/views/structure/hooks/useStructurePlanMutation';
+import { setCompletionMethod } from '@/app/views/structure/util/editing/structurePlanDraft';
 
 interface Props {
   course: CourseEntry;

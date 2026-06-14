@@ -3,26 +3,31 @@ import { fetchEnrolments } from '@/app/api/endpoints/enrolments';
 import { fetchPlans } from '@/app/api/endpoints/plans';
 import { fetchStudyRights } from '@/app/api/endpoints/studyRights';
 import { koriApi } from '@/app/api/client';
+import { isPassingCourseUnitAttainment } from '@/app/api/dataPoints/util';
 import type { CourseUnitAttainmentRestricted } from '@/app/api/generated/OriApi';
-import type { CourseUnit, LocalizedMarkupString, LocalizedString, Module } from '@/app/api/generated/KoriApi';
+import type {
+  CourseUnit,
+  CurriculumPeriod,
+  LocalizedMarkupString,
+  LocalizedString,
+  Module,
+} from '@/app/api/generated/KoriApi';
 import type { Plan } from '@/app/api/generated/OsuvaApi';
 import { buildCuToTopModuleMap } from '@/app/api/resolvers/helpers/buildCuToTopModuleMap';
 import { pickLabel } from '@/app/api/resolvers/helpers/pickLabel';
 import { resolveCourseUnit } from '@/app/api/resolvers/resolveCourseUnit';
 import { resolveModule } from '@/app/api/resolvers/resolveModule';
+import { formatAppDate } from '@/app/helpers/formatAppDate';
 import { getCurrentLocale } from '@/app/i18n';
 import { useSisuQuery } from '@/app/hooks/useSisuQuery';
-import type {
-  CourseEntry,
-  StructureData,
-  StructureOption,
-  StructureSelectionGroup,
-} from '@/app/views/structure/structureTypes';
+import { CourseEntry, StructureData, StructureOption, StructureSelectionGroup } from '@/app/views/structure/types';
 
 type StructurePlan = {
   id?: string;
+  name?: string;
   rootId: string;
   curriculumPeriodId: string;
+  metadata?: Record<string, unknown>;
   moduleSelections: { moduleId: string; parentModuleId?: string }[];
   courseUnitSelections: { courseUnitId: string; parentModuleId?: string; completionMethodId?: string }[];
 };
@@ -57,11 +62,6 @@ function getTopLevelModuleIds(plan: StructurePlan): { topLevelModuleIds: string[
   return { topLevelModuleIds, wrapperModuleId };
 }
 
-function isPassingCourseUnitAttainment(attainment: unknown): attainment is CourseUnitAttainmentRestricted {
-  const candidate = attainment as Partial<CourseUnitAttainmentRestricted>;
-  return candidate.type === 'CourseUnitAttainment' && candidate.primary === true && candidate.state !== 'FAILED';
-}
-
 function getGrade(attainment: CourseUnitAttainmentRestricted | undefined): string | null {
   if (!attainment) return null;
   if (attainment.gradeScaleId.includes('hyl-hyv')) return attainment.gradeId != null ? 'Pass' : null;
@@ -75,6 +75,21 @@ function formatStudyRightUntil(endDate: string | undefined): string | null {
   const date = new Date(endDate);
   date.setDate(date.getDate() - 1);
   return date.toLocaleDateString(getCurrentLocale(), { month: 'long', year: 'numeric' });
+}
+
+function formatMetadataDate(value: unknown): string | null {
+  if (typeof value !== 'string' && typeof value !== 'number' && !(value instanceof Date)) return null;
+  const formatted = formatAppDate(value, '');
+  return formatted || null;
+}
+
+function pickPlanMetadataValue(plan: StructurePlan, keys: string[]): unknown {
+  const planRecord = plan as unknown as Record<string, unknown>;
+  for (const key of keys) {
+    if (planRecord[key] != null) return planRecord[key];
+    if (plan.metadata?.[key] != null) return plan.metadata[key];
+  }
+  return null;
 }
 
 function stripMarkup(value: string | null): string | null {
@@ -94,6 +109,15 @@ async function fetchModuleDocument(moduleId: string): Promise<Module | null> {
   try {
     const response = await koriApi.api.getModule(moduleId);
     return response.data as Module;
+  } catch {
+    return null;
+  }
+}
+
+async function fetchCurriculumPeriod(curriculumPeriodId: string): Promise<CurriculumPeriod | null> {
+  try {
+    const response = await koriApi.api.getCurriculumPeriod(curriculumPeriodId);
+    return response.data as CurriculumPeriod;
   } catch {
     return null;
   }
@@ -263,12 +287,16 @@ export const getStructureData = (): { data: StructureData | undefined; isLoading
   const { data, isLoading: structureLoading } = useSisuQuery(
     ['structure-data'],
     async (): Promise<StructureData> => {
-      const plan = plansQuery.data?.[0] as StructurePlan | undefined;
+      const plan = (plansQuery.data?.find((p) => p.primary) ?? plansQuery.data?.[0]) as StructurePlan | undefined;
       if (!plan) {
         return {
           planId: '',
           plan: {} as Plan,
           planName: 'My study plan',
+          degreeProgramName: null,
+          curriculumPeriodName: null,
+          planModifiedOn: null,
+          planCreatedOn: null,
           studyRightUntil: null,
           totalTarget: 0,
           degreeMinimumCredits: null,
@@ -293,10 +321,11 @@ export const getStructureData = (): { data: StructureData | undefined; isLoading
         .filter((selection) => cuToTopModule.has(selection.courseUnitId))
         .map((selection) => selection.courseUnitId);
 
-      const [moduleDetails, wrapperDetails, courseUnits] = await Promise.all([
+      const [moduleDetails, wrapperDetails, courseUnits, curriculumPeriod] = await Promise.all([
         Promise.all(topLevelModuleIds.map(resolveModule)),
         wrapperModuleId ? resolveModule(wrapperModuleId) : Promise.resolve(null),
         Promise.all(courseUnitIds.map(resolveCourseUnit)),
+        fetchCurriculumPeriod(plan.curriculumPeriodId),
       ]);
       const sectionDocuments = await Promise.all(topLevelModuleIds.map(fetchModuleDocument));
       const sectionChildren = await Promise.all(
@@ -370,7 +399,15 @@ export const getStructureData = (): { data: StructureData | undefined; isLoading
       return {
         planId: plan.id ?? '',
         plan: plan as Plan,
-        planName: wrapperDetails?.name ?? 'My study plan',
+        planName: plan.name ?? wrapperDetails?.name ?? 'My study plan',
+        degreeProgramName: wrapperDetails?.name ?? null,
+        curriculumPeriodName: curriculumPeriod
+          ? (pickLabel(curriculumPeriod.name) ?? pickLabel(curriculumPeriod.abbreviation))
+          : null,
+        planModifiedOn: formatMetadataDate(
+          pickPlanMetadataValue(plan, ['lastModifiedOn', 'modifiedOn', 'modifiedAt', 'updatedAt']),
+        ),
+        planCreatedOn: formatMetadataDate(pickPlanMetadataValue(plan, ['createdOn', 'createdAt'])),
         studyRightUntil: formatStudyRightUntil(activeStudyRight?.valid?.endDate),
         totalTarget: sections.reduce((sum, section) => sum + section.targetCredits, 0),
         degreeMinimumCredits: wrapperDetails?.targetCredits ?? null,

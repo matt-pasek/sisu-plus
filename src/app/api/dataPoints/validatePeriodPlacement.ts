@@ -1,4 +1,5 @@
 import type { StudyPeriodMap } from '@/app/api/dataPoints/getStudyPeriodMap';
+import { rangesOverlap } from '@/app/api/dataPoints/util';
 import type { RealisationResult } from '@/app/api/resolvers/resolveRealization';
 
 export interface PeriodPlacementResult {
@@ -7,16 +8,6 @@ export interface PeriodPlacementResult {
   valid: boolean;
   noData: boolean;
   reason?: string;
-}
-
-function rangesOverlap(
-  firstStart: string | null,
-  firstEnd: string | null,
-  secondStart: string,
-  secondEnd: string,
-): boolean {
-  if (!firstStart || !firstEnd) return false;
-  return firstStart < secondEnd && firstEnd > secondStart;
 }
 
 export function validatePeriodPlacement(

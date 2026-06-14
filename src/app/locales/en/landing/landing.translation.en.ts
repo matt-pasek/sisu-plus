@@ -1,9 +1,15 @@
+export type LandingRoadmapItem = {
+  label: string;
+  featured?: boolean;
+};
+
 export type LandingRoadmapColumn = {
   version: string;
   title: string;
+  body?: string;
   status: string;
-  items: string[];
-  current?: boolean;
+  tone: 'shipped' | 'current' | 'planned';
+  items: LandingRoadmapItem[];
 };
 
 export type LandingPolicySection = {
@@ -65,13 +71,11 @@ export type LandingTranslation = {
   universities: {
     kicker: string;
     title: string;
-    live: string;
-    requestTitle: string;
-    requestBody: string;
+    installTitle: string;
+    installBody: string;
     steps: string[];
-    emailStrong: string;
-    emailRest: string;
-    action: string;
+    confirmed: string;
+    confirmedNote: string;
   };
   footer: {
     copyright: string;
@@ -233,33 +237,50 @@ export const landingTranslation: LandingTranslation = {
   },
   roadmap: {
     kicker: "What's coming",
-    title: 'Fixing the things that actually slow you down.',
-    body: "The plan is pretty straightforward: fewer clicks to find what you need, clearer course info, and a timeline that doesn't make you guess. Supported universities first, then more campuses as requests come in.",
+    title: 'From useful upgrade to complete study workspace.',
+    body: 'Sisu+ is moving in clear release steps: v1.2 cleaned up course management, v2.0 brings the larger study-planning experience together, and the next updates focus on calendar depth, mobile polish, and smarter planning guidance.',
     columns: [
-      {
-        version: 'v1.0',
-        title: 'Initial release',
-        status: 'Shipped',
-        items: ['Personal dashboard', 'Moodle deadline view', 'Editable study timeline', 'Prerequisite warnings'],
-      },
       {
         version: 'v1.2',
         title: 'Course management',
-        status: 'Shipping now',
+        status: 'Shipped',
+        tone: 'shipped',
         items: [
-          'Structure of studies',
-          'Attainments and course details',
-          'Registrations',
-          'Course version management',
-          'Finnish language',
+          { label: 'Structure of studies' },
+          { label: 'Attainments and course details' },
+          { label: 'Registrations' },
+          { label: 'Course version management' },
+          { label: 'Finnish language' },
         ],
-        current: true,
       },
       {
-        version: 'Next',
-        title: 'More depth',
+        version: 'v2.0',
+        title: 'Complete study workspace',
+        body: 'Even better way to handle your studies.',
+        status: 'Shipping now',
+        tone: 'current',
+        items: [
+          { label: 'Support for EVERY university', featured: true },
+          { label: 'Even better visual experience' },
+          { label: 'Redesigned dashboard widgets' },
+          { label: 'Degree structure overview' },
+          { label: 'Smoother registration flow' },
+          { label: 'Notifications for registrations and deadlines' },
+        ],
+      },
+      {
+        version: 'Future',
+        title: 'Upcoming updates',
+        body: 'On the board, shaped by what you request.',
         status: 'Planned',
-        items: ['Calendar view', 'Mobile layout polish', 'More timeline guidance', 'More universities'],
+        tone: 'planned',
+        items: [
+          { label: 'Community-driven updates', featured: true },
+          { label: 'Calendar view' },
+          { label: 'Mobile layout polish' },
+          { label: 'Smarter timeline guidance' },
+          { label: 'More university-specific polish' },
+        ],
       },
     ],
   },
@@ -268,24 +289,17 @@ export const landingTranslation: LandingTranslation = {
     title: 'Enjoy Sisu+ and want to support development?',
     body: 'Get me a strawberry-lime energy drink on Ko-fi and I will deliver new features even quicker! It helps cover the small costs and late-night polish passes that keep Sisu+ moving.',
     aria: 'Support Sisu+ development on Ko-fi',
-    action: 'Feed me with batteries',
-    hint: '(Ko-fi opens in a new tab)',
+    action: 'Feed me batteries',
+    hint: 'Support development via Ko-fi',
   },
   universities: {
     kicker: 'Where it works',
     title: 'Your university, your Sisu+.',
-    live: 'Live universities',
-    requestTitle: 'Want it at your university?',
-    requestBody:
-      'Sisu+ is built to support Finnish universities running Sisu. If your university is not listed, send me the Sisu URL and I can check support.',
-    steps: [
-      'with your university name and Sisu URL',
-      'We collaborate to make sure everything works',
-      'Your campus gets the same cleaner dashboard and timeline',
-    ],
-    emailStrong: 'Email me',
-    emailRest: 'with your university name and Sisu URL',
-    action: 'Email me to add your university',
+    installTitle: 'Install Sisu+. Your campus is already in.',
+    installBody: 'A 30-second setup - grant access, pick your university - and Sisu+ activates every time.',
+    steps: ['Install', 'Grant access once', 'Open Sisu'],
+    confirmed: 'Confirmed',
+    confirmedNote: 'Any university running Sisu works automatically.',
   },
   footer: {
     copyright: 'All rights reserved.',

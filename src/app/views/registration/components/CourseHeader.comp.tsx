@@ -1,7 +1,8 @@
 import React from 'react';
 import type { RegistrationCourse, RegistrationImplementation } from '@/app/api/dataPoints/getRegistrationCourses';
-import { formatCredits, isExamImplementation } from '../registrationFormatters';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
+import { formatCredits } from '@/app/helpers/formatCredits';
+import { isExamImplementation } from '@/app/views/registration/util';
 
 interface Props {
   course: RegistrationCourse;

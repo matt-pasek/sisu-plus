@@ -6,6 +6,10 @@ export type StructureTranslation = {
     primaryBadge: string;
     subtitle: string;
     overallProgress: string;
+    creditsEarned: string;
+    curriculumPercent: string;
+    toDegreeMinimum: string;
+    modifiedOn: string;
     completed: string;
     remaining: string;
     milestone: string;
@@ -14,6 +18,8 @@ export type StructureTranslation = {
   };
   sidebar: {
     byCategory: string;
+    viewAction: string;
+    creditsLeft: string;
   };
   section: {
     statusComplete: string;
@@ -85,6 +91,7 @@ export type StructureTranslation = {
     unscheduledGroup: string;
     courseCount: string;
     selectedCount: string;
+    moreCount: string;
   };
   dialogs: {
     close: string;
@@ -179,6 +186,10 @@ export const structureTranslation: StructureTranslation = {
     primaryBadge: 'PRIMARY',
     subtitle: 'Degree programme · university · curriculum',
     overallProgress: 'Overall progress',
+    creditsEarned: 'credits earned',
+    curriculumPercent: '{{count}}% of curriculum',
+    toDegreeMinimum: '{{count}} cr to the degree minimum',
+    modifiedOn: 'Modified on: {{date}}',
     completed: 'Completed',
     remaining: 'Remaining',
     milestone: 'Milestone',
@@ -187,6 +198,8 @@ export const structureTranslation: StructureTranslation = {
   },
   sidebar: {
     byCategory: 'By Category',
+    viewAction: 'View',
+    creditsLeft: '{{count}} cr left',
   },
   section: {
     statusComplete: 'Complete',
@@ -260,6 +273,7 @@ export const structureTranslation: StructureTranslation = {
     unscheduledGroup: 'Unscheduled',
     courseCount: 'courses',
     selectedCount: 'selected',
+    moreCount: '+{{count}} more',
   },
   dialogs: {
     close: 'Close',

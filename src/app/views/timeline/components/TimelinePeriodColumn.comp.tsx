@@ -1,36 +1,25 @@
 import React from 'react';
-import type { TimelineCourse } from '@/app/api/dataPoints/getTimelineCourses';
 import type { PeriodCreditSummary } from '@/app/api/dataPoints/getCreditsByPeriod';
 import { TimelineCourseCard } from '@/app/views/timeline/components/TimelineCourseCard.comp';
-import {
-  formatCredits,
-  formatPeriodRange,
-  getCourseKey,
-  getModuleColor,
-  isCurrentPeriod,
-} from '@/app/views/timeline/components/timelineUtils';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
+import { sortCourses } from '@/app/views/timeline/util/sortCourses';
+import { formatPeriodRange } from '@/app/views/timeline/util/formatPeriodRange';
+import { isCurrentPeriod } from '@/app/views/timeline/util/getVisibleSemesters';
+import { formatCredits } from '@/app/helpers/formatCredits';
+import { getCourseKey } from '@/app/views/timeline/util/getCourseKey';
+import { getModuleColor } from '@/app/theme/moduleColors';
 
 interface Props {
   period: PeriodCreditSummary;
-  moduleIds: string[];
 }
 
-function sortCourses(courses: TimelineCourse[]): TimelineCourse[] {
-  return [...courses].sort((a, b) => {
-    if (a.isPassed !== b.isPassed) return a.isPassed ? -1 : 1;
-    if (a.isEnrolled !== b.isEnrolled) return a.isEnrolled ? -1 : 1;
-    return (a.courseName ?? '').localeCompare(b.courseName ?? '');
-  });
-}
-
-export const TimelinePeriodColumn: React.FC<Props> = ({ period, moduleIds }) => {
+export const TimelinePeriodColumn: React.FC<Props> = ({ period }) => {
   const { t } = useTranslationWithPrefix('views.timeline');
   const current = isCurrentPeriod(period);
   const courses = sortCourses(period.courses);
 
   return (
-    <section className="flex min-h-0 w-[280px] shrink-0 flex-col">
+    <section className="flex min-h-0 w-70 shrink-0 flex-col">
       <div
         className={`mb-3 rounded-lg border px-3 py-2 ${
           current ? 'border-accent/70 bg-accent/10' : 'border-border bg-container'
@@ -47,14 +36,10 @@ export const TimelinePeriodColumn: React.FC<Props> = ({ period, moduleIds }) => 
         </div>
       </div>
 
-      <div className="flex min-h-[180px] flex-1 flex-col gap-2 rounded-lg border border-dashed border-border bg-background/30 p-2">
+      <div className="flex min-h-45 flex-1 flex-col gap-2 rounded-lg border border-dashed border-border bg-background/30 p-2">
         {courses.length > 0 ? (
           courses.map((course) => (
-            <TimelineCourseCard
-              key={getCourseKey(course)}
-              course={course}
-              color={getModuleColor(course.moduleId, moduleIds)}
-            />
+            <TimelineCourseCard key={getCourseKey(course)} course={course} color={getModuleColor(course.moduleId)} />
           ))
         ) : (
           <div className="flex flex-1 items-center justify-center text-xs text-darkishGrey">{t('board.noCourses')}</div>

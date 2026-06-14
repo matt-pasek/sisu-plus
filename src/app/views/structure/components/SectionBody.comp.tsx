@@ -1,8 +1,9 @@
 import React from 'react';
+import { motion, useReducedMotion } from 'motion/react';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import type { ModuleColor } from '@/app/theme/moduleColors';
-import type { CourseEntry } from '@/app/views/structure/structureTypes';
 import { CourseCard } from '@/app/views/structure/components/CourseCard.comp';
+import { CourseEntry } from '@/app/views/structure/types';
 
 interface Props {
   courses: CourseEntry[];
@@ -20,6 +21,7 @@ type GroupTone = 'completed' | 'active' | 'remaining';
 
 export const SectionBody: React.FC<Props> = ({ courses, color, onMethodClick, onDetailsClick, onCardClick }) => {
   const { t } = useTranslationWithPrefix('views.structure');
+  const prefersReducedMotion = useReducedMotion();
   const completed = courses.filter((course) => course.completed);
   const active = courses.filter((course) => !course.completed && course.enrolled);
   const remaining = courses.filter((course) => !course.completed && !course.enrolled);
@@ -29,7 +31,12 @@ export const SectionBody: React.FC<Props> = ({ courses, color, onMethodClick, on
   }
 
   return (
-    <div className="border-t border-border/80 px-4 py-4">
+    <motion.div
+      className="border-t border-border px-5 pt-4.5 pb-5.5"
+      initial={prefersReducedMotion ? false : { opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.14, ease: [0.22, 1, 0.36, 1] }}
+    >
       <CourseGroup
         courses={completed}
         color={color}
@@ -54,7 +61,7 @@ export const SectionBody: React.FC<Props> = ({ courses, color, onMethodClick, on
         onMethodClick={onMethodClick}
         onCardClick={onCardClick}
       />
-    </div>
+    </motion.div>
   );
 };
 
@@ -73,28 +80,43 @@ const CourseGroup: React.FC<{
   onDetailsClick?: (course: CourseEntry) => void;
   onCardClick: (course: CourseEntry) => void;
 }> = ({ courses, color, label, tone, onMethodClick, onDetailsClick, onCardClick }) => {
+  const prefersReducedMotion = useReducedMotion();
   if (courses.length === 0) return null;
 
   const styles = toneStyles[tone];
 
   return (
-    <section className="mb-4 last:mb-0">
-      <div className={`mb-3 flex items-center gap-2 text-xs font-bold tracking-[0.13em] uppercase ${styles.text}`}>
-        <span className={`size-1.5 rounded-full ${tone === 'remaining' ? color.accent : styles.dot}`} />
+    <motion.section
+      className="mb-5.5 last:mb-0"
+      initial={prefersReducedMotion ? false : { opacity: 0, y: 5 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
+    >
+      <motion.div
+        className={`mb-3.5 flex items-center gap-2.5 font-mono text-[11px] font-bold tracking-[0.12em] uppercase ${styles.text}`}
+        initial={prefersReducedMotion ? false : { opacity: 0, x: -4 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.14, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <span
+          className={`size-1.75 rounded-full ${tone === 'remaining' ? '' : styles.dot}`}
+          style={tone === 'remaining' ? { backgroundColor: color.value } : undefined}
+        />
         {label}
-      </div>
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-2">
-        {courses.map((course) => (
+      </motion.div>
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-3">
+        {courses.map((course, index) => (
           <CourseCard
             key={course.courseUnitId}
             color={color}
             course={course}
+            index={index}
             onMethodClick={onMethodClick ? () => onMethodClick(course) : undefined}
             onDetailsClick={onDetailsClick ? () => onDetailsClick(course) : undefined}
             onCardClick={() => onCardClick(course)}
           />
         ))}
       </div>
-    </section>
+    </motion.section>
   );
 };

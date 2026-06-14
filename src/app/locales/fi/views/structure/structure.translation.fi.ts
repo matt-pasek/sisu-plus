@@ -8,6 +8,10 @@ export const structureTranslation: StructureTranslation = {
     primaryBadge: 'ENSISIJAINEN',
     subtitle: 'Tutkinto-ohjelma · yliopisto · opetussuunnitelma',
     overallProgress: 'Kokonaisedistyminen',
+    creditsEarned: 'opintopistettä suoritettu',
+    curriculumPercent: '{{count}} % opetussuunnitelmasta',
+    toDegreeMinimum: '{{count}} op tutkinnon vähimmäislaajuuteen',
+    modifiedOn: 'Muokattu: {{date}}',
     completed: 'Suoritettu',
     remaining: 'Jäljellä',
     milestone: 'Välitavoite',
@@ -16,6 +20,8 @@ export const structureTranslation: StructureTranslation = {
   },
   sidebar: {
     byCategory: 'Kategorioittain',
+    viewAction: 'Näytä',
+    creditsLeft: '{{count}} op jäljellä',
   },
   section: {
     statusComplete: 'Valmis',
@@ -89,6 +95,7 @@ export const structureTranslation: StructureTranslation = {
     unscheduledGroup: 'Aikatauluttamaton',
     courseCount: 'kurssit',
     selectedCount: 'valittu',
+    moreCount: '+{{count}} lisää',
   },
   dialogs: {
     close: 'Sulje',

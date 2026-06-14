@@ -255,17 +255,13 @@ export const TimelineBoard: React.FC<Props> = ({
                       }}
                       course={block.course}
                       color={getModuleColor(block.course.moduleId)}
-                      compact={
-                        block.endColumn - block.startColumn <= 1 ||
-                        courseBlocks.some(
-                          (otherBlock) =>
-                            otherBlock.course.courseUnitId !== block.course.courseUnitId &&
-                            otherBlock.row === block.row &&
-                            ((otherBlock.startColumn >= block.startColumn &&
-                              otherBlock.startColumn < block.endColumn) ||
-                              (otherBlock.endColumn > block.startColumn && otherBlock.endColumn <= block.endColumn)),
-                        )
-                      }
+                      compact={courseBlocks.some(
+                        (otherBlock) =>
+                          otherBlock.course.courseUnitId !== block.course.courseUnitId &&
+                          otherBlock.row === block.row &&
+                          ((otherBlock.startColumn >= block.startColumn && otherBlock.startColumn < block.endColumn) ||
+                            (otherBlock.endColumn > block.startColumn && otherBlock.endColumn <= block.endColumn)),
+                      )}
                       disabled={block.course.isPassed}
                       isDraft={draftCourseIds.has(block.course.courseUnitId)}
                       className="h-full min-h-18.5"

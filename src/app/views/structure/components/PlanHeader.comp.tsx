@@ -78,7 +78,7 @@ export const PlanHeader: React.FC<Props> = ({
             animation: 'heroAurora3 12s ease-in-out infinite',
           }}
         />
-        <Threads color={[65, 150, 72]} color2={[45, 180, 160]} amplitude={3} distance={0.5} glow={1} />
+        <Threads color={[65, 150, 72]} amplitude={3} distance={0.5} />
       </div>
       <div className="relative px-5 py-7 sm:px-8 sm:py-8 lg:px-10">
         <motion.div

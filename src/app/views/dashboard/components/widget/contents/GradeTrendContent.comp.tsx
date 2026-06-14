@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { formatCredits } from '@/app/helpers/formatCredits';
-import { DashboardCompletedCourse } from '@/app/views/dashboard/types/DashboardCompletedCourse.type';
+import type { DashboardCompletedCourse } from '@/app/views/dashboard/types/DashboardCompletedCourse.type';
 import { formatCompactDate } from '@/app/views/dashboard/util';
 import { getSmoothPath } from '@/app/views/dashboard/util/getSmoothPath';
 
@@ -26,9 +26,33 @@ const getTrendLine = (
 
 export const GradeTrendContent: React.FC<{ courses: DashboardCompletedCourse[] }> = ({ courses }) => {
   const { t } = useTranslationWithPrefix('views.dashboard');
+  const chartRef = useRef<SVGSVGElement>(null);
+  const [chartSize, setChartSize] = useState({ width: 520, height: 170 });
   const graded = courses
     .filter((course) => getNumericGrade(course) != null && course.attainmentDate)
     .sort((a, b) => a.attainmentDate.localeCompare(b.attainmentDate));
+
+  useEffect(() => {
+    const chart = chartRef.current;
+    if (!chart) return;
+
+    const updateSize = () => {
+      const { width, height } = chart.getBoundingClientRect();
+      setChartSize((current) => {
+        const nextWidth = Math.max(Math.round(width), 1);
+        const nextHeight = Math.max(Math.round(height), 1);
+        if (current.width === nextWidth && current.height === nextHeight) return current;
+        return { width: nextWidth, height: nextHeight };
+      });
+    };
+
+    updateSize();
+    const observer = new ResizeObserver(updateSize);
+    observer.observe(chart);
+
+    return () => observer.disconnect();
+  }, [graded.length]);
+
   const minDate = Math.min(...graded.map((course) => new Date(course.attainmentDate).getTime()));
   const maxDate = Math.max(...graded.map((course) => new Date(course.attainmentDate).getTime()));
   const range = Math.max(maxDate - minDate, 1);
@@ -42,8 +66,8 @@ export const GradeTrendContent: React.FC<{ courses: DashboardCompletedCourse[] }
   const slopeDelta = trend ? (trend.y2 - trend.y1) * 5 : null;
   const improving = slopeDelta != null && slopeDelta >= 0;
 
-  const W = 520,
-    H = 170,
+  const W = chartSize.width,
+    H = chartSize.height,
     padL = 26,
     padR = 10,
     padT = 12,
@@ -90,6 +114,7 @@ export const GradeTrendContent: React.FC<{ courses: DashboardCompletedCourse[] }
       <div className="relative min-h-0 flex-1 rounded-xl bg-background/45 p-2 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]">
         <div className="pointer-events-none absolute inset-2 rounded-lg bg-[radial-gradient(circle_at_50%_10%,rgba(82,201,137,0.08),transparent_48%)]" />
         <svg
+          ref={chartRef}
           aria-label={t('widgets.analytics.chartAria')}
           className="relative h-full w-full"
           role="img"

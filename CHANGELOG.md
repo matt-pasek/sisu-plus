@@ -1,5 +1,61 @@
 # Changelog
 
+## [2.0.0](https://github.com/matt-pasek/sisu-plus/compare/sisu-plus-v1.2.0...sisu-plus-v2.0.0) (2026-06-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* rewrote code to allow any university to use Sisu+
+
+### Features
+
+* add control center notification settings ([6a4e9d7](https://github.com/matt-pasek/sisu-plus/commit/6a4e9d72a5f0a1baa5e62ee34fff3af9e5c847a4))
+* add initial documentation for Sisu+ design system and coding principles ([a53da43](https://github.com/matt-pasek/sisu-plus/commit/a53da4301b081f396de22721ead78b2c0edf8775))
+* add known universities to config ([b83ec2e](https://github.com/matt-pasek/sisu-plus/commit/b83ec2e9a726a9d884433c7005cb79e7aa6bf2cf))
+* add new dashboard widget content components ([ef6e12c](https://github.com/matt-pasek/sisu-plus/commit/ef6e12c5ffe433a5e472f485c60a89ae6fffb6fa))
+* add notification background engine ([76fd2ff](https://github.com/matt-pasek/sisu-plus/commit/76fd2ff9140e98e5f189081b56923944ab55129b))
+* add notification center surfaces ([15384be](https://github.com/matt-pasek/sisu-plus/commit/15384be75eb8fc3816f738a24704b09d4ecc55ec))
+* CC tips for all views ([c7c5d4a](https://github.com/matt-pasek/sisu-plus/commit/c7c5d4a15eace6ed9138cf655ef124c712057940))
+* dashboard hero panels rewrite and new panel ([b17024b](https://github.com/matt-pasek/sisu-plus/commit/b17024bfbe52ff43eaaa730e17f4f279e7d3b6a9))
+* dashboard hero selectable panel, more stats + revamped code struct ([52fc882](https://github.com/matt-pasek/sisu-plus/commit/52fc882f7b077ec214706c539933622ce2167fa8))
+* hash based module colors ([feaa963](https://github.com/matt-pasek/sisu-plus/commit/feaa963df81e9453c59ecce3071020ddfada5436))
+* implement onboarding flow ([2400a61](https://github.com/matt-pasek/sisu-plus/commit/2400a6161a525239ac63c826a2e58c859042f889))
+* in-app beautiful changelog body + v2 prepared ([661a440](https://github.com/matt-pasek/sisu-plus/commit/661a44083cee5c83d1534fffd3cf3ed923ab36b0))
+* internationalize extension ([e8b5c93](https://github.com/matt-pasek/sisu-plus/commit/e8b5c93714d592f892c341d842a11ca3a82cc3d9))
+* new widget CourseMap (WIP) ([a365fce](https://github.com/matt-pasek/sisu-plus/commit/a365fcefa3b5bc66942685ced22a08059ce26664))
+* next exam hero stat becomes next due ([d58a1b4](https://github.com/matt-pasek/sisu-plus/commit/d58a1b49d617aa3f2c0f081ca4892038b7dbb097))
+* redesign landing roadmap ([6684a76](https://github.com/matt-pasek/sisu-plus/commit/6684a760698342c9399599250ef1f4d73e8d2f2e))
+* redesigned better registration view ([ee0de1c](https://github.com/matt-pasek/sisu-plus/commit/ee0de1c1200864cc0049c55e91d475e179d8dab2))
+* redesigned better structure view ([ddbe9d2](https://github.com/matt-pasek/sisu-plus/commit/ddbe9d2080780b9cc2516e58d250a1e0e685d530))
+* redesigned dashboard ([900b36e](https://github.com/matt-pasek/sisu-plus/commit/900b36edbccbf01c958251495212c018a139cc5c))
+* rewrote code to allow any university to use Sisu+ ([66f1a0b](https://github.com/matt-pasek/sisu-plus/commit/66f1a0b89c04fc6d8e50cfca9ed829bf548766ec))
+* surface notification prompts on dashboard ([88d2056](https://github.com/matt-pasek/sisu-plus/commit/88d20567acc5326ecb276d2326676952413765db))
+* Timeline qol changes ([cbbe508](https://github.com/matt-pasek/sisu-plus/commit/cbbe5081f3c3253104d6e43a1c73145c1a9bf7cf))
+
+
+### Bug Fixes
+
+* 1 period courses shouldnt be compact ([c8062e5](https://github.com/matt-pasek/sisu-plus/commit/c8062e50285cc0527fff0833453cd82effd20417))
+* bar better feel and style and timeline state going back to initial after confirming ([812a477](https://github.com/matt-pasek/sisu-plus/commit/812a477db93a5401875a23867889aa7935d807c4))
+* build fix ([5142430](https://github.com/matt-pasek/sisu-plus/commit/51424303ab1d65a731484afaaa94a9713e537fc0))
+* can correctly change implementation in registration ([b0dd11d](https://github.com/matt-pasek/sisu-plus/commit/b0dd11da5e2bc9873afd45e762cb130983ce7a18))
+* changelog animation not firing ([d1280f9](https://github.com/matt-pasek/sisu-plus/commit/d1280f9e07e5577970006e7e0b1f43085128e0e5))
+* grade trend widget resizing issues ([4cb0e0b](https://github.com/matt-pasek/sisu-plus/commit/4cb0e0bf0fc2dc61ae25e3d12366bcc6b084fa48))
+* hide badge on edit mode ([eed6675](https://github.com/matt-pasek/sisu-plus/commit/eed66752a3cf12ace7f8c0c90942a6f1f4484b0a))
+* login handoff flow ([8b313f6](https://github.com/matt-pasek/sisu-plus/commit/8b313f6f8dbbac47f2f384c7f870de3a2c0a4c1d))
+* major SEO improvement ([3c6268b](https://github.com/matt-pasek/sisu-plus/commit/3c6268bee950390f5bc8ab3ece60e325fe1f26ed))
+* No space badge in drawer wrongly wrapping ([1f1911f](https://github.com/matt-pasek/sisu-plus/commit/1f1911f6948f7bbe9d584d2bf1f988abcb962ee4))
+* registration split between implementation selection and enrolment ([8d61577](https://github.com/matt-pasek/sisu-plus/commit/8d61577a26449a04886202b62bf1915de97c678c))
+* removed redundant button from changelog outro - both do the same ([acf2465](https://github.com/matt-pasek/sisu-plus/commit/acf24652475575836c9422af3d9abf719510c441))
+* show properly filtered data for upcoming exam ([1d740d4](https://github.com/matt-pasek/sisu-plus/commit/1d740d4433dbda6f5531adf81ab8e934ce5b7793))
+* simplify structure header threads ([c64d822](https://github.com/matt-pasek/sisu-plus/commit/c64d822f0c2ee27149bfcd7f6e1927fd5c1197f1))
+* timeline courses DnD feels more natural ([16fa2cc](https://github.com/matt-pasek/sisu-plus/commit/16fa2cc5bfaf32aa0957534c1418fa0d25d6debf))
+* timeline courses no longer jumping when column count changes ([617b07c](https://github.com/matt-pasek/sisu-plus/commit/617b07c84e1a609252af54b0cb9a8dbfcd67be1a))
+* use correct course grade to calculate order ([4218884](https://github.com/matt-pasek/sisu-plus/commit/42188846f882ea0a0f5db414dd3abc6164e0ab3c))
+* use correct moodle link for known universities ([f26b7f4](https://github.com/matt-pasek/sisu-plus/commit/f26b7f458e19e9853144741b9159fc82ab1ec9c7))
+* use redirect to send to chrome store listing ([06f5fc6](https://github.com/matt-pasek/sisu-plus/commit/06f5fc600a100baaf6f407185bf7012dc88b5296))
+* widget import on landing page ([4778f11](https://github.com/matt-pasek/sisu-plus/commit/4778f117fd6a929f4b6570a87d518fdf967ffbde))
+
 ## [1.2.0](https://github.com/matt-pasek/sisu-plus/compare/sisu-plus-v1.1.0...sisu-plus-v1.2.0) (2026-05-31)
 
 

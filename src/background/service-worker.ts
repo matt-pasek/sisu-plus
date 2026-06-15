@@ -26,6 +26,10 @@ chrome.storage.onChanged.addListener((changes, area) => {
 chrome.runtime.onInstalled.addListener((details) => {
   if (details.reason === 'install') {
     void chrome.tabs.create({ url: chrome.runtime.getURL('onboarding.html') });
+  } else if (details.reason === 'update' && details.previousVersion && details.previousVersion <= '2.0.0') {
+    void chrome.storage.sync.remove('universityConfig').then(() => {
+      void chrome.tabs.create({ url: chrome.runtime.getURL('onboarding.html') });
+    });
   }
 
   void configReady.then(() => syncRuntimeForConfig(cachedConfig));

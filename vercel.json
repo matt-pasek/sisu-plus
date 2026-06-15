@@ -2,8 +2,14 @@
   "redirects": [
     {
       "source": "/install",
+      "has": [{ "type": "header", "key": "user-agent", "value": ".*Firefox.*" }],
+      "destination": "https://addons.mozilla.org/firefox/addon/sisu/",
+      "permanent": false
+    },
+    {
+      "source": "/install",
       "destination": "https://chromewebstore.google.com/detail/sisu+/oaimdmdjlgfgfigmblpolficgleijcoe",
-      "permanent": true
+      "permanent": false
     },
     {
       "source": "/",

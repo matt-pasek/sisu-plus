@@ -8,6 +8,7 @@ export const landingTranslation: LandingTranslation = {
     install: 'Asenna',
     home: 'Etusivu',
     addToChrome: 'Lisää Chromeen',
+    addToFirefox: 'Lisää Firefoxiin',
     backToSisu: 'Takaisin Sisu+:aan',
   },
   hero: {
@@ -17,6 +18,7 @@ export const landingTranslation: LandingTranslation = {
     titleAccent: 'vihdoin.',
     body: 'Selainlaajennus joka korjaa Sisun. Etusivu, aikajana, opintorakenne, ilmoittautumiset. Kaikki mitä ennen piti kaivaa esiin, nyt yhdessä paikassa. Opiskelijoille, opiskelijalta.',
     addToChromeFree: 'Lisää Chromeen - ilmainen',
+    addToFirefoxFree: 'Lisää Firefoxiin - ilmainen',
     sourceCode: 'Lähdekoodi',
     seeChanged: 'Katso mikä muuttui',
     activeUsers: '25+ aktiivista Chrome-käyttäjää',

@@ -26,7 +26,6 @@ export const LANDING_OG_IMAGE_ALT =
   'Sisu+ landing page preview showing a dark dashboard interface and the headline The Sisu we deserve, finally.';
 
 export const landingRoutes: LandingRoute[] = [
-  { kind: 'home', locale: 'en', path: '/' },
   { kind: 'home', locale: 'en', path: '/en/' },
   { kind: 'home', locale: 'fi', path: '/fi/' },
   { kind: 'privacy', locale: 'en', path: '/en/privacy' },
@@ -96,7 +95,7 @@ export function buildHreflangLinks(kind: LandingRouteKind): LandingAlternateLink
   return [
     { hreflang: 'en', href: `${LANDING_ORIGIN}${getRoutePath('en', kind)}` },
     { hreflang: 'fi', href: `${LANDING_ORIGIN}${getRoutePath('fi', kind)}` },
-    { hreflang: 'x-default', href: `${LANDING_ORIGIN}/` },
+    { hreflang: 'x-default', href: `${LANDING_ORIGIN}/en/` },
   ];
 }
 
@@ -128,11 +127,7 @@ export function buildOpenGraphImageUrl(): string {
 }
 
 export function buildRobotsTxt(): string {
-  return `User-agent: *
-    Allow: /
-    
-    Sitemap: ${LANDING_ORIGIN}/sitemap.xml
-  `;
+  return `User-agent: *\nAllow: /\n\nSitemap: ${LANDING_ORIGIN}/sitemap.xml\n`;
 }
 
 export function buildSitemapXml(): string {

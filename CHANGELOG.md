@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.0.1](https://github.com/matt-pasek/sisu-plus/compare/sisu-plus-v2.0.0...sisu-plus-v2.0.1) (2026-06-15)
+
+
+### Bug Fixes
+
+* SEO fixes ([cc64fec](https://github.com/matt-pasek/sisu-plus/commit/cc64fec0fca6c9c746f5c36221b2ef14b377b939))
+* show onboarding flow for user who update ([4e5ffba](https://github.com/matt-pasek/sisu-plus/commit/4e5ffbabe6840b8d2ff6262370351c007496c2b1))
+
 ## [2.0.0](https://github.com/matt-pasek/sisu-plus/compare/sisu-plus-v1.2.0...sisu-plus-v2.0.0) (2026-06-14)
 
 

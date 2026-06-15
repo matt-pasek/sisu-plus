@@ -129,7 +129,7 @@ export const landingTranslation: LandingTranslation = {
     confirmedNote: 'Mikä tahansa Sisua käyttävä yliopisto toimii automaattisesti.',
   },
   footer: {
-    copyright: 'Kaikki oikeudet pidätetään.',
+    copyright: 'Julkaistu MIT-lisenssillä.',
     affiliation: 'Ei yhteyttä tuettuihin yliopistoihin tai Funidata Oy:hyn.',
     privacyPolicy: 'Tietosuojakäytäntö',
     sourceCode: 'Lähdekoodi',

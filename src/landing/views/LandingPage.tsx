@@ -12,7 +12,7 @@ import { SisuPlusLogo } from '@/shared/SisuPlusLogo';
 import { HeroSocialProof } from '@/landing/components/HeroSocialProof';
 import { LanguageToggle } from '@/landing/components/LanguageToggle';
 import { Footer } from '@/landing/components/Footer';
-import { getInstallLinkProps } from '@/landing/util/getInstallLinkProps';
+import { getInstallLinkProps, useIsFirefox } from '@/landing/util/getInstallLinkProps';
 
 const appVersion = import.meta.env?.VITE_APP_VERSION ?? packageJson.version;
 
@@ -23,6 +23,7 @@ export function LandingPage({ route }: { route: LandingRoute }) {
   const featureCards = t('features.cards', { returnObjects: true }) as LandingFeatureCard[];
   const homePath = getRoutePath(route.locale, 'home');
   const installLinkProps = getInstallLinkProps();
+  const isFirefox = useIsFirefox();
 
   return (
     <main className="landing-page">
@@ -35,7 +36,7 @@ export function LandingPage({ route }: { route: LandingRoute }) {
         </div>
         <div className="flex items-center gap-3">
           <a className="landing-nav-cta" {...installLinkProps}>
-            {t('nav.addToChrome')}
+            {t(isFirefox ? 'nav.addToFirefox' : 'nav.addToChrome')}
           </a>
           <LanguageToggle route={route} />
         </div>
@@ -64,7 +65,7 @@ export function LandingPage({ route }: { route: LandingRoute }) {
           <p>{t('hero.body')}</p>
           <div className="landing-actions">
             <a className="landing-primary" {...installLinkProps}>
-              {t('hero.addToChromeFree')}
+              {t(isFirefox ? 'hero.addToFirefoxFree' : 'hero.addToChromeFree')}
             </a>
             <a className="landing-secondary" href="https://github.com/matt-pasek/sisu-plus">
               <GithubIcon />

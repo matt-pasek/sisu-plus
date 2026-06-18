@@ -1,0 +1,278 @@
+html {
+  background: #0d0d11;
+  scroll-behavior: smooth;
+  scroll-padding-top: 6.5rem;
+  overflow-x: hidden;
+}
+
+body {
+  overflow-x: hidden;
+  background: radial-gradient(circle at 50% 0%, rgba(82, 201, 137, 0.12), transparent 34rem), var(--color-background);
+}
+
+@layer base {
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
+.app-showcase-dashboard [style*='width'],
+.app-showcase-dashboard svg circle[stroke='var(--color-accent)'] {
+  transform-origin: left center;
+  animation: appProgressGrow 900ms 900ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+
+.app-showcase-dashboard svg circle[stroke='var(--color-accent)'] {
+  transform-origin: center;
+  animation-name: appDialGrow;
+}
+
+.landing-hero-copy {
+  animation: landingHeroCopyIn 760ms 90ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.landing-hero-badge,
+.landing-hero-title,
+.landing-hero-body,
+.landing-hero-actions,
+.landing-hero-proof {
+  animation: landingHeroItemIn 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.landing-hero-badge {
+  animation-delay: 220ms;
+}
+
+.landing-hero-title {
+  animation-delay: 300ms;
+}
+
+.landing-hero-body {
+  animation-delay: 390ms;
+}
+
+.landing-hero-actions {
+  animation-delay: 480ms;
+}
+
+.landing-hero-proof {
+  animation-delay: 560ms;
+}
+
+.landing-hero-showcase {
+  animation: landingShowcaseIn 860ms 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.landing-roadmap-track::after {
+  transform-origin: left;
+  animation: landingRoadmapTrace 1100ms 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.landing-roadmap-card {
+  animation: landingRoadmapCardIn 680ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(520ms + var(--roadmap-index, 0) * 90ms);
+}
+
+.landing-support-panel {
+  animation: landingPanelLiftIn 720ms 180ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.landing-install-panel {
+  animation: landingPanelLiftIn 720ms 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes landingHeroCopyIn {
+  from {
+    opacity: 0;
+    translate: 0 22px;
+    filter: blur(10px);
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    filter: blur(0);
+  }
+}
+
+@keyframes landingHeroItemIn {
+  from {
+    opacity: 0;
+    translate: 0 18px;
+    clip-path: inset(0 0 18% 0);
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes landingShowcaseIn {
+  from {
+    opacity: 0;
+    scale: 0.975;
+    translate: 0 28px;
+    filter: blur(14px);
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+    translate: 0 0;
+    filter: blur(0);
+  }
+}
+
+@keyframes appPanelIn {
+  from {
+    opacity: 0;
+    scale: 0.98;
+    translate: 0 18px;
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+    translate: 0 0;
+    filter: blur(0);
+  }
+}
+
+@keyframes appProgressGrow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes appDialGrow {
+  from {
+    transform: scale(0.76);
+    opacity: 0.1;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes appTimelineMove {
+  0% {
+    transform: translateX(0) translateY(0) rotate(0);
+    filter: none;
+  }
+  34% {
+    transform: translateX(0) translateY(0) rotate(0);
+    filter: none;
+  }
+  68% {
+    transform: translateX(calc(100% + 2rem)) translateY(-5.6rem) rotate(2deg);
+    filter: drop-shadow(0 20px 32px rgba(0, 0, 0, 0.36));
+  }
+  100% {
+    transform: translateX(calc(100% + 2.25rem)) translateY(-5.75rem) rotate(0);
+    filter: drop-shadow(0 12px 22px rgba(0, 0, 0, 0.26));
+  }
+}
+
+@keyframes appDropTargetPulse {
+  0%,
+  34% {
+    border-color: rgba(82, 201, 137, 0.2);
+    background: rgba(13, 13, 17, 0.24);
+  }
+  68% {
+    border-color: rgba(82, 201, 137, 0.55);
+    background: linear-gradient(135deg, rgba(82, 201, 137, 0.12), transparent), rgba(13, 13, 17, 0.36);
+    opacity: 1;
+  }
+  100% {
+    border-color: rgba(82, 201, 137, 0.08);
+    background: rgba(13, 13, 17, 0.08);
+    opacity: 0;
+  }
+}
+
+@keyframes landingNodeRing {
+  0%,
+  100% {
+    opacity: 0.52;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.18;
+    transform: scale(1.18);
+  }
+}
+
+@keyframes landingNodeSpin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+@keyframes landingRoadmapTrace {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes landingRoadmapCardIn {
+  from {
+    opacity: 0;
+    translate: 0 18px;
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    filter: blur(0);
+  }
+}
+
+@keyframes landingPanelLiftIn {
+  from {
+    opacity: 0;
+    translate: 0 18px;
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    filter: blur(0);
+  }
+}
+
+@keyframes landingScrollProgress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .app-showcase-dashboard [style*='width'],
+  .app-showcase-dashboard svg circle[stroke='var(--color-accent)'] {
+    animation: none;
+  }
+}

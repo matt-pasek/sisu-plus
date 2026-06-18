@@ -1,0 +1,28 @@
+---
+interface Props {
+  chromeLabel: string;
+  firefoxLabel?: string;
+  className: string;
+}
+
+const { chromeLabel, firefoxLabel = chromeLabel, className } = Astro.props;
+---
+
+<a
+  class={className}
+  data-install-link
+  data-chrome-label={chromeLabel}
+  data-firefox-label={firefoxLabel}
+  href="/install"
+  rel="noreferrer"
+>
+  {chromeLabel}
+</a>
+
+<script>
+  const isFirefox = /firefox/i.test(window.navigator.userAgent);
+
+  document.querySelectorAll<HTMLAnchorElement>('[data-install-link]').forEach((link) => {
+    link.textContent = isFirefox ? link.dataset.firefoxLabel || link.textContent : link.dataset.chromeLabel || link.textContent;
+  });
+</script>

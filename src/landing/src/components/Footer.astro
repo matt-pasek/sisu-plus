@@ -1,0 +1,51 @@
+---
+import type { LandingRoute } from '@/landing/landingSeo';
+import { getRoutePath } from '@/landing/landingSeo';
+import type { LandingTranslation } from '@/app/locales/en/landing/landing.translation.en';
+import GithubIcon from './GithubIcon.astro';
+import Logo from './Logo.astro';
+
+interface Props {
+  full?: boolean;
+  route: LandingRoute;
+  t: LandingTranslation;
+}
+
+const { full = true, route, t } = Astro.props;
+---
+
+<footer class="w-full border-t border-white/10 bg-[#121216]">
+  <div
+    class="mx-auto flex w-[min(1120px,calc(100%-2.5rem))] flex-wrap items-center justify-between gap-4 px-0 py-10 text-sm text-lightGrey max-lg:flex-col max-lg:items-start max-lg:gap-8 max-md:w-[calc(100%-1.5rem)]"
+  >
+    <div class="flex flex-col max-w-107.5 gap-3">
+      <Logo />
+      <div class="m-0 max-w-95">
+        <p>&copy; {new Date().getFullYear()} Mateusz Pasek. {t.footer.copyright}</p>
+        <span class="text-lightGrey/70">{t.footer.affiliation}</span>
+      </div>
+    </div>
+    <div
+      class="flex flex-wrap items-center justify-start gap-x-6 gap-y-3 text-sm text-lightGrey [&_a]:inline-flex [&_a]:items-center [&_a]:gap-2 [&_a]:leading-5 [&_a]:transition-colors [&_a:hover]:text-offwhite [&_svg]:size-4"
+    >
+      {full && <a href={getRoutePath(route.locale, 'privacy')}>{t.footer.privacyPolicy}</a>}
+      <a href="https://github.com/matt-pasek/sisu-plus">{t.footer.sourceCode}</a>
+      {
+        full && (
+          <a href="https://ko-fi.com/mattpasek" target="_blank" rel="noreferrer">
+            {t.footer.supportDevelopment}
+          </a>
+        )
+      }
+      <a href="mailto:contact@matt-pasek.dev">{t.footer.contact}</a>
+      {
+        full && (
+          <a href="https://github.com/matt-pasek">
+            <GithubIcon />
+            {t.footer.myGithub}
+          </a>
+        )
+      }
+    </div>
+  </div>
+</footer>

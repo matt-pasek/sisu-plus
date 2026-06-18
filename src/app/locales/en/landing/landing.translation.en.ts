@@ -25,6 +25,7 @@ export type LandingTranslation = {
     install: string;
     home: string;
     addToChrome: string;
+    addToFirefox: string;
     backToSisu: string;
   };
   hero: {
@@ -34,6 +35,7 @@ export type LandingTranslation = {
     titleAccent: string;
     body: string;
     addToChromeFree: string;
+    addToFirefoxFree: string;
     sourceCode: string;
     seeChanged: string;
     activeUsers: string;
@@ -179,6 +181,7 @@ export const landingTranslation: LandingTranslation = {
     install: 'Install',
     home: 'Home',
     addToChrome: 'Add to Chrome',
+    addToFirefox: 'Add to Firefox',
     backToSisu: 'Back to Sisu+',
   },
   hero: {
@@ -188,6 +191,7 @@ export const landingTranslation: LandingTranslation = {
     titleAccent: 'finally.',
     body: 'A browser extension that fixes Sisu. Dashboard, study timeline, structure of studies, registrations. Everything that used to take too long, now in one place. For students, by student.',
     addToChromeFree: 'Add to Chrome - free',
+    addToFirefoxFree: 'Add to Firefox - free',
     sourceCode: 'Source code',
     seeChanged: 'See what changed',
     activeUsers: '25+ active Chrome users',
@@ -302,7 +306,7 @@ export const landingTranslation: LandingTranslation = {
     confirmedNote: 'Any university running Sisu works automatically.',
   },
   footer: {
-    copyright: 'All rights reserved.',
+    copyright: 'Released under the MIT License.',
     affiliation: 'Not affiliated with any supported university or Funidata Oy.',
     privacyPolicy: 'Privacy policy',
     sourceCode: 'Source code',

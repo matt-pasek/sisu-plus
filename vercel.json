@@ -2,28 +2,25 @@
   "redirects": [
     {
       "source": "/install",
+      "has": [{ "type": "header", "key": "user-agent", "value": ".*Firefox.*" }],
+      "destination": "https://addons.mozilla.org/firefox/addon/sisu/",
+      "permanent": false
+    },
+    {
+      "source": "/install",
       "destination": "https://chromewebstore.google.com/detail/sisu+/oaimdmdjlgfgfigmblpolficgleijcoe",
-      "permanent": true
+      "permanent": false
+    },
+    {
+      "source": "/",
+      "has": [{ "type": "header", "key": "accept-language", "value": "fi.*" }],
+      "destination": "/fi/",
+      "permanent": false
     },
     {
       "source": "/",
       "destination": "/en/",
-      "permanent": true
-    },
-    {
-      "source": "/en",
-      "destination": "/en/",
-      "permanent": true
-    },
-    {
-      "source": "/fi",
-      "destination": "/fi/",
-      "permanent": true
-    },
-    {
-      "source": "/privacy",
-      "destination": "/en/privacy",
-      "permanent": true
+      "permanent": false
     }
   ]
 }

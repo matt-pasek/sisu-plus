@@ -1,6 +1,27 @@
+<div align="center">
+
 # Sisu+
 
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/G2G41YIDLL)
+**Sisu, but usable.**
+
+[![Chrome Web Store Version](https://img.shields.io/chrome-web-store/v/oaimdmdjlgfgfigmblpolficgleijcoe?style=flat-square&label=version&color=6d28d9)](https://sisu-plus.matt-pasek.dev/install)
+[![Chrome Web Store Users](https://img.shields.io/chrome-web-store/users/oaimdmdjlgfgfigmblpolficgleijcoe?style=flat-square&label=users&color=0e7490)](https://sisu-plus.matt-pasek.dev/install)
+[![Chrome Web Store Last Updated](https://img.shields.io/chrome-web-store/last-updated/oaimdmdjlgfgfigmblpolficgleijcoe?style=flat-square&label=updated&color=0e7490)](https://sisu-plus.matt-pasek.dev/install)
+[![Chrome Web Store Rating](https://img.shields.io/chrome-web-store/rating/oaimdmdjlgfgfigmblpolficgleijcoe?style=flat-square&label=rating&color=0e7490)](https://sisu-plus.matt-pasek.dev/install)
+[![License](https://img.shields.io/github/license/matt-pasek/sisu-plus?style=flat-square&color=6d28d9)](./LICENSE)
+[![ko-fi](https://img.shields.io/badge/ko--fi-support%20the%20project-FF5E5B?style=flat-square&logo=ko-fi&logoColor=white)](https://ko-fi.com/G2G41YIDLL)
+
+[![Finnish universities](https://img.shields.io/badge/🇫🇮_Finnish_universities-supported-1a1a2e?style=flat-square)](https://sisu-plus.matt-pasek.dev)
+[![Built with](https://img.shields.io/badge/built_with-React_%2B_TypeScript-3178c6?style=flat-square&logo=typescript&logoColor=white)](https://sisu-plus.matt-pasek.dev)
+[![MV3](https://img.shields.io/badge/manifest-v3-22c55e?style=flat-square)](https://sisu-plus.matt-pasek.dev)
+
+<br/>
+
+[<img src="https://img.shields.io/badge/Chrome_%7C_Firefox-Install-6d28d9?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Install for Chrome or Firefox" height="36"/>](https://sisu-plus.matt-pasek.dev/install)
+
+</div>
+
+---
 
 Sisu+ is a browser extension for Sisu, the study information system used by Finnish universities. It runs inside your
 university's own Sisu page and turns the student side of Sisu into a faster planning workspace.
@@ -103,7 +124,7 @@ Build it:
 bun run build:landing
 ```
 
-The landing build writes to `dist-landing/`.
+The Astro landing build writes to `dist-landing/`.
 
 ## scripts
 
@@ -128,32 +149,40 @@ being reachable.
 ## project layout
 
 ```text
-src/content/                      content-script entrypoint and shadow-root mount
-src/background/                   service worker modules
-src/background/runtime/           content-script registration and host-scoped request watching
-src/background/session/           per-origin Sisu/Moodle session cache
-src/background/notifications/     notification prefs, cache, scheduling, and delivery
-src/onboarding/                   first-run university and permission setup
-src/app/                          Sisu replacement app
-src/app/api/generated/            generated Sisu API clients, rebuilt locally
-src/app/api/endpoints/            thin Sisu API wrappers
-src/app/api/dataPoints/           composed data and mutations used by views/widgets
-src/app/api/resolvers/            helpers for resolving Sisu entities
-src/app/views/dashboard/          dashboard, hero, widget system, notification nudges
-src/app/views/timeline/           study timeline, course search, validation, plan mutations
-src/app/views/structure/          degree structure, course details, attainments, version updates
-src/app/views/registration/       enrolment cards, dialogs, and registration actions
-src/app/components/changelog/     in-app release notes
-src/app/controlCenter/            floating pause/settings/notification panel
-src/app/locales/                  English and Finnish app copy
-src/app/hooks/                    shared React hooks, including Chrome storage
-src/app/types/                    shared app and preference types
-src/landing/                      public landing page and privacy page
-src/shared/                       shared extension/onboarding helpers
-docs/agents/                      agent/project workflow notes
-docs/sisu-plus-notification-spec.md notification architecture notes
-scripts/generate-apis.ts          generated API client refresh script
-scripts/prerender-landing.tsx     static landing prerender step
+sisu-plus/
+├── scripts/
+│   ├── export-translations.ts    generate an TSV file for translations
+│   └── generate-apis.ts          regenerate Sisu API clients from Swagger docs
+├── docs/
+│   └── agents/                   agent/project workflow notes
+├── src/
+│   ├── content/                  content-script entrypoint and shadow-root mount
+│   ├── background/               service worker
+│   │   ├── runtime/              content-script registration and host-scoped request watching
+│   │   ├── session/              per-origin Sisu/Moodle session cache
+│   │   └── notifications/        notification prefs, cache, scheduling, and delivery
+│   ├── onboarding/               first-run university and permission setup
+│   ├── shared/                   helpers shared across extension and onboarding
+│   ├── landing/                  Astro landing page and privacy policy
+│   └── app/                      the Sisu replacement app
+│       ├── api/
+│       │   ├── generated/        generated Sisu API clients (rebuilt locally, not in git)
+│       │   ├── endpoints/        thin wrappers around generated clients
+│       │   ├── dataPoints/       composed data and mutations used by views and widgets
+│       │   └── resolvers/        helpers for resolving Sisu entities
+│       ├── views/
+│       │   ├── dashboard/        dashboard, hero panel, widget system
+│       │   ├── timeline/         study timeline, course search, validation, plan mutations
+│       │   ├── structure/        degree structure, attainments, course details, version updates
+│       │   └── registration/     enrolment cards, dialogs, and registration actions
+│       ├── components/
+│       │   └── changelog/        in-app release notes
+│       ├── controlCenter/        floating pause/settings/notification panel
+│       ├── locales/              English and Finnish app copy
+│       ├── hooks/                shared React hooks, including Chrome storage
+│       ├── types/                shared app and preference types
+│       └── global.css            injected into shadow root
+└── dist/                         extension build output (load this in chrome://extensions)
 ```
 
 ## useful notes
@@ -168,8 +197,8 @@ scripts/prerender-landing.tsx     static landing prerender step
 
 ## status
 
-Sisu+ is currently focused on making university Sisu workflows less painful. Near-term work is mostly better course
-details, calendar-first planning, cleaner empty states, and smoother setup across Sisu universities.
+Sisu+ is under active development. The focus right now is on rounding out course details, re-creating calendar view, and
+making setup seamless across every Finnish university running Sisu.
 
 ## acknowledgements
 

@@ -306,7 +306,7 @@ export const landingTranslation: LandingTranslation = {
     confirmedNote: 'Any university running Sisu works automatically.',
   },
   footer: {
-    copyright: 'Released under the MIT License.',
+    copyright: 'Released under the GNU GPL v3',
     affiliation: 'Not affiliated with any supported university or Funidata Oy.',
     privacyPolicy: 'Privacy policy',
     sourceCode: 'Source code',

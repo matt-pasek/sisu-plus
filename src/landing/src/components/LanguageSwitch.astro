@@ -1,0 +1,30 @@
+---
+import type { LandingRouteKind } from '@/landing/landingSeo';
+import { getRoutePath } from '@/landing/landingSeo';
+import type { LandingLocale } from '@/landing/data/translations';
+
+interface Props {
+  kind: LandingRouteKind;
+  locale: LandingLocale;
+}
+
+const { kind, locale } = Astro.props;
+const locales: LandingLocale[] = ['en', 'fi'];
+---
+
+<div class="flex items-center gap-1 rounded-full border border-border bg-container2 p-1 text-xs font-semibold">
+  {
+    locales.map((candidate) => (
+      <a
+        aria-current={candidate === locale ? 'page' : undefined}
+        class:list={[
+          'min-h-7 rounded-full px-2.5 pt-1.5 transition-[background-color,color,transform] duration-150 active:scale-[0.96]',
+          candidate === locale ? 'bg-lighterGreen text-background' : 'text-lightGrey hover:text-offwhite',
+        ]}
+        href={getRoutePath(candidate, kind)}
+      >
+        {candidate.toUpperCase()}
+      </a>
+    ))
+  }
+</div>

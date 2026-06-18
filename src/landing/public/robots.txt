@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://sisu-plus.matt-pasek.dev/sitemap.xml

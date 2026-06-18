@@ -1,6 +1,7 @@
 dist
 dist-landing
 node_modules
+.astro
 
 .claude/*
 .idea

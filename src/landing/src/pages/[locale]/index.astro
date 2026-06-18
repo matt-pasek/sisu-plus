@@ -1,0 +1,347 @@
+---
+import type { LandingRoadmapColumn } from '@/app/locales/en/landing/landing.translation.en';
+import { getRoutePath, localizedPageMetadata } from '@/landing/landingSeo';
+import { landingTranslations, type LandingLocale } from '@/landing/data/translations';
+import CheckIcon from '@landing/components/CheckIcon.astro';
+import { FeatureCarousel } from '@landing/components/FeatureCarousel';
+import Footer from '@landing/components/Footer.astro';
+import GithubIcon from '@landing/components/GithubIcon.astro';
+import HeroShowcaseIsland from '@landing/components/HeroShowcaseIsland';
+import InstallLink from '@landing/components/InstallLink.astro';
+import LandingLayout from '@landing/layouts/LandingLayout.astro';
+import LanguageSwitch from '@landing/components/LanguageSwitch.astro';
+import Logo from '@landing/components/Logo.astro';
+import PlasmaIsland from '@landing/components/PlasmaIsland';
+import SupportIcon from '@landing/components/SupportIcon.astro';
+
+export function getStaticPaths() {
+  return Object.keys(landingTranslations).map((locale) => ({ params: { locale } }));
+}
+
+const locale = Astro.params.locale as LandingLocale;
+const t = landingTranslations[locale] ?? landingTranslations.en;
+const homePath = getRoutePath(locale, 'home');
+const route = { kind: 'home', locale, path: homePath } as const;
+const metadata = localizedPageMetadata[locale].home;
+const appVersion = import.meta.env.VITE_APP_VERSION;
+const shippedLabel = appVersion && t.hero.shipped.replace('{{version}}', appVersion);
+const roadmap = t.roadmap.columns as LandingRoadmapColumn[];
+const pageClass =
+  'min-h-dvh w-dvw max-w-full overflow-x-hidden bg-background text-offwhite antialiased [scrollbar-color:var(--color-border2)_transparent]';
+const navClass =
+  'landing-nav-pill fixed top-4 left-1/2 z-20 flex w-[min(1120px,calc(100%_-_2rem))] -translate-x-1/2 items-center justify-between gap-4 rounded-[14px] border border-white/10 bg-container/75 px-4 py-3 shadow-[0_18px_60px_rgba(0,0,0,0.28)] backdrop-blur-[18px] max-lg:w-[calc(100%_-_2rem)] max-md:gap-2 max-md:px-3';
+const navLinksClass =
+  'flex items-center gap-6 text-sm text-lightGrey max-md:hidden [&_a]:relative [&_a]:transition-colors [&_a:hover]:text-offwhite [&_a:focus-visible]:text-offwhite';
+const primaryClass =
+  'inline-flex min-h-11 items-center justify-center rounded-[10px] border border-lighterGreen/50 bg-lighterGreen px-4 py-3 text-sm font-semibold text-background shadow-[0_0_36px_rgba(82,201,137,0.24)] transition-[background-color,border-color,box-shadow,transform] duration-150 hover:-translate-y-px focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-lighterGreen/75 active:scale-[0.96] max-[520px]:w-full';
+const secondaryClass =
+  'inline-flex min-h-11 items-center justify-center gap-2 rounded-[10px] border border-white/10 bg-white/[0.055] px-4 py-3 text-sm font-semibold text-offwhite/85 transition-[background-color,border-color,box-shadow,transform] duration-150 hover:-translate-y-px hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-lighterGreen/75 active:scale-[0.96] max-[520px]:w-full [&_svg]:size-4';
+const navCtaClass = primaryClass.replace('max-[520px]:w-full', 'max-sm:hidden');
+const kickerClass =
+  'mb-4 font-mono text-xs font-semibold tracking-[0.16em] text-lighterGreen uppercase';
+const sectionClass =
+  'mx-auto grid w-[min(1120px,calc(100%_-_2.5rem))] grid-cols-[minmax(0,0.85fr)_minmax(0,1fr)] items-start gap-8 py-24 max-lg:grid-cols-1 max-lg:py-[4.5rem] max-md:w-[min(calc(100%_-_1.7rem),1120px)]';
+const sectionTitleClass = 'm-0 max-w-3xl text-[clamp(2rem,4vw,3.4rem)] leading-[1.02] font-bold tracking-normal text-balance';
+const sectionCopyClass = 'mt-5 max-w-[620px] text-[1rem] leading-[1.75] text-offwhite/60 text-pretty';
+const cardBaseClass =
+  'relative overflow-hidden rounded-2xl border border-white/10 bg-[#15151c] shadow-[0_24px_80px_rgba(0,0,0,0.28)]';
+const getRoadmapToneClass = (tone: LandingRoadmapColumn['tone']) => {
+  if (tone === 'current') {
+    return '-translate-y-1 border-lighterGreen/40 bg-[radial-gradient(circle_at_50%_0%,rgba(127,218,143,0.22),transparent_52%),radial-gradient(circle_at_50%_100%,rgba(82,201,137,0.08),transparent_50%),linear-gradient(180deg,rgba(38,70,48,0.72),rgba(16,26,22,0.9))] shadow-[0_0_0_1px_rgba(82,201,137,0.18),0_28px_80px_rgba(82,201,137,0.18),0_8px_24px_rgba(0,0,0,0.28)]';
+  }
+
+  if (tone === 'planned') {
+    return 'bg-container/55 opacity-85';
+  }
+
+  return 'bg-[radial-gradient(circle_at_72%_10%,rgba(82,201,137,0.05),transparent_44%),rgba(20,20,28,0.76)]';
+};
+const getRoadmapStatusClass = (tone: LandingRoadmapColumn['tone']) => {
+  if (tone === 'shipped') {
+    return 'bg-lighterGreen/12 text-lighterGreen before:h-[0.33rem] before:w-[0.58rem] before:rotate-[-45deg] before:rounded-none before:border-b-2 before:border-l-2 before:border-current before:bg-transparent';
+  }
+
+  if (tone === 'current') {
+    return 'bg-lighterGreen text-background before:bg-background/50';
+  }
+
+  return 'bg-white/[0.055] text-lightGrey before:border before:border-current before:bg-transparent';
+};
+const getRoadmapNodeClass = (tone: LandingRoadmapColumn['tone']) => {
+  if (tone === 'shipped') {
+    return 'size-[3.9rem] border-lighterGreen/40 bg-[rgba(23,56,40,0.9)] shadow-[0_14px_38px_rgba(0,0,0,0.25)] before:h-2 before:w-4 before:rotate-[-45deg] before:rounded-none before:border-b-[3px] before:border-l-[3px] before:border-lighterGreen before:bg-transparent';
+  }
+
+  if (tone === 'current') {
+    return 'size-[4.8rem] border-lighterGreen/40 bg-[#4f9656] shadow-[0_0_0_10px_rgba(82,201,137,0.15),0_24px_58px_rgba(82,201,137,0.25)] before:size-6 before:animate-spin before:rounded-full before:border-[2.5px] before:border-white/25 before:border-t-white after:absolute after:inset-[-12px] after:rounded-full after:border-2 after:border-lighterGreen/50 after:animate-[landingNodeRing_2200ms_ease-in-out_infinite]';
+  }
+
+  return 'size-[3.9rem] border-white/10 bg-container2/90 text-lightGrey after:content-[\'→\'] after:bg-transparent after:text-lg';
+};
+const getRoadmapItemMarkerClass = (tone: LandingRoadmapColumn['tone']) => {
+  if (tone === 'planned') {
+    return 'border-[#8b89b0]/35 bg-transparent';
+  }
+
+  return 'border-lighterGreen/55 bg-lighterGreen/12 text-lighterGreen';
+};
+---
+
+<LandingLayout kind="home" locale={locale} metadata={metadata} route={route}>
+  <main class={pageClass}>
+    <nav class={navClass}>
+      <Logo />
+      <div class={navLinksClass}>
+        <a href={`${homePath}#features`}>{t.nav.features}</a>
+        <a href={`${homePath}#privacy`}>{t.nav.privacy}</a>
+        <a href={`${homePath}#roadmap`}>{t.nav.roadmap}</a>
+      </div>
+      <div class="flex items-center gap-3">
+        <InstallLink
+          chromeLabel={t.nav.addToChrome}
+          firefoxLabel={t.nav.addToFirefox}
+          className={navCtaClass}
+        />
+        <LanguageSwitch kind="home" locale={locale} />
+      </div>
+    </nav>
+
+    <section
+      class="relative grid min-h-dvh grid-cols-[minmax(0,0.95fr)_minmax(30rem,0.9fr)] items-center gap-x-[clamp(1.25rem,3vw,3.5rem)] overflow-hidden px-[max(0.75rem,calc((100vw-1440px)/2))] pt-29 pb-32 max-lg:grid-cols-1 max-lg:gap-14 max-lg:px-5 max-lg:pb-20 max-md:px-4"
+      id="top"
+    >
+      <div class="pointer-events-none absolute inset-0 opacity-100 after:absolute after:inset-0 after:bg-[linear-gradient(to_bottom,rgba(13,13,17,0.1),rgba(13,13,17,0.76)_76%,#0d0d11),linear-gradient(105deg,transparent_0,rgba(13,13,17,0.08)_28%,rgba(13,13,17,0.64)_76%),radial-gradient(ellipse_at_24%_43%,transparent_0,rgba(13,13,17,0.22)_38rem,rgba(13,13,17,0.74)_68rem)]">
+        <PlasmaIsland client:load />
+      </div>
+      <div class="landing-hero-copy flex gap-4 flex-col z-10 w-[min(760px,100%)] text-left max-lg:mx-auto max-lg:text-center">
+        <div>
+          {shippedLabel &&<div
+            class="landing-hero-badge mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5.5 py-1 pr-3 pl-1 text-xs text-lightGrey"
+          >
+            <span class="rounded-full bg-lighterGreen px-2 py-1 text-[0.68rem] font-extrabold tracking-[0.08em] text-background uppercase">{t.hero.badge}</span>
+            <p>{shippedLabel}</p>
+          </div>}
+          <h1 class="landing-hero-title m-0 pb-2.5 text-[clamp(4rem,6.55vw,6.55rem)] leading-[0.96] font-bold tracking-normal text-balance max-md:text-[clamp(3rem,14vw,4.6rem)]">
+            {t.hero.titleStart} <span class="text-lighterGreen">{t.hero.titleAccent}</span>
+          </h1>
+        </div>
+
+        <p class="landing-hero-body max-w-155 text-[1.08rem] leading-8 text-offwhite/60 text-balance max-lg:mx-auto">{t.hero.body}</p>
+        <div>
+          <div class="landing-hero-actions mt-3 flex flex-wrap justify-start gap-3 max-lg:justify-center max-[520px]:grid max-[520px]:grid-cols-1">
+            <InstallLink
+              chromeLabel={t.hero.addToChromeFree}
+              firefoxLabel={t.hero.addToFirefoxFree}
+              className={primaryClass}
+            />
+            <a class={secondaryClass} href="https://github.com/matt-pasek/sisu-plus">
+              <GithubIcon />
+              {t.hero.sourceCode}
+            </a>
+          </div>
+          <div class="landing-hero-proof mt-4 flex w-fit items-center gap-4 text-sm font-semibold text-offwhite/40 max-lg:mx-auto">
+            <div class="flex items-center pl-1 [&_span]:-ml-1 [&_span]:grid [&_span]:size-8 [&_span]:place-items-center [&_span]:rounded-full [&_span]:border-2 [&_span]:border-background [&_span]:bg-lighterGreen/20 [&_span]:text-[0.78rem] [&_span]:font-extrabold [&_span]:text-lighterGreen [&_span]:shadow-[0_8px_24px_rgba(0,0,0,0.22)]" aria-hidden="true">
+              <span>MP</span>
+              <span>AK</span>
+              <span>JL</span>
+              <span>+</span>
+            </div>
+            <p>{t.hero.activeUsers}</p>
+          </div>
+        </div>
+        <p class="mx-auto mt-4 hidden max-w-124 text-[0.7rem] leading-6 text-offwhite/50 text-pretty max-md:block">{t.hero.mobileNote}</p>
+      </div>
+      <div class="landing-hero-showcase relative z-10 mt-[-1.4rem] w-full max-lg:mt-0 max-lg:mx-auto max-lg:w-[min(900px,100%)] max-lg:-mb-6 max-[760px]:hidden">
+        <HeroShowcaseIsland locale={locale} client:load />
+      </div>
+    </section>
+
+    <section class={sectionClass} id="features">
+      <div>
+        <p class={kickerClass}>{t.features.kicker}</p>
+        <h2 class={sectionTitleClass}>{t.features.title}</h2>
+        <p class={sectionCopyClass}>{t.features.body}</p>
+      </div>
+      <FeatureCarousel cards={t.features.cards} client:load />
+    </section>
+
+    <section class={`${sectionClass} items-center`} id="privacy">
+      <div>
+        <p class={kickerClass}>{t.privacy.kicker}</p>
+        <h2 class={sectionTitleClass}>{t.privacy.title}</h2>
+        <p class={sectionCopyClass}>{t.privacy.body}</p>
+      </div>
+      <div class={`${cardBaseClass} p-4`}>
+        {
+          t.privacy.points.map((point) => (
+            <div class="flex items-start gap-3 border-b border-white/8 px-3 py-4 text-offwhite/75 transition-colors duration-150 last:border-0 hover:text-offwhite">
+              <CheckIcon />
+              <span>{point}</span>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="mx-auto w-[min(1120px,calc(100%-2rem))] py-24 max-md:w-[calc(100%-1.5rem)] max-md:py-14" id="roadmap">
+      <div class="max-w-3xl">
+        <p class={kickerClass}>{t.roadmap.kicker}</p>
+        <h2 class={sectionTitleClass}>{t.roadmap.title}</h2>
+        <p class={sectionCopyClass}>{t.roadmap.body}</p>
+      </div>
+      <div class="relative mt-12 grid gap-[clamp(1.4rem,4vw,2.6rem)]">
+        <div
+          class="landing-roadmap-track relative mx-auto -mb-3 grid w-[min(74%,920px)] grid-cols-3 items-center before:absolute before:top-1/2 before:right-[16.666666666666668%] before:left-[16.666666666666668%] before:h-0.5 before:-translate-y-1/2 before:bg-[repeating-linear-gradient(90deg,rgba(139,137,176,0.22)_0,rgba(139,137,176,0.22)_7px,transparent_7px,transparent_16px)] after:absolute after:top-1/2 after:right-1/2 after:left-[16.666666666666668%] after:h-0.5 after:-translate-y-1/2 after:bg-[linear-gradient(90deg,rgba(82,201,137,0.25),rgba(127,218,143,0.95))] after:shadow-[0_0_24px_rgba(82,201,137,0.28)] max-md:hidden"
+          aria-hidden="true"
+        >
+          {
+            roadmap.map((column) => (
+              <span class={`relative z-10 grid justify-self-center place-items-center rounded-full border ${getRoadmapNodeClass(column.tone)}`}></span>
+            ))
+          }
+        </div>
+        <div class="grid grid-cols-3 gap-[clamp(1rem,2.4vw,1.5rem)] max-md:grid-cols-1">
+          {
+            roadmap.map((column, index) => (
+              <article style={`--roadmap-index:${index}`} class={`landing-roadmap-card ${cardBaseClass} flex min-h-96 flex-col p-[clamp(1.45rem,2.4vw,1.9rem)] transition-[border-color,box-shadow,transform,opacity] duration-200 hover:-translate-y-1 hover:border-lighterGreen/20 hover:bg-container/90 ${getRoadmapToneClass(column.tone)}`}>
+                <div class="mb-5 flex items-center justify-between gap-4">
+                  <div class="inline-flex rounded-lg border border-lighterGreen/25 bg-lighterGreen/8 px-3 py-2 font-mono text-[0.82rem] font-extrabold text-offwhite">{column.version}</div>
+                  <span class={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-[0.72rem] font-bold before:size-1.5 before:rounded-full ${getRoadmapStatusClass(column.tone)}`}>{column.status}</span>
+                </div>
+                <h3 class={`m-0 leading-tight font-bold text-offwhite ${column.tone === 'current' ? 'text-[clamp(1.35rem,2.4vw,1.8rem)]' : 'text-[clamp(1.22rem,2vw,1.55rem)]'}`}>{column.title}</h3>
+                {column.body && <p class={`mt-2 text-sm leading-6 ${column.tone === 'current' ? 'text-[#baebc4]/75' : 'text-[#adaacd]/65'}`}>{column.body}</p>}
+                <ul class="mt-5 grid gap-3 p-0 text-[0.92rem]">
+                  {column.items.map((item) => (
+                    <li class={`flex items-start gap-2 leading-6 ${item.featured ? 'rounded-[0.62rem] border border-lighterGreen/30 bg-[linear-gradient(135deg,rgba(82,201,137,0.18),rgba(82,201,137,0.055)),rgba(82,201,137,0.045)] px-3 py-2 font-extrabold text-[#daffdf] shadow-[0_12px_30px_rgba(82,201,137,0.12),inset_0_0_0_1px_rgba(127,218,143,0.08)]' : column.tone === 'planned' ? 'text-[#adaacd]/65' : 'text-offwhite/60'}`}>
+                      {!item.featured && (
+                        <span class={`mt-1 grid size-[1.1rem] shrink-0 place-items-center rounded-[0.28rem] border-[1.5px] [&_svg]:m-0 [&_svg]:size-3 ${getRoadmapItemMarkerClass(column.tone)}`}>
+                          {column.tone !== 'planned' && <CheckIcon />}
+                        </span>
+                      )}
+                      {item.label}
+                    </li>
+                  ))}
+                </ul>
+              </article>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <section
+      class="landing-support-panel relative mx-auto grid w-[min(1120px,calc(100%-2.5rem))] grid-cols-[minmax(0,1fr)_minmax(17rem,22rem)] items-center gap-[clamp(1.25rem,4vw,3rem)] overflow-hidden rounded-[18px] border border-white/10 bg-[radial-gradient(circle_at_12%_0%,rgba(82,201,137,0.1),transparent_24rem),linear-gradient(135deg,rgba(255,255,255,0.055),rgba(255,255,255,0.024))] p-[clamp(1.4rem,3vw,2rem)] shadow-[0_24px_80px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.08)] max-md:w-[calc(100%-1.5rem)] max-md:grid-cols-1"
+      aria-labelledby="support-heading"
+    >
+      <div class="max-w-2xl">
+        <p class={kickerClass}>{t.support.kicker}</p>
+        <h2 id="support-heading" class="m-0 max-w-170 text-[clamp(1.65rem,3vw,2.7rem)] leading-[1.06] font-bold text-balance">{t.support.title}</h2>
+        <p class="mt-4 text-base leading-7 text-offwhite/62">{t.support.body}</p>
+      </div>
+      <a
+        class="inline-flex min-h-[4.35rem] w-full shrink-0 items-center justify-start gap-4 justify-self-end rounded-[10px] border border-lighterGreen/25 bg-lighterGreen/7.5 px-5 py-4 text-offwhite shadow-[0_16px_50px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.08)] transition-[background-color,border-color,box-shadow,transform] duration-150 hover:-translate-y-px hover:border-lighterGreen/40 hover:bg-lighterGreen/10 focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-lighterGreen/75 active:scale-[0.96]"
+        href="https://ko-fi.com/mattpasek"
+        target="_blank"
+        rel="noreferrer"
+        aria-label={t.support.aria}
+      >
+        <span class="grid size-10 shrink-0 place-items-center rounded-[10px] border border-lighterGreen/25 bg-lighterGreen/15 text-lighterGreen shadow-[0_12px_32px_rgba(0,0,0,0.18)] [&_svg]:size-5">
+          <SupportIcon />
+        </span>
+        <span class="grid gap-1">
+          <strong class="text-sm">{t.support.action}</strong>
+          <small class="text-xs text-lightGrey">{t.support.hint}</small>
+        </span>
+      </a>
+    </section>
+
+    <section class="relative mx-auto w-[min(1120px,calc(100%-2.5rem))] py-20 max-md:w-[calc(100%-1.5rem)] max-md:py-14" id="install">
+      <div>
+        <p class={kickerClass}>{t.universities.kicker}</p>
+        <h2 class={sectionTitleClass}>{t.universities.title}</h2>
+      </div>
+
+      <div class="landing-install-panel relative z-10 mt-9 overflow-hidden rounded-[14px] border border-lighterGreen/15 bg-[linear-gradient(135deg,rgba(82,201,137,0.06),rgba(82,201,137,0.02)_50%,transparent_100%)] px-8 py-7 max-md:px-5">
+        <div class="flex flex-wrap items-start justify-between gap-8">
+          <div class="min-w-0">
+            <p class="mb-2 text-[1.1rem] leading-tight font-bold text-offwhite">{t.universities.installTitle}</p>
+            <p class="m-0 max-w-2xl text-sm leading-6 text-offwhite/70">{t.universities.installBody}</p>
+            <div class="mt-4 flex flex-wrap items-center gap-1.5" aria-label="Setup steps">
+              {
+                t.universities.steps.map((step, index) => (
+                  <>
+                    <span class="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/4 px-2.5 py-1.5 text-xs text-offwhite/75">
+                      <span class="grid size-[1.1rem] shrink-0 place-items-center rounded-full bg-lighterGreen/15 text-[0.62rem] font-bold text-lighterGreen">{index + 1}</span>
+                      {step}
+                    </span>
+                    {index < t.universities.steps.length - 1 && (
+                      <span class="text-lightGrey max-md:hidden" aria-hidden="true">
+                        &rarr;
+                      </span>
+                    )}
+                  </>
+                ))
+              }
+            </div>
+          </div>
+          <InstallLink
+            chromeLabel={t.nav.addToChrome}
+            firefoxLabel={t.nav.addToFirefox}
+            className={primaryClass}
+          />
+        </div>
+        <div class="my-5 h-px bg-white/8"></div>
+        <div class="flex flex-wrap items-center gap-3">
+          <span class="font-mono text-[0.68rem] font-bold tracking-widest whitespace-nowrap text-lightGrey/65 uppercase">{t.universities.confirmed}</span>
+          <div class="flex flex-wrap gap-1.5">
+            {
+              ['Aalto', 'Helsinki', 'TUNI', 'JYU', 'LUT', 'LAB'].map((uni) => (
+                <span class="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-offwhite/80">
+                  <CheckIcon />
+                  {uni}
+                </span>
+              ))
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <Footer route={route} t={t} />
+  </main>
+</LandingLayout>
+
+<style is:global>
+  .landing-nav-pill::after {
+    content: '';
+    position: absolute;
+    right: 1rem;
+    bottom: -1px;
+    left: 1rem;
+    height: 1px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, transparent, rgba(82, 201, 137, 0.8), transparent);
+    opacity: 0.7;
+  }
+
+  .landing-nav-pill::before {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 1rem;
+    width: calc(100% - 2rem);
+    height: 1px;
+    border-radius: 999px;
+    background: var(--color-lighterGreen);
+    opacity: 0.9;
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+
+  @supports (animation-timeline: scroll()) {
+    .landing-nav-pill::before {
+      animation: landingScrollProgress linear both;
+      animation-timeline: scroll(root);
+    }
+  }
+</style>

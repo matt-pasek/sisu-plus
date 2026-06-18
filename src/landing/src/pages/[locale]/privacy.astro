@@ -1,0 +1,70 @@
+---
+import type { LandingPolicySection } from '@/app/locales/en/landing/landing.translation.en';
+import { getRoutePath, localizedPageMetadata } from '@/landing/landingSeo';
+import { landingTranslations, type LandingLocale } from '@/landing/data/translations';
+import Footer from '@landing/components/Footer.astro';
+import InstallLink from '@landing/components/InstallLink.astro';
+import LandingLayout from '@landing/layouts/LandingLayout.astro';
+import LanguageSwitch from '@landing/components/LanguageSwitch.astro';
+import Logo from '@landing/components/Logo.astro';
+
+export function getStaticPaths() {
+  return Object.keys(landingTranslations).map((locale) => ({ params: { locale } }));
+}
+
+const locale = Astro.params.locale as LandingLocale;
+const t = landingTranslations[locale] ?? landingTranslations.en;
+const homePath = getRoutePath(locale, 'home');
+const privacyPath = getRoutePath(locale, 'privacy');
+const route = { kind: 'privacy', locale, path: privacyPath } as const;
+const metadata = localizedPageMetadata[locale].privacy;
+const policySections = t.policy.sections as LandingPolicySection[];
+const pageClass = 'min-h-dvh w-dvw max-w-full overflow-x-hidden text-offwhite antialiased';
+const navClass =
+  'fixed top-4 left-1/2 z-20 flex w-[min(1120px,calc(100%_-_2rem))] -translate-x-1/2 items-center justify-between gap-4 rounded-[14px] border border-white/10 bg-container/75 px-4 py-3 shadow-[0_18px_60px_rgba(0,0,0,0.28)] backdrop-blur-[18px] max-lg:w-[calc(100%_-_2rem)] max-md:gap-2 max-md:px-3';
+const navLinksClass =
+  'flex items-center gap-6 text-sm text-lightGrey max-md:hidden [&_a]:relative [&_a]:transition-colors [&_a:hover]:text-offwhite [&_a:focus-visible]:text-offwhite';
+const navCtaClass =
+  'inline-flex min-h-11 items-center justify-center rounded-[10px] border border-lighterGreen/50 bg-lighterGreen px-4 py-3 text-sm font-semibold text-background shadow-[0_0_36px_rgba(82,201,137,0.24)] transition-[background-color,border-color,box-shadow,transform] duration-150 hover:-translate-y-px focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-lighterGreen/75 active:scale-[0.96] max-sm:hidden';
+const kickerClass = 'mb-4 font-mono text-xs font-semibold tracking-[0.16em] text-lighterGreen uppercase';
+---
+
+<LandingLayout kind="privacy" locale={locale} metadata={metadata} route={route}>
+  <main class={pageClass}>
+    <nav class={navClass}>
+      <Logo />
+      <div class={navLinksClass}>
+        <a href={homePath}>{t.nav.home}</a>
+        <a href={`${homePath}#features`}>{t.nav.features}</a>
+      </div>
+      <div class="flex items-center gap-3">
+        <InstallLink chromeLabel={t.nav.addToChrome} firefoxLabel={t.nav.addToFirefox} className={navCtaClass} />
+        <LanguageSwitch kind="privacy" locale={locale} />
+      </div>
+    </nav>
+
+    <section
+      class="mx-auto min-h-dvh w-[min(860px,calc(100%-2rem))] px-0 pt-40 pb-20 max-md:w-[calc(100%-1.5rem)] max-md:pt-32"
+    >
+      <p class={kickerClass}>{t.policy.kicker}</p>
+      <h1 class="m-0 text-[clamp(2.7rem,6vw,5.2rem)] leading-[0.95] font-bold tracking-normal text-balance">{t.policy.title}</h1>
+      <p class="mt-6 font-mono text-sm text-lighterGreen">{t.policy.effectiveDate}</p>
+      <p class="mt-5 max-w-3xl text-lg leading-8 text-offwhite/64 text-pretty">{t.policy.intro}</p>
+
+      <div class="mt-12 grid gap-4">
+        {
+          policySections.map((section) => (
+            <section class="rounded-2xl border border-white/10 [background:linear-gradient(145deg,rgba(255,255,255,0.075),rgba(255,255,255,0.022)),#15151c] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.24)]">
+              <h2 class="m-0 text-xl font-semibold text-offwhite">{section.title}</h2>
+              {section.body.map((paragraph, index) => (
+                <p class={`text-[0.98rem] leading-7 text-offwhite/62 ${index === 0 ? 'mt-4' : 'mt-3'}`}>{paragraph}</p>
+              ))}
+            </section>
+          ))
+        }
+      </div>
+    </section>
+
+    <Footer full={false} route={route} t={t} />
+  </main>
+</LandingLayout>

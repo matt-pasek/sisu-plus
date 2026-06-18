@@ -13,23 +13,14 @@
     },
     {
       "source": "/",
-      "destination": "/en/",
-      "permanent": true
-    },
-    {
-      "source": "/en",
-      "destination": "/en/",
-      "permanent": true
-    },
-    {
-      "source": "/fi",
+      "has": [{ "type": "header", "key": "accept-language", "value": "fi.*" }],
       "destination": "/fi/",
-      "permanent": true
+      "permanent": false
     },
     {
-      "source": "/privacy",
-      "destination": "/en/privacy",
-      "permanent": true
+      "source": "/",
+      "destination": "/en/",
+      "permanent": false
     }
   ]
 }

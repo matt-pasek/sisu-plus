@@ -12,6 +12,17 @@
       "permanent": false
     },
     {
+      "source": "/privacy",
+      "has": [{ "type": "header", "key": "accept-language", "value": "fi.*" }],
+      "destination": "/fi/privacy",
+      "permanent": false
+    },
+    {
+      "source": "/privacy",
+      "destination": "/en/privacy",
+      "permanent": false
+    },
+    {
       "source": "/",
       "has": [{ "type": "header", "key": "accept-language", "value": "fi.*" }],
       "destination": "/fi/",

@@ -21,6 +21,7 @@ export type LandingPageMetadata = {
 
 export const LANDING_ORIGIN = 'https://sisu-plus.matt-pasek.dev';
 export const CHROME_WEB_STORE_URL = 'https://chromewebstore.google.com/detail/sisu+/oaimdmdjlgfgfigmblpolficgleijcoe';
+export const FIREFOX_WEB_STORE_URL = 'https://addons.mozilla.org/en-GB/firefox/addon/sisu/';
 export const LANDING_OG_IMAGE_PATH = '/og-image.png';
 export const LANDING_OG_IMAGE_ALT =
   'Sisu+ landing page preview showing a dark dashboard interface and the headline The Sisu we deserve, finally.';
@@ -99,14 +100,18 @@ export function buildHreflangLinks(kind: LandingRouteKind): LandingAlternateLink
   ];
 }
 
-export function buildLandingJsonLd(locale: Locale, chromeStoreUrl = CHROME_WEB_STORE_URL) {
+export function buildLandingJsonLd(
+  locale: Locale,
+  chromeStoreUrl = CHROME_WEB_STORE_URL,
+  firefoxStoreUrl = FIREFOX_WEB_STORE_URL,
+) {
   return {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
     name: 'Sisu+',
     applicationCategory: 'BrowserApplication',
-    operatingSystem: 'Chrome',
-    browserRequirements: 'Requires Google Chrome or a Chromium-based browser',
+    operatingSystem: 'Chrome, Firefox',
+    browserRequirements: 'Requires Firefox, Google Chrome or a Chromium-based browser',
     offers: {
       '@type': 'Offer',
       price: '0',
@@ -117,7 +122,7 @@ export function buildLandingJsonLd(locale: Locale, chromeStoreUrl = CHROME_WEB_S
       name: 'Mateusz Pasek',
       url: 'https://matt-pasek.dev',
     },
-    sameAs: ['https://github.com/matt-pasek/sisu-plus', chromeStoreUrl],
+    sameAs: ['https://github.com/matt-pasek/sisu-plus', chromeStoreUrl, firefoxStoreUrl],
     inLanguage: locale,
   };
 }

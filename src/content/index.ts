@@ -3,16 +3,22 @@ import { mountControlCenter } from '@/app/controlCenter/main';
 import { DEFAULT_PREFS, SisuPrefs } from '@/app/types/prefs';
 import globalCss from '@/app/global.css?inline';
 import type { UniversityConfig } from '@/app/types/universityConfig';
+import { buildShibbolethLoginUrl, withResolvedShibbolethUrl } from '@/shared/sisuUniversityConfig';
+import { createSessionRevalidator, validateSession } from '@/app/api/sessionValidation';
 
 const SISU_PLUS_ROOT_ID = 'sisu-plus-root';
 const SISU_PLUS_CONTROLS_ID = 'sisu-plus-controls';
-
-const origPushState = history.pushState;
-const origReplaceState = history.replaceState;
+const ROUTE_BRIDGE_SOURCE = 'sisu-plus-route-bridge';
+const ROUTE_CHANGE_TYPE = 'sisuplus:main-world-route-change';
+const SESSION_PING_PATH = '/ori/api/user-details';
 
 let appMounted = false;
 let initStarted = false;
 let waitingForToken = false;
+let unauthenticated = false;
+let unauthenticatedTimer: number | undefined;
+let universityConfig: UniversityConfig | undefined;
+let lastStudentUrl = window.location.href;
 
 const isStudentPage = (pathname = window.location.pathname) =>
   pathname === '/student' || pathname.startsWith('/student/');
@@ -51,6 +57,19 @@ const clearStoredSessionForCurrentOrigin = async () => {
   });
 };
 
+const persistResolvedUniversityConfig = async (config: UniversityConfig) => {
+  if (!config.shibbolethUrl || config.shibbolethUrl === universityConfig?.shibbolethUrl) return;
+
+  universityConfig = config;
+  await chrome.storage.sync.set({ universityConfig: config });
+};
+
+const didUniversityOriginsChange = (oldConfig?: UniversityConfig, newConfig?: UniversityConfig) => {
+  if (!oldConfig || !newConfig) return true;
+
+  return oldConfig.sisuOrigin !== newConfig.sisuOrigin || oldConfig.moodleOrigin !== newConfig.moodleOrigin;
+};
+
 const hasSisuPlusRoot = () => Boolean(document.getElementById(SISU_PLUS_ROOT_ID));
 const hasControlCenterRoot = () => Boolean(document.getElementById(SISU_PLUS_CONTROLS_ID));
 
@@ -63,15 +82,88 @@ const removeSisuPlus = () => {
   appMounted = false;
 };
 
-const handOffToSisuLogin = () => {
-  waitingForToken = false;
-  removeSisuPlus();
+const navigateToShibbolethLogin = async () => {
+  if (!universityConfig) return;
+
+  const resolvedConfig = await withResolvedShibbolethUrl(universityConfig);
+  await persistResolvedUniversityConfig(resolvedConfig);
+
+  if (!resolvedConfig.shibbolethUrl) {
+    if (!isStudentLoginPage()) {
+      window.location.assign(`${resolvedConfig.sisuOrigin}/student/login`);
+    }
+
+    return;
+  }
+
+  window.location.assign(
+    buildShibbolethLoginUrl({
+      shibbolethUrl: resolvedConfig.shibbolethUrl,
+      sisuOrigin: resolvedConfig.sisuOrigin,
+      targetUrl: lastStudentUrl,
+    }),
+  );
 };
 
-const handleSessionExpired = async () => {
+const pingSession = async () => {
+  const token = await getStoredSisuToken();
+
+  if (!token) {
+    throw new Error('No captured token to validate');
+  }
+
+  return fetch(`${window.location.origin}${SESSION_PING_PATH}`, {
+    credentials: 'include',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+};
+
+const sessionRevalidator = createSessionRevalidator({
+  validate: () => validateSession(pingSession),
+  onExpired: () => enterUnauthenticated(true),
+});
+
+const revalidateSession = () => {
+  if (!appMounted || unauthenticated || waitingForToken) return;
+
+  void sessionRevalidator.revalidate();
+};
+
+const exitUnauthenticated = () => {
+  if (unauthenticatedTimer !== undefined) {
+    window.clearTimeout(unauthenticatedTimer);
+    unauthenticatedTimer = undefined;
+  }
+
+  if (unauthenticated) {
+    sessionRevalidator.reset();
+  }
+
   waitingForToken = false;
-  await clearStoredSessionForCurrentOrigin();
+  unauthenticated = false;
+};
+
+const applyUnauthenticated = async (clearStoredSession: boolean) => {
+  if (unauthenticated) return;
+
+  waitingForToken = false;
+  unauthenticated = true;
+
+  if (clearStoredSession) {
+    await clearStoredSessionForCurrentOrigin();
+  }
+
   removeSisuPlus();
+  await navigateToShibbolethLogin();
+};
+
+const enterUnauthenticated = (clearStoredSession: boolean) => {
+  if (unauthenticated || unauthenticatedTimer !== undefined) return;
+
+  unauthenticatedTimer = window.setTimeout(() => {
+    unauthenticatedTimer = undefined;
+    void applyUnauthenticated(clearStoredSession);
+  }, 100);
 };
 
 const mountSisuPlus = () => {
@@ -111,16 +203,18 @@ const reconcileRoute = async () => {
   await ensureBodyReady();
 
   if (isStudentLoginPage()) {
-    handOffToSisuLogin();
+    enterUnauthenticated(false);
     return;
   }
 
   if (!canRunSisuPlusOnCurrentRoute()) return;
 
+  lastStudentUrl = window.location.href;
+
   const prefs = await getPrefs();
 
   if (!prefs.sisuPlusActive) {
-    waitingForToken = false;
+    exitUnauthenticated();
 
     if (hasSisuPlusRoot()) {
       reloadToRestoreNativeSisu();
@@ -139,47 +233,57 @@ const reconcileRoute = async () => {
     return;
   }
 
-  waitingForToken = false;
+  exitUnauthenticated();
   mountSisuPlus();
   mountControlCenterOnce();
+  revalidateSession();
 };
 
 const handleRouteChange = () => {
   void reconcileRoute();
 };
 
-history.pushState = function (...args: Parameters<typeof history.pushState>) {
-  origPushState.apply(this, args);
-  handleRouteChange();
+const isRouteBridgeMessage = (event: MessageEvent) => {
+  if (event.source !== window || event.origin !== window.location.origin) return false;
+  if (!event.data || typeof event.data !== 'object') return false;
+
+  const data = event.data as { source?: unknown; type?: unknown };
+  return data.source === ROUTE_BRIDGE_SOURCE && data.type === ROUTE_CHANGE_TYPE;
 };
 
-history.replaceState = function (...args: Parameters<typeof history.replaceState>) {
-  origReplaceState.apply(this, args);
-  handleRouteChange();
-};
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible') return;
+
+  revalidateSession();
+});
 
 window.addEventListener('popstate', handleRouteChange);
+window.addEventListener('message', (event) => {
+  if (!isRouteBridgeMessage(event)) return;
+  handleRouteChange();
+});
 
 const init = async () => {
   if (initStarted) return;
   initStarted = true;
 
   const stored = await chrome.storage.sync.get('universityConfig');
-  const universityConfig = stored.universityConfig as UniversityConfig | undefined;
+  universityConfig = stored.universityConfig as UniversityConfig | undefined;
 
   if (!universityConfig || window.location.hostname !== universityConfig.sisuDomain) return;
 
   await reconcileRoute();
 
   window.addEventListener('sisuplus:session-expired', () => {
-    void handleSessionExpired();
+    enterUnauthenticated(true);
   });
 
   chrome.runtime.onMessage.addListener((message) => {
     if (message.type !== 'SISU_TOKEN_CAPTURED') return;
     if (message.origin !== window.location.origin) return;
-    if (!waitingForToken) return;
+    if (!waitingForToken && !unauthenticated) return;
 
+    exitUnauthenticated();
     void reconcileRoute();
   });
 
@@ -191,7 +295,13 @@ const init = async () => {
     }
 
     if ('universityConfig' in changes) {
-      window.location.reload();
+      const oldConfig = changes.universityConfig.oldValue as UniversityConfig | undefined;
+      const newConfig = changes.universityConfig.newValue as UniversityConfig | undefined;
+      universityConfig = newConfig;
+
+      if (didUniversityOriginsChange(oldConfig, newConfig)) {
+        window.location.reload();
+      }
     }
   });
 };

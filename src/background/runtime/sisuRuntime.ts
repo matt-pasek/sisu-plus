@@ -4,6 +4,9 @@ import { getOrigin } from '@/background/util/origin';
 
 const CONTENT_SCRIPT_ID = 'sisu-plus-content';
 const CONTENT_SCRIPT_FILE = 'content/index.js';
+const ROUTE_BRIDGE_SCRIPT_ID = 'sisu-plus-route-bridge';
+const ROUTE_BRIDGE_SCRIPT_FILE = 'content/route-bridge.js';
+const CONTENT_SCRIPT_IDS = [CONTENT_SCRIPT_ID, ROUTE_BRIDGE_SCRIPT_ID];
 
 let webRequestListenerRegistered = false;
 let currentConfig: UniversityConfig | null = null;
@@ -63,34 +66,20 @@ const onBeforeSendHeaders: Parameters<typeof chrome.webRequest.onBeforeSendHeade
 
 const syncContentScriptRegistration = async (config: UniversityConfig | null) => {
   const registeredScripts = await chrome.scripting.getRegisteredContentScripts({
-    ids: [CONTENT_SCRIPT_ID],
+    ids: CONTENT_SCRIPT_IDS,
   });
 
-  if (!config) {
-    if (registeredScripts.length > 0) {
-      await chrome.scripting.unregisterContentScripts({
-        ids: [CONTENT_SCRIPT_ID],
-      });
-    }
+  if (registeredScripts.length > 0) {
+    await chrome.scripting.unregisterContentScripts({
+      ids: registeredScripts.map((script) => script.id),
+    });
+  }
 
+  if (!config) {
     return;
   }
 
   const matches = [getSisuMatchPattern(config)];
-
-  if (registeredScripts.length > 0) {
-    await chrome.scripting.updateContentScripts([
-      {
-        id: CONTENT_SCRIPT_ID,
-        matches,
-        js: [CONTENT_SCRIPT_FILE],
-        runAt: 'document_start',
-        allFrames: false,
-      },
-    ]);
-
-    return;
-  }
 
   await chrome.scripting.registerContentScripts([
     {
@@ -100,6 +89,15 @@ const syncContentScriptRegistration = async (config: UniversityConfig | null) =>
       runAt: 'document_start',
       allFrames: false,
       persistAcrossSessions: true,
+    },
+    {
+      id: ROUTE_BRIDGE_SCRIPT_ID,
+      matches,
+      js: [ROUTE_BRIDGE_SCRIPT_FILE],
+      runAt: 'document_start',
+      allFrames: false,
+      persistAcrossSessions: true,
+      world: 'MAIN',
     },
   ]);
 };

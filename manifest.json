@@ -6,7 +6,16 @@
   "default_locale": "en",
   "permissions": ["storage", "webRequest", "scripting", "alarms", "notifications"],
   "optional_host_permissions": ["https://*.fi/*"],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "sisu-plus@matt-pasek",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
+    }
+  },
   "background": {
+    "scripts": ["background/service-worker.js"],
     "service_worker": "background/service-worker.js",
     "type": "module"
   },

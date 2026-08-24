@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import type { UniversityConfig } from '@/app/types/universityConfig';
+import { withResolvedShibbolethUrl } from '@/shared/sisuUniversityConfig';
 import { OnboardingButton } from '../components/OnboardingButton';
 import { OnboardingHeadline } from '../components/OnboardingHeadline';
 
@@ -62,7 +63,9 @@ export function PermissionStep({ config, onGranted, onBack, showBack = true, isR
 
       setGranted(true);
 
-      await chrome.storage.sync.set({ universityConfig: config });
+      const resolvedConfig = await withResolvedShibbolethUrl(config);
+
+      await chrome.storage.sync.set({ universityConfig: resolvedConfig });
 
       await chrome.runtime.sendMessage({
         type: 'SYNC_CONTENT_SCRIPT',

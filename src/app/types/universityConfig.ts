@@ -4,6 +4,7 @@ export type UniversityConfig = {
   moodleDomain: string;
   sisuOrigin: string;
   moodleOrigin: string;
+  shibbolethUrl?: string;
 };
 
 export const KNOWN_UNIVERSITIES: UniversityConfig[] = [

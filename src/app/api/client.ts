@@ -3,6 +3,7 @@ import { OriApi } from './generated/OriApi';
 import { OsuvaApi } from './generated/OsuvaApi';
 import { KoriApi } from './generated/KoriApi';
 import { ArtoApi } from './generated/ArtoApi';
+import { isAuthFailure } from './authFailure';
 import { getSisuApiBaseUrl } from '@/shared/domains';
 
 const securityWorker = async () => {
@@ -16,7 +17,7 @@ const securityWorker = async () => {
 const customFetch = new Proxy(fetch, {
   async apply(target, _thisArg, args) {
     const response = await (Reflect.apply(target, globalThis, args) as Promise<Response>);
-    if (response.url.includes('/student/login')) {
+    if (isAuthFailure(response)) {
       window.dispatchEvent(new CustomEvent('sisuplus:session-expired'));
     }
     return response;

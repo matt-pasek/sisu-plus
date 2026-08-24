@@ -9,6 +9,7 @@ import {
 import { scheduleNotificationAlarms, syncSisuNotificationCache } from '@/background/notifications/scheduler';
 import type { SisuNotificationSyncPayload } from '@/background/notifications/types';
 import { clearSessionForOrigin, syncRuntimeForConfig } from '@/background/runtime/sisuRuntime';
+import { stashResume, takeResume } from '@/background/session/resumeStore';
 import { getSisuTokenForOrigin } from '@/background/session/sessionStore';
 import { getOrigin } from '@/background/util/origin';
 import { DEV_TEST_NOTIFICATION_PAYLOADS, isNotificationType } from '@/shared/notifications/devTestPayloads';
@@ -45,6 +46,36 @@ export const createMessageRouter =
       clearSessionForOrigin(origin)
         .then(() => sendResponse({ ok: true }))
         .catch((err) => sendResponse({ ok: false, err }));
+
+      return true;
+    }
+
+    if (message.type === 'STASH_RESUME') {
+      const origin = getOrigin(message.origin);
+
+      if (!origin || typeof message.route !== 'string') {
+        sendResponse({ ok: false });
+        return false;
+      }
+
+      stashResume(origin, message.route, Date.now())
+        .then(() => sendResponse({ ok: true }))
+        .catch((err) => sendResponse({ ok: false, err }));
+
+      return true;
+    }
+
+    if (message.type === 'TAKE_RESUME') {
+      const origin = getOrigin(message.origin);
+
+      if (!origin) {
+        sendResponse({ stash: undefined });
+        return false;
+      }
+
+      takeResume(origin)
+        .then((stash) => sendResponse({ stash }))
+        .catch(() => sendResponse({ stash: undefined }));
 
       return true;
     }

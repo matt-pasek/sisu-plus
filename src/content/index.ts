@@ -5,9 +5,12 @@ import globalCss from '@/app/global.css?inline';
 import type { UniversityConfig } from '@/app/types/universityConfig';
 import { buildShibbolethLoginUrl, withResolvedShibbolethUrl } from '@/shared/sisuUniversityConfig';
 import { createSessionRevalidator, validateSession } from '@/app/api/sessionValidation';
+import { hideAuthOverlay, showAuthOverlay } from '@/app/auth/mountAuthOverlay';
+import { resolveResumeRoute, type ResumeStash } from '@/shared/sessionResume';
 
 const SISU_PLUS_ROOT_ID = 'sisu-plus-root';
 const SISU_PLUS_CONTROLS_ID = 'sisu-plus-controls';
+const SPLASH_ID = 'sisu-plus-splash';
 const ROUTE_BRIDGE_SOURCE = 'sisu-plus-route-bridge';
 const ROUTE_CHANGE_TYPE = 'sisuplus:main-world-route-change';
 const SESSION_PING_PATH = '/ori/api/user-details';
@@ -18,6 +21,7 @@ let waitingForToken = false;
 let unauthenticated = false;
 let unauthenticatedTimer: number | undefined;
 let universityConfig: UniversityConfig | undefined;
+let shadowRoot: ShadowRoot | undefined;
 let lastStudentUrl = window.location.href;
 
 const isStudentPage = (pathname = window.location.pathname) =>
@@ -57,6 +61,23 @@ const clearStoredSessionForCurrentOrigin = async () => {
   });
 };
 
+const stashResumeRoute = async (route: string) => {
+  await chrome.runtime.sendMessage({
+    type: 'STASH_RESUME',
+    origin: window.location.origin,
+    route,
+  });
+};
+
+const takeResumeStash = async (): Promise<ResumeStash | undefined> => {
+  const { stash } = await chrome.runtime.sendMessage({
+    type: 'TAKE_RESUME',
+    origin: window.location.origin,
+  });
+
+  return stash as ResumeStash | undefined;
+};
+
 const persistResolvedUniversityConfig = async (config: UniversityConfig) => {
   if (!config.shibbolethUrl || config.shibbolethUrl === universityConfig?.shibbolethUrl) return;
 
@@ -75,11 +96,6 @@ const hasControlCenterRoot = () => Boolean(document.getElementById(SISU_PLUS_CON
 
 const reloadToRestoreNativeSisu = () => {
   window.location.reload();
-};
-
-const removeSisuPlus = () => {
-  document.getElementById(SISU_PLUS_ROOT_ID)?.remove();
-  appMounted = false;
 };
 
 const navigateToShibbolethLogin = async () => {
@@ -137,10 +153,26 @@ const exitUnauthenticated = () => {
 
   if (unauthenticated) {
     sessionRevalidator.reset();
+
+    if (shadowRoot) {
+      hideAuthOverlay(shadowRoot);
+    }
   }
 
   waitingForToken = false;
   unauthenticated = false;
+};
+
+const continueToReAuth = async () => {
+  await stashResumeRoute(`${window.location.pathname}${window.location.search}`);
+
+  try {
+    window.sessionStorage.setItem('sisuPlusReauth', '1');
+  } catch {
+    // Private mode or blocked storage; the splash is optional polish.
+  }
+
+  await navigateToShibbolethLogin();
 };
 
 const applyUnauthenticated = async (clearStoredSession: boolean) => {
@@ -153,8 +185,11 @@ const applyUnauthenticated = async (clearStoredSession: boolean) => {
     await clearStoredSessionForCurrentOrigin();
   }
 
-  removeSisuPlus();
-  await navigateToShibbolethLogin();
+  if (!appMounted || !shadowRoot) return;
+
+  showAuthOverlay(shadowRoot, () => {
+    void continueToReAuth();
+  });
 };
 
 const enterUnauthenticated = (clearStoredSession: boolean) => {
@@ -169,6 +204,7 @@ const enterUnauthenticated = (clearStoredSession: boolean) => {
 const mountSisuPlus = () => {
   if (appMounted || hasSisuPlusRoot()) {
     appMounted = true;
+    shadowRoot ??= document.getElementById(SISU_PLUS_ROOT_ID)?.shadowRoot ?? undefined;
     return;
   }
 
@@ -179,6 +215,7 @@ const mountSisuPlus = () => {
   document.body.appendChild(host);
 
   const shadow = host.attachShadow({ mode: 'open' });
+  shadowRoot = shadow;
 
   const style = document.createElement('style');
   style.textContent = globalCss;
@@ -191,6 +228,7 @@ const mountSisuPlus = () => {
 
   mountApp(appRoot);
   appMounted = true;
+  document.getElementById(SPLASH_ID)?.remove();
 };
 
 const mountControlCenterOnce = () => {
@@ -234,6 +272,18 @@ const reconcileRoute = async () => {
   }
 
   exitUnauthenticated();
+
+  const resumeRoute = resolveResumeRoute({
+    currentPath: window.location.pathname,
+    stash: await takeResumeStash(),
+    now: Date.now(),
+  });
+
+  if (resumeRoute) {
+    window.history.replaceState(null, '', resumeRoute);
+    lastStudentUrl = window.location.href;
+  }
+
   mountSisuPlus();
   mountControlCenterOnce();
   revalidateSession();

@@ -1,4 +1,5 @@
 import { viewsTranslation, ViewsTranslation } from '@/app/locales/en/views/views.translation.en';
+import { authTranslation, AuthTranslation } from '@/app/locales/en/auth/auth.translation.en';
 import { componentsTranslation, ComponentsTranslation } from '@/app/locales/en/components/components.translation.en';
 import {
   controlCenterTranslation,
@@ -12,6 +13,7 @@ export const I18N_NAMESPACE = 'sisu';
 
 export interface Translations {
   [I18N_NAMESPACE: string]: {
+    auth: AuthTranslation;
     components: ComponentsTranslation;
     controlCenter: ControlCenterTranslation;
     landing: LandingTranslation;
@@ -23,6 +25,7 @@ export interface Translations {
 
 export const en: Translations = {
   [I18N_NAMESPACE]: {
+    auth: authTranslation,
     components: componentsTranslation,
     controlCenter: controlCenterTranslation,
     landing: landingTranslation,

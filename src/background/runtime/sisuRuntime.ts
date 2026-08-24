@@ -6,7 +6,9 @@ const CONTENT_SCRIPT_ID = 'sisu-plus-content';
 const CONTENT_SCRIPT_FILE = 'content/index.js';
 const ROUTE_BRIDGE_SCRIPT_ID = 'sisu-plus-route-bridge';
 const ROUTE_BRIDGE_SCRIPT_FILE = 'content/route-bridge.js';
-const CONTENT_SCRIPT_IDS = [CONTENT_SCRIPT_ID, ROUTE_BRIDGE_SCRIPT_ID];
+const SPLASH_SCRIPT_ID = 'sisu-plus-splash';
+const SPLASH_SCRIPT_FILE = 'content/splash.js';
+const CONTENT_SCRIPT_IDS = [CONTENT_SCRIPT_ID, ROUTE_BRIDGE_SCRIPT_ID, SPLASH_SCRIPT_ID];
 
 let webRequestListenerRegistered = false;
 let currentConfig: UniversityConfig | null = null;
@@ -98,6 +100,14 @@ const syncContentScriptRegistration = async (config: UniversityConfig | null) =>
       allFrames: false,
       persistAcrossSessions: true,
       world: 'MAIN',
+    },
+    {
+      id: SPLASH_SCRIPT_ID,
+      matches,
+      js: [SPLASH_SCRIPT_FILE],
+      runAt: 'document_start',
+      allFrames: false,
+      persistAcrossSessions: true,
     },
   ]);
 };

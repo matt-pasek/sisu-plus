@@ -1,4 +1,5 @@
 import { en, I18N_NAMESPACE, Translations } from '@/app/locales/en/en';
+import { authTranslation } from '@/app/locales/fi/auth/auth.translation.fi';
 import { componentsTranslation } from '@/app/locales/fi/components/components.translation.fi';
 import { controlCenterTranslation } from '@/app/locales/fi/controlCenter/controlCenter.translation.fi';
 import { landingTranslation } from '@/app/locales/fi/landing/landing.translation.fi';
@@ -9,6 +10,7 @@ import { viewsTranslation } from '@/app/locales/fi/views/views.translation.fi';
 export const fi: Translations = {
   [I18N_NAMESPACE]: {
     ...en.sisu,
+    auth: authTranslation,
     components: componentsTranslation,
     controlCenter: controlCenterTranslation,
     landing: landingTranslation,

@@ -7,6 +7,8 @@ import {
   type RegistrationImplementation,
 } from '@/app/api/dataPoints/getRegistrationCourses';
 import { Button } from '@/app/components/ui/Button.comp';
+import { PageHeader } from '@/app/components/ui/PageHeader.comp';
+import { SegmentedControl } from '@/app/components/ui/SegmentedControl.comp';
 import { notify } from '@/app/components/ui/notify';
 import { RefreshIcon } from '@/app/views/registration/components/icons';
 import { useSisuQuery } from '@/app/hooks/useSisuQuery';
@@ -201,14 +203,10 @@ const RegistrationView: React.FC = () => {
 
   return (
     <section className="mx-auto flex flex-col gap-5 pb-10">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <span className="inline-flex min-w-0 items-center gap-2 font-mono text-[11px] font-semibold tracking-[0.14em] text-lightGrey uppercase">
-          <span className="size-1.5 shrink-0 rounded-full bg-lighterGreen shadow-[0_0_10px_rgba(82,201,137,0.7)]" />
-          <span className="truncate">{t('title')}</span>
-          <span aria-hidden="true">&middot;</span>
-          <b className="truncate font-bold text-offwhite">{t('labels.courseExamRegistration')}</b>
-        </span>
-        <div className="flex shrink-0 gap-2 sm:justify-end">
+      <PageHeader
+        title={t('title')}
+        subtitle={t('labels.courseExamRegistration')}
+        actions={
           <Button
             className="min-h-10 gap-2 px-4 text-sm font-semibold"
             onClick={() => {
@@ -218,8 +216,8 @@ const RegistrationView: React.FC = () => {
             <RefreshIcon className="size-4" />
             <span>{t('actions.updateView')}</span>
           </Button>
-        </div>
-      </header>
+        }
+      />
 
       <div
         ref={periodScrollerRef}
@@ -322,35 +320,32 @@ const RegistrationView: React.FC = () => {
         )}
       </AnimatePresence>
 
-      <div className="inline-flex w-fit rounded-xl bg-container2 p-[3px] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.055)]">
-        {(
-          [
-            ['course', t('labels.courseRegistration'), courseCount],
-            ['exam', t('labels.examRegistration'), examCount],
-          ] as const
-        ).map(([value, label, count]) => (
-          <button
-            key={value}
-            type="button"
-            onClick={() => setSelectedTab(value)}
-            className={`relative inline-flex min-h-10 cursor-pointer items-center gap-2.5 overflow-hidden rounded-[9px] px-[18px] text-sm font-semibold transition-[color,transform] duration-150 active:scale-[0.97] ${
-              selectedTab === value ? 'text-offwhite' : 'text-lightGrey hover:text-offwhite'
-            }`}
-          >
-            {selectedTab === value && (
-              <motion.span
-                layoutId="registration-tab-active"
-                className="absolute inset-0 bg-container shadow-[0_1px_4px_rgba(0,0,0,0.3)]"
-                transition={{ duration: shouldReduceMotion ? 0 : 0.18, ease: REGISTRATION_EASE }}
-              />
-            )}
-            <span className="relative">{label}</span>
-            <span className="relative rounded-md bg-[#3a355f] px-2 py-0.5 font-mono text-xs text-[#b8a6ff] tabular-nums">
-              {count}
-            </span>
-          </button>
-        ))}
-      </div>
+      <SegmentedControl
+        ariaLabel={t('labels.courseExamRegistration')}
+        layoutId="registration-tab-active"
+        value={selectedTab}
+        onChange={setSelectedTab}
+        options={[
+          {
+            value: 'course',
+            label: t('labels.courseRegistration'),
+            badge: (
+              <span className="rounded-md bg-[#3a355f] px-2 py-0.5 font-mono text-xs text-[#b8a6ff] tabular-nums">
+                {courseCount}
+              </span>
+            ),
+          },
+          {
+            value: 'exam',
+            label: t('labels.examRegistration'),
+            badge: (
+              <span className="rounded-md bg-[#3a355f] px-2 py-0.5 font-mono text-xs text-[#b8a6ff] tabular-nums">
+                {examCount}
+              </span>
+            ),
+          },
+        ]}
+      />
 
       {selectedPeriod ? (
         <div className="grid items-start gap-4 lg:grid-cols-2">

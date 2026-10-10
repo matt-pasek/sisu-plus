@@ -4,3 +4,4 @@ export * from './terms';
 export * from './duration';
 export * from './expand';
 export * from './kind';
+export * from './clashes';

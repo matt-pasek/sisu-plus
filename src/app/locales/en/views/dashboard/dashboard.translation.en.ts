@@ -1,5 +1,6 @@
 export type DashboardTranslation = {
   title: string;
+  weekLabel: string;
   periodLabel: {
     autumn: string;
     spring: string;
@@ -235,6 +236,7 @@ export type DashboardTranslation = {
 
 export const dashboardTranslation: DashboardTranslation = {
   title: 'Dashboard',
+  weekLabel: 'Week {{week}}',
   periodLabel: {
     autumn: 'Autumn',
     spring: 'Spring',

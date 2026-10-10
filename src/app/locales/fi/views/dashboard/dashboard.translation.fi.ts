@@ -2,6 +2,7 @@ import { DashboardTranslation } from '@/app/locales/en/views/dashboard/dashboard
 
 export const dashboardTranslation: DashboardTranslation = {
   title: 'Etusivu',
+  weekLabel: 'Viikko {{week}}',
   periodLabel: {
     autumn: 'Syksy',
     spring: 'Kevät',

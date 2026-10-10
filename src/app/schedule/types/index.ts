@@ -1,7 +1,11 @@
 export type { Clash } from './Clash.type';
 export type { ClashKind } from './ClashKind.type';
 export type { DateRange } from './DateRange.type';
+export type { DayLayout } from './DayLayout.type';
+export type { HourRange } from './HourRange.type';
 export type { Occurrence } from './Occurrence.type';
+export type { OverflowSlot } from './OverflowSlot.type';
+export type { Placement } from './Placement.type';
 export type { RecurrenceRule } from './RecurrenceRule.type';
 export type { RecurringSeries } from './RecurringSeries.type';
 export type { SeriesClashSummary } from './SeriesClashSummary.type';

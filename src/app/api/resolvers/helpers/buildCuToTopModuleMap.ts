@@ -1,7 +1,9 @@
+import { getPlacedCourseUnitSelections, type PlacedSelectionShape } from './placedCourseUnitSelections';
+
 type PlanShape = {
   rootId: string;
   moduleSelections: { moduleId: string; parentModuleId?: string }[];
-  courseUnitSelections: { courseUnitId: string; parentModuleId?: string }[];
+  courseUnitSelections: PlacedSelectionShape[];
 };
 
 export function buildCuToTopModuleMap(plan: PlanShape): Map<string, string> {
@@ -21,7 +23,7 @@ export function buildCuToTopModuleMap(plan: PlanShape): Map<string, string> {
 
   const topLevelSet = new Set(topLevelIds);
   const cuToTopModule = new Map<string, string>();
-  for (const cs of plan.courseUnitSelections) {
+  for (const cs of getPlacedCourseUnitSelections(plan.courseUnitSelections)) {
     if (!cs.parentModuleId) continue;
     let current = cs.parentModuleId;
     let depth = 0;

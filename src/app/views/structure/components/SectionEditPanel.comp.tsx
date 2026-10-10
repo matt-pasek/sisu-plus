@@ -7,10 +7,12 @@ import { getSectionInstructionsForEdit } from '@/app/views/structure/components/
 import { SectionData, StructureOption, StructureSelectionGroup } from '@/app/views/structure/types';
 import {
   addCourseToModule,
+  getSubstituteIds,
   removeCourseFromModule,
   selectCourseOption,
   selectModuleOption,
 } from '@/app/views/structure/util/editing/structurePlanDraft';
+import { ReplacedByHint } from './ReplacedByHint.comp';
 
 interface Props {
   color: ModuleColor;
@@ -28,11 +30,18 @@ function selectedCourseIds(plan: Plan): Set<string> {
   return new Set(plan.courseUnitSelections.map((selection) => selection.courseUnitId));
 }
 
+function substituteNames(plan: Plan, courseUnitId: string, courseNames: Map<string, string>): string[] {
+  return getSubstituteIds(plan, courseUnitId).map((id) => courseNames.get(id) ?? id);
+}
+
 export const SectionEditPanel: React.FC<Props> = ({ color, draftPlan, section, onDraftPlanChange }) => {
   const { t } = useTranslationWithPrefix('views.structure');
   const [query, setQuery] = useState('');
   const search = searchCourseUnits(query.trim());
   const selectedCourses = selectedCourseIds(draftPlan);
+  const courseNames = new Map(
+    section.courses.map((course) => [course.courseUnitId, course.name ?? course.code ?? course.courseUnitId]),
+  );
   const sectionInstructions = getSectionInstructionsForEdit(section.instructions, section.selectionGroups);
 
   const chooseOption = (group: StructureSelectionGroup, option: StructureOption) => {
@@ -86,6 +95,7 @@ export const SectionEditPanel: React.FC<Props> = ({ color, draftPlan, section, o
           <SelectionGroupCard
             key={group.id}
             color={color}
+            courseNames={courseNames}
             draftPlan={draftPlan}
             group={group}
             onSelect={(option) => chooseOption(group, option)}
@@ -133,6 +143,10 @@ export const SectionEditPanel: React.FC<Props> = ({ color, draftPlan, section, o
                       <span className="mt-1 block font-mono text-xs text-lightGrey">
                         {course.code ?? course.courseUnitId} · {course.credits ?? 0} cr
                       </span>
+                      <ReplacedByHint
+                        names={substituteNames(draftPlan, course.courseUnitId, courseNames)}
+                        iconClassName={color.text}
+                      />
                     </span>
                     <span className={`shrink-0 text-sm font-bold ${isSelected ? 'text-lighterGreen' : color.text}`}>
                       {isSelected ? t('edit.remove') : t('edit.add')}
@@ -151,10 +165,11 @@ export const SectionEditPanel: React.FC<Props> = ({ color, draftPlan, section, o
 
 const SelectionGroupCard: React.FC<{
   color: ModuleColor;
+  courseNames: Map<string, string>;
   draftPlan: Plan;
   group: StructureSelectionGroup;
   onSelect: (option: StructureOption) => void;
-}> = ({ color, draftPlan, group, onSelect }) => {
+}> = ({ color, courseNames, draftPlan, group, onSelect }) => {
   const { t } = useTranslationWithPrefix('views.structure');
 
   return (
@@ -199,6 +214,12 @@ const SelectionGroupCard: React.FC<{
                 <span className="mt-1 block font-mono text-xs text-lightGrey">
                   {option.code ?? option.id} · {option.credits ?? 0} cr
                 </span>
+                {option.type === 'course' && (
+                  <ReplacedByHint
+                    names={substituteNames(draftPlan, option.id, courseNames)}
+                    iconClassName={color.text}
+                  />
+                )}
               </span>
               <span className={`shrink-0 text-xs font-bold ${selected ? 'text-lighterGreen' : color.text}`}>
                 {selected ? t('edit.selected') : t('edit.select')}

@@ -14,6 +14,10 @@ import type {
 } from '@/app/api/generated/KoriApi';
 import type { Plan } from '@/app/api/generated/OsuvaApi';
 import { buildCuToTopModuleMap } from '@/app/api/resolvers/helpers/buildCuToTopModuleMap';
+import {
+  getPlacedCourseUnitSelections,
+  type PlacedSelectionShape,
+} from '@/app/api/resolvers/helpers/placedCourseUnitSelections';
 import { pickLabel } from '@/app/api/resolvers/helpers/pickLabel';
 import { resolveCourseUnit } from '@/app/api/resolvers/resolveCourseUnit';
 import { resolveModule } from '@/app/api/resolvers/resolveModule';
@@ -29,7 +33,7 @@ type StructurePlan = {
   curriculumPeriodId: string;
   metadata?: Record<string, unknown>;
   moduleSelections: { moduleId: string; parentModuleId?: string }[];
-  courseUnitSelections: { courseUnitId: string; parentModuleId?: string; completionMethodId?: string }[];
+  courseUnitSelections: (PlacedSelectionShape & { completionMethodId?: string })[];
 };
 
 type EditableRule = {
@@ -317,16 +321,26 @@ export const getStructureData = (): { data: StructureData | undefined; isLoading
           .map((e) => e.courseUnitId)
           .filter((id): id is string => id != null),
       );
-      const courseUnitIds = plan.courseUnitSelections
+      const placedSelections = getPlacedCourseUnitSelections(plan.courseUnitSelections);
+      const courseUnitIds = placedSelections
         .filter((selection) => cuToTopModule.has(selection.courseUnitId))
         .map((selection) => selection.courseUnitId);
+      const substitutedIds = [
+        ...new Set(
+          placedSelections.flatMap((s) => (s.substituteFor ?? []).map((entry) => entry.substitutedCourseUnitId)),
+        ),
+      ];
 
-      const [moduleDetails, wrapperDetails, courseUnits, curriculumPeriod] = await Promise.all([
+      const [moduleDetails, wrapperDetails, courseUnits, substitutedCourses, curriculumPeriod] = await Promise.all([
         Promise.all(topLevelModuleIds.map(resolveModule)),
         wrapperModuleId ? resolveModule(wrapperModuleId) : Promise.resolve(null),
         Promise.all(courseUnitIds.map(resolveCourseUnit)),
+        Promise.all(substitutedIds.map(resolveCourseUnit)),
         fetchCurriculumPeriod(plan.curriculumPeriodId),
       ]);
+      const substitutedNames = new Map(
+        substitutedIds.map((id, index) => [id, substitutedCourses[index].name ?? substitutedCourses[index].code ?? id]),
+      );
       const sectionDocuments = await Promise.all(topLevelModuleIds.map(fetchModuleDocument));
       const sectionChildren = await Promise.all(
         sectionDocuments.map((sectionDocument, index) =>
@@ -343,7 +357,7 @@ export const getStructureData = (): { data: StructureData | undefined; isLoading
 
         const courseUnit = courseUnits[index];
         const attainment = passingByCourseUnit.get(courseUnitId);
-        const selection = plan.courseUnitSelections.find((s) => s.courseUnitId === courseUnitId);
+        const selection = placedSelections.find((s) => s.courseUnitId === courseUnitId);
         const completionMethodId = selection?.completionMethodId ?? null;
         const methodIdx = completionMethodId ? courseUnit.completionMethodLocalIds.indexOf(completionMethodId) : -1;
         const course: CourseEntry = {
@@ -357,6 +371,9 @@ export const getStructureData = (): { data: StructureData | undefined; isLoading
           grade: getGrade(attainment),
           completionMethodId,
           completionMethodIndex: methodIdx >= 0 ? methodIdx + 1 : null,
+          substitutesFor: (selection?.substituteFor ?? []).map(
+            (entry) => substitutedNames.get(entry.substitutedCourseUnitId) ?? entry.substitutedCourseUnitId,
+          ),
         };
 
         coursesByModule.set(moduleId, [...(coursesByModule.get(moduleId) ?? []), course]);

@@ -3,6 +3,7 @@ import { motion, useReducedMotion } from 'motion/react';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import type { ModuleColor } from '@/app/theme/moduleColors';
 import { CourseEntry } from '@/app/views/structure/types';
+import { SwapIcon } from './icons';
 
 interface Props {
   course: CourseEntry;
@@ -56,6 +57,12 @@ export const CourseCard: React.FC<Props> = ({
               {course.name ?? course.code ?? course.courseUnitId}
             </h3>
             <code className="block font-mono text-[11px] text-lightGrey">{course.code ?? course.courseUnitId}</code>
+            {course.substitutesFor.length > 0 && (
+              <span className="flex items-start gap-1.5 text-[11px] leading-snug text-lightGrey">
+                <SwapIcon className="mt-px size-3.5 shrink-0" style={{ color: color.value }} />
+                {t('course.replacesLabel', { names: course.substitutesFor.join(', ') })}
+              </span>
+            )}
           </div>
           <div className="shrink-0 text-right">
             <div

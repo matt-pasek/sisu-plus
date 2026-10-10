@@ -7,6 +7,7 @@ import { resolveCourseRealisations } from '@/app/api/resolvers/resolveCourseReal
 import { resolveCourseUnit } from '@/app/api/resolvers/resolveCourseUnit';
 import { resolveModule } from '@/app/api/resolvers/resolveModule';
 import { buildCuToTopModuleMap } from '@/app/api/resolvers/helpers/buildCuToTopModuleMap';
+import { getPlacedCourseUnitSelections } from '@/app/api/resolvers/helpers/placedCourseUnitSelections';
 import { useSisuQuery } from '@/app/hooks/useSisuQuery';
 import type { CourseUnitAttainmentRestricted } from '@/app/api/generated/OriApi';
 import type { RealisationResult } from '@/app/api/resolvers/resolveRealization';
@@ -76,7 +77,8 @@ export const getTimelineCourses = (planId?: string): { timelineCourses: Timeline
       if (!plan) return [];
 
       const cuToTopModule = buildCuToTopModuleMap(plan);
-      const courseUnitIds = plan.courseUnitSelections.map((selection) => selection.courseUnitId);
+      const placedSelections = getPlacedCourseUnitSelections(plan.courseUnitSelections);
+      const courseUnitIds = placedSelections.map((selection) => selection.courseUnitId);
       const topModuleIds = [...new Set([...cuToTopModule.values()])];
 
       const courseUnitEntries = await Promise.all(
@@ -110,7 +112,7 @@ export const getTimelineCourses = (planId?: string): { timelineCourses: Timeline
           .map((enrolment) => enrolment.courseUnitId),
       );
 
-      return plan.courseUnitSelections.map((selection): TimelineCourse => {
+      return placedSelections.map((selection): TimelineCourse => {
         const courseUnit = courseUnitsById.get(selection.courseUnitId);
         const moduleId = cuToTopModule.get(selection.courseUnitId) ?? null;
         const module = moduleId ? modulesById.get(moduleId) : undefined;

@@ -42,6 +42,7 @@ export const structureTranslation: StructureTranslation = {
     detailsAction: 'Tiedot',
     methodAction: 'Suoritustapa',
     methodSelectedLabel: 'Suoritustapa {{n}}',
+    replacesLabel: 'Korvaa: {{names}}',
   },
   edit: {
     edit: 'Muokkaa rakennetta',
@@ -50,12 +51,13 @@ export const structureTranslation: StructureTranslation = {
     cancel: 'Peruuta',
     title: 'Muokkaa valintoja',
     draftHint:
-      'Muutokset jäävät luonnokseksi tallennukseen asti. Uuden vaihtoehdon valitseminen poistaa vanhan vaihtoehdon ja sen sisältämät kurssit.',
+      'Muutokset jäävät luonnokseksi tallennukseen asti. Uuden vaihtoehdon valitseminen poistaa vanhan vaihtoehdon, sen sisältämät kurssit ja niitä korvaavat kurssit.',
     instructions: 'Ohjeet',
     groups: 'ryhmät',
     noGroups: 'Tälle osiolle ei löytynyt jäsenneltyjä valintaryhmiä.',
     selected: 'Valittu',
     select: 'Valitse',
+    replacedByLabel: 'Korvattu: {{names}}',
     add: 'Lisää',
     remove: 'Poista',
     countRule: 'Valitse {{min}}–{{max}} vaihtoehtoa',

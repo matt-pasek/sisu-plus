@@ -3,6 +3,7 @@ import { fetchPlans } from '@/app/api/endpoints/plans';
 import { getStudyPeriodMap, type StudyPeriodInfo } from '@/app/api/dataPoints/getStudyPeriodMap';
 import { resolveCourseRealisations } from '@/app/api/resolvers/resolveCourseRealisations';
 import { resolveCourseUnit } from '@/app/api/resolvers/resolveCourseUnit';
+import { getPlacedCourseUnitSelections } from '@/app/api/resolvers/helpers/placedCourseUnitSelections';
 import { useSisuQuery } from '@/app/hooks/useSisuQuery';
 import type { Enrolment } from '@/app/api/generated/IlmoApi';
 import type { RealisationResult } from '@/app/api/resolvers/resolveRealization';
@@ -202,7 +203,7 @@ export const getRegistrationCourses = (): {
         activeEnrolments.map((enrolment) => [enrolment.courseUnitRealisationId, enrolment]),
       );
       const courseUnits = await Promise.all(
-        plan.courseUnitSelections.map(async (selection) => ({
+        getPlacedCourseUnitSelections(plan.courseUnitSelections).map(async (selection) => ({
           selection,
           courseUnit: await resolveCourseUnit(selection.courseUnitId),
         })),

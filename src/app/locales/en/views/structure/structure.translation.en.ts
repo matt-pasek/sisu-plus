@@ -40,6 +40,7 @@ export type StructureTranslation = {
     detailsAction: string;
     methodAction: string;
     methodSelectedLabel: string;
+    replacesLabel: string;
   };
   edit: {
     edit: string;
@@ -53,6 +54,7 @@ export type StructureTranslation = {
     noGroups: string;
     selected: string;
     select: string;
+    replacedByLabel: string;
     add: string;
     remove: string;
     countRule: string;
@@ -220,6 +222,7 @@ export const structureTranslation: StructureTranslation = {
     detailsAction: 'Details',
     methodAction: 'Method',
     methodSelectedLabel: 'Method {{n}}',
+    replacesLabel: 'Replaces {{names}}',
   },
   edit: {
     edit: 'Edit structure',
@@ -228,12 +231,13 @@ export const structureTranslation: StructureTranslation = {
     cancel: 'Cancel',
     title: 'Edit selections',
     draftHint:
-      'Changes stay in draft until saved. Choosing a new alternative removes the old alternative and its nested courses.',
+      'Changes stay in draft until saved. Choosing a new alternative removes the old alternative, its nested courses and any courses replacing them.',
     instructions: 'Instructions',
     groups: 'groups',
     noGroups: 'No structured selection groups were found for this section.',
     selected: 'Selected',
     select: 'Select',
+    replacedByLabel: 'Replaced by {{names}}',
     add: 'Add',
     remove: 'Remove',
     countRule: 'Select {{min}}-{{max}} options',

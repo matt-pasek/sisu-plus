@@ -64,6 +64,7 @@ const structureCourse: CourseEntry = {
   parentModuleId: 'major',
   completionMethodId: 'method-2',
   completionMethodIndex: 2,
+  substitutesFor: [],
 };
 
 function FeaturePill({ children }: { children: React.ReactNode }) {

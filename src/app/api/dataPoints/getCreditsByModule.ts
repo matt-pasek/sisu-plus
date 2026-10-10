@@ -3,6 +3,7 @@ import { fetchPlans } from '@/app/api/endpoints/plans';
 import { fetchAttainments } from '@/app/api/endpoints/attainments';
 import { resolveModule } from '@/app/api/resolvers/resolveModule';
 import { resolveCourseUnit } from '@/app/api/resolvers/resolveCourseUnit';
+import { buildCuToTopModuleMap } from '@/app/api/resolvers/helpers/buildCuToTopModuleMap';
 import type { CourseUnitAttainmentRestricted } from '@/app/api/generated/OriApi';
 
 export type ModuleProgress = {
@@ -27,11 +28,6 @@ export const getCreditsByModule = () => {
       const plan = plansQuery.data![0];
       if (!plan) return { modules: [], totalTarget: 0 };
 
-      const moduleToParent = new Map<string, string>();
-      for (const ms of plan.moduleSelections) {
-        if (ms.parentModuleId) moduleToParent.set(ms.moduleId, ms.parentModuleId);
-      }
-
       let topLevelModuleIds = plan.moduleSelections
         .filter((ms) => ms.parentModuleId === plan.rootId)
         .map((ms) => ms.moduleId);
@@ -48,21 +44,7 @@ export const getCreditsByModule = () => {
 
       if (topLevelModuleIds.length === 0) return { modules: [], totalTarget: 0 };
 
-      const topLevelSet = new Set(topLevelModuleIds);
-
-      const cuToTopModule = new Map<string, string>();
-      for (const cs of plan.courseUnitSelections) {
-        if (!cs.parentModuleId) continue;
-        let current: string = cs.parentModuleId;
-        let depth = 0;
-        while (current && !topLevelSet.has(current) && depth < 10) {
-          current = moduleToParent.get(current) ?? '';
-          depth++;
-        }
-        if (topLevelSet.has(current)) {
-          cuToTopModule.set(cs.courseUnitId, current);
-        }
-      }
+      const cuToTopModule = buildCuToTopModuleMap(plan);
 
       const cuAttainments = (attainmentsQuery.data ?? []).filter(
         (a): a is CourseUnitAttainmentRestricted =>

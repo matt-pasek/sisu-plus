@@ -9,4 +9,5 @@ export type CourseEntry = {
   grade: string | null;
   completionMethodId: string | null;
   completionMethodIndex: number | null;
+  substitutesFor: string[];
 };

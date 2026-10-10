@@ -1,6 +1,10 @@
 import { useTranslation } from 'react-i18next';
 
-export function AuthOverlay({ onContinue }: { onContinue: () => void }) {
+interface Props {
+  onContinue: () => void;
+}
+
+export const AuthOverlay: React.FC<Props> = ({ onContinue }) => {
   const { t } = useTranslation();
 
   return (
@@ -8,53 +12,22 @@ export function AuthOverlay({ onContinue }: { onContinue: () => void }) {
       role="dialog"
       aria-modal="true"
       aria-labelledby="sisu-plus-auth-title"
-      style={{
-        alignItems: 'center',
-        background: 'color-mix(in srgb, var(--color-background) 82%, transparent)',
-        display: 'flex',
-        inset: 0,
-        justifyContent: 'center',
-        position: 'fixed',
-        zIndex: 2147483647,
-      }}
+      className="fixed inset-0 z-[2147483647] flex items-center justify-center bg-background/80"
     >
-      <div
-        style={{
-          background: 'var(--color-container)',
-          border: '1px solid var(--color-border)',
-          borderRadius: '16px',
-          color: 'var(--color-offwhite)',
-          fontFamily: 'var(--font-sans)',
-          maxWidth: '380px',
-          padding: '28px',
-          textAlign: 'center',
-        }}
-      >
-        <h2 id="sisu-plus-auth-title" style={{ fontSize: '20px', fontWeight: 600, margin: '0 0 10px' }}>
+      <div className="max-w-[380px] rounded-2xl border border-border bg-container p-7 text-center font-sans text-offwhite">
+        <h2 id="sisu-plus-auth-title" className="mb-2.5 text-xl font-semibold">
           {t('auth.overlay.title')}
         </h2>
-        <p style={{ fontSize: '14px', lineHeight: 1.5, margin: '0 0 22px', opacity: 0.75 }}>
-          {t('auth.overlay.description')}
-        </p>
+        <p className="mb-5 text-sm leading-normal opacity-75">{t('auth.overlay.description')}</p>
         <button
           type="button"
           onClick={onContinue}
           autoFocus
-          style={{
-            background: 'var(--color-accent)',
-            border: 'none',
-            borderRadius: '10px',
-            color: 'var(--color-background)',
-            cursor: 'pointer',
-            fontFamily: 'var(--font-sans)',
-            fontSize: '15px',
-            fontWeight: 600,
-            padding: '11px 26px',
-          }}
+          className="cursor-pointer rounded-[10px] bg-accent px-6 py-2.5 text-[15px] font-semibold text-background"
         >
           {t('auth.overlay.continue')}
         </button>
       </div>
     </div>
   );
-}
+};

@@ -20,6 +20,7 @@ let initStarted = false;
 let waitingForToken = false;
 let unauthenticated = false;
 let unauthenticatedTimer: number | undefined;
+let expiredToken: string | undefined;
 let universityConfig: UniversityConfig | undefined;
 let shadowRoot: ShadowRoot | undefined;
 let lastStudentUrl = window.location.href;
@@ -89,6 +90,10 @@ const didUniversityOriginsChange = (oldConfig?: UniversityConfig, newConfig?: Un
   if (!oldConfig || !newConfig) return true;
 
   return oldConfig.sisuOrigin !== newConfig.sisuOrigin || oldConfig.moodleOrigin !== newConfig.moodleOrigin;
+};
+
+const removeSplash = () => {
+  document.getElementById(SPLASH_ID)?.remove();
 };
 
 const hasSisuPlusRoot = () => Boolean(document.getElementById(SISU_PLUS_ROOT_ID));
@@ -182,6 +187,7 @@ const applyUnauthenticated = async (clearStoredSession: boolean) => {
   unauthenticated = true;
 
   if (clearStoredSession) {
+    expiredToken = await getStoredSisuToken();
     await clearStoredSessionForCurrentOrigin();
   }
 
@@ -228,7 +234,7 @@ const mountSisuPlus = () => {
 
   mountApp(appRoot);
   appMounted = true;
-  document.getElementById(SPLASH_ID)?.remove();
+  removeSplash();
 };
 
 const mountControlCenterOnce = () => {
@@ -241,17 +247,22 @@ const reconcileRoute = async () => {
   await ensureBodyReady();
 
   if (isStudentLoginPage()) {
+    removeSplash();
     enterUnauthenticated(false);
     return;
   }
 
-  if (!canRunSisuPlusOnCurrentRoute()) return;
+  if (!canRunSisuPlusOnCurrentRoute()) {
+    removeSplash();
+    return;
+  }
 
   lastStudentUrl = window.location.href;
 
   const prefs = await getPrefs();
 
   if (!prefs.sisuPlusActive) {
+    removeSplash();
     exitUnauthenticated();
 
     if (hasSisuPlusRoot()) {
@@ -301,6 +312,16 @@ const isRouteBridgeMessage = (event: MessageEvent) => {
   return data.source === ROUTE_BRIDGE_SOURCE && data.type === ROUTE_CHANGE_TYPE;
 };
 
+const handleTokenCaptured = async () => {
+  if (!waitingForToken && !unauthenticated) return;
+
+  // Native Sisu keeps running behind the overlay and resends the dead token; only a fresh one ends the expiry.
+  if (unauthenticated && (await getStoredSisuToken()) === expiredToken) return;
+
+  exitUnauthenticated();
+  await reconcileRoute();
+};
+
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState !== 'visible') return;
 
@@ -331,10 +352,8 @@ const init = async () => {
   chrome.runtime.onMessage.addListener((message) => {
     if (message.type !== 'SISU_TOKEN_CAPTURED') return;
     if (message.origin !== window.location.origin) return;
-    if (!waitingForToken && !unauthenticated) return;
 
-    exitUnauthenticated();
-    void reconcileRoute();
+    void handleTokenCaptured();
   });
 
   chrome.storage.onChanged.addListener((changes, area) => {

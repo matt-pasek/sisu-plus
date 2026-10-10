@@ -1,5 +1,9 @@
 import type { UniversityConfig } from '@/app/types/universityConfig';
-import { clearOriginSessionData, patchOriginSessionData } from '@/background/session/sessionStore';
+import {
+  clearOriginSessionData,
+  getSisuTokenForOrigin,
+  patchOriginSessionData,
+} from '@/background/session/sessionStore';
 import { getOrigin } from '@/background/util/origin';
 
 const CONTENT_SCRIPT_ID = 'sisu-plus-content';
@@ -41,9 +45,10 @@ const onBeforeSendHeaders: Parameters<typeof chrome.webRequest.onBeforeSendHeade
     if (authHeader?.value?.startsWith('Bearer ')) {
       const token = authHeader.value.slice(7);
 
-      void patchOriginSessionData('sisuTokensByOrigin', origin, token).then(() => {
+      if (token !== (await getSisuTokenForOrigin(origin))) {
+        await patchOriginSessionData('sisuTokensByOrigin', origin, token);
         notifyTokenCaptured(details.tabId, origin);
-      });
+      }
     }
 
     const cookieHeader = headers.find((h) => h.name.toLowerCase() === 'cookie');

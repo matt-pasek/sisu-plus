@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { keepPreviousData } from '@tanstack/react-query';
 import { getUserDetails } from '@/app/api/dataPoints/getUserDetails';
 import { fetchCourseUnit } from '@/app/api/endpoints/courseUnit';
 import { fetchLocations } from '@/app/api/endpoints/locations';
@@ -6,14 +7,17 @@ import { fetchStudyEventsInCalendar } from '@/app/api/endpoints/studyEventsInCal
 import { pickLabel } from '@/app/api/resolvers/helpers/pickLabel';
 import { useSisuQuery } from '@/app/hooks/useSisuQuery';
 import { findClashes, groupClashesBySession, termRangeFor } from '@/app/schedule';
+import { applyCourseUnitNames } from './applyCourseUnitNames';
 import { mapCalendarRows } from './mapCalendarRows';
 import { mapCourseUnits } from './mapCourseUnits';
 import { mapLocations } from './mapLocations';
-import type { CalendarData, CalendarRowsResult, LabelPicker } from './types';
+import type { CalendarData, CalendarRowsResult, CourseUnitInfo, LabelPicker, RoomInfo } from './types';
 
 const FIVE_MINUTES = 5 * 60 * 1000;
 const ONE_DAY = 24 * 60 * 60 * 1000;
 const EMPTY_ROWS: CalendarRowsResult = { sessions: [], courses: [] };
+const EMPTY_ROOMS: Record<string, RoomInfo> = {};
+const EMPTY_COURSE_UNITS: Record<string, CourseUnitInfo> = {};
 
 const pickCalendarLabel: LabelPicker = (value) => (value ? pickLabel(value) : null);
 
@@ -42,7 +46,7 @@ export const getCalendarData = (anchorKey: string): CalendarData => {
   const roomsQuery = useSisuQuery(
     ['calendar-rooms', locationIds],
     async () => mapLocations(await fetchLocations(locationIds), pickCalendarLabel),
-    { enabled: locationIds.length > 0, staleTime: ONE_DAY },
+    { enabled: locationIds.length > 0, staleTime: ONE_DAY, placeholderData: keepPreviousData },
   );
 
   const courseUnitIds = useMemo(
@@ -52,7 +56,13 @@ export const getCalendarData = (anchorKey: string): CalendarData => {
   const courseUnitsQuery = useSisuQuery(
     ['calendar-course-units', courseUnitIds],
     async () => mapCourseUnits(await Promise.all(courseUnitIds.map(fetchCourseUnit)), pickCalendarLabel),
-    { enabled: courseUnitIds.length > 0, staleTime: ONE_DAY },
+    { enabled: courseUnitIds.length > 0, staleTime: ONE_DAY, placeholderData: keepPreviousData },
+  );
+  const rooms = roomsQuery.data ?? EMPTY_ROOMS;
+  const courseUnits = courseUnitsQuery.data ?? EMPTY_COURSE_UNITS;
+  const named = useMemo(
+    () => applyCourseUnitNames(rowsQuery.data ?? EMPTY_ROWS, courseUnits),
+    [rowsQuery.data, courseUnits],
   );
 
   const clashes = useMemo(() => findClashes(sessions), [sessions]);
@@ -60,12 +70,12 @@ export const getCalendarData = (anchorKey: string): CalendarData => {
 
   return {
     range,
-    sessions,
-    courses,
+    sessions: named.sessions,
+    courses: named.courses,
     clashes,
     clashesBySession,
-    rooms: roomsQuery.data ?? {},
-    courseUnits: courseUnitsQuery.data ?? {},
+    rooms,
+    courseUnits,
     isLoading: loadingDetails || rowsQuery.isLoading,
     isFetching: rowsQuery.isFetching,
     error: rowsQuery.error ?? null,

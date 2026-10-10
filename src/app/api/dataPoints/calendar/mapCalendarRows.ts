@@ -1,5 +1,6 @@
 import type { Enrolment, EnrolmentWithStudyEvents, StudyEvent, StudyGroupSet } from '@/app/api/generated/IlmoApi';
 import { classifySessionKind, expandSeries, type DateRange, type RecurringSeries, type Session } from '@/app/schedule';
+import { compareCourses } from './courseOrder';
 import type { CalendarCourse, CalendarRowsResult, LabelPicker } from './types';
 
 interface SubGroupMatch {
@@ -95,6 +96,7 @@ const mapRow = (
       courseUnitId,
       enrolmentId: row.enrolment?.id ?? null,
       name: courseName,
+      realisationName: courseName,
       colorIndex,
       isInCalendar: row.enrolment?.isInCalendar !== false,
       isExam,
@@ -115,6 +117,6 @@ export const mapCalendarRows = (
     ...new Map(
       mapped.flatMap((entry) => (entry.course ? [entry.course] : [])).map((course) => [course.realisationId, course]),
     ).values(),
-  ].sort((a, b) => Number(a.isExam) - Number(b.isExam) || a.name.localeCompare(b.name));
+  ].sort(compareCourses);
   return { sessions, courses };
 };

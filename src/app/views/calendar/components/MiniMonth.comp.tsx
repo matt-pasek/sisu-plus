@@ -14,7 +14,7 @@ interface Props {
 }
 
 const navButton =
-  'inline-flex size-6 cursor-pointer items-center justify-center rounded-md text-lightGrey transition-colors duration-150 hover:bg-offwhite/5 hover:text-offwhite';
+  "relative inline-flex size-6 cursor-pointer items-center justify-center rounded-md text-lightGrey transition-colors duration-150 after:absolute after:-inset-2 after:content-[''] hover:bg-offwhite/5 hover:text-offwhite";
 
 export const MiniMonth: React.FC<Props> = ({ anchorKey, todayKey, busyDateKeys, locale, onSelect }) => {
   const { t } = useTranslationWithPrefix('views.calendar');

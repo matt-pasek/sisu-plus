@@ -51,7 +51,7 @@ export const CalendarToolbar: React.FC<Props> = ({
           type="button"
           onClick={onShowClash}
           title={t('actions.showClash')}
-          className="ml-auto inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-lg bg-warn/8 px-2.5 text-xs font-medium text-warn shadow-[inset_0_0_0_1px_rgba(240,168,77,0.22)] transition-[background-color,transform] duration-150 hover:bg-warn/12 active:scale-[0.97]"
+          className="ml-auto inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-lg bg-warn/8 px-2.5 text-xs font-medium text-warn shadow-[inset_0_0_0_1px_rgba(240,168,77,0.22)] transition-[background-color,transform] duration-150 hover:bg-warn/12 active:scale-[0.96]"
         >
           <WarningIcon className="size-3" />
           {t('toolbar.clashes', { count: clashCount })}

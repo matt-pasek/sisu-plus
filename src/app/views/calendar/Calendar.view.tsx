@@ -9,6 +9,7 @@ import {
   addDaysToDateKey,
   HELSINKI_TIME_ZONE,
   isoWeekNumber,
+  seriesKeyOf,
   startOfWeekKey,
   summarizeSeriesClashes,
   todayKey,
@@ -36,7 +37,7 @@ const CalendarView: React.FC = () => {
   const today = todayKey(now);
   const [anchorKey, setAnchorKey] = useState(today);
   const [popover, setPopover] = useState<PopoverTarget | null>(null);
-  const [inspectorSeriesId, setInspectorSeriesId] = useState<string | null>(null);
+  const [inspectorSeriesKey, setInspectorSeriesKey] = useState<string | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const data = getCalendarData(anchorKey);
   const { studyPeriodMap } = getStudyPeriodMap();
@@ -62,17 +63,22 @@ const CalendarView: React.FC = () => {
     () => findPeriodName(anchorKey, [...studyPeriodMap.values()]),
     [anchorKey, studyPeriodMap],
   );
+  const coursesByKey = useMemo(
+    () => new Map(data.courses.map((course) => [course.realisationId, course])),
+    [data.courses],
+  );
+  const popoverSeriesKey = popover ? seriesKeyOf(popover.session) : null;
   const popoverSeries = useMemo(
-    () => (popover ? seriesOf(popover.session.seriesId, data.sessions) : []),
-    [popover, data.sessions],
+    () => (popoverSeriesKey ? seriesOf(popoverSeriesKey, data.sessions) : []),
+    [popoverSeriesKey, data.sessions],
   );
   const popoverSummary = useMemo(
-    () => (popover ? summarizeSeriesClashes(popover.session.seriesId, data.sessions, data.clashesBySession) : null),
-    [popover, data.sessions, data.clashesBySession],
+    () => (popoverSeriesKey ? summarizeSeriesClashes(popoverSeriesKey, data.sessions, data.clashesBySession) : null),
+    [popoverSeriesKey, data.sessions, data.clashesBySession],
   );
   const inspectorSeries = useMemo(
-    () => (inspectorSeriesId ? seriesOf(inspectorSeriesId, data.sessions) : []),
-    [inspectorSeriesId, data.sessions],
+    () => (inspectorSeriesKey ? seriesOf(inspectorSeriesKey, data.sessions) : []),
+    [inspectorSeriesKey, data.sessions],
   );
 
   const closePopover = useCallback(() => setPopover(null), []);
@@ -88,7 +94,7 @@ const CalendarView: React.FC = () => {
   }, [today]);
   const closeOverlays = useCallback(() => {
     if (popover) setPopover(null);
-    else setInspectorSeriesId(null);
+    else setInspectorSeriesKey(null);
   }, [popover]);
 
   useCalendarKeyboard({
@@ -112,8 +118,8 @@ const CalendarView: React.FC = () => {
     setPopover({ session, element });
   };
 
-  const showAllSessions = (seriesId: string) => {
-    setInspectorSeriesId(seriesId);
+  const showAllSessions = (seriesKey: string) => {
+    setInspectorSeriesKey(seriesKey);
     setPopover(null);
   };
 
@@ -186,16 +192,18 @@ const CalendarView: React.FC = () => {
             rooms={data.rooms}
             now={now}
             locale={locale}
-            onClose={() => setInspectorSeriesId(null)}
+            onClose={() => setInspectorSeriesKey(null)}
           />
         )}
       </div>
-      {popover && popoverSummary && (
+      {popover && popoverSeriesKey && popoverSummary && (
         <EventPopover
           target={popover}
+          seriesKey={popoverSeriesKey}
           series={popoverSeries}
           summary={popoverSummary}
           rooms={data.rooms}
+          course={coursesByKey.get(popover.session.courseKey)}
           courseUnit={popover.session.courseUnitId ? data.courseUnits[popover.session.courseUnitId] : undefined}
           locale={locale}
           onClose={closePopover}

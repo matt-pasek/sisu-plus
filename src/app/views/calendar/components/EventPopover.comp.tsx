@@ -1,6 +1,6 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
-import type { CourseUnitInfo, RoomInfo } from '@/app/api/dataPoints/calendar/types';
+import type { CalendarCourse, CourseUnitInfo, RoomInfo } from '@/app/api/dataPoints/calendar/types';
 import { Button } from '@/app/components/ui/Button.comp';
 import { StatusChip } from '@/app/components/ui/StatusChip.comp';
 import { formatCredits } from '@/app/helpers/formatCredits';
@@ -17,7 +17,7 @@ import {
   placePopover,
 } from '../util';
 import { ClashBox } from './ClashBox.comp';
-import { ClockIcon, CloseIcon, ListIcon, PinIcon } from './icons';
+import { CalendarIcon, ClockIcon, CloseIcon, ListIcon, PinIcon } from './icons';
 
 const POPOVER_WIDTH = 372;
 const DEFAULT_HEIGHT = 320;
@@ -25,20 +25,24 @@ const POPOVER_EASE = [0.22, 1, 0.36, 1] as const;
 
 interface Props {
   target: PopoverTarget;
+  seriesKey: string;
   series: Session[];
   summary: SeriesClashSummary;
   rooms: Record<string, RoomInfo>;
+  course: CalendarCourse | undefined;
   courseUnit: CourseUnitInfo | undefined;
   locale: string;
   onClose: () => void;
-  onShowAllSessions: (seriesId: string) => void;
+  onShowAllSessions: (seriesKey: string) => void;
 }
 
 export const EventPopover: React.FC<Props> = ({
   target,
+  seriesKey,
   series,
   summary,
   rooms,
+  course,
   courseUnit,
   locale,
   onClose,
@@ -99,7 +103,7 @@ export const EventPopover: React.FC<Props> = ({
       initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: shouldReduceMotion ? 0.1 : 0.16, ease: POPOVER_EASE }}
-      className="fixed z-50 rounded-[14px] bg-container2 shadow-[0_0_0_1px_rgba(255,255,255,0.09),0_24px_60px_rgba(0,0,0,0.6)] outline-none"
+      className="fixed z-50 overflow-hidden rounded-[14px] bg-container shadow-[0_0_0_1px_rgba(255,255,255,0.09),0_24px_60px_rgba(0,0,0,0.6)] outline-none"
       style={{
         top: placement.top,
         left: placement.left,
@@ -107,21 +111,29 @@ export const EventPopover: React.FC<Props> = ({
         transformOrigin: placement.side === 'right' ? 'left center' : 'right center',
       }}
     >
-      <div className="flex items-start gap-3 px-4 pt-3.5 pb-2.5">
+      <div className="flex items-start gap-3.5 px-[18px] pt-4 pb-3.5">
         <span
           aria-hidden="true"
           className="w-1 shrink-0 self-stretch rounded-full"
           style={{ backgroundColor: color }}
         />
         <div className="min-w-0 flex-1">
-          <p className="flex items-center gap-2 font-mono text-[10px] font-semibold tracking-[0.12em] text-lightGrey uppercase">
-            <span className="truncate">{session.groupName ? `${kindLabel} · ${session.groupName}` : kindLabel}</span>
-            {session.cancelled && <StatusChip tone="neutral">{t('sessions.chips.cancelled')}</StatusChip>}
-          </p>
-          <h3 className="text-[15px] leading-snug font-semibold text-balance text-offwhite">{session.courseName}</h3>
-          {courseUnit && (
-            <p className="font-mono text-[11px] text-lightGrey">
-              {courseUnit.code} · {formatCredits(courseUnit.credits)}
+          <h3 className="text-[15.5px] leading-[1.3] font-semibold text-balance text-offwhite">{session.courseName}</h3>
+          {(courseUnit || course?.isExam) && (
+            <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-xs text-lightGrey">
+              {courseUnit && (
+                <>
+                  <span>{courseUnit.code}</span>
+                  <span aria-hidden="true">·</span>
+                  <span className="font-semibold text-[#7ea0ff]">{formatCredits(courseUnit.credits)}</span>
+                </>
+              )}
+              {course?.isExam && (
+                <>
+                  {courseUnit && <span aria-hidden="true">·</span>}
+                  <span className="font-semibold text-[#a98cff]">{t('sidebar.exam')}</span>
+                </>
+              )}
             </p>
           )}
         </div>
@@ -129,17 +141,29 @@ export const EventPopover: React.FC<Props> = ({
           type="button"
           aria-label={t('actions.close')}
           onClick={onClose}
-          className="cursor-pointer rounded-md p-1 text-lightGrey transition-colors duration-150 hover:text-offwhite"
+          className="relative -mt-1 -mr-1.5 cursor-pointer rounded-md p-1 text-lightGrey transition-colors duration-150 after:absolute after:-inset-2 after:content-[''] hover:text-offwhite"
         >
           <CloseIcon className="size-4" />
         </button>
       </div>
-      <dl className="grid grid-cols-[22px_minmax(0,1fr)] gap-x-2 gap-y-2.5 px-4 pb-3 text-[13px]">
-        <dt className="pt-0.5 text-lightGrey">
-          <ClockIcon className="size-[15px]" />
+      <dl className="grid grid-cols-[18px_minmax(0,1fr)] gap-x-2.5 gap-y-3 border-t border-border px-[18px] py-[13px] text-[12.5px]">
+        <dt className="pt-px text-darkishGrey">
+          <CalendarIcon className="size-3.5" />
         </dt>
-        <dd className="text-offwhite">
-          <span className="font-mono tabular-nums">
+        <dd className="min-w-0">
+          <span className="flex items-center gap-2 font-medium text-offwhite">
+            <span className="truncate">{course?.realisationName ?? kindLabel}</span>
+            {session.cancelled && <StatusChip tone="neutral">{t('sessions.chips.cancelled')}</StatusChip>}
+          </span>
+          <span className="block truncate text-[11.5px] text-lightGrey">
+            {session.groupName ? `${kindLabel} · ${session.groupName}` : kindLabel}
+          </span>
+        </dd>
+        <dt className="pt-px text-darkishGrey">
+          <ClockIcon className="size-3.5" />
+        </dt>
+        <dd>
+          <span className="font-mono text-offwhite tabular-nums">
             {formatSessionDate(session.dateKey, locale)} · {formatClock(session.start)}–{formatClock(session.end)}
           </span>
           {position >= 0 && (
@@ -148,8 +172,8 @@ export const EventPopover: React.FC<Props> = ({
             </span>
           )}
         </dd>
-        <dt className="pt-0.5 text-lightGrey">
-          <PinIcon className="size-[15px]" />
+        <dt className="pt-px text-darkishGrey">
+          <PinIcon className="size-3.5" />
         </dt>
         <dd className="text-offwhite">
           {describeRoomWithBuilding(session.locationIds, rooms, roomLabels)}
@@ -169,11 +193,11 @@ export const EventPopover: React.FC<Props> = ({
           label={t('event.clashesWith', { names: otherNames, count: summary.clashing, total: summary.total })}
         />
       )}
-      <div className="flex gap-1.5 border-t border-border2 px-3 py-2.5">
+      <div className="flex gap-1.5 border-t border-border px-3 py-2.5">
         <Button
           variant="onSurface"
           className="min-h-8 px-2.5"
-          onClick={() => onShowAllSessions(session.seriesId)}
+          onClick={() => onShowAllSessions(seriesKey)}
           icon={<ListIcon className="size-3.5" />}
         >
           {t('actions.allSessions')}

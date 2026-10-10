@@ -49,7 +49,7 @@ export const SessionsInspector: React.FC<Props> = ({ series, clashesBySession, r
             type="button"
             aria-label={t('actions.close')}
             onClick={onClose}
-            className="cursor-pointer rounded-md p-1 text-lightGrey transition-colors duration-150 hover:text-offwhite"
+            className="relative cursor-pointer rounded-md p-1 text-lightGrey transition-colors duration-150 after:absolute after:-inset-2 after:content-[''] hover:text-offwhite"
           >
             <CloseIcon className="size-4" />
           </button>
@@ -77,7 +77,7 @@ export const SessionsInspector: React.FC<Props> = ({ series, clashesBySession, r
               return (
                 <div
                   key={session.id}
-                  className={`-mx-2 grid grid-cols-[76px_84px_minmax(0,1fr)_auto] items-center gap-2 rounded-lg px-2 py-1.5 text-[12.5px] ${
+                  className={`-mx-2 grid grid-cols-[76px_84px_minmax(0,1fr)] items-baseline gap-2 rounded-lg px-2 py-1.5 text-[12.5px] ${
                     session.id === nextId ? 'bg-offwhite/5' : ''
                   } ${session.end <= now ? 'opacity-45' : ''}`}
                 >
@@ -87,13 +87,17 @@ export const SessionsInspector: React.FC<Props> = ({ series, clashesBySession, r
                   <span className="font-mono text-[11px] text-lightGrey tabular-nums">
                     {formatClock(session.start)}–{formatClock(session.end)}
                   </span>
-                  <span className="truncate text-[#c0c0da]">
-                    {describeRoom(session.locationIds, rooms, roomLabels)}
-                  </span>
-                  <span className="flex gap-1">
-                    {chips.map((chip) => (
-                      <SessionChipBadge key={chip.type} chip={chip} />
-                    ))}
+                  <span className="min-w-0">
+                    <span className="block truncate text-[#c0c0da]">
+                      {describeRoom(session.locationIds, rooms, roomLabels)}
+                    </span>
+                    {chips.length > 0 && (
+                      <span className="mt-1 flex flex-wrap gap-1">
+                        {chips.map((chip) => (
+                          <SessionChipBadge key={chip.type} chip={chip} />
+                        ))}
+                      </span>
+                    )}
                   </span>
                 </div>
               );

@@ -4,6 +4,7 @@ import { describe, expect, test } from 'bun:test';
 
 import { buildSession } from './__fixtures__/buildSession';
 import { findClashes, groupClashesBySession, summarizeSeriesClashes } from './clashes';
+import { seriesKeyOf } from './series';
 
 const DAY = '2026-10-27';
 
@@ -60,10 +61,29 @@ describe('summarizeSeriesClashes', () => {
       chinese('c1', '2026-10-27'),
       chinese('c2', '2026-11-03'),
     ];
-    const summary = summarizeSeriesClashes('cni', sessions, groupClashesBySession(findClashes(sessions)));
+    const summary = summarizeSeriesClashes(
+      seriesKeyOf(sessions[0]),
+      sessions,
+      groupClashesBySession(findClashes(sessions)),
+    );
     expect(summary.total).toBe(3);
     expect(summary.clashing).toBe(2);
     expect(summary.perSession.map((entry) => entry.clashes)).toEqual([true, true, false]);
     expect(summary.otherSessions.map((other) => other.courseName)).toEqual(['Basic Chinese 1']);
+  });
+
+  test('treats one study event per week in the same subgroup as one series', () => {
+    const lecture = (id: string, day: string) =>
+      buildSession(id, day, 14, 16, { seriesId: `se-${id}`, courseKey: 'cur-chn', groupId: 'sub-lec' });
+    const exam = buildSession('exam', '2026-11-03', 15, 18, { seriesId: 'se-exam', kind: 'exam' });
+    const sessions = [lecture('w1', '2026-10-27'), lecture('w2', '2026-11-03'), lecture('w3', '2026-11-10'), exam];
+    const summary = summarizeSeriesClashes(
+      seriesKeyOf(sessions[0]),
+      sessions,
+      groupClashesBySession(findClashes(sessions)),
+    );
+    expect(summary.total).toBe(3);
+    expect(summary.clashing).toBe(1);
+    expect(summary.otherSessions.map((other) => other.id)).toEqual(['exam']);
   });
 });

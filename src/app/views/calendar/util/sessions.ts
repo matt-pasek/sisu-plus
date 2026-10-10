@@ -1,4 +1,4 @@
-import { isoWeekNumber, type Clash, type Session } from '@/app/schedule';
+import { isoWeekNumber, seriesKeyOf, type Clash, type Session } from '@/app/schedule';
 import type { SessionChip } from '../types';
 
 const byStart = (a: Session, b: Session): number => a.start.getTime() - b.start.getTime();
@@ -9,8 +9,8 @@ export const sessionsOnDay = (sessions: Session[], dateKey: string): Session[] =
 export const sessionsInRange = (sessions: Session[], startKey: string, endKey: string): Session[] =>
   sessions.filter((session) => session.dateKey >= startKey && session.dateKey < endKey);
 
-export const seriesOf = (seriesId: string, sessions: Session[]): Session[] =>
-  sessions.filter((session) => session.seriesId === seriesId).sort(byStart);
+export const seriesOf = (seriesKey: string, sessions: Session[]): Session[] =>
+  sessions.filter((session) => seriesKeyOf(session) === seriesKey).sort(byStart);
 
 export const groupByWeek = (sessions: Session[]): { week: number; sessions: Session[] }[] =>
   sessions.reduce<{ week: number; sessions: Session[] }[]>((groups, session) => {

@@ -1,3 +1,4 @@
+import { seriesKeyOf } from './series';
 import type { Clash, SeriesClashSummary, Session } from './types';
 
 const MINUTE_MS = 60_000;
@@ -42,12 +43,12 @@ export const groupClashesBySession = (clashes: Clash[]): Map<string, Clash[]> =>
   }, new Map<string, Clash[]>());
 
 export const summarizeSeriesClashes = (
-  seriesId: string,
+  seriesKey: string,
   sessions: Session[],
   clashesBySession: Map<string, Clash[]>,
 ): SeriesClashSummary => {
   const byId = new Map(sessions.map((session) => [session.id, session]));
-  const series = sessions.filter((session) => session.seriesId === seriesId && !session.cancelled).sort(byStart);
+  const series = sessions.filter((session) => seriesKeyOf(session) === seriesKey && !session.cancelled).sort(byStart);
   const perSession = series.map((session) => ({
     sessionId: session.id,
     clashes: (clashesBySession.get(session.id) ?? []).length > 0,
@@ -57,11 +58,11 @@ export const summarizeSeriesClashes = (
       (clashesBySession.get(session.id) ?? []).flatMap((clash) => clash.sessionIds.filter((id) => id !== session.id)),
     )
     .map((id) => byId.get(id))
-    .filter((other): other is Session => other != null && other.seriesId !== seriesId);
+    .filter((other): other is Session => other != null && seriesKeyOf(other) !== seriesKey);
   return {
     total: series.length,
     clashing: perSession.filter((entry) => entry.clashes).length,
     perSession,
-    otherSessions: [...new Map(otherSessions.map((other) => [other.seriesId, other])).values()],
+    otherSessions: [...new Map(otherSessions.map((other) => [seriesKeyOf(other), other])).values()],
   };
 };

@@ -3,7 +3,7 @@
 import { describe, expect, test } from 'bun:test';
 
 import { buildSession } from '@/app/schedule/__fixtures__/buildSession';
-import { findClashes, groupClashesBySession } from '@/app/schedule';
+import { findClashes, groupClashesBySession, seriesKeyOf } from '@/app/schedule';
 import { groupByWeek, seriesOf, sessionChips, sessionsInRange } from './sessions';
 
 const series = [
@@ -18,7 +18,14 @@ describe('session helpers', () => {
   });
 
   test('collects a series in start order', () => {
-    expect(seriesOf('s', [...series].reverse()).map((s) => s.id)).toEqual(['a', 'b', 'c']);
+    expect(seriesOf(seriesKeyOf(series[0]), [...series].reverse()).map((s) => s.id)).toEqual(['a', 'b', 'c']);
+  });
+
+  test('collects weekly study events of one subgroup as one series', () => {
+    const weekly = ['2026-10-05', '2026-10-12', '2026-10-19'].map((day, index) =>
+      buildSession(`w${index}`, day, 14, 16, { seriesId: `se-${index}`, courseKey: 'cur', groupId: 'sub-lec' }),
+    );
+    expect(seriesOf(seriesKeyOf(weekly[1]), weekly).map((s) => s.id)).toEqual(['w0', 'w1', 'w2']);
   });
 
   test('groups consecutive sessions by ISO week', () => {

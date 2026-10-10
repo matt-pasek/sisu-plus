@@ -3,6 +3,7 @@ export interface CalendarCourse {
   courseUnitId: string | null;
   enrolmentId: string | null;
   name: string;
+  realisationName: string;
   colorIndex: number;
   isInCalendar: boolean;
   isExam: boolean;

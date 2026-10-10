@@ -1,3 +1,4 @@
+export { CalendarIcon } from './CalendarIcon.comp';
 export { ChevronLeftIcon } from './ChevronLeftIcon.comp';
 export { ChevronRightIcon } from './ChevronRightIcon.comp';
 export { ClockIcon } from './ClockIcon.comp';

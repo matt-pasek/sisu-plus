@@ -12,10 +12,13 @@ interface Props {
 export const ProvenanceFooter: React.FC<Props> = ({ updatedAt, isFetching, onRefresh }) => {
   const { t } = useTranslationWithPrefix('views.calendar');
   return (
-    <div className="flex items-center justify-between gap-3">
-      <span>
+    <div className="flex items-center gap-3">
+      <span className="tabular-nums">
         {t('footer.source')}
         {updatedAt > 0 && ` · ${t('footer.updated', { time: formatClock(new Date(updatedAt)) })}`}
+      </span>
+      <span aria-hidden="true" className="text-darkishGrey">
+        ·
       </span>
       <button
         type="button"

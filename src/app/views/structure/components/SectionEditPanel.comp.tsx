@@ -6,7 +6,7 @@ import type { ModuleColor } from '@/app/theme/moduleColors';
 import { getSectionInstructionsForEdit } from '@/app/views/structure/components/sectionInstructions';
 import { SectionData } from '@/app/views/structure/types';
 import { chooseGroupOption } from '@/app/views/structure/util/editing/selectionGroupChoice';
-import { addCourseToModule, removeCourseFromModule } from '@/app/views/structure/util/editing/structurePlanDraft';
+import { addCourseToModule, removeCourseFromPlan } from '@/app/views/structure/util/editing/structurePlanDraft';
 import { ReplacedByHint } from './ReplacedByHint.comp';
 import { SelectionGroupCard } from './SelectionGroupCard.comp';
 
@@ -95,7 +95,7 @@ export const SectionEditPanel: React.FC<Props> = ({ color, draftPlan, section, o
                     onClick={() =>
                       onDraftPlanChange(
                         isSelected
-                          ? removeCourseFromModule(draftPlan, course.courseUnitId, section.moduleId)
+                          ? removeCourseFromPlan(draftPlan, course.courseUnitId)
                           : addCourseToModule(draftPlan, course.courseUnitId, section.moduleId),
                       )
                     }

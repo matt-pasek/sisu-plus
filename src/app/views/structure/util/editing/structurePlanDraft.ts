@@ -139,12 +139,10 @@ export const addCourseToModule = (plan: Plan, courseUnitId: string, parentModule
   };
 };
 
-export const removeCourseFromModule = (plan: Plan, courseUnitId: string, parentModuleId: string) => {
+export const removeCourseFromPlan = (plan: Plan, courseUnitId: string) => {
   return withoutDanglingSubstitutions({
     ...plan,
-    courseUnitSelections: plan.courseUnitSelections.filter(
-      (selection) => selection.courseUnitId !== courseUnitId || selection.parentModuleId !== parentModuleId,
-    ),
+    courseUnitSelections: plan.courseUnitSelections.filter((selection) => selection.courseUnitId !== courseUnitId),
   });
 };
 

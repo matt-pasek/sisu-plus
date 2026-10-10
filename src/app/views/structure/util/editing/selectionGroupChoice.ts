@@ -3,7 +3,7 @@ import type { StructureOption, StructureSelectionGroup } from '@/app/views/struc
 import {
   addCourseToModule,
   addModuleToModule,
-  removeCourseFromModule,
+  removeCourseFromPlan,
   removeModuleFromPlan,
   selectCourseOption,
   selectModuleOption,
@@ -41,9 +41,7 @@ const replaceChoice = (plan: Plan, group: StructureSelectionGroup, option: Struc
 
 const toggleChoice = (plan: Plan, group: StructureSelectionGroup, option: StructureOption): Plan => {
   if (isOptionSelected(option, plan)) {
-    return option.type === 'module'
-      ? removeModuleFromPlan(plan, option.id)
-      : removeCourseFromModule(plan, option.id, group.parentModuleId);
+    return option.type === 'module' ? removeModuleFromPlan(plan, option.id) : removeCourseFromPlan(plan, option.id);
   }
   if (isGroupFull(group, plan)) return plan;
   return option.type === 'module'

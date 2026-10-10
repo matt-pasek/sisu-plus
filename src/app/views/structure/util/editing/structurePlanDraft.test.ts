@@ -4,7 +4,7 @@ import { describe, expect, test } from 'bun:test';
 
 import type { Plan } from '@/app/api/generated/OsuvaApi';
 
-import { getSubstituteIds, removeCourseFromModule, selectCourseOption, selectModuleOption } from './structurePlanDraft';
+import { getSubstituteIds, removeCourseFromPlan, selectCourseOption, selectModuleOption } from './structurePlanDraft';
 
 const plan = {
   id: 'plan',
@@ -26,7 +26,7 @@ const courseIds = (draft: Plan) => draft.courseUnitSelections.map((selection) =>
 
 describe('substitution guard', () => {
   test('removing a substituted course also removes its substitute', () => {
-    const draft = removeCourseFromModule(plan, 'work-1', 'finnish');
+    const draft = removeCourseFromPlan(plan, 'work-1');
 
     expect(courseIds(draft)).toEqual(['finnish-3', 'networks']);
   });
@@ -64,7 +64,7 @@ describe('substitution guard', () => {
       ],
     } as unknown as Plan;
 
-    const draft = removeCourseFromModule(shared, 'work-1', 'finnish');
+    const draft = removeCourseFromPlan(shared, 'work-1');
 
     expect(draft.courseUnitSelections).toEqual([
       { courseUnitId: 'work-2', parentModuleId: 'finnish', substitutedBy: ['combined'] },
@@ -73,10 +73,28 @@ describe('substitution guard', () => {
   });
 
   test('leaves unrelated selections untouched by reference', () => {
-    const draft = removeCourseFromModule(plan, 'finnish-3', 'finnish');
+    const draft = removeCourseFromPlan(plan, 'finnish-3');
 
     expect(draft.courseUnitSelections[0]).toBe(plan.courseUnitSelections[1]);
     expect(draft.courseUnitSelections[1]).toBe(plan.courseUnitSelections[2]);
+  });
+});
+
+describe('removing a course from search', () => {
+  test('removes a course that sits in a module nested under the section', () => {
+    const draft = removeCourseFromPlan(plan, 'finnish-3');
+
+    expect(courseIds(draft)).toEqual(['work-1', 'finnish-5', 'networks']);
+  });
+
+  test('removing a substitute brings back the course it replaced', () => {
+    const draft = removeCourseFromPlan(plan, 'finnish-5');
+
+    expect(draft.courseUnitSelections).toEqual([
+      { courseUnitId: 'finnish-3', parentModuleId: 'finnish' },
+      { courseUnitId: 'work-1', parentModuleId: 'finnish', substitutedBy: [] },
+      { courseUnitId: 'networks', parentModuleId: 'major' },
+    ]);
   });
 });
 

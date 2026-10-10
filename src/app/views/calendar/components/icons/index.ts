@@ -1,0 +1,8 @@
+export { ChevronLeftIcon } from './ChevronLeftIcon.comp';
+export { ChevronRightIcon } from './ChevronRightIcon.comp';
+export { ClockIcon } from './ClockIcon.comp';
+export { CloseIcon } from './CloseIcon.comp';
+export { ListIcon } from './ListIcon.comp';
+export { PinIcon } from './PinIcon.comp';
+export { RefreshIcon } from './RefreshIcon.comp';
+export { WarningIcon } from './WarningIcon.comp';

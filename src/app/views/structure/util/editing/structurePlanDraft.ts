@@ -93,6 +93,16 @@ export const selectModuleOption = (plan: Plan, args: SelectModuleOptionArgs) => 
   };
 };
 
+export const addModuleToModule = (plan: Plan, moduleId: string, parentModuleId: string): Plan => {
+  const alreadySelected = plan.moduleSelections.some((selection) => selection.moduleId === moduleId);
+  if (alreadySelected) return plan;
+
+  return { ...plan, moduleSelections: [...plan.moduleSelections, { moduleId, parentModuleId }] };
+};
+
+export const removeModuleFromPlan = (plan: Plan, moduleId: string): Plan =>
+  withoutNestedSelections(plan, new Set([moduleId]));
+
 export const selectCourseOption = (plan: Plan, args: SelectCourseOptionArgs) => {
   const nextSelection: CourseUnitSelection = {
     courseUnitId: args.selectedCourseUnitId,

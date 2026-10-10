@@ -4,15 +4,11 @@ import type { Plan } from '@/app/api/generated/OsuvaApi';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import type { ModuleColor } from '@/app/theme/moduleColors';
 import { getSectionInstructionsForEdit } from '@/app/views/structure/components/sectionInstructions';
-import { SectionData, StructureOption, StructureSelectionGroup } from '@/app/views/structure/types';
-import {
-  addCourseToModule,
-  getSubstituteIds,
-  removeCourseFromModule,
-  selectCourseOption,
-  selectModuleOption,
-} from '@/app/views/structure/util/editing/structurePlanDraft';
+import { SectionData } from '@/app/views/structure/types';
+import { chooseGroupOption } from '@/app/views/structure/util/editing/selectionGroupChoice';
+import { addCourseToModule, removeCourseFromModule } from '@/app/views/structure/util/editing/structurePlanDraft';
 import { ReplacedByHint } from './ReplacedByHint.comp';
+import { SelectionGroupCard } from './SelectionGroupCard.comp';
 
 interface Props {
   color: ModuleColor;
@@ -21,17 +17,8 @@ interface Props {
   onDraftPlanChange: (plan: Plan) => void;
 }
 
-function isOptionSelected(option: StructureOption, draftPlan: Plan): boolean {
-  if (option.type === 'module') return draftPlan.moduleSelections.some((selection) => selection.moduleId === option.id);
-  return draftPlan.courseUnitSelections.some((selection) => selection.courseUnitId === option.id);
-}
-
 function selectedCourseIds(plan: Plan): Set<string> {
   return new Set(plan.courseUnitSelections.map((selection) => selection.courseUnitId));
-}
-
-function substituteNames(plan: Plan, courseUnitId: string, courseNames: Map<string, string>): string[] {
-  return getSubstituteIds(plan, courseUnitId).map((id) => courseNames.get(id) ?? id);
 }
 
 export const SectionEditPanel: React.FC<Props> = ({ color, draftPlan, section, onDraftPlanChange }) => {
@@ -43,31 +30,6 @@ export const SectionEditPanel: React.FC<Props> = ({ color, draftPlan, section, o
     section.courses.map((course) => [course.courseUnitId, course.name ?? course.code ?? course.courseUnitId]),
   );
   const sectionInstructions = getSectionInstructionsForEdit(section.instructions, section.selectionGroups);
-
-  const chooseOption = (group: StructureSelectionGroup, option: StructureOption) => {
-    if (option.type === 'module') {
-      onDraftPlanChange(
-        selectModuleOption(draftPlan, {
-          parentModuleId: group.parentModuleId,
-          selectedModuleId: option.id,
-          optionModuleIds: group.options
-            .filter((candidate) => candidate.type === 'module')
-            .map((candidate) => candidate.id),
-        }),
-      );
-      return;
-    }
-
-    onDraftPlanChange(
-      selectCourseOption(draftPlan, {
-        parentModuleId: group.parentModuleId,
-        selectedCourseUnitId: option.id,
-        optionCourseUnitIds: group.options
-          .filter((candidate) => candidate.type === 'course')
-          .map((candidate) => candidate.id),
-      }),
-    );
-  };
 
   return (
     <div className="border-t border-border/80 bg-container/70 px-4 py-4">
@@ -98,7 +60,7 @@ export const SectionEditPanel: React.FC<Props> = ({ color, draftPlan, section, o
             courseNames={courseNames}
             draftPlan={draftPlan}
             group={group}
-            onSelect={(option) => chooseOption(group, option)}
+            onSelect={(option) => onDraftPlanChange(chooseGroupOption(draftPlan, group, option))}
           />
         ))}
 
@@ -144,7 +106,9 @@ export const SectionEditPanel: React.FC<Props> = ({ color, draftPlan, section, o
                         {course.code ?? course.courseUnitId} · {course.credits ?? 0} cr
                       </span>
                       <ReplacedByHint
-                        names={substituteNames(draftPlan, course.courseUnitId, courseNames)}
+                        plan={draftPlan}
+                        courseUnitId={course.courseUnitId}
+                        courseNames={courseNames}
                         iconClassName={color.text}
                       />
                     </span>
@@ -160,74 +124,5 @@ export const SectionEditPanel: React.FC<Props> = ({ color, draftPlan, section, o
         )}
       </div>
     </div>
-  );
-};
-
-const SelectionGroupCard: React.FC<{
-  color: ModuleColor;
-  courseNames: Map<string, string>;
-  draftPlan: Plan;
-  group: StructureSelectionGroup;
-  onSelect: (option: StructureOption) => void;
-}> = ({ color, courseNames, draftPlan, group, onSelect }) => {
-  const { t } = useTranslationWithPrefix('views.structure');
-
-  return (
-    <section className="rounded-lg bg-container2/70 p-4 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)]">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <h3 className="text-sm font-semibold text-offwhite">{group.title}</h3>
-          <p className="mt-1 text-xs text-lightGrey">
-            {group.creditsMin != null
-              ? t('edit.creditRule', { min: group.creditsMin, max: group.creditsMax ?? '∞' })
-              : t('edit.countRule', { min: group.min ?? 0, max: group.max ?? '∞' })}
-          </p>
-          {group.instructions && <p className="mt-2 max-w-5xl text-sm leading-6 text-offwhite">{group.instructions}</p>}
-        </div>
-        <span className="rounded bg-container px-2 py-1 font-mono text-xs text-darkishGrey">
-          {group.options.length}
-        </span>
-      </div>
-      <div className="grid gap-2 sm:grid-cols-2">
-        {group.options.map((option) => {
-          const selected = isOptionSelected(option, draftPlan);
-          return (
-            <button
-              key={`${option.type}:${option.id}`}
-              className={`group flex min-h-16 items-center gap-3 rounded-md px-3 py-2 text-left transition-[background-color,box-shadow,scale] active:scale-[0.98] ${
-                selected
-                  ? 'bg-accent/12 shadow-[0_0_0_1px_rgba(82,201,137,0.28)]'
-                  : 'bg-container hover:bg-container/80'
-              }`}
-              type="button"
-              onClick={() => onSelect(option)}
-            >
-              <span
-                className={`grid size-5 shrink-0 place-items-center rounded-full border ${
-                  selected ? 'border-lighterGreen bg-lighterGreen text-container' : 'border-darkishGrey'
-                }`}
-              >
-                {selected && <span className="size-2 rounded-full bg-container" />}
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-semibold text-offwhite">{option.name}</span>
-                <span className="mt-1 block font-mono text-xs text-lightGrey">
-                  {option.code ?? option.id} · {option.credits ?? 0} cr
-                </span>
-                {option.type === 'course' && (
-                  <ReplacedByHint
-                    names={substituteNames(draftPlan, option.id, courseNames)}
-                    iconClassName={color.text}
-                  />
-                )}
-              </span>
-              <span className={`shrink-0 text-xs font-bold ${selected ? 'text-lighterGreen' : color.text}`}>
-                {selected ? t('edit.selected') : t('edit.select')}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-    </section>
   );
 };

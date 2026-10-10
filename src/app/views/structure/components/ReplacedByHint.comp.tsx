@@ -1,14 +1,19 @@
 import React from 'react';
+import type { Plan } from '@/app/api/generated/OsuvaApi';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
+import { getSubstituteIds } from '@/app/views/structure/util/editing/structurePlanDraft';
 import { SwapIcon } from './icons';
 
 interface Props {
-  names: string[];
+  plan: Plan;
+  courseUnitId: string;
+  courseNames: Map<string, string>;
   iconClassName: string;
 }
 
-export const ReplacedByHint: React.FC<Props> = ({ names, iconClassName }) => {
+export const ReplacedByHint: React.FC<Props> = ({ plan, courseUnitId, courseNames, iconClassName }) => {
   const { t } = useTranslationWithPrefix('views.structure');
+  const names = getSubstituteIds(plan, courseUnitId).map((id) => courseNames.get(id) ?? id);
 
   if (names.length === 0) return null;
 

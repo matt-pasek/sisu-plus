@@ -5,6 +5,7 @@ export type NavbarTranslation = {
     timeline: string;
     structure: string;
     registration: string;
+    calendar: string;
   };
   notificationBell: {
     aria: string;
@@ -27,6 +28,7 @@ export const navbarTranslation: NavbarTranslation = {
     timeline: 'Timeline',
     structure: 'Structure',
     registration: 'Registration',
+    calendar: 'Calendar',
   },
   notificationBell: {
     aria: 'Notifications',

@@ -1,0 +1,78 @@
+import { CalendarTranslation } from '@/app/locales/en/views/calendar/calendar.translation.en';
+
+export const calendarTranslation: CalendarTranslation = {
+  title: 'Kalenteri',
+  weekLabel: 'Viikko {{week}}',
+  weekShort: 'VK {{week}}',
+  weekendShort: 'L–S',
+  timeZoneNote: 'Ajat Suomen aikaa',
+  actions: {
+    today: 'Tänään',
+    previous: 'Edellinen viikko',
+    next: 'Seuraava viikko',
+    refresh: 'Päivitä',
+    close: 'Sulje',
+    allSessions: 'Kaikki kerrat',
+    showClash: 'Näytä ensimmäinen päällekkäisyys',
+    openRegistration: 'Avaa ilmoittautuminen',
+  },
+  toolbar: {
+    clashes_one: '{{count}} päällekkäisyys',
+    clashes_other: '{{count}} päällekkäisyyttä',
+  },
+  sidebar: {
+    courses: 'Kurssit',
+    layers: 'Tasot',
+    cancelled: 'Perutut kerrat',
+    exam: 'Tentti',
+    previousMonth: 'Edellinen kuukausi',
+    nextMonth: 'Seuraava kuukausi',
+  },
+  kinds: {
+    lecture: 'Luento',
+    exercise: 'Harjoitus',
+    lab: 'Labra',
+    seminar: 'Seminaari',
+    exam: 'Tentti',
+    other: 'Opetus',
+  },
+  event: {
+    session: 'Kerta {{index}}/{{total}}',
+    noRoom: 'Ei tilaa',
+    roomUnavailable: 'Tila ei saatavilla',
+    nextSession: 'Seuraava kerta {{date}} · {{room}}',
+    nextSessionMoves: 'Seuraava kerta siirtyy tilaan {{room}} {{date}}',
+    clashesWith: 'Päällekkäin: {{names}}, {{count}}/{{total}} kertaa',
+  },
+  sessions: {
+    title: 'Kaikki kerrat',
+    week: 'Viikko {{week}}',
+    total_one: '{{count}} kerta',
+    total_other: '{{count}} kertaa',
+    clashes_one: '{{count}} päällekkäisyys',
+    clashes_other: '{{count}} päällekkäisyyttä',
+    rooms_one: '{{count}} tila',
+    rooms_other: '{{count}} tilaa',
+    chips: {
+      clash: 'Päällekkäin',
+      partialClash: '{{minutes}} min päällekkäin',
+      roomChanged: 'Tila',
+      cancelled: 'Peruttu',
+    },
+  },
+  footer: {
+    source: 'Ajat Sisusta',
+    updated: 'päivitetty {{time}}',
+  },
+  states: {
+    loading: 'Ladataan kalenteria',
+    error: 'Kalenteria ei voitu ladata.',
+    retry: 'Yritä uudelleen',
+    emptyWeek: 'Ei opetusta tällä viikolla',
+    emptyTerm: 'Ei opetusta sisältäviä ilmoittautumisia tällä lukukaudella.',
+  },
+  aria: {
+    session: '{{kind}}, {{course}}, {{date}} {{start}}–{{end}}, {{room}}',
+    clash: 'päällekkäin: {{names}}',
+  },
+};

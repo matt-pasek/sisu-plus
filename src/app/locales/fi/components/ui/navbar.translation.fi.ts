@@ -7,6 +7,7 @@ export const navbarTranslation: NavbarTranslation = {
     timeline: 'Aikajana',
     structure: 'Rakenne',
     registration: 'Ilmoittautuminen',
+    calendar: 'Kalenteri',
   },
   notificationBell: {
     aria: 'Ilmoitukset',

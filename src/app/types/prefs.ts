@@ -22,6 +22,7 @@ export interface SisuPrefs {
   dashboardLayout: DashboardWidgetLayout[];
   heroStats: HeroStatId[];
   heroPanel: HeroPanelId;
+  calendarShowCancelled: boolean;
   lastSeenChangelogVersion: string | null;
   notificationNudgeDismissed: boolean;
   notificationPrefs: NotificationPrefs;
@@ -37,6 +38,7 @@ export const DEFAULT_PREFS: SisuPrefs = {
   dashboardLayout: DEFAULT_DASHBOARD_LAYOUT,
   heroStats: DEFAULT_HERO_STATS,
   heroPanel: DEFAULT_HERO_PANEL,
+  calendarShowCancelled: false,
   lastSeenChangelogVersion: null,
   notificationNudgeDismissed: false,
   notificationPrefs: DEFAULT_NOTIFICATION_PREFS,

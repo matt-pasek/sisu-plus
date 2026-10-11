@@ -1,8 +1,13 @@
+export type { AttendancePlan } from './AttendancePlan.type';
+export type { AttendanceResult } from './AttendanceResult.type';
+export type { AttendanceStatus } from './AttendanceStatus.type';
 export type { Clash } from './Clash.type';
 export type { ClashKind } from './ClashKind.type';
+export type { ClashSkip } from './ClashSkip.type';
 export type { DateRange } from './DateRange.type';
 export type { DayLayout } from './DayLayout.type';
 export type { GroupEvents } from './GroupEvents.type';
+export type { GroupRef } from './GroupRef.type';
 export type { HourRange } from './HourRange.type';
 export type { Occurrence } from './Occurrence.type';
 export type { OverflowSlot } from './OverflowSlot.type';
@@ -15,3 +20,4 @@ export type { Session } from './Session.type';
 export type { SessionKind } from './SessionKind.type';
 export type { SessionSource } from './SessionSource.type';
 export type { SharedRelation } from './SharedRelation.type';
+export type { Swap } from './Swap.type';

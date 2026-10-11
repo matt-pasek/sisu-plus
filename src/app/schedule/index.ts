@@ -8,3 +8,5 @@ export * from './clashes';
 export * from './layout';
 export * from './series';
 export * from './sharedSessions';
+export * from './collections';
+export * from './attendance';

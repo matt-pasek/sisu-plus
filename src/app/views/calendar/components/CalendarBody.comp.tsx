@@ -1,8 +1,11 @@
 import React from 'react';
 import type { CalendarData } from '@/app/api/dataPoints/calendar/types';
+import type { StudyPeriodInfo } from '@/app/api/dataPoints/getStudyPeriodMap';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import type { Session } from '@/app/schedule';
 import type { CalendarView, PreviewModel, WeekModel } from '../types';
+import { monthStartKey } from '../util';
+import { MonthView } from './MonthView.comp';
 import { WeekGrid } from './WeekGrid.comp';
 
 interface Props {
@@ -17,6 +20,10 @@ interface Props {
   preview: PreviewModel;
   linkedLabels: Record<string, string>;
   activeSessionId: string | null;
+  periods: StudyPeriodInfo[];
+  showCancelled: boolean;
+  onOpenDay: (dateKey: string) => void;
+  onOpenWeek: (dateKey: string) => void;
   onSelect: (session: Session, element: HTMLElement) => void;
   onUserScroll: () => void;
 }
@@ -33,10 +40,29 @@ export const CalendarBody: React.FC<Props> = ({
   preview,
   linkedLabels,
   activeSessionId,
+  periods,
+  showCancelled,
+  onOpenDay,
+  onOpenWeek,
   onSelect,
   onUserScroll,
 }) => {
   const { t } = useTranslationWithPrefix('views.calendar');
+  if (view === 'month') {
+    return (
+      <MonthView
+        data={data}
+        sessionsById={week.sessionsById}
+        monthKey={monthStartKey(anchorKey)}
+        todayKey={todayKey}
+        periods={periods}
+        showCancelled={showCancelled}
+        locale={locale}
+        onOpenDay={onOpenDay}
+        onOpenWeek={onOpenWeek}
+      />
+    );
+  }
   if (view !== 'week' && view !== 'day') return null;
   const isDay = view === 'day';
   return (

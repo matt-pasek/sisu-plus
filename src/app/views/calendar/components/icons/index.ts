@@ -1,8 +1,11 @@
+export { ArrowRightIcon } from './ArrowRightIcon.comp';
 export { CalendarIcon } from './CalendarIcon.comp';
 export { ChevronLeftIcon } from './ChevronLeftIcon.comp';
 export { ChevronRightIcon } from './ChevronRightIcon.comp';
 export { ClockIcon } from './ClockIcon.comp';
 export { CloseIcon } from './CloseIcon.comp';
+export { CrossIcon } from './CrossIcon.comp';
+export { DiamondIcon } from './DiamondIcon.comp';
 export { LinkIcon } from './LinkIcon.comp';
 export { ListIcon } from './ListIcon.comp';
 export { PinIcon } from './PinIcon.comp';

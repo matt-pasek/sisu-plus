@@ -200,6 +200,35 @@ export type CalendarTranslation = {
     clashWith: string;
     skipping: string;
   };
+  month: {
+    hours: string;
+    exam: string;
+    cancelled: string;
+    roomChange: string;
+    clash: string;
+    periodStarts: string;
+    noTeaching: string;
+    dayAria: string;
+    dayAriaClash: string;
+    openWeek: string;
+  };
+  holidays: {
+    newYear: string;
+    epiphany: string;
+    goodFriday: string;
+    easterSunday: string;
+    easterMonday: string;
+    mayDay: string;
+    ascension: string;
+    whitsun: string;
+    midsummerEve: string;
+    midsummerDay: string;
+    allSaints: string;
+    independence: string;
+    christmasEve: string;
+    christmasDay: string;
+    stStephens: string;
+  };
 };
 
 export const calendarTranslation: CalendarTranslation = {
@@ -403,5 +432,34 @@ export const calendarTranslation: CalendarTranslation = {
     noUpcoming: 'No upcoming classes',
     clashWith: 'Clashes with {{names}}',
     skipping: 'Skipping',
+  },
+  month: {
+    hours: '{{hours}} h',
+    exam: '{{course}} {{time}}',
+    cancelled: '{{course}} {{kind}}',
+    roomChange: '{{course}} → {{room}}',
+    clash: '{{first}} × {{second}} {{time}}',
+    periodStarts: '{{period}} starts',
+    noTeaching: 'No teaching',
+    dayAria: '{{date}}: {{hours}} h of teaching',
+    dayAriaClash: '{{date}}: {{hours}} h of teaching, has a clash',
+    openWeek: 'Open week {{week}}',
+  },
+  holidays: {
+    newYear: "New Year's Day",
+    epiphany: 'Epiphany',
+    goodFriday: 'Good Friday',
+    easterSunday: 'Easter Sunday',
+    easterMonday: 'Easter Monday',
+    mayDay: 'May Day',
+    ascension: 'Ascension Day',
+    whitsun: 'Whitsun',
+    midsummerEve: 'Midsummer Eve',
+    midsummerDay: 'Midsummer Day',
+    allSaints: "All Saints' Day",
+    independence: 'Independence Day',
+    christmasEve: 'Christmas Eve',
+    christmasDay: 'Christmas Day',
+    stStephens: "St Stephen's Day",
   },
 };

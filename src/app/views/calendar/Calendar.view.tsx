@@ -48,7 +48,7 @@ import {
 
 const browserTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 const NO_COURSE_KEYS: string[] = [];
-const ENABLED_VIEWS: CalendarViewMode[] = ['day', 'week'];
+const ENABLED_VIEWS: CalendarViewMode[] = ['day', 'week', 'month'];
 
 const CalendarView: React.FC = () => {
   const { t, i18n } = useTranslationWithPrefix('views.calendar');
@@ -77,6 +77,13 @@ const CalendarView: React.FC = () => {
     (dateKey: string) => {
       setAnchorKey(dateKey);
       setView('week');
+    },
+    [setAnchorKey, setView],
+  );
+  const openDay = useCallback(
+    (dateKey: string) => {
+      setAnchorKey(dateKey);
+      setView('day');
     },
     [setAnchorKey, setView],
   );
@@ -121,10 +128,8 @@ const CalendarView: React.FC = () => {
   const eyebrow =
     view === 'month' ? null : view === 'year' ? t('toolbar.academicYear') : t('weekShort', { week: weekNumber });
   const busyDateKeys = useMemo(() => new Set(data.attended.map((session) => session.dateKey)), [data.attended]);
-  const periodName = useMemo(
-    () => findPeriodName(anchorKey, [...studyPeriodMap.values()]),
-    [anchorKey, studyPeriodMap],
-  );
+  const periods = useMemo(() => [...studyPeriodMap.values()], [studyPeriodMap]);
+  const periodName = useMemo(() => findPeriodName(anchorKey, periods), [anchorKey, periods]);
   const coursesByKey = useMemo(
     () => new Map(data.courses.map((course) => [course.realisationId, course])),
     [data.courses],
@@ -296,6 +301,10 @@ const CalendarView: React.FC = () => {
                 preview={preview}
                 linkedLabels={linkedLabels}
                 activeSessionId={popover?.session.id ?? null}
+                periods={periods}
+                showCancelled={prefs.calendarShowCancelled}
+                onOpenDay={openDay}
+                onOpenWeek={openWeek}
                 onSelect={selectSession}
                 onUserScroll={closePopover}
               />

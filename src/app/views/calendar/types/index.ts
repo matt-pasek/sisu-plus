@@ -1,5 +1,6 @@
 export type { AnchorRect } from './AnchorRect.type';
 export type { CalendarActions } from './CalendarActions.type';
+export type { CalendarView } from './CalendarView.type';
 export type { GroupContext } from './GroupContext.type';
 export type { IconProps } from './IconProps.type';
 export type { InspectorState } from './InspectorState.type';

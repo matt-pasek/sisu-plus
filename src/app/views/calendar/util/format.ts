@@ -1,4 +1,4 @@
-import { getHelsinkiParts } from '@/app/schedule';
+import { getHelsinkiParts, type DateRange } from '@/app/schedule';
 
 const intlLocale = (locale: string): string => (locale.startsWith('fi') ? 'fi-FI' : 'en-GB');
 
@@ -37,3 +37,24 @@ export const formatMonthTitle = (monthKey: string, locale: string): string => {
 
 export const joinNames = (names: string[], locale: string): string =>
   new Intl.ListFormat(intlLocale(locale), { style: 'long', type: 'conjunction' }).format(names);
+
+const capitalise = (text: string): string => text.charAt(0).toUpperCase() + text.slice(1);
+
+export const formatDayTitle = (dateKey: string, locale: string): string =>
+  capitalise(
+    new Intl.DateTimeFormat(intlLocale(locale), {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      timeZone: 'UTC',
+    }).format(noonUtc(dateKey)),
+  );
+
+export const formatAcademicYear = (range: DateRange): string =>
+  `${range.startKey.slice(0, 4)}–${range.endKey.slice(2, 4)}`;
+
+export const formatHours = (minutes: number, locale: string): string =>
+  new Intl.NumberFormat(intlLocale(locale), { maximumFractionDigits: 1 }).format(Math.round(minutes / 30) / 2);
+
+export const formatMonthShort = (dateKey: string, locale: string): string =>
+  capitalise(new Intl.DateTimeFormat(intlLocale(locale), { month: 'short', timeZone: 'UTC' }).format(noonUtc(dateKey)));

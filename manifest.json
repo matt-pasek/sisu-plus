@@ -5,7 +5,7 @@
   "description": "__MSG_extDescription__",
   "default_locale": "en",
   "permissions": ["storage", "webRequest", "scripting", "alarms", "notifications"],
-  "optional_host_permissions": ["https://*.fi/*"],
+  "optional_host_permissions": ["https://*/*"],
   "browser_specific_settings": {
     "gecko": {
       "id": "sisu-plus@matt-pasek",

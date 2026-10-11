@@ -14,7 +14,9 @@ export const CalendarState: React.FC<Props> = ({ status, onRetry }) => {
   if (status === 'loading') {
     return (
       <div role="status" aria-label={t('states.loading')} className="flex flex-1 items-center justify-center">
-        <InlineLoader />
+        <div className="size-20">
+          <InlineLoader />
+        </div>
       </div>
     );
   }

@@ -2,6 +2,7 @@ import { mountApp } from '@/app/main';
 import { mountControlCenter } from '@/app/controlCenter/main';
 import { DEFAULT_PREFS, SisuPrefs } from '@/app/types/prefs';
 import globalCss from '@/app/global.css?inline';
+import { registerPropertyRules } from './propertyRules';
 import type { UniversityConfig } from '@/app/types/universityConfig';
 import { buildShibbolethLoginUrl, withResolvedShibbolethUrl } from '@/shared/sisuUniversityConfig';
 import { createSessionRevalidator, validateSession } from '@/app/api/sessionValidation';
@@ -223,6 +224,7 @@ const mountSisuPlus = () => {
   const shadow = host.attachShadow({ mode: 'open' });
   shadowRoot = shadow;
 
+  registerPropertyRules(globalCss);
   const style = document.createElement('style');
   style.textContent = globalCss;
   shadow.appendChild(style);

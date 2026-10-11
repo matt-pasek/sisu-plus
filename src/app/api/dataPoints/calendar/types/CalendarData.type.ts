@@ -1,7 +1,9 @@
 import type { AttendancePlan, AttendanceStatus, Clash, DateRange, GroupRef, Session } from '@/app/schedule';
 import type { CalendarCourse } from './CalendarCourse.type';
 import type { CourseUnitInfo } from './CourseUnitInfo.type';
+import type { LinkedTimetableState } from './LinkedTimetableState.type';
 import type { RoomInfo } from './RoomInfo.type';
+import type { TimetableLink } from './TimetableLink.type';
 
 export interface CalendarData {
   range: DateRange;
@@ -24,6 +26,11 @@ export interface CalendarData {
   groups: Map<string, GroupRef>;
   plans: Record<string, AttendancePlan>;
   updatePlan: (courseKey: string, update: (plan: AttendancePlan) => AttendancePlan) => void;
+  linked: Record<string, LinkedTimetableState>;
+  noTimesCourseKeys: Set<string>;
+  saveTimetable: (courseKey: string, link: TimetableLink) => void;
+  removeTimetable: (courseKey: string) => void;
+  refreshTimetable: (courseKey: string) => void;
   isLoading: boolean;
   isFetching: boolean;
   error: Error | null;

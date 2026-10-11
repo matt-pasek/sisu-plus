@@ -15,9 +15,11 @@ import { mapCalendarRows } from './mapCalendarRows';
 import { mapCourseUnits } from './mapCourseUnits';
 import { mapLocations } from './mapLocations';
 import { pruneBase, visibleGroupIdsOf } from './pruneContext';
+import { coursesWithoutTimes } from './timetableLinks';
 import type { CalendarData, CalendarDataOptions, CalendarRowsResult, CourseUnitInfo, RoomInfo } from './types';
 import { useAttendancePlans } from './useAttendancePlans';
 import { useGroupCandidates } from './useGroupCandidates';
+import { useLinkedTimetables } from './useLinkedTimetables';
 
 const FIVE_MINUTES = 5 * 60 * 1000;
 const ONE_DAY = 24 * 60 * 60 * 1000;
@@ -54,10 +56,19 @@ export const getCalendarData = (anchorKey: string, options: CalendarDataOptions)
   );
   const courseUnits = courseUnitsQuery.data ?? EMPTY_COURSE_UNITS;
   const named = useMemo(() => applyCourseUnitNames(rows, courseUnits), [rows, courseUnits]);
+  const linked = useLinkedTimetables(named.courses, range);
+  const sessions = useMemo(
+    () => [...named.sessions, ...linked.sessions].sort((a, b) => a.start.getTime() - b.start.getTime()),
+    [named.sessions, linked.sessions],
+  );
+  const noTimesCourseKeys = useMemo(
+    () => coursesWithoutTimes(named.courses, named.sessions),
+    [named.courses, named.sessions],
+  );
 
   const { plans, isLoaded: plansLoaded, updatePlan } = useAttendancePlans(options.onPlanWriteError);
   const groups = useMemo(() => groupIndex(toGroupRefs(named.courses)), [named.courses]);
-  const firstPass = useMemo(() => applyAttendance(named.sessions, groups, plans), [named.sessions, groups, plans]);
+  const firstPass = useMemo(() => applyAttendance(sessions, groups, plans), [sessions, groups, plans]);
   const firstClashes = useMemo(() => findClashes(firstPass.attended), [firstPass.attended]);
   const courseKeys = useMemo(
     () => candidateCourseKeys(named.courses, plans, firstPass.attended, firstClashes, options.candidateCourseKeys),
@@ -78,8 +89,8 @@ export const getCalendarData = (anchorKey: string, options: CalendarDataOptions)
   const rooms = roomsQuery.data ?? EMPTY_ROOMS;
 
   const attendance = useMemo(
-    () => applyAttendance(named.sessions, groups, plans, candidates.sessions),
-    [named.sessions, groups, plans, candidates.sessions],
+    () => applyAttendance(sessions, groups, plans, candidates.sessions),
+    [sessions, groups, plans, candidates.sessions],
   );
   const clashes = useMemo(() => findClashes(attendance.attended), [attendance.attended]);
   const clashesBySession = useMemo(() => groupClashesBySession(clashes), [clashes]);
@@ -93,7 +104,7 @@ export const getCalendarData = (anchorKey: string, options: CalendarDataOptions)
     plansLoaded && rowsQuery.isSuccess && !rowsQuery.isFetching && !candidates.isFetching && !candidates.failed;
   useEffect(() => {
     if (!canPrune) return;
-    const base = pruneBase(range, named.sessions, candidates.sessions, clashes);
+    const base = pruneBase(range, sessions, candidates.sessions, clashes);
     named.courses
       .filter((course) => course.isInCalendar && plans[course.realisationId])
       .forEach((course) => {
@@ -101,11 +112,11 @@ export const getCalendarData = (anchorKey: string, options: CalendarDataOptions)
         const next = prunePlan(plan, { ...base, visibleGroupIds: visibleGroupIdsOf(course) });
         if (!samePlan(plan, next)) updatePlan(course.realisationId, () => next);
       });
-  }, [canPrune, range, named, candidates.sessions, clashes, plans, updatePlan]);
+  }, [canPrune, range, named.courses, sessions, candidates.sessions, clashes, plans, updatePlan]);
 
   return {
     range,
-    sessions: named.sessions,
+    sessions,
     courses: named.courses,
     clashes,
     clashesBySession,
@@ -124,6 +135,11 @@ export const getCalendarData = (anchorKey: string, options: CalendarDataOptions)
     groups,
     plans,
     updatePlan,
+    linked: linked.states,
+    noTimesCourseKeys,
+    saveTimetable: linked.saveLink,
+    removeTimetable: linked.removeLink,
+    refreshTimetable: linked.refresh,
     isLoading: loadingDetails || rowsQuery.isLoading,
     isFetching: rowsQuery.isFetching,
     error: rowsQuery.error ?? null,

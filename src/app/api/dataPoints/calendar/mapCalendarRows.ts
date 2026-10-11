@@ -1,58 +1,17 @@
-import type { Enrolment, EnrolmentWithStudyEvents, StudyEvent, StudyGroupSet } from '@/app/api/generated/IlmoApi';
-import { classifySessionKind, expandSeries, type DateRange, type RecurringSeries, type Session } from '@/app/schedule';
+import type { EnrolmentWithStudyEvents } from '@/app/api/generated/IlmoApi';
+import { classifySessionKind, expandSeries, type DateRange, type Session } from '@/app/schedule';
 import { compareCourses } from './courseOrder';
-import type { CalendarCourse, CalendarRowsResult, LabelPicker } from './types';
-
-interface SubGroupMatch {
-  id: string;
-  name: string | null;
-  setName: string | null;
-}
+import { mapGroupSets } from './mapGroupSets';
+import { toSeries } from './studyEventSeries';
+import type { CalendarCourse, CalendarGroup, CalendarGroupSet, CalendarRowsResult, LabelPicker } from './types';
 
 const isExamRealisation = (typeUrn: string | undefined): boolean => /exam/i.test(typeUrn ?? '');
 
-const selectedSubGroupIds = (enrolment: Enrolment | undefined): Set<string> =>
-  new Set([
-    ...(enrolment?.studySubGroups ?? []).map((group) => group.studySubGroupId),
-    ...(enrolment?.confirmedStudySubGroupIds ?? []),
-    ...(enrolment?.tentativeStudySubGroupIds ?? []),
-  ]);
+const ownersOf = (studyEventId: string | undefined, groupSets: CalendarGroupSet[]): CalendarGroup[] =>
+  studyEventId ? groupSets.flatMap((set) => set.groups.filter((group) => group.eventIds.includes(studyEventId))) : [];
 
-const matchSubGroup = (
-  studyEventId: string | undefined,
-  sets: StudyGroupSet[],
-  selected: Set<string>,
-  label: LabelPicker,
-): SubGroupMatch | null => {
-  if (!studyEventId) return null;
-  const candidates = sets.flatMap((set) =>
-    set.studySubGroups.flatMap((group) =>
-      group.id && group.studyEventIds.includes(studyEventId) ? [{ id: group.id, group, set }] : [],
-    ),
-  );
-  const match = candidates.find((candidate) => selected.has(candidate.id)) ?? candidates[0];
-  return match ? { id: match.id, name: label(match.group.name), setName: label(match.set.name) } : null;
-};
-
-const toSeries = (studyEvent: StudyEvent, fallbackId: string, label: LabelPicker): RecurringSeries => ({
-  id: studyEvent.id ?? fallbackId,
-  startTime: studyEvent.startTime,
-  duration: studyEvent.duration,
-  recursEvery: studyEvent.recursEvery,
-  recursUntil: studyEvent.recursUntil?.slice(0, 10),
-  exceptions: studyEvent.exceptions,
-  cancellations: studyEvent.cancellations,
-  locationIds: studyEvent.locationIds,
-  occurrences: studyEvent.events?.map((event) => ({
-    start: event.start,
-    end: event.end,
-    duration: event.duration,
-    excluded: event.excluded,
-    cancelled: event.cancelled,
-    irregularLocationIds: event.irregularLocationIds,
-    notice: label(event.notice),
-  })),
-});
+const displayOwner = (owners: CalendarGroup[]): CalendarGroup | undefined =>
+  owners.find((group) => group.isInCalendar) ?? owners.find((group) => group.hasEntry) ?? owners[0];
 
 const mapRow = (
   row: EnrolmentWithStudyEvents,
@@ -68,11 +27,16 @@ const mapRow = (
   const colorIndex = row.enrolment?.colorIndex ?? rowIndex;
   const isExam = isExamRealisation(realisation.courseUnitRealisationTypeUrn);
   const courseUnitId = row.enrolment?.courseUnitId ?? null;
-  const selected = selectedSubGroupIds(row.enrolment);
+  const groupSets = mapGroupSets(realisation.studyGroupSets ?? [], row.enrolment, label);
+  const setNames = new Map(groupSets.map((set) => [set.id, set.name]));
 
   const sessions = (row.studyEvents ?? []).flatMap((studyEvent) => {
-    const group = matchSubGroup(studyEvent.id, realisation.studyGroupSets ?? [], selected, label);
-    const kind = classifySessionKind([group?.name, label(studyEvent.name), group?.setName], isExam);
+    const owners = ownersOf(studyEvent.id, groupSets);
+    const group = displayOwner(owners);
+    const kind = classifySessionKind(
+      [group?.name, label(studyEvent.name), group ? setNames.get(group.setId) : null],
+      isExam,
+    );
     const series = toSeries(studyEvent, `${realisationId}:${studyEvent.startTime}`, label);
     return expandSeries(series, range).map(
       (occurrence): Session => ({
@@ -83,8 +47,11 @@ const mapRow = (
         courseUnitId,
         groupId: group?.id ?? null,
         groupName: group?.name ?? null,
+        groupIds: owners.map((owner) => owner.id),
         kind,
         colorIndex,
+        source: 'sisu',
+        locationText: null,
       }),
     );
   });
@@ -100,6 +67,7 @@ const mapRow = (
       colorIndex,
       isInCalendar: row.enrolment?.isInCalendar !== false,
       isExam,
+      groupSets,
     },
   };
 };

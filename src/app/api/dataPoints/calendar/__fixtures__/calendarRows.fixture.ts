@@ -161,3 +161,78 @@ export const CALENDAR_ROWS = [
     },
   },
 ] as unknown as EnrolmentWithStudyEvents[];
+
+export const CHINESE_SHARED_ROW = {
+  enrolment: {
+    id: 'enr-hdd',
+    courseUnitRealisationId: 'cur-hdd',
+    courseUnitId: 'cu-hdd',
+    assessmentItemId: 'ai-hdd',
+    colorIndex: 3,
+    isInCalendar: true,
+    state: 'ENROLLED',
+    studySubGroups: [
+      { studySubGroupId: 'sub-hdd-ssg', enrolmentStudySubGroupPriority: 'NOT_SUITABLE', isInCalendar: false },
+      { studySubGroupId: 'sub-hdd-lec', enrolmentStudySubGroupPriority: 'NOT_SUITABLE', isInCalendar: false },
+      { studySubGroupId: 'sub-hdd-t1', enrolmentStudySubGroupPriority: 'NOT_SUITABLE', isInCalendar: true },
+      { studySubGroupId: 'sub-hdd-t2', enrolmentStudySubGroupPriority: 'NOT_SUITABLE', isInCalendar: true },
+    ],
+  },
+  courseUnitRealisation: {
+    ...realisationBase,
+    id: 'cur-hdd',
+    name: { en: 'Contact teaching, Lahti' },
+    courseUnitRealisationTypeUrn: 'urn:code:course-unit-realisation-type:teaching-participation-contact',
+    studyGroupSets: [
+      {
+        localId: 'set-ssg',
+        name: { en: 'Studygroupset' },
+        subGroupRange: { min: 0, max: 0 },
+        studySubGroups: [{ id: 'sub-hdd-ssg', name: { fi: 'Opetusryhmä' }, studyEventIds: [] }],
+      },
+      {
+        localId: 'set-teaching',
+        name: { en: 'LAHTI-Teaching' },
+        subGroupRange: { min: 0, max: 0 },
+        studySubGroups: [
+          {
+            id: 'sub-hdd-lec',
+            name: { en: 'HDD7010 1 LAHTI Lectures for everyone' },
+            studyEventIds: ['se-hdd-shared'],
+          },
+        ],
+      },
+      {
+        localId: 'set-exercises',
+        name: { en: 'LAHTI-Excercises' },
+        subGroupRange: { min: 0, max: 0 },
+        studySubGroups: [
+          { id: 'sub-hdd-t1', name: { en: 'HDD7010 1 LAHTI Tutorial 1' }, studyEventIds: ['se-hdd-shared'] },
+          { id: 'sub-hdd-t2', name: { en: 'HDD7010 1 LAHTI Tutorial 2' }, studyEventIds: ['se-hdd-t2'] },
+        ],
+      },
+    ],
+  },
+  studyEvents: [
+    {
+      ...eventBase,
+      id: 'se-hdd-shared',
+      recursEvery: 'NEVER',
+      startTime: '2026-10-05T14:00:00',
+      duration: 'PT2H',
+      recursUntil: null,
+      locationIds: ['loc-aud1b'],
+      events: [{ start: '2026-10-05T14:00:00', end: '2026-10-05T16:00:00' }],
+    },
+    {
+      ...eventBase,
+      id: 'se-hdd-t2',
+      recursEvery: 'NEVER',
+      startTime: '2026-10-05T16:00:00',
+      duration: 'PT2H',
+      recursUntil: null,
+      locationIds: ['loc-aud1b'],
+      events: [{ start: '2026-10-05T16:00:00', end: '2026-10-05T18:00:00' }],
+    },
+  ],
+} as unknown as EnrolmentWithStudyEvents;

@@ -2,7 +2,7 @@
 
 import { describe, expect, test } from 'bun:test';
 
-import { CALENDAR_ROWS, FIXTURE_RANGE } from './__fixtures__/calendarRows.fixture';
+import { CALENDAR_ROWS, CHINESE_SHARED_ROW, FIXTURE_RANGE } from './__fixtures__/calendarRows.fixture';
 import { mapCalendarRows } from './mapCalendarRows';
 import type { LabelPicker } from './types';
 
@@ -92,5 +92,44 @@ describe('mapCalendarRows', () => {
     const doubled = mapCalendarRows([...CALENDAR_ROWS, CALENDAR_ROWS[1]], FIXTURE_RANGE, label);
     expect(doubled.sessions).toHaveLength(8);
     expect(doubled.courses).toHaveLength(4);
+  });
+});
+
+describe('mapCalendarRows group ownership', () => {
+  const shared = mapCalendarRows([CHINESE_SHARED_ROW], FIXTURE_RANGE, label);
+
+  test('a session owned by two groups lists both and is named after the switched-on one', () => {
+    const session = shared.sessions.find((item) => item.seriesId === 'se-hdd-shared');
+    expect(session?.groupIds).toEqual(['sub-hdd-lec', 'sub-hdd-t1']);
+    expect(session?.groupId).toBe('sub-hdd-t1');
+    expect(session?.groupName).toBe('HDD7010 1 LAHTI Tutorial 1');
+    expect(session?.source).toBe('sisu');
+    expect(session?.locationText).toBeNull();
+  });
+
+  test('maps every group set with its range and calendar flags', () => {
+    const summary = shared.courses[0].groupSets.map((set) => [
+      set.id,
+      set.min,
+      set.max,
+      set.groups.map((group) => `${group.id}:${group.isInCalendar}:${group.hasEntry}:${group.eventIds.length}`),
+    ]);
+    expect(summary).toEqual([
+      ['set-ssg', 0, 0, ['sub-hdd-ssg:false:true:0']],
+      ['set-teaching', 0, 0, ['sub-hdd-lec:false:true:1']],
+      ['set-exercises', 0, 0, ['sub-hdd-t1:true:true:1', 'sub-hdd-t2:true:true:1']],
+    ]);
+  });
+
+  test('groups without an enrolment entry are off and marked as having no entry', () => {
+    const chinese = result.courses.find((course) => course.realisationId === 'cur-chn');
+    const flags = chinese?.groupSets.flatMap((set) =>
+      set.groups.map((group) => `${group.id}:${group.isInCalendar}:${group.hasEntry}`),
+    );
+    expect(flags).toEqual(['sub-chn-lec:false:false', 'sub-chn-t1:false:false', 'sub-chn-t2:true:true']);
+  });
+
+  test('a session with no owning group has no owners', () => {
+    expect(byId('se-cni-lec@2026-10-27#0')?.groupIds).toEqual([]);
   });
 });

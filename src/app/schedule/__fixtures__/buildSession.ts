@@ -22,7 +22,10 @@ export const buildSession = (
   courseUnitId: null,
   groupId: null,
   groupName: null,
+  groupIds: [],
   kind: 'lecture',
   colorIndex: 0,
+  source: 'sisu',
+  locationText: null,
   ...overrides,
 });

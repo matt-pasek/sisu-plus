@@ -1,3 +1,5 @@
+import type { CalendarGroupSet } from './CalendarGroupSet.type';
+
 export interface CalendarCourse {
   realisationId: string;
   courseUnitId: string | null;
@@ -7,4 +9,5 @@ export interface CalendarCourse {
   colorIndex: number;
   isInCalendar: boolean;
   isExam: boolean;
+  groupSets: CalendarGroupSet[];
 }

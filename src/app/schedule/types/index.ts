@@ -12,3 +12,4 @@ export type { SeriesClashSummary } from './SeriesClashSummary.type';
 export type { SeriesOccurrence } from './SeriesOccurrence.type';
 export type { Session } from './Session.type';
 export type { SessionKind } from './SessionKind.type';
+export type { SessionSource } from './SessionSource.type';

@@ -15,6 +15,7 @@ const course = (overrides: Partial<CalendarCourse>): CalendarCourse => ({
   colorIndex: 2,
   isInCalendar: true,
   isExam: false,
+  groupSets: [],
   ...overrides,
 });
 

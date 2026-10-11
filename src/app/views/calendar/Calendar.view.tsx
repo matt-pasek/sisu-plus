@@ -28,6 +28,7 @@ import { WeekGrid } from './components/WeekGrid.comp';
 import { useCalendarActions } from './hooks/useCalendarActions';
 import { useCalendarKeyboard } from './hooks/useCalendarKeyboard';
 import { useNow } from './hooks/useNow';
+import { usePopoverModel } from './hooks/usePopoverModel';
 import { useWeekModel } from './hooks/useWeekModel';
 import type { InspectorState, PopoverTarget } from './types';
 import { findPeriodName, formatWeekRange, previewModel, promptId, seriesOf, weekDateKeys } from './util';
@@ -147,6 +148,11 @@ const CalendarView: React.FC = () => {
     setInspector(null);
     setPreviewGroupId(null);
   }, []);
+  const popoverView = useMemo(
+    () => ({ showAllSessions, openGroups, close: closePopover }),
+    [showAllSessions, openGroups, closePopover],
+  );
+  const popoverModel = usePopoverModel(popover?.session ?? null, data, badges, sessionsById, actions, popoverView);
 
   const status = data.isLoading ? 'loading' : data.error ? 'error' : data.courses.length === 0 ? 'emptyTerm' : null;
   const inspectorOpen = inspectorSeries.length > 0 || pickerCourse != null;
@@ -247,18 +253,17 @@ const CalendarView: React.FC = () => {
           />
         )}
       </div>
-      {popover && popoverSeriesKey && popoverSummary && (
+      {popover && popoverSeriesKey && popoverSummary && popoverModel && (
         <EventPopover
           target={popover}
-          seriesKey={popoverSeriesKey}
           series={popoverSeries}
           summary={popoverSummary}
           rooms={data.rooms}
           course={coursesByKey.get(popover.session.courseKey)}
           courseUnit={popover.session.courseUnitId ? data.courseUnits[popover.session.courseUnitId] : undefined}
           locale={locale}
+          model={popoverModel}
           onClose={closePopover}
-          onShowAllSessions={showAllSessions}
         />
       )}
     </div>

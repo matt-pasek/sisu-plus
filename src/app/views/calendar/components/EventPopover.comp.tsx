@@ -1,13 +1,12 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import type { CalendarCourse, CourseUnitInfo, RoomInfo } from '@/app/api/dataPoints/calendar/types';
-import { Button } from '@/app/components/ui/Button.comp';
 import { StatusChip } from '@/app/components/ui/StatusChip.comp';
 import { formatCredits } from '@/app/helpers/formatCredits';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import type { SeriesClashSummary, Session } from '@/app/schedule';
 import { getModuleColorValueByIndex } from '@/app/theme/moduleColors';
-import type { PopoverTarget } from '../types';
+import type { PopoverModel, PopoverTarget } from '../types';
 import {
   describeRoom,
   describeRoomWithBuilding,
@@ -17,36 +16,39 @@ import {
   placePopover,
 } from '../util';
 import { ClashBox } from './ClashBox.comp';
-import { CalendarIcon, ClockIcon, CloseIcon, ListIcon, PinIcon } from './icons';
+import { CalendarIcon, ClockIcon, CloseIcon, PinIcon } from './icons';
+import { OtherTimesList } from './OtherTimesList.comp';
+import { PopoverActions } from './PopoverActions.comp';
+import { SessionChipBadge } from './SessionChipBadge.comp';
+import { SwapSuggestion } from './SwapSuggestion.comp';
 
 const POPOVER_WIDTH = 372;
 const DEFAULT_HEIGHT = 320;
 const POPOVER_EASE = [0.22, 1, 0.36, 1] as const;
+const SKIP_BUTTON_CLASS = 'cursor-pointer font-semibold underline-offset-2 hover:underline';
 
 interface Props {
   target: PopoverTarget;
-  seriesKey: string;
   series: Session[];
   summary: SeriesClashSummary;
   rooms: Record<string, RoomInfo>;
   course: CalendarCourse | undefined;
   courseUnit: CourseUnitInfo | undefined;
   locale: string;
+  model: PopoverModel;
   onClose: () => void;
-  onShowAllSessions: (seriesKey: string) => void;
 }
 
 export const EventPopover: React.FC<Props> = ({
   target,
-  seriesKey,
   series,
   summary,
   rooms,
   course,
   courseUnit,
   locale,
+  model,
   onClose,
-  onShowAllSessions,
 }) => {
   const { t } = useTranslationWithPrefix('views.calendar');
   const shouldReduceMotion = useReducedMotion();
@@ -154,6 +156,8 @@ export const EventPopover: React.FC<Props> = ({
           <span className="flex items-center gap-2 font-medium text-offwhite">
             <span className="truncate">{course?.realisationName ?? kindLabel}</span>
             {session.cancelled && <StatusChip tone="neutral">{t('sessions.chips.cancelled')}</StatusChip>}
+            {model.status === 'alternative' && <StatusChip tone="neutral">{t('event.alternativeChip')}</StatusChip>}
+            {model.badge && <SessionChipBadge chip={{ type: model.badge }} />}
           </span>
           <span className="block truncate text-[11.5px] text-lightGrey">
             {session.groupName ? `${kindLabel} · ${session.groupName}` : kindLabel}
@@ -187,22 +191,35 @@ export const EventPopover: React.FC<Props> = ({
           )}
         </dd>
       </dl>
+      {model.otherTimes.length > 0 && (
+        <OtherTimesList sessions={model.otherTimes} rooms={rooms} locale={locale} onGo={model.handlers.onGoTo} />
+      )}
       {summary.clashing > 0 && (
         <ClashBox
           summary={summary}
           label={t('event.clashesWith', { names: otherNames, count: summary.clashing, total: summary.total })}
-        />
-      )}
-      <div className="flex gap-1.5 border-t border-border px-3 py-2.5">
-        <Button
-          variant="onSurface"
-          className="min-h-8 px-2.5"
-          onClick={() => onShowAllSessions(seriesKey)}
-          icon={<ListIcon className="size-3.5" />}
         >
-          {t('actions.allSessions')}
-        </Button>
-      </div>
+          {model.suggestion && (
+            <SwapSuggestion
+              suggestion={model.suggestion}
+              locale={locale}
+              onSwitch={model.handlers.onSwitchToSuggestion}
+              onKeep={model.handlers.onKeep}
+            />
+          )}
+          {model.partner && (
+            <div className="mt-2 flex flex-wrap gap-3 text-[11.5px]">
+              <button type="button" className={SKIP_BUTTON_CLASS} onClick={() => model.handlers.onSkip(false)}>
+                {t('actions.skipOnce')}
+              </button>
+              <button type="button" className={SKIP_BUTTON_CLASS} onClick={() => model.handlers.onSkip(true)}>
+                {t('actions.skipAlways')}
+              </button>
+            </div>
+          )}
+        </ClashBox>
+      )}
+      <PopoverActions model={model} />
     </motion.div>
   );
 };

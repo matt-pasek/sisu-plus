@@ -1,12 +1,17 @@
 export type { AnchorRect } from './AnchorRect.type';
 export type { CalendarActions } from './CalendarActions.type';
+export type { GroupContext } from './GroupContext.type';
 export type { IconProps } from './IconProps.type';
 export type { InspectorState } from './InspectorState.type';
+export type { PopoverActionHandlers } from './PopoverActionHandlers.type';
+export type { PopoverModel } from './PopoverModel.type';
 export type { PopoverPlacement } from './PopoverPlacement.type';
 export type { PopoverTarget } from './PopoverTarget.type';
+export type { PopoverViewCallbacks } from './PopoverViewCallbacks.type';
 export type { PreviewModel } from './PreviewModel.type';
 export type { RoomLabels } from './RoomLabels.type';
 export type { SessionBadge } from './SessionBadge.type';
 export type { SessionChip } from './SessionChip.type';
 export type { Size } from './Size.type';
+export type { SwapSuggestionModel } from './SwapSuggestionModel.type';
 export type { WeekModel } from './WeekModel.type';

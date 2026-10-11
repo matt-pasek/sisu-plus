@@ -14,6 +14,16 @@ export type CalendarTranslation = {
     allSessions: string;
     showClash: string;
     openRegistration: string;
+    goToThis: string;
+    goInstead: string;
+    swapWeek: string;
+    makeUsual: string;
+    undoSwap: string;
+    switchGroup: string;
+    hideGroup: string;
+    skipOnce: string;
+    skipAlways: string;
+    undoSkip: string;
   };
   toolbar: {
     clashes_one: string;
@@ -49,6 +59,13 @@ export type CalendarTranslation = {
     nextSession: string;
     nextSessionMoves: string;
     clashesWith: string;
+    otherTimes: string;
+    alternativeChip: string;
+  };
+  suggestion: {
+    free: string;
+    switch: string;
+    keep: string;
   };
   sessions: {
     title: string;
@@ -133,6 +150,16 @@ export const calendarTranslation: CalendarTranslation = {
     allSessions: 'All sessions',
     showClash: 'Show the first clash',
     openRegistration: 'Open Registration',
+    goToThis: 'Go to this one',
+    goInstead: 'Go to this one instead',
+    swapWeek: 'Swap the whole week',
+    makeUsual: 'Make {{group}} my usual',
+    undoSwap: 'Undo swap',
+    switchGroup: 'Switch group',
+    hideGroup: 'Hide this group',
+    skipOnce: 'Skip this one',
+    skipAlways: 'Skip every time',
+    undoSkip: 'Undo skip',
   },
   toolbar: {
     clashes_one: '{{count}} clash',
@@ -168,6 +195,13 @@ export const calendarTranslation: CalendarTranslation = {
     nextSession: 'Next session {{date}} · {{room}}',
     nextSessionMoves: 'Next session moves to {{room}} on {{date}}',
     clashesWith: 'Clashes with {{names}} in {{count}} of {{total}} sessions',
+    otherTimes: 'Other times this week',
+    alternativeChip: 'Alternative',
+  },
+  suggestion: {
+    free: '{{group}} on {{date}} {{start}}–{{end}} is free this week',
+    switch: 'Switch',
+    keep: 'Keep',
   },
   sessions: {
     title: 'All sessions',

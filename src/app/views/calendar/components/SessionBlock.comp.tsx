@@ -58,7 +58,7 @@ export const SessionBlock: React.FC<Props> = ({
       data-session-id={session.id}
       aria-label={ariaLabel}
       onClick={(event) => onSelect(session, event.currentTarget)}
-      className={`absolute flex cursor-pointer flex-col justify-start overflow-hidden rounded-xl bg-container px-2.5 py-2 text-left transition-[opacity,box-shadow,transform] duration-150 ease-out hover:-translate-y-px focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lighterGreen active:scale-[0.96] ${opacityFor(isDimmed, isPast, session.cancelled)}`}
+      className={`absolute flex cursor-pointer flex-col justify-center overflow-hidden rounded-xl bg-container px-2.5 py-2 text-left transition-[opacity,box-shadow,transform] duration-150 ease-out hover:-translate-y-px focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lighterGreen active:scale-[0.96] ${opacityFor(isDimmed, isPast, session.cancelled)}`}
       style={{
         top: box.top + 2,
         height: Math.max(box.height - 4, 18),

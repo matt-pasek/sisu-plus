@@ -1,13 +1,15 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import type { CourseUnitInfo, RoomInfo } from '@/app/api/dataPoints/calendar/types';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { helsinkiMinutesOfDay, visibleHourRange, type Clash, type HourRange, type Session } from '@/app/schedule';
-import { formatClock, minutesToOffset, sessionsOnDay } from '../util';
+import { useElementHeight } from '../hooks/useElementHeight';
+import { fitHourHeight, formatClock, minutesToOffset, sessionsOnDay } from '../util';
 import { HourGutter } from './HourGutter.comp';
 import { WeekDayColumn } from './WeekDayColumn.comp';
 import { WeekDayHeader } from './WeekDayHeader.comp';
 
-const HOUR_HEIGHT = 52;
+const HOUR_BOUNDS = { min: 52, max: 120 };
+const GRID_INSET = 10;
 const DEFAULT_HOURS: HourRange = { startHour: 8, endHour: 18 };
 const WEEKDAYS = 5;
 
@@ -41,6 +43,9 @@ export const WeekGrid: React.FC<Props> = ({
   onUserScroll,
 }) => {
   const { t } = useTranslationWithPrefix('views.calendar');
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const viewportHeight = useElementHeight(scrollRef);
   const hourRange = useMemo(() => visibleHourRange(sessions, DEFAULT_HOURS), [sessions]);
   const days = useMemo(
     () => weekKeys.map((dateKey) => ({ dateKey, sessions: sessionsOnDay(sessions, dateKey) })),
@@ -50,6 +55,11 @@ export const WeekGrid: React.FC<Props> = ({
   const columns = weekendEmpty ? days.slice(0, WEEKDAYS) : days;
   const template = `52px repeat(${columns.length}, minmax(0, 1fr))${weekendEmpty ? ' 34px' : ''}`;
   const hours = Array.from({ length: hourRange.endHour - hourRange.startHour }, (_, i) => hourRange.startHour + i);
+  const hourHeight = fitHourHeight(
+    viewportHeight - (headerRef.current?.offsetHeight ?? 0) - 2 * GRID_INSET,
+    hours.length,
+    HOUR_BOUNDS,
+  );
   const nowMinutes = helsinkiMinutesOfDay(now);
   const showNowLabel =
     columns.some(({ dateKey }) => dateKey === todayKey) &&
@@ -58,8 +68,14 @@ export const WeekGrid: React.FC<Props> = ({
 
   return (
     // Only user input closes the popover; scroll events also fire for scrollIntoView from the clash chip.
-    <div className="relative min-h-0 flex-1 overflow-y-auto" onWheel={onUserScroll} onTouchMove={onUserScroll}>
+    <div
+      ref={scrollRef}
+      className="relative min-h-0 flex-1 overflow-y-auto bg-background"
+      onWheel={onUserScroll}
+      onTouchMove={onUserScroll}
+    >
       <div
+        ref={headerRef}
         className="sticky top-0 z-20 grid border-b border-border2 bg-container"
         style={{ gridTemplateColumns: template }}
       >
@@ -74,14 +90,15 @@ export const WeekGrid: React.FC<Props> = ({
         )}
       </div>
       <div
-        className="relative grid bg-background"
-        style={{ gridTemplateColumns: template, height: hours.length * HOUR_HEIGHT }}
+        className="relative grid"
+        style={{ gridTemplateColumns: template, height: hours.length * hourHeight + 2 * GRID_INSET }}
       >
         <HourGutter
           hours={hours}
-          hourHeight={HOUR_HEIGHT}
+          hourHeight={hourHeight}
+          inset={GRID_INSET}
           nowLabel={
-            showNowLabel ? { top: minutesToOffset(nowMinutes, hourRange, HOUR_HEIGHT), text: formatClock(now) } : null
+            showNowLabel ? { top: minutesToOffset(nowMinutes, hourRange, hourHeight), text: formatClock(now) } : null
           }
         />
         {columns.map(({ dateKey, sessions: daySessions }) => (
@@ -93,7 +110,8 @@ export const WeekGrid: React.FC<Props> = ({
             sessions={daySessions}
             sessionsById={sessionsById}
             hourRange={hourRange}
-            hourHeight={HOUR_HEIGHT}
+            hourHeight={hourHeight}
+            inset={GRID_INSET}
             clashesBySession={clashesBySession}
             rooms={rooms}
             courseUnits={courseUnits}

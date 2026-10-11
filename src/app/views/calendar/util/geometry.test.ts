@@ -3,7 +3,28 @@
 import { describe, expect, test } from 'bun:test';
 
 import { buildSession } from '@/app/schedule/__fixtures__/buildSession';
-import { placePopover, sessionBox } from './geometry';
+import { fitHourHeight, placePopover, sessionBox } from './geometry';
+
+describe('fitHourHeight', () => {
+  const bounds = { min: 52, max: 120 };
+
+  test('stretches hours to fill the available height', () => {
+    expect(fitHourHeight(800, 10, bounds)).toBe(80);
+  });
+
+  test('never shrinks below the minimum, so short windows scroll', () => {
+    expect(fitHourHeight(300, 10, bounds)).toBe(52);
+  });
+
+  test('caps tall windows at the maximum', () => {
+    expect(fitHourHeight(2000, 10, bounds)).toBe(120);
+  });
+
+  test('falls back to the minimum before the panel is measured', () => {
+    expect(fitHourHeight(0, 10, bounds)).toBe(52);
+    expect(fitHourHeight(800, 0, bounds)).toBe(52);
+  });
+});
 
 describe('sessionBox', () => {
   test('positions a session inside the visible hours', () => {

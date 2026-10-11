@@ -3,6 +3,11 @@ import type { AnchorRect, PopoverPlacement, Size } from '../types';
 
 const VIEWPORT_MARGIN = 8;
 
+export const fitHourHeight = (available: number, hours: number, bounds: { min: number; max: number }): number => {
+  if (available <= 0 || hours <= 0) return bounds.min;
+  return Math.min(bounds.max, Math.max(bounds.min, Math.floor(available / hours)));
+};
+
 export const minutesToOffset = (minutes: number, range: HourRange, hourHeight: number): number =>
   ((minutes - range.startHour * 60) / 60) * hourHeight;
 

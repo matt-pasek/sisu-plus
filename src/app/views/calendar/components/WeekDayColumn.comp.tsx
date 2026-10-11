@@ -23,6 +23,7 @@ interface Props {
   sessionsById: Map<string, Session>;
   hourRange: HourRange;
   hourHeight: number;
+  inset: number;
   clashesBySession: Map<string, Clash[]>;
   rooms: Record<string, RoomInfo>;
   courseUnits: Record<string, CourseUnitInfo>;
@@ -39,6 +40,7 @@ export const WeekDayColumn: React.FC<Props> = ({
   sessionsById,
   hourRange,
   hourHeight,
+  inset,
   clashesBySession,
   rooms,
   courseUnits,
@@ -75,7 +77,8 @@ export const WeekDayColumn: React.FC<Props> = ({
     <div
       className={`relative border-l border-border ${isToday ? 'bg-accent/[0.025]' : ''}`}
       style={{
-        backgroundImage: `repeating-linear-gradient(to bottom, transparent 0, transparent ${hourHeight - 1}px, rgba(34,34,40,0.8) ${hourHeight - 1}px, rgba(34,34,40,0.8) ${hourHeight}px)`,
+        backgroundImage: `repeating-linear-gradient(to bottom, rgba(34,34,40,0.8) 0, rgba(34,34,40,0.8) 1px, transparent 1px, transparent ${hourHeight}px)`,
+        backgroundPosition: `0 ${inset}px`,
       }}
     >
       {sessions.map((session) => {
@@ -83,12 +86,13 @@ export const WeekDayColumn: React.FC<Props> = ({
         if (!placement) return null;
         const clashes = clashesBySession.get(session.id) ?? [];
         const room = describeRoom(session.locationIds, rooms, roomLabels);
+        const box = sessionBox(session, hourRange, hourHeight);
         return (
           <SessionBlock
             key={session.id}
             session={session}
             placement={placement}
-            box={sessionBox(session, hourRange, hourHeight)}
+            box={{ ...box, top: box.top + inset }}
             reservedRight={inOverflowCluster(session) ? OVERFLOW_STRIP_WIDTH : 0}
             code={session.courseUnitId ? (courseUnits[session.courseUnitId]?.code ?? null) : null}
             isClashing={clashes.length > 0}
@@ -109,7 +113,7 @@ export const WeekDayColumn: React.FC<Props> = ({
         return (
           <OverflowChip
             key={slot.sessionIds.join()}
-            top={minutesToOffset(helsinkiMinutesOfDay(slot.start), hourRange, hourHeight)}
+            top={minutesToOffset(helsinkiMinutesOfDay(slot.start), hourRange, hourHeight) + inset}
             count={slot.sessionIds.length}
             ariaLabel={t('aria.moreSessions', {
               count: hidden.length,
@@ -124,7 +128,7 @@ export const WeekDayColumn: React.FC<Props> = ({
           />
         );
       })}
-      {showNow && <NowLine top={minutesToOffset(nowMinutes, hourRange, hourHeight)} />}
+      {showNow && <NowLine top={minutesToOffset(nowMinutes, hourRange, hourHeight) + inset} />}
     </div>
   );
 };

@@ -10,3 +10,4 @@ export * from './series';
 export * from './sharedSessions';
 export * from './collections';
 export * from './attendance';
+export * from './prune';

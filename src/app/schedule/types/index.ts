@@ -12,6 +12,7 @@ export type { HourRange } from './HourRange.type';
 export type { Occurrence } from './Occurrence.type';
 export type { OverflowSlot } from './OverflowSlot.type';
 export type { Placement } from './Placement.type';
+export type { PruneContext } from './PruneContext.type';
 export type { RecurrenceRule } from './RecurrenceRule.type';
 export type { RecurringSeries } from './RecurringSeries.type';
 export type { SeriesClashSummary } from './SeriesClashSummary.type';

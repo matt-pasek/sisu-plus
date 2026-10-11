@@ -5,6 +5,7 @@ import { YearDayCell } from './YearDayCell.comp';
 
 const WEEKDAY_ROWS = [0, 1, 2, 3, 4];
 const FIRST_DAY_ROW = 4;
+const MIN_LABELLED_WEEKS = 3;
 const BAND =
   'mb-0.5 flex h-5 items-center overflow-hidden rounded-md px-1.5 font-mono text-[10px] font-semibold whitespace-nowrap';
 
@@ -51,7 +52,7 @@ export const YearGrid: React.FC<Props> = ({ weeks, months, periods, gaps, locale
           className={`${BAND} bg-warn/8 text-warn`}
           style={{ gridRow: 3, ...columnOf(band) }}
         >
-          {band.label}
+          {band.to - band.from + 1 >= MIN_LABELLED_WEEKS && band.label}
         </span>
       ))}
       {WEEKDAY_ROWS.map((dayIndex) => (

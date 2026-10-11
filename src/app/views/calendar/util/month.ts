@@ -13,7 +13,6 @@ import {
 import type { MonthCell, MonthException, MonthInput, MonthWeek } from '../types';
 import { monthGrid } from './dates';
 
-const MIN_SLOT_SESSIONS = 3;
 const WEEKDAYS = 5;
 
 const locationKey = (session: Session): string => [...session.locationIds].sort().join('|');
@@ -21,12 +20,10 @@ const locationKey = (session: Session): string => [...session.locationIds].sort(
 const slotKey = (session: Session): string =>
   `${seriesKeyOf(session)}|${weekdayIndex(session.dateKey)}|${helsinkiMinutesOfDay(session.start)}`;
 
-const mostCommon = (values: string[]): string =>
-  Object.entries(
-    values.reduce<Record<string, number>>((counts, value) => ({ ...counts, [value]: (counts[value] ?? 0) + 1 }), {}),
-  ).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0] ?? '';
+const byStart = (a: Session, b: Session): number => a.start.getTime() - b.start.getTime();
 
-// A group can meet in a different room on each weekday, so a change is judged against its own weekly slot.
+// A group can meet in a different room on each weekday, and a slot can move for good between periods,
+// so only a week that differs from the same slot's room the week before and after is a one-off change.
 export const roomChangeIds = (sessions: Session[]): Set<string> => {
   const located = sessions.filter(
     (session) => !session.cancelled && session.source === 'sisu' && session.locationIds.length > 0,
@@ -34,10 +31,19 @@ export const roomChangeIds = (sessions: Session[]): Set<string> => {
   const slots = [...new Set(located.map(slotKey))];
   return new Set(
     slots.flatMap((slot) => {
-      const members = located.filter((session) => slotKey(session) === slot);
-      if (members.length < MIN_SLOT_SESSIONS) return [];
-      const usual = mostCommon(members.map(locationKey));
-      return members.filter((session) => locationKey(session) !== usual).map((session) => session.id);
+      const members = located.filter((session) => slotKey(session) === slot).sort(byStart);
+      return members
+        .filter((session, index) => {
+          const before = members[index - 1];
+          const after = members[index + 1];
+          return (
+            before != null &&
+            after != null &&
+            locationKey(before) === locationKey(after) &&
+            locationKey(session) !== locationKey(before)
+          );
+        })
+        .map((session) => session.id);
     }),
   );
 };

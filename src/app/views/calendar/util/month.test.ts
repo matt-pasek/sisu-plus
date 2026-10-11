@@ -98,6 +98,17 @@ describe('roomChangeIds', () => {
     expect([...roomChangeIds(sessions)]).toEqual(['w3']);
   });
 
+  test('a lasting move to another room is not a one-off change', () => {
+    const sessions = [
+      slot('p1', '2026-10-05', 'aud1'),
+      slot('p2', '2026-10-12', 'aud1'),
+      slot('p3', '2026-10-26', 'aud2'),
+      slot('p4', '2026-11-02', 'aud2'),
+      slot('p5', '2026-11-09', 'aud2'),
+    ];
+    expect(roomChangeIds(sessions).size).toBe(0);
+  });
+
   test('ignores a group whose different weekly slots use different rooms', () => {
     const monday = ['2026-10-05', '2026-10-12', '2026-10-19'].map((dateKey, index) =>
       slot(`m${index}`, dateKey, 'aud1'),

@@ -48,7 +48,10 @@ export const MonthView: React.FC<Props> = ({
 
   return (
     <div className="min-h-0 flex-1 overflow-y-auto bg-background">
-      <div className="grid grid-cols-[34px_repeat(5,minmax(0,1fr))_repeat(2,minmax(0,0.55fr))]">
+      <div
+        className="grid min-h-full grid-cols-[34px_repeat(5,minmax(0,1fr))_repeat(2,minmax(0,0.55fr))]"
+        style={{ gridTemplateRows: `auto repeat(${weeks.length}, minmax(112px, 1fr))` }}
+      >
         <div className="sticky top-0 z-10 border-b border-border2 bg-container" />
         {weeks[0].cells.map((cell) => (
           <div

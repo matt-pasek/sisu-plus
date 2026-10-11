@@ -14,3 +14,4 @@ export * from './prune';
 export * from './swaps';
 export * from './groupStats';
 export * from './linked';
+export * from './holidays';

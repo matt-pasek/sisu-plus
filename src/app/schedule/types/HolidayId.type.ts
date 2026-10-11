@@ -1,0 +1,16 @@
+export type HolidayId =
+  | 'newYear'
+  | 'epiphany'
+  | 'goodFriday'
+  | 'easterSunday'
+  | 'easterMonday'
+  | 'mayDay'
+  | 'ascension'
+  | 'whitsun'
+  | 'midsummerEve'
+  | 'midsummerDay'
+  | 'allSaints'
+  | 'independence'
+  | 'christmasEve'
+  | 'christmasDay'
+  | 'stStephens';

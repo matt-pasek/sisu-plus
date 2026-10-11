@@ -9,6 +9,8 @@ export type { DayLayout } from './DayLayout.type';
 export type { GroupEvents } from './GroupEvents.type';
 export type { GroupRef } from './GroupRef.type';
 export type { GroupStats } from './GroupStats.type';
+export type { Holiday } from './Holiday.type';
+export type { HolidayId } from './HolidayId.type';
 export type { HourRange } from './HourRange.type';
 export type { LinkedImport } from './LinkedImport.type';
 export type { LinkedSeries } from './LinkedSeries.type';

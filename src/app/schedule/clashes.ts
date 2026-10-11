@@ -30,7 +30,9 @@ export const findClashes = (sessions: Session[]): Clash[] => {
     .flatMap((a, index) =>
       active
         .slice(index + 1)
-        .filter((b) => b.id !== a.id && b.start < a.end && overlapMinutes(a, b) > 0)
+        .filter(
+          (b) => b.id !== a.id && b.start < a.end && overlapMinutes(a, b) > 0 && seriesKeyOf(a) !== seriesKeyOf(b),
+        )
         .map((b) => toClash(a, b)),
     )
     .sort((x, y) => Number(y.involvesExam) - Number(x.involvesExam) || x.start.getTime() - y.start.getTime());

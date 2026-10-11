@@ -93,3 +93,30 @@ describe('expandSeries: populated by the API', () => {
     expect(second.end.toISOString()).toBe('2026-11-02T16:00:00.000Z');
   });
 });
+
+describe('expandSeries: offset-less Sisu date-times', () => {
+  test('generated occurrences use Helsinki wall time whatever the browser zone', () => {
+    const series = weeklyTuesday({ startTime: '2026-10-20T14:00:00' });
+    expect(expandSeries(series, AUTUMN).map((o) => o.start.toISOString())).toEqual([
+      '2026-10-20T11:00:00.000Z',
+      '2026-10-27T12:00:00.000Z',
+      '2026-11-03T12:00:00.000Z',
+    ]);
+  });
+
+  test('a late-evening start stays on its Helsinki date', () => {
+    const series = weeklyTuesday({ startTime: '2026-10-20T23:30:00', recursUntil: '2026-10-20', duration: 'PT30M' });
+    const [only] = expandSeries(series, AUTUMN);
+    expect(only.dateKey).toBe('2026-10-20');
+    expect(only.start.toISOString()).toBe('2026-10-20T20:30:00.000Z');
+  });
+
+  test('populated occurrences read start and end as Helsinki wall time', () => {
+    const series = weeklyTuesday({
+      occurrences: [{ start: '2026-10-28T14:00:00', end: '2026-10-28T16:00:00' }],
+    });
+    const [only] = expandSeries(series, AUTUMN);
+    expect(only.start.toISOString()).toBe('2026-10-28T12:00:00.000Z');
+    expect(only.end.toISOString()).toBe('2026-10-28T14:00:00.000Z');
+  });
+});

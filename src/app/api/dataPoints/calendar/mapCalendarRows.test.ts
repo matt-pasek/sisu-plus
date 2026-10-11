@@ -58,6 +58,36 @@ describe('mapCalendarRows', () => {
     expect(result.courses.find((course) => course.realisationId === 'cur-exam')?.isExam).toBe(true);
   });
 
+  test('reads real Sisu rows (offset-less times, null fields) as Helsinki time', () => {
+    const lutRow = {
+      enrolment: { id: 'enr-lut', courseUnitRealisationId: 'cur-lut', courseUnitId: 'cu-lut', colorIndex: 1 },
+      courseUnitRealisation: {
+        id: 'cur-lut',
+        name: { en: 'Contact teaching, Lahti' },
+        courseUnitRealisationTypeUrn: 'urn:code:course-unit-realisation-type:teaching-participation-contact',
+        studyGroupSets: [],
+      },
+      studyEvents: [
+        {
+          id: 'lut-1',
+          recursEvery: 'NEVER',
+          startTime: '2026-10-28T14:00:00',
+          duration: 'PT2H',
+          recursUntil: null,
+          locationIds: ['loc-aud1b'],
+          events: [
+            { start: '2026-10-28T14:00:00', end: '2026-10-28T16:00:00', irregularLocationIds: null, notice: null },
+          ],
+        },
+      ],
+    } as unknown as (typeof CALENDAR_ROWS)[number];
+    const [session] = mapCalendarRows([lutRow], FIXTURE_RANGE, label).sessions;
+    expect(session.start.toISOString()).toBe('2026-10-28T12:00:00.000Z');
+    expect(session.end.toISOString()).toBe('2026-10-28T14:00:00.000Z');
+    expect(session.locationIds).toEqual(['loc-aud1b']);
+    expect(session.notice).toBeNull();
+  });
+
   test('deduplicates repeated rows', () => {
     const doubled = mapCalendarRows([...CALENDAR_ROWS, CALENDAR_ROWS[1]], FIXTURE_RANGE, label);
     expect(doubled.sessions).toHaveLength(8);

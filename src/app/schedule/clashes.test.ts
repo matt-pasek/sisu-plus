@@ -37,6 +37,12 @@ describe('findClashes', () => {
     );
   });
 
+  test('parallel events of the same series do not clash with each other', () => {
+    const roomA = buildSession('a', DAY, 14, 16, { seriesId: 'se-a', courseKey: 'cur', groupId: 'sub-lec' });
+    const roomB = buildSession('b', DAY, 14, 16, { seriesId: 'se-b', courseKey: 'cur', groupId: 'sub-lec' });
+    expect(findClashes([roomA, roomB])).toEqual([]);
+  });
+
   test('exam clashes sort first', () => {
     const clashes = findClashes([
       buildSession('a', DAY, 10, 12),

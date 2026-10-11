@@ -5,6 +5,7 @@ import {
   helsinkiDateKey,
   helsinkiMinutesOfDay,
   helsinkiWallTimeToInstant,
+  parseSisuDateTime,
 } from './time';
 import type { DateRange, Occurrence, RecurrenceRule, RecurringSeries, SeriesOccurrence } from './types';
 
@@ -34,7 +35,7 @@ function* seriesDateKeys(firstKey: string, rule: RecurrenceRule, lastKey: string
 }
 
 const generated = (series: RecurringSeries, range: DateRange): Occurrence[] => {
-  const first = new Date(series.startTime);
+  const first = parseSisuDateTime(series.startTime);
   const firstKey = helsinkiDateKey(first);
   const startMinutes = helsinkiMinutesOfDay(first);
   const durationMs = parseIsoDurationMs(series.duration);
@@ -68,9 +69,9 @@ const populated = (series: RecurringSeries, occurrences: SeriesOccurrence[]): Oc
         Boolean(occurrence.start) && occurrence.excluded !== true,
     )
     .map((occurrence, index) => {
-      const start = new Date(occurrence.start);
+      const start = parseSisuDateTime(occurrence.start);
       const end = occurrence.end
-        ? new Date(occurrence.end)
+        ? parseSisuDateTime(occurrence.end)
         : new Date(start.getTime() + parseIsoDurationMs(occurrence.duration ?? series.duration));
       return {
         seriesId: series.id,

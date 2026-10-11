@@ -52,7 +52,13 @@ export const layoutDay = (sessions: Session[]): DayLayout =>
             : [
                 ...layout.overflow,
                 {
-                  start: cluster[0].start,
+                  start: new Date(
+                    Math.min(
+                      ...cluster
+                        .filter((session) => hidden.some((entry) => entry.id === session.id))
+                        .map((session) => session.start.getTime()),
+                    ),
+                  ),
                   end: new Date(Math.max(...cluster.map((session) => session.end.getTime()))),
                   sessionIds: hidden.map((entry) => entry.id),
                 },

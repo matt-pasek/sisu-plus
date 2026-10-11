@@ -11,6 +11,7 @@ import {
   helsinkiMinutesOfDay,
   helsinkiWallTimeToInstant,
   isoWeekNumber,
+  parseSisuDateTime,
   startOfWeekKey,
   weekdayIndex,
 } from './time';
@@ -30,6 +31,20 @@ describe('helsinkiWallTimeToInstant', () => {
 
   test('rolls 24.00 over to the next day', () => {
     expect(helsinkiWallTimeToInstant('2026-11-02', 24 * 60).toISOString()).toBe('2026-11-02T22:00:00.000Z');
+  });
+});
+
+describe('parseSisuDateTime', () => {
+  test('reads offset-less Sisu date-times as Helsinki wall time', () => {
+    expect(parseSisuDateTime('2026-10-20T14:00:00').toISOString()).toBe('2026-10-20T11:00:00.000Z');
+    expect(parseSisuDateTime('2026-10-28T14:00:00').toISOString()).toBe('2026-10-28T12:00:00.000Z');
+    expect(parseSisuDateTime('2026-10-28T14:00').toISOString()).toBe('2026-10-28T12:00:00.000Z');
+    expect(parseSisuDateTime('2026-10-28T14:00:30.500').toISOString()).toBe('2026-10-28T12:00:30.500Z');
+  });
+
+  test('keeps values that carry a zone', () => {
+    expect(parseSisuDateTime('2026-10-20T11:00:00.000Z').toISOString()).toBe('2026-10-20T11:00:00.000Z');
+    expect(parseSisuDateTime('2026-10-20T14:00:00+03:00').toISOString()).toBe('2026-10-20T11:00:00.000Z');
   });
 });
 

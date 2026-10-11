@@ -76,6 +76,17 @@ export const helsinkiWallTimeToInstant = (dateKey: string, minutesOfDay: number)
   return new Date(wallAsUtc - helsinkiOffsetMinutes(firstGuess) * MINUTE_MS);
 };
 
+const LOCAL_DATE_TIME = /^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2})(?::(\d{2}(?:\.\d+)?))?$/;
+
+// Sisu serialises Java LocalDateTime without an offset; those values are Finnish wall time, not browser time.
+export const parseSisuDateTime = (value: string): Date => {
+  const match = value.match(LOCAL_DATE_TIME);
+  if (!match) return new Date(value);
+  const [, dateKey, hours, minutes, seconds = '0'] = match;
+  const wallMinute = helsinkiWallTimeToInstant(dateKey, Number(hours) * 60 + Number(minutes));
+  return new Date(wallMinute.getTime() + Math.round(Number(seconds) * 1000));
+};
+
 export const addDaysToDateKey = (dateKey: string, days: number): string =>
   utcMsToDateKey(dateKeyToUtcMs(dateKey) + days * DAY_MS);
 

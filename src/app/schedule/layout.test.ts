@@ -31,6 +31,17 @@ describe('layoutDay', () => {
     expect(placements.c).toEqual({ col: 0, cols: 2 });
   });
 
+  test('places the overflow slot at the first hidden session, not the cluster start', () => {
+    const layout = layoutDay([
+      buildSession('a', DAY, 8, 12),
+      buildSession('b', DAY, 9, 12),
+      buildSession('c', DAY, 9.5, 12),
+      buildSession('d', DAY, 9.75, 11),
+    ]);
+    expect(layout.overflow[0].sessionIds).toEqual(['d']);
+    expect(layout.overflow[0].start.toISOString()).toBe(buildSession('d', DAY, 9.75, 11).start.toISOString());
+  });
+
   test('caps at three columns and reports the rest as overflow', () => {
     const layout = layoutDay(['a', 'b', 'c', 'd'].map((id) => buildSession(id, DAY, 14, 16)));
     expect(Object.keys(layout.placements)).toHaveLength(3);

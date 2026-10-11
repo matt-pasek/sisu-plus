@@ -28,6 +28,13 @@ export const calendarTranslation: CalendarTranslation = {
     exam: 'Tentti',
     previousMonth: 'Edellinen kuukausi',
     nextMonth: 'Seuraava kuukausi',
+    showCourse: 'Näytä {{course}} kalenterissa',
+    chooseGroup: 'Valitse harjoitusryhmä',
+  },
+  prompt: {
+    question: 'Käytkö joka viikko yhdessä näistä?',
+    pick: 'Valitse tavallinen ryhmä',
+    notNow: 'Ei nyt',
   },
   kinds: {
     lecture: 'Luento',

@@ -2,10 +2,25 @@
 
 import { describe, expect, test } from 'bun:test';
 
+import {
+  CALENDAR_ROWS,
+  CHINESE_SHARED_ROW,
+  FIXTURE_RANGE,
+} from '@/app/api/dataPoints/calendar/__fixtures__/calendarRows.fixture';
+import { mapCalendarRows } from '@/app/api/dataPoints/calendar/mapCalendarRows';
 import type { CalendarGroup } from '@/app/api/dataPoints/calendar/types';
 import { buildSession } from '@/app/schedule/__fixtures__/buildSession';
 import type { GroupRef, GroupStats } from '@/app/schedule';
-import { previewModel, sessionsByGroup, sortGroups, weeklyPattern } from './groups';
+import {
+  hasGroupChoice,
+  previewModel,
+  promptId,
+  promptSets,
+  requiredSetWithoutGroup,
+  sessionsByGroup,
+  sortGroups,
+  weeklyPattern,
+} from './groups';
 
 const COURSE = 'cur-hdd';
 const t1 = (id: string, day: string, from: number, to: number) =>
@@ -102,5 +117,30 @@ describe('previewModel', () => {
 
   test('is empty without a group', () => {
     expect(previewModel(candidates, attended, groups, null, '2026-10-05', '2026-10-12').sessions).toEqual([]);
+  });
+});
+
+describe('course prompts', () => {
+  const label = (value: { en?: string; fi?: string } | null | undefined) => value?.en ?? value?.fi ?? null;
+  const [lut] = mapCalendarRows([CHINESE_SHARED_ROW], FIXTURE_RANGE, label).courses;
+  const fixtureChinese = mapCalendarRows(CALENDAR_ROWS, FIXTURE_RANGE, label).courses.find(
+    (course) => course.realisationId === 'cur-chn',
+  );
+  const plan = { usual: {}, swaps: [], skips: [], dismissed: [] };
+
+  test('offers alternatives for a set with two switched-on groups', () => {
+    expect(promptSets(lut, undefined).map((set) => set.id)).toEqual(['set-exercises']);
+    expect(hasGroupChoice(lut)).toBe(true);
+  });
+
+  test('stops asking once a usual group is picked or the prompt is dismissed', () => {
+    expect(promptSets(lut, { ...plan, usual: { 'set-exercises': 'sub-hdd-t2' } })).toEqual([]);
+    expect(promptSets(lut, { ...plan, dismissed: [promptId('set-exercises')] })).toEqual([]);
+    expect(promptSets({ ...lut, isInCalendar: false }, undefined)).toEqual([]);
+  });
+
+  test('flags a required set without a switched-on group, never at LUT', () => {
+    expect(requiredSetWithoutGroup(lut)).toBeNull();
+    expect(fixtureChinese && requiredSetWithoutGroup(fixtureChinese)).toBe('set-teaching');
   });
 });

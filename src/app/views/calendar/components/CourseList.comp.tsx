@@ -3,15 +3,26 @@ import type { CalendarCourse, CourseUnitInfo } from '@/app/api/dataPoints/calend
 import { Panel } from '@/app/components/ui/Panel.comp';
 import { PanelEyebrow } from '@/app/components/ui/PanelEyebrow.comp';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
+import type { AttendancePlan } from '@/app/schedule';
 import { CourseRow } from './CourseRow.comp';
 
 interface Props {
   courses: CalendarCourse[];
   courseUnits: Record<string, CourseUnitInfo>;
+  plans: Record<string, AttendancePlan>;
+  onToggleCourse: (course: CalendarCourse, visible: boolean) => void;
   onOpenGroups: (courseKey: string, setId: string | null) => void;
+  onDismissPrompt: (courseKey: string, setId: string) => void;
 }
 
-export const CourseList: React.FC<Props> = ({ courses, courseUnits, onOpenGroups }) => {
+export const CourseList: React.FC<Props> = ({
+  courses,
+  courseUnits,
+  plans,
+  onToggleCourse,
+  onOpenGroups,
+  onDismissPrompt,
+}) => {
   const { t } = useTranslationWithPrefix('views.calendar');
   return (
     <Panel
@@ -29,7 +40,10 @@ export const CourseList: React.FC<Props> = ({ courses, courseUnits, onOpenGroups
             key={course.realisationId}
             course={course}
             code={course.courseUnitId ? courseUnits[course.courseUnitId]?.code : undefined}
+            plan={plans[course.realisationId]}
+            onToggleCourse={onToggleCourse}
             onOpenGroups={onOpenGroups}
+            onDismissPrompt={onDismissPrompt}
           />
         ))}
       </ul>

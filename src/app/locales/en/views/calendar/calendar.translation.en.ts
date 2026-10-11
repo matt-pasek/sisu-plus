@@ -26,6 +26,13 @@ export type CalendarTranslation = {
     exam: string;
     previousMonth: string;
     nextMonth: string;
+    showCourse: string;
+    chooseGroup: string;
+  };
+  prompt: {
+    question: string;
+    pick: string;
+    notNow: string;
   };
   kinds: {
     lecture: string;
@@ -138,6 +145,13 @@ export const calendarTranslation: CalendarTranslation = {
     exam: 'Exam',
     previousMonth: 'Previous month',
     nextMonth: 'Next month',
+    showCourse: 'Show {{course}} in the calendar',
+    chooseGroup: 'Choose tutorial group',
+  },
+  prompt: {
+    question: 'Go to one of these each week?',
+    pick: 'Pick usual group',
+    notNow: 'Not now',
   },
   kinds: {
     lecture: 'Lecture',

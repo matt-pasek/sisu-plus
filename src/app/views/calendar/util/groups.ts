@@ -1,9 +1,10 @@
-import type { CalendarGroup } from '@/app/api/dataPoints/calendar/types';
+import type { CalendarCourse, CalendarGroup, CalendarGroupSet } from '@/app/api/dataPoints/calendar/types';
 import {
   helsinkiMinutesOfDay,
   statsForCandidate,
   uniqueBy,
   weekdayIndex,
+  type AttendancePlan,
   type GroupRef,
   type GroupStats,
   type Session,
@@ -95,3 +96,24 @@ export const previewModel = (
     clashIds: new Set(stats.perSession.filter((entry) => entry.clashes).map((entry) => entry.sessionId)),
   };
 };
+
+export const promptId = (setId: string): string => `prompt:${setId}`;
+
+const choosable = (set: CalendarGroupSet): CalendarGroup[] =>
+  set.groups.filter((group) => !group.cancelled && group.eventIds.length > 0);
+
+export const hasGroupChoice = (course: CalendarCourse): boolean =>
+  course.groupSets.some((set) => choosable(set).length > 1);
+
+export const requiredSetWithoutGroup = (course: CalendarCourse): string | null =>
+  course.groupSets.find((set) => set.min >= 1 && !set.groups.some((group) => group.isInCalendar))?.id ?? null;
+
+export const promptSets = (course: CalendarCourse, plan: AttendancePlan | undefined): CalendarGroupSet[] =>
+  course.isInCalendar
+    ? course.groupSets.filter(
+        (set) =>
+          choosable(set).filter((group) => group.isInCalendar).length >= 2 &&
+          !plan?.usual[set.id] &&
+          !plan?.dismissed.includes(promptId(set.id)),
+      )
+    : [];

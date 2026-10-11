@@ -1,5 +1,6 @@
 import React from 'react';
 import type { CalendarCourse, CourseUnitInfo } from '@/app/api/dataPoints/calendar/types';
+import type { AttendancePlan } from '@/app/schedule';
 import { CourseList } from './CourseList.comp';
 import { LayersPanel } from './LayersPanel.comp';
 import { MiniMonth } from './MiniMonth.comp';
@@ -11,10 +12,13 @@ interface Props {
   locale: string;
   courses: CalendarCourse[];
   courseUnits: Record<string, CourseUnitInfo>;
+  plans: Record<string, AttendancePlan>;
   showCancelled: boolean;
   onSelectDate: (dateKey: string) => void;
   onShowCancelledChange: (value: boolean) => void;
+  onToggleCourse: (course: CalendarCourse, visible: boolean) => void;
   onOpenGroups: (courseKey: string, setId: string | null) => void;
+  onDismissPrompt: (courseKey: string, setId: string) => void;
 }
 
 export const CalendarSidebar: React.FC<Props> = ({
@@ -24,10 +28,13 @@ export const CalendarSidebar: React.FC<Props> = ({
   locale,
   courses,
   courseUnits,
+  plans,
   showCancelled,
   onSelectDate,
   onShowCancelledChange,
+  onToggleCourse,
   onOpenGroups,
+  onDismissPrompt,
 }) => (
   <aside className="hidden min-h-0 flex-col gap-4 overflow-y-auto pb-1 lg:flex">
     <MiniMonth
@@ -37,7 +44,14 @@ export const CalendarSidebar: React.FC<Props> = ({
       locale={locale}
       onSelect={onSelectDate}
     />
-    <CourseList courses={courses} courseUnits={courseUnits} onOpenGroups={onOpenGroups} />
+    <CourseList
+      courses={courses}
+      courseUnits={courseUnits}
+      plans={plans}
+      onToggleCourse={onToggleCourse}
+      onOpenGroups={onOpenGroups}
+      onDismissPrompt={onDismissPrompt}
+    />
     <LayersPanel showCancelled={showCancelled} onShowCancelledChange={onShowCancelledChange} />
   </aside>
 );

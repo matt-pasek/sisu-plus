@@ -30,7 +30,7 @@ import { useCalendarKeyboard } from './hooks/useCalendarKeyboard';
 import { useNow } from './hooks/useNow';
 import { useWeekModel } from './hooks/useWeekModel';
 import type { InspectorState, PopoverTarget } from './types';
-import { findPeriodName, formatWeekRange, previewModel, seriesOf, weekDateKeys } from './util';
+import { findPeriodName, formatWeekRange, previewModel, promptId, seriesOf, weekDateKeys } from './util';
 
 const browserTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 const NO_COURSE_KEYS: string[] = [];
@@ -174,10 +174,13 @@ const CalendarView: React.FC = () => {
           locale={locale}
           courses={data.courses}
           courseUnits={data.courseUnits}
+          plans={data.plans}
           showCancelled={prefs.calendarShowCancelled}
           onSelectDate={setAnchorKey}
           onShowCancelledChange={(value) => setPrefs({ calendarShowCancelled: value })}
+          onToggleCourse={actions.setCourseVisible}
           onOpenGroups={openGroups}
+          onDismissPrompt={(courseKey, setId) => actions.dismiss(courseKey, promptId(setId))}
         />
         <Panel
           footer={<ProvenanceFooter updatedAt={data.updatedAt} isFetching={data.isFetching} onRefresh={data.refetch} />}

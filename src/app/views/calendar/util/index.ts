@@ -8,3 +8,4 @@ export * from './popover';
 export * from './rooms';
 export * from './sessions';
 export * from './timetable';
+export * from './year';

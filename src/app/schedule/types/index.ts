@@ -10,6 +10,8 @@ export type { GroupEvents } from './GroupEvents.type';
 export type { GroupRef } from './GroupRef.type';
 export type { GroupStats } from './GroupStats.type';
 export type { HourRange } from './HourRange.type';
+export type { LinkedImport } from './LinkedImport.type';
+export type { LinkedSeries } from './LinkedSeries.type';
 export type { Occurrence } from './Occurrence.type';
 export type { OverflowSlot } from './OverflowSlot.type';
 export type { Placement } from './Placement.type';

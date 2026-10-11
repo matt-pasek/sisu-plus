@@ -3,6 +3,7 @@ export type CalendarTranslation = {
   weekLabel: string;
   weekShort: string;
   weekendShort: string;
+  weekendFree: string;
   timeZoneNote: string;
   actions: {
     today: string;
@@ -51,6 +52,7 @@ export type CalendarTranslation = {
     clashes_other: string;
     rooms_one: string;
     rooms_other: string;
+    next: string;
     chips: {
       clash: string;
       partialClash: string;
@@ -72,6 +74,7 @@ export type CalendarTranslation = {
   aria: {
     session: string;
     clash: string;
+    moreSessions: string;
   };
 };
 
@@ -80,6 +83,7 @@ export const calendarTranslation: CalendarTranslation = {
   weekLabel: 'Week {{week}}',
   weekShort: 'WK {{week}}',
   weekendShort: 'S–S',
+  weekendFree: 'Weekend free',
   timeZoneNote: 'Times shown in Finnish time',
   actions: {
     today: 'Today',
@@ -128,10 +132,11 @@ export const calendarTranslation: CalendarTranslation = {
     clashes_other: '{{count}} clashes',
     rooms_one: '{{count}} room',
     rooms_other: '{{count}} rooms',
+    next: 'Next',
     chips: {
       clash: 'Clash',
       partialClash: '{{minutes}} min clash',
-      roomChanged: 'Room',
+      roomChanged: 'Room changed',
       cancelled: 'Cancelled',
     },
   },
@@ -149,5 +154,6 @@ export const calendarTranslation: CalendarTranslation = {
   aria: {
     session: '{{kind}}, {{course}}, {{date}} {{start}} to {{end}}, {{room}}',
     clash: 'clashes with {{names}}',
+    moreSessions: '{{count}} more at this time: {{names}}',
   },
 };

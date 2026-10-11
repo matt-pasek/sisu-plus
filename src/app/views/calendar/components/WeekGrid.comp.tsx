@@ -1,13 +1,13 @@
 import React, { useMemo } from 'react';
-import type { RoomInfo } from '@/app/api/dataPoints/calendar/types';
+import type { CourseUnitInfo, RoomInfo } from '@/app/api/dataPoints/calendar/types';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
-import { visibleHourRange, type Clash, type HourRange, type Session } from '@/app/schedule';
-import { sessionsOnDay } from '../util';
+import { helsinkiMinutesOfDay, visibleHourRange, type Clash, type HourRange, type Session } from '@/app/schedule';
+import { formatClock, minutesToOffset, sessionsOnDay } from '../util';
 import { HourGutter } from './HourGutter.comp';
 import { WeekDayColumn } from './WeekDayColumn.comp';
 import { WeekDayHeader } from './WeekDayHeader.comp';
 
-const HOUR_HEIGHT = 48;
+const HOUR_HEIGHT = 52;
 const DEFAULT_HOURS: HourRange = { startHour: 8, endHour: 18 };
 const WEEKDAYS = 5;
 
@@ -19,6 +19,7 @@ interface Props {
   sessionsById: Map<string, Session>;
   clashesBySession: Map<string, Clash[]>;
   rooms: Record<string, RoomInfo>;
+  courseUnits: Record<string, CourseUnitInfo>;
   activeSessionId: string | null;
   locale: string;
   onSelect: (session: Session, element: HTMLElement) => void;
@@ -33,6 +34,7 @@ export const WeekGrid: React.FC<Props> = ({
   sessionsById,
   clashesBySession,
   rooms,
+  courseUnits,
   activeSessionId,
   locale,
   onSelect,
@@ -48,6 +50,11 @@ export const WeekGrid: React.FC<Props> = ({
   const columns = weekendEmpty ? days.slice(0, WEEKDAYS) : days;
   const template = `52px repeat(${columns.length}, minmax(0, 1fr))${weekendEmpty ? ' 34px' : ''}`;
   const hours = Array.from({ length: hourRange.endHour - hourRange.startHour }, (_, i) => hourRange.startHour + i);
+  const nowMinutes = helsinkiMinutesOfDay(now);
+  const showNowLabel =
+    columns.some(({ dateKey }) => dateKey === todayKey) &&
+    nowMinutes >= hourRange.startHour * 60 &&
+    nowMinutes <= hourRange.endHour * 60;
 
   return (
     <div className="relative min-h-0 flex-1 overflow-y-auto" onScroll={onScroll}>
@@ -66,7 +73,13 @@ export const WeekGrid: React.FC<Props> = ({
         )}
       </div>
       <div className="relative grid" style={{ gridTemplateColumns: template, height: hours.length * HOUR_HEIGHT }}>
-        <HourGutter hours={hours} hourHeight={HOUR_HEIGHT} />
+        <HourGutter
+          hours={hours}
+          hourHeight={HOUR_HEIGHT}
+          nowLabel={
+            showNowLabel ? { top: minutesToOffset(nowMinutes, hourRange, HOUR_HEIGHT), text: formatClock(now) } : null
+          }
+        />
         {columns.map(({ dateKey, sessions: daySessions }) => (
           <WeekDayColumn
             key={dateKey}
@@ -79,13 +92,18 @@ export const WeekGrid: React.FC<Props> = ({
             hourHeight={HOUR_HEIGHT}
             clashesBySession={clashesBySession}
             rooms={rooms}
+            courseUnits={courseUnits}
             activeSessionId={activeSessionId}
             locale={locale}
             onSelect={onSelect}
           />
         ))}
         {weekendEmpty && (
-          <div className="border-l border-border bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.012)_0_6px,transparent_6px_12px)]" />
+          <div className="relative border-l border-border bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.012)_0_6px,transparent_6px_12px)]">
+            <span className="absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-90 font-mono text-[10px] font-medium tracking-[0.08em] whitespace-nowrap text-darkishGrey uppercase">
+              {t('weekendFree')}
+            </span>
+          </div>
         )}
       </div>
       {sessions.length === 0 && (

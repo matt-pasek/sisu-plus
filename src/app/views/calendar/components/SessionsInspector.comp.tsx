@@ -6,9 +6,9 @@ import { StatusChip } from '@/app/components/ui/StatusChip.comp';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import type { Clash, Session } from '@/app/schedule';
 import { getModuleColorValueByIndex } from '@/app/theme/moduleColors';
-import { describeRoom, formatClock, formatSessionDate, groupByWeek, sessionChips } from '../util';
+import { groupByWeek } from '../util';
 import { CloseIcon, WarningIcon } from './icons';
-import { SessionChipBadge } from './SessionChipBadge.comp';
+import { SessionRow } from './SessionRow.comp';
 
 interface Props {
   series: Session[];
@@ -67,41 +67,21 @@ export const SessionsInspector: React.FC<Props> = ({ series, clashesBySession, r
           <StatusChip tone="info">{t('sessions.rooms', { count: roomCount })}</StatusChip>
         </div>
         {groupByWeek(series).map(({ week, sessions }) => (
-          <section key={week}>
-            <h4 className="mt-3 mb-1 font-mono text-[10px] font-semibold tracking-[0.12em] text-lightGrey uppercase">
-              {t('sessions.week', { week })}
-            </h4>
-            {sessions.map((session) => {
-              const previous = series[series.indexOf(session) - 1];
-              const chips = sessionChips(session, previous, clashesBySession.get(session.id));
-              return (
-                <div
-                  key={session.id}
-                  className={`-mx-2 grid grid-cols-[76px_84px_minmax(0,1fr)] items-baseline gap-2 rounded-lg px-2 py-1.5 text-[12.5px] ${
-                    session.id === nextId ? 'bg-offwhite/5' : ''
-                  } ${session.end <= now ? 'opacity-45' : ''}`}
-                >
-                  <span className={`font-mono text-[11px] text-offwhite ${session.cancelled ? 'line-through' : ''}`}>
-                    {formatSessionDate(session.dateKey, locale)}
-                  </span>
-                  <span className="font-mono text-[11px] text-lightGrey tabular-nums">
-                    {formatClock(session.start)}–{formatClock(session.end)}
-                  </span>
-                  <span className="min-w-0">
-                    <span className="block truncate text-[#c0c0da]">
-                      {describeRoom(session.locationIds, rooms, roomLabels)}
-                    </span>
-                    {chips.length > 0 && (
-                      <span className="mt-1 flex flex-wrap gap-1">
-                        {chips.map((chip) => (
-                          <SessionChipBadge key={chip.type} chip={chip} />
-                        ))}
-                      </span>
-                    )}
-                  </span>
-                </div>
-              );
-            })}
+          <section key={week} className="border-t border-border py-0.5 first-of-type:border-t-0">
+            {sessions.map((session, index) => (
+              <SessionRow
+                key={session.id}
+                session={session}
+                previous={series[series.indexOf(session) - 1]}
+                clashes={clashesBySession.get(session.id)}
+                rooms={rooms}
+                roomLabels={roomLabels}
+                weekLabel={index === 0 ? t('weekShort', { week }) : null}
+                isNext={session.id === nextId}
+                isPast={session.end <= now}
+                locale={locale}
+              />
+            ))}
           </section>
         ))}
       </div>

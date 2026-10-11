@@ -5,6 +5,7 @@ export const calendarTranslation: CalendarTranslation = {
   weekLabel: 'Viikko {{week}}',
   weekShort: 'VK {{week}}',
   weekendShort: 'L–S',
+  weekendFree: 'Viikonloppu vapaa',
   timeZoneNote: 'Ajat Suomen aikaa',
   actions: {
     today: 'Tänään',
@@ -53,10 +54,11 @@ export const calendarTranslation: CalendarTranslation = {
     clashes_other: '{{count}} päällekkäisyyttä',
     rooms_one: '{{count}} tila',
     rooms_other: '{{count}} tilaa',
+    next: 'Seuraava',
     chips: {
       clash: 'Päällekkäin',
       partialClash: '{{minutes}} min päällekkäin',
-      roomChanged: 'Tila',
+      roomChanged: 'Tila vaihtui',
       cancelled: 'Peruttu',
     },
   },
@@ -74,5 +76,6 @@ export const calendarTranslation: CalendarTranslation = {
   aria: {
     session: '{{kind}}, {{course}}, {{date}} {{start}}–{{end}}, {{room}}',
     clash: 'päällekkäin: {{names}}',
+    moreSessions: '{{count}} lisää samaan aikaan: {{names}}',
   },
 };

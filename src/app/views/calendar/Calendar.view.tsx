@@ -28,6 +28,7 @@ import type { PopoverTarget } from './types';
 import { findPeriodName, formatWeekRange, seriesOf, sessionsInRange, weekDateKeys } from './util';
 
 const browserTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+const PROGRAMMATIC_SCROLL_MS = 500;
 
 const CalendarView: React.FC = () => {
   const { t, i18n } = useTranslationWithPrefix('views.calendar');
@@ -82,6 +83,11 @@ const CalendarView: React.FC = () => {
   );
 
   const closePopover = useCallback(() => setPopover(null), []);
+  const ignoreScrollUntil = useRef(0);
+  // Scroll events fire a frame after scrollIntoView, so our own scrolling must not close the popover it opens.
+  const closePopoverOnUserScroll = useCallback(() => {
+    if (Date.now() >= ignoreScrollUntil.current) setPopover(null);
+  }, []);
   const goToWeek = useCallback((delta: number) => {
     setPopover(null);
     setAnchorKey((current) => addDaysToDateKey(startOfWeekKey(current), delta * 7));
@@ -114,6 +120,7 @@ const CalendarView: React.FC = () => {
       ? gridRef.current?.querySelector<HTMLElement>(`[data-session-id="${CSS.escape(sessionId)}"]`)
       : null;
     if (!session || !element) return;
+    ignoreScrollUntil.current = Date.now() + PROGRAMMATIC_SCROLL_MS;
     element.scrollIntoView({ block: 'nearest' });
     setPopover({ session, element });
   };
@@ -177,10 +184,11 @@ const CalendarView: React.FC = () => {
                 sessionsById={sessionsById}
                 clashesBySession={data.clashesBySession}
                 rooms={data.rooms}
+                courseUnits={data.courseUnits}
                 activeSessionId={popover?.session.id ?? null}
                 locale={locale}
                 onSelect={selectSession}
-                onScroll={closePopover}
+                onScroll={closePopoverOnUserScroll}
               />
             </div>
           )}

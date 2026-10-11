@@ -2,7 +2,8 @@
 
 import { describe, expect, test } from 'bun:test';
 
-import { describeRoom, describeRoomShort, describeRoomWithBuilding, shortRoomName } from './rooms';
+import { buildSession } from '@/app/schedule/__fixtures__/buildSession';
+import { describeRoom, describeRoomShort, describeRoomWithBuilding, sessionRoom, shortRoomName } from './rooms';
 
 describe('shortRoomName', () => {
   test('keeps the room code after a building prefix', () => {
@@ -51,5 +52,22 @@ describe('describeRoom', () => {
   test('adds the building when known', () => {
     expect(describeRoomWithBuilding(['loc-aud1b'], rooms, labels)).toBe('M19_AUD1B Auditorio 1 · LAB');
     expect(describeRoomWithBuilding(['loc-2310'], rooms, labels)).toBe('2310');
+  });
+});
+
+describe('sessionRoom', () => {
+  const labels = { noRoom: 'No room', unavailable: 'Room unavailable' };
+
+  test('uses the linked event location or says there is no room', () => {
+    const linked = buildSession('l', '2026-10-27', 12, 14, { source: 'linked', locationText: 'Teams' });
+    expect(sessionRoom(linked, {}, labels)).toBe('Teams');
+    expect(sessionRoom({ ...linked, locationText: null }, {}, labels)).toBe('No room');
+  });
+
+  test('describes Sisu rooms with the chosen describer', () => {
+    const sisu = buildSession('s', '2026-10-27', 12, 14, { locationIds: ['r1'] });
+    const rooms = { r1: { id: 'r1', name: 'M19_AUD1B Auditorio 1', building: 'LAB' } };
+    expect(sessionRoom(sisu, rooms, labels)).toBe('AUD1B');
+    expect(sessionRoom(sisu, rooms, labels, describeRoomWithBuilding)).toBe('M19_AUD1B Auditorio 1 · LAB');
   });
 });

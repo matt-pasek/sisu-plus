@@ -139,6 +139,7 @@ export const calendarTranslation: CalendarTranslation = {
     error: 'Kalenteria ei voitu ladata.',
     retry: 'Yritä uudelleen',
     emptyWeek: 'Ei opetusta tällä viikolla',
+    emptyDay: 'Ei opetusta tänä päivänä',
     emptyTerm: 'Ei opetusta sisältäviä ilmoittautumisia tällä lukukaudella.',
   },
   aria: {
@@ -190,5 +191,20 @@ export const calendarTranslation: CalendarTranslation = {
       year: 'Edellinen lukuvuosi',
     },
     next: { day: 'Seuraava päivä', week: 'Seuraava viikko', month: 'Seuraava kuukausi', year: 'Seuraava lukuvuosi' },
+  },
+  agenda: {
+    title: 'Agenda',
+    today: 'Tänään',
+    next: 'Seuraavaksi',
+    now: 'Nyt · {{time}} asti',
+    inMinutes: '{{minutes}} min päästä',
+    inHours: '{{hours}} h {{minutes}} min päästä',
+    restOfToday: 'Loppupäivä',
+    onDay: '{{date}}',
+    tomorrowFirst: 'Huomisen ensimmäinen',
+    firstOn: 'Ensimmäinen {{date}}',
+    noUpcoming: 'Ei tulevia opetuksia',
+    clashWith: 'Päällekkäin: {{names}}',
+    skipping: 'Ohitetaan',
   },
 };

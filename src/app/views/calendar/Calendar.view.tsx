@@ -21,6 +21,7 @@ import { CalendarBody } from './components/CalendarBody.comp';
 import { CalendarSidebar } from './components/CalendarSidebar.comp';
 import { CalendarState } from './components/CalendarState.comp';
 import { CalendarToolbar } from './components/CalendarToolbar.comp';
+import { DayAgenda } from './components/DayAgenda.comp';
 import { EventPopover } from './components/EventPopover.comp';
 import { GroupPicker } from './components/GroupPicker.comp';
 import { ProvenanceFooter } from './components/ProvenanceFooter.comp';
@@ -47,7 +48,7 @@ import {
 
 const browserTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 const NO_COURSE_KEYS: string[] = [];
-const ENABLED_VIEWS: CalendarViewMode[] = ['week'];
+const ENABLED_VIEWS: CalendarViewMode[] = ['day', 'week'];
 
 const CalendarView: React.FC = () => {
   const { t, i18n } = useTranslationWithPrefix('views.calendar');
@@ -221,7 +222,9 @@ const CalendarView: React.FC = () => {
   const popoverModel = usePopoverModel(popover?.session ?? null, data, badges, sessionsById, actions, popoverView);
 
   const status = data.isLoading ? 'loading' : data.error ? 'error' : data.courses.length === 0 ? 'emptyTerm' : null;
-  const inspectorOpen = inspectorSeries.length > 0 || pickerCourse != null || timetableCourse != null;
+  const explicitInspector = inspectorSeries.length > 0 || pickerCourse != null || timetableCourse != null;
+  const showAgenda = view === 'day' && !explicitInspector;
+  const inspectorOpen = explicitInspector || showAgenda;
 
   return (
     <div className="-mx-6 -mt-6 flex h-[calc(100dvh-3rem)] flex-col gap-4 overflow-hidden px-6 pt-6 pb-6">
@@ -283,6 +286,7 @@ const CalendarView: React.FC = () => {
             <div ref={gridRef} className="flex min-h-0 flex-1 flex-col">
               <CalendarBody
                 view={view}
+                anchorKey={anchorKey}
                 weekKeys={weekKeys}
                 todayKey={today}
                 now={now}
@@ -339,6 +343,19 @@ const CalendarView: React.FC = () => {
               closeInspector();
             }}
             onClose={closeInspector}
+          />
+        )}
+        {showAgenda && (
+          <DayAgenda
+            dateKey={anchorKey}
+            todayKey={today}
+            now={now}
+            attended={data.attended}
+            skipped={data.skipped}
+            sessionsById={sessionsById}
+            clashesBySession={data.clashesBySession}
+            rooms={data.rooms}
+            locale={locale}
           />
         )}
       </div>

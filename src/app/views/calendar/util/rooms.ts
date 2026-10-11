@@ -1,4 +1,5 @@
 import type { RoomInfo } from '@/app/api/dataPoints/calendar/types';
+import type { Session } from '@/app/schedule';
 import type { RoomLabels } from '../types';
 
 const describe = (
@@ -35,3 +36,13 @@ export const describeRoomWithBuilding = (
   labels: RoomLabels,
 ): string =>
   describe(locationIds, rooms, labels, (room) => (room.building ? `${room.name} · ${room.building}` : room.name));
+
+export const sessionRoom = (
+  session: Session,
+  rooms: Record<string, RoomInfo>,
+  labels: RoomLabels,
+  describeIds: typeof describeRoom = describeRoomShort,
+): string =>
+  session.source === 'linked'
+    ? (session.locationText ?? labels.noRoom)
+    : describeIds(session.locationIds, rooms, labels);

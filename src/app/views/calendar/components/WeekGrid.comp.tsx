@@ -15,7 +15,10 @@ const DEFAULT_HOURS: HourRange = { startHour: 8, endHour: 18 };
 const WEEKDAYS = 5;
 
 interface Props {
-  weekKeys: string[];
+  dayKeys: string[];
+  collapseWeekend: boolean;
+  detailed: boolean;
+  emptyLabel: string;
   todayKey: string;
   now: Date;
   sessions: Session[];
@@ -35,7 +38,10 @@ interface Props {
 }
 
 export const WeekGrid: React.FC<Props> = ({
-  weekKeys,
+  dayKeys,
+  collapseWeekend,
+  detailed,
+  emptyLabel,
   todayKey,
   now,
   sessions,
@@ -63,15 +69,16 @@ export const WeekGrid: React.FC<Props> = ({
   );
   const days = useMemo(
     () =>
-      weekKeys.map((dateKey) => ({
+      dayKeys.map((dateKey) => ({
         dateKey,
         sessions: sessionsOnDay(sessions, dateKey),
         alternatives: sessionsOnDay(alternatives, dateKey),
         preview: sessionsOnDay(preview, dateKey),
       })),
-    [weekKeys, sessions, alternatives, preview],
+    [dayKeys, sessions, alternatives, preview],
   );
-  const weekendEmpty = days.slice(WEEKDAYS).every((day) => day.sessions.length === 0 && day.alternatives.length === 0);
+  const weekendEmpty =
+    collapseWeekend && days.slice(WEEKDAYS).every((day) => day.sessions.length === 0 && day.alternatives.length === 0);
   const columns = weekendEmpty ? days.slice(0, WEEKDAYS) : days;
   const template = `52px repeat(${columns.length}, minmax(0, 1fr))${weekendEmpty ? ' 34px' : ''}`;
   const hours = Array.from({ length: hourRange.endHour - hourRange.startHour }, (_, i) => hourRange.startHour + i);
@@ -140,6 +147,7 @@ export const WeekGrid: React.FC<Props> = ({
             rooms={rooms}
             courseUnits={courseUnits}
             linkedLabels={linkedLabels}
+            detailed={detailed}
             activeSessionId={activeSessionId}
             locale={locale}
             onSelect={onSelect}
@@ -153,9 +161,9 @@ export const WeekGrid: React.FC<Props> = ({
           </div>
         )}
       </div>
-      {sessions.length === 0 && alternatives.length === 0 && (
+      {columns.every((day) => day.sessions.length === 0 && day.alternatives.length === 0) && (
         <p className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-lightGrey">
-          {t('states.emptyWeek')}
+          {emptyLabel}
         </p>
       )}
     </div>

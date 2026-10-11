@@ -6,11 +6,13 @@ import type { SessionBadge } from '../types';
 import {
   describeRoom,
   describeRoomShort,
+  describeRoomWithBuilding,
   formatClock,
   formatSessionDate,
   joinNames,
   minutesToOffset,
   sessionBox,
+  sessionRoom,
 } from '../util';
 import { AlternativeBlock } from './AlternativeBlock.comp';
 import { NowLine } from './NowLine.comp';
@@ -34,6 +36,7 @@ interface Props {
   rooms: Record<string, RoomInfo>;
   courseUnits: Record<string, CourseUnitInfo>;
   linkedLabels: Record<string, string>;
+  detailed: boolean;
   activeSessionId: string | null;
   locale: string;
   onSelect: (session: Session, element: HTMLElement) => void;
@@ -56,6 +59,7 @@ export const WeekDayColumn: React.FC<Props> = ({
   rooms,
   courseUnits,
   linkedLabels,
+  detailed,
   activeSessionId,
   locale,
   onSelect,
@@ -123,8 +127,13 @@ export const WeekDayColumn: React.FC<Props> = ({
         const clashes = clashesBySession.get(session.id) ?? [];
         const badge = badges.get(session.id) ?? null;
         const isLinked = session.source !== 'sisu';
-        const linkedRoom = session.locationText ?? roomLabels.noRoom;
-        const room = isLinked ? linkedRoom : describeRoom(session.locationIds, rooms, roomLabels);
+        const room = sessionRoom(session, rooms, roomLabels, describeRoom);
+        const roomName = sessionRoom(
+          session,
+          rooms,
+          roomLabels,
+          detailed ? describeRoomWithBuilding : describeRoomShort,
+        );
         const box = sessionBox(session, hourRange, hourHeight);
         return (
           <SessionBlock
@@ -139,7 +148,8 @@ export const WeekDayColumn: React.FC<Props> = ({
             isDimmed={activeSessionId != null && activeSessionId !== session.id}
             isPast={session.end <= now}
             kindLabel={t(`kinds.${session.kind}`)}
-            roomName={isLinked ? linkedRoom : describeRoomShort(session.locationIds, rooms, roomLabels)}
+            roomName={roomName}
+            detail={detailed && !isLinked ? session.groupName : null}
             ariaLabel={ariaLabelFor(session, room, clashes)}
             badge={badge}
             badgeLabel={badge ? t(`sessions.chips.${badge}`) : null}

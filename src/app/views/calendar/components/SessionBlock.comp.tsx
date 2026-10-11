@@ -26,6 +26,7 @@ interface Props {
   badge: SessionBadge | null;
   badgeLabel: string | null;
   sourceLabel: string | null;
+  detail: string | null;
   onSelect: (session: Session, element: HTMLElement) => void;
 }
 
@@ -57,6 +58,7 @@ export const SessionBlock: React.FC<Props> = ({
   badge,
   badgeLabel,
   sourceLabel,
+  detail,
   onSelect,
 }) => {
   const color = getModuleColorValueByIndex(session.colorIndex);
@@ -116,9 +118,7 @@ export const SessionBlock: React.FC<Props> = ({
       {showMeta && (
         <span className="mt-2 flex min-w-0 items-center gap-1.5 pl-3.5 text-[11.5px] text-[#a3a3c4]">
           <PinIcon className="size-3 shrink-0 text-lightGrey" />
-          <span className="truncate">
-            {kindLabel} · {roomName}
-          </span>
+          <span className="truncate">{[kindLabel, detail, roomName].filter(Boolean).join(' · ')}</span>
         </span>
       )}
     </button>

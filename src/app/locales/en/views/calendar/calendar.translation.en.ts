@@ -137,6 +137,7 @@ export type CalendarTranslation = {
     error: string;
     retry: string;
     emptyWeek: string;
+    emptyDay: string;
     emptyTerm: string;
   };
   aria: {
@@ -183,6 +184,21 @@ export type CalendarTranslation = {
   navigation: {
     previous: { day: string; week: string; month: string; year: string };
     next: { day: string; week: string; month: string; year: string };
+  };
+  agenda: {
+    title: string;
+    today: string;
+    next: string;
+    now: string;
+    inMinutes: string;
+    inHours: string;
+    restOfToday: string;
+    onDay: string;
+    tomorrowFirst: string;
+    firstOn: string;
+    noUpcoming: string;
+    clashWith: string;
+    skipping: string;
   };
 };
 
@@ -325,6 +341,7 @@ export const calendarTranslation: CalendarTranslation = {
     error: 'The calendar could not be loaded.',
     retry: 'Try again',
     emptyWeek: 'No teaching this week',
+    emptyDay: 'No teaching this day',
     emptyTerm: 'No enrolments with teaching this term.',
   },
   aria: {
@@ -371,5 +388,20 @@ export const calendarTranslation: CalendarTranslation = {
   navigation: {
     previous: { day: 'Previous day', week: 'Previous week', month: 'Previous month', year: 'Previous academic year' },
     next: { day: 'Next day', week: 'Next week', month: 'Next month', year: 'Next academic year' },
+  },
+  agenda: {
+    title: 'Agenda',
+    today: 'Today',
+    next: 'Next',
+    now: 'Now · until {{time}}',
+    inMinutes: 'in {{minutes}} min',
+    inHours: 'in {{hours}} h {{minutes}} min',
+    restOfToday: 'Rest of today',
+    onDay: 'On {{date}}',
+    tomorrowFirst: "Tomorrow's first class",
+    firstOn: 'First class on {{date}}',
+    noUpcoming: 'No upcoming classes',
+    clashWith: 'Clashes with {{names}}',
+    skipping: 'Skipping',
   },
 };

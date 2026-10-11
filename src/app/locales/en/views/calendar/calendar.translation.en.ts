@@ -76,6 +76,9 @@ export type CalendarTranslation = {
     clash: string;
     moreSessions: string;
   };
+  plan: {
+    saveFailed: string;
+  };
 };
 
 export const calendarTranslation: CalendarTranslation = {
@@ -155,5 +158,8 @@ export const calendarTranslation: CalendarTranslation = {
     session: '{{kind}}, {{course}}, {{date}} {{start}} to {{end}}, {{room}}',
     clash: 'clashes with {{names}}',
     moreSessions: '{{count}} more at this time: {{names}}',
+  },
+  plan: {
+    saveFailed: "Couldn't save that change. It only lasts until you leave this page.",
   },
 };

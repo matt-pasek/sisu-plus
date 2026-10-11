@@ -1,17 +1,23 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { keepPreviousData } from '@tanstack/react-query';
 import { getUserDetails } from '@/app/api/dataPoints/getUserDetails';
 import { fetchCourseUnit } from '@/app/api/endpoints/courseUnit';
 import { fetchLocations } from '@/app/api/endpoints/locations';
 import { fetchStudyEventsInCalendar } from '@/app/api/endpoints/studyEventsInCalendar';
 import { useSisuQuery } from '@/app/hooks/useSisuQuery';
-import { findClashes, groupClashesBySession, termRangeFor } from '@/app/schedule';
+import { applyAttendance, findClashes, groupClashesBySession, prunePlan, termRangeFor, uniqueBy } from '@/app/schedule';
 import { applyCourseUnitNames } from './applyCourseUnitNames';
+import { samePlan } from './attendancePlan';
+import { candidateCourseKeys } from './candidateCourseKeys';
+import { groupIndex, toGroupRefs } from './groupRefs';
 import { pickCalendarLabel } from './labels';
 import { mapCalendarRows } from './mapCalendarRows';
 import { mapCourseUnits } from './mapCourseUnits';
 import { mapLocations } from './mapLocations';
-import type { CalendarData, CalendarRowsResult, CourseUnitInfo, RoomInfo } from './types';
+import { pruneBase, visibleGroupIdsOf } from './pruneContext';
+import type { CalendarData, CalendarDataOptions, CalendarRowsResult, CourseUnitInfo, RoomInfo } from './types';
+import { useAttendancePlans } from './useAttendancePlans';
+import { useGroupCandidates } from './useGroupCandidates';
 
 const FIVE_MINUTES = 5 * 60 * 1000;
 const ONE_DAY = 24 * 60 * 60 * 1000;
@@ -19,7 +25,7 @@ const EMPTY_ROWS: CalendarRowsResult = { sessions: [], courses: [] };
 const EMPTY_ROOMS: Record<string, RoomInfo> = {};
 const EMPTY_COURSE_UNITS: Record<string, CourseUnitInfo> = {};
 
-export const getCalendarData = (anchorKey: string): CalendarData => {
+export const getCalendarData = (anchorKey: string, options: CalendarDataOptions): CalendarData => {
   const { startKey, endKey } = termRangeFor(anchorKey);
   const range = useMemo(() => ({ startKey, endKey }), [startKey, endKey]);
   const { userDetails, loadingDetails } = getUserDetails();
@@ -35,36 +41,67 @@ export const getCalendarData = (anchorKey: string): CalendarData => {
       ),
     { enabled: personId != null, staleTime: FIVE_MINUTES },
   );
-  const { sessions, courses } = rowsQuery.data ?? EMPTY_ROWS;
-
-  const locationIds = useMemo(
-    () => [...new Set(sessions.flatMap((session) => session.locationIds))].sort(),
-    [sessions],
-  );
-  const roomsQuery = useSisuQuery(
-    ['calendar-rooms', locationIds],
-    async () => mapLocations(await fetchLocations(locationIds), pickCalendarLabel),
-    { enabled: locationIds.length > 0, staleTime: ONE_DAY, placeholderData: keepPreviousData },
-  );
+  const rows = rowsQuery.data ?? EMPTY_ROWS;
 
   const courseUnitIds = useMemo(
-    () => [...new Set(courses.flatMap((course) => (course.courseUnitId ? [course.courseUnitId] : [])))].sort(),
-    [courses],
+    () => [...new Set(rows.courses.flatMap((course) => (course.courseUnitId ? [course.courseUnitId] : [])))].sort(),
+    [rows.courses],
   );
   const courseUnitsQuery = useSisuQuery(
     ['calendar-course-units', courseUnitIds],
     async () => mapCourseUnits(await Promise.all(courseUnitIds.map(fetchCourseUnit)), pickCalendarLabel),
     { enabled: courseUnitIds.length > 0, staleTime: ONE_DAY, placeholderData: keepPreviousData },
   );
-  const rooms = roomsQuery.data ?? EMPTY_ROOMS;
   const courseUnits = courseUnitsQuery.data ?? EMPTY_COURSE_UNITS;
-  const named = useMemo(
-    () => applyCourseUnitNames(rowsQuery.data ?? EMPTY_ROWS, courseUnits),
-    [rowsQuery.data, courseUnits],
+  const named = useMemo(() => applyCourseUnitNames(rows, courseUnits), [rows, courseUnits]);
+
+  const { plans, isLoaded: plansLoaded, updatePlan } = useAttendancePlans(options.onPlanWriteError);
+  const groups = useMemo(() => groupIndex(toGroupRefs(named.courses)), [named.courses]);
+  const firstPass = useMemo(() => applyAttendance(named.sessions, groups, plans), [named.sessions, groups, plans]);
+  const firstClashes = useMemo(() => findClashes(firstPass.attended), [firstPass.attended]);
+  const courseKeys = useMemo(
+    () => candidateCourseKeys(named.courses, plans, firstPass.attended, firstClashes, options.candidateCourseKeys),
+    [named.courses, plans, firstPass.attended, firstClashes, options.candidateCourseKeys],
+  );
+  const candidates = useGroupCandidates(named.courses, courseKeys, range);
+
+  // Candidate groups are not switched on, so their rooms are not among the visible sessions' rooms.
+  const locationIds = useMemo(
+    () => [...new Set([...rows.sessions, ...candidates.sessions].flatMap((session) => session.locationIds))].sort(),
+    [rows.sessions, candidates.sessions],
+  );
+  const roomsQuery = useSisuQuery(
+    ['calendar-rooms', locationIds],
+    async () => mapLocations(await fetchLocations(locationIds), pickCalendarLabel),
+    { enabled: locationIds.length > 0, staleTime: ONE_DAY, placeholderData: keepPreviousData },
+  );
+  const rooms = roomsQuery.data ?? EMPTY_ROOMS;
+
+  const attendance = useMemo(
+    () => applyAttendance(named.sessions, groups, plans, candidates.sessions),
+    [named.sessions, groups, plans, candidates.sessions],
+  );
+  const clashes = useMemo(() => findClashes(attendance.attended), [attendance.attended]);
+  const clashesBySession = useMemo(() => groupClashesBySession(clashes), [clashes]);
+  const pool = useMemo(
+    () =>
+      uniqueBy([...attendance.alternatives, ...candidates.sessions], (session) => `${session.id}|${session.groupId}`),
+    [attendance.alternatives, candidates.sessions],
   );
 
-  const clashes = useMemo(() => findClashes(sessions), [sessions]);
-  const clashesBySession = useMemo(() => groupClashesBySession(clashes), [clashes]);
+  const canPrune =
+    plansLoaded && rowsQuery.isSuccess && !rowsQuery.isFetching && !candidates.isFetching && !candidates.failed;
+  useEffect(() => {
+    if (!canPrune) return;
+    const base = pruneBase(range, named.sessions, candidates.sessions, clashes);
+    named.courses
+      .filter((course) => course.isInCalendar && plans[course.realisationId])
+      .forEach((course) => {
+        const plan = plans[course.realisationId];
+        const next = prunePlan(plan, { ...base, visibleGroupIds: visibleGroupIdsOf(course) });
+        if (!samePlan(plan, next)) updatePlan(course.realisationId, () => next);
+      });
+  }, [canPrune, range, named, candidates.sessions, clashes, plans, updatePlan]);
 
   return {
     range,
@@ -74,6 +111,19 @@ export const getCalendarData = (anchorKey: string): CalendarData => {
     clashesBySession,
     rooms,
     courseUnits,
+    attended: attendance.attended,
+    alternatives: attendance.alternatives,
+    skipped: attendance.skipped,
+    statusById: attendance.statusById,
+    swappedIn: attendance.swappedIn,
+    unavailableSwaps: attendance.unavailableSwaps,
+    candidates: candidates.sessions,
+    candidatesLoading: candidates.isFetching,
+    candidatesFailed: candidates.failed,
+    pool,
+    groups,
+    plans,
+    updatePlan,
     isLoading: loadingDetails || rowsQuery.isLoading,
     isFetching: rowsQuery.isFetching,
     error: rowsQuery.error ?? null,

@@ -1,5 +1,6 @@
 export type { CalendarCourse } from './CalendarCourse.type';
 export type { CalendarData } from './CalendarData.type';
+export type { CalendarDataOptions } from './CalendarDataOptions.type';
 export type { CalendarGroup } from './CalendarGroup.type';
 export type { CalendarGroupSet } from './CalendarGroupSet.type';
 export type { CalendarRowsResult } from './CalendarRowsResult.type';

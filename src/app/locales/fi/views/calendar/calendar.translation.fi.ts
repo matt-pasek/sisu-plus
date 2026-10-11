@@ -78,4 +78,7 @@ export const calendarTranslation: CalendarTranslation = {
     clash: 'päällekkäin: {{names}}',
     moreSessions: '{{count}} lisää samaan aikaan: {{names}}',
   },
+  plan: {
+    saveFailed: 'Muutosta ei voitu tallentaa. Se säilyy vain, kunnes poistut sivulta.',
+  },
 };

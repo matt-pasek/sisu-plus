@@ -2,6 +2,7 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { getCalendarData } from '@/app/api/dataPoints/calendar/getCalendarData';
 import { getStudyPeriodMap } from '@/app/api/dataPoints/getStudyPeriodMap';
 import { PageHeader } from '@/app/components/ui/PageHeader.comp';
+import { notify } from '@/app/components/ui/notify';
 import { Panel } from '@/app/components/ui/Panel.comp';
 import { useChromeStorage } from '@/app/hooks/useChromeStorage';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
@@ -28,6 +29,7 @@ import type { PopoverTarget } from './types';
 import { findPeriodName, formatWeekRange, seriesOf, sessionsInRange, weekDateKeys } from './util';
 
 const browserTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+const NO_COURSE_KEYS: string[] = [];
 
 const CalendarView: React.FC = () => {
   const { t, i18n } = useTranslationWithPrefix('views.calendar');
@@ -39,7 +41,8 @@ const CalendarView: React.FC = () => {
   const [popover, setPopover] = useState<PopoverTarget | null>(null);
   const [inspectorSeriesKey, setInspectorSeriesKey] = useState<string | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
-  const data = getCalendarData(anchorKey);
+  const onPlanWriteError = useCallback(() => notify.error(t('plan.saveFailed')), [t]);
+  const data = getCalendarData(anchorKey, { candidateCourseKeys: NO_COURSE_KEYS, onPlanWriteError });
   const { studyPeriodMap } = getStudyPeriodMap();
 
   const weekKeys = useMemo(() => weekDateKeys(anchorKey), [anchorKey]);
@@ -73,8 +76,8 @@ const CalendarView: React.FC = () => {
     [popoverSeriesKey, data.sessions],
   );
   const popoverSummary = useMemo(
-    () => (popoverSeriesKey ? summarizeSeriesClashes(popoverSeriesKey, data.sessions, data.clashesBySession) : null),
-    [popoverSeriesKey, data.sessions, data.clashesBySession],
+    () => (popoverSeriesKey ? summarizeSeriesClashes(popoverSeriesKey, data.attended, data.clashesBySession) : null),
+    [popoverSeriesKey, data.attended, data.clashesBySession],
   );
   const inspectorSeries = useMemo(
     () => (inspectorSeriesKey ? seriesOf(inspectorSeriesKey, data.sessions) : []),

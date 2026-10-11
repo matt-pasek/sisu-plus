@@ -208,8 +208,6 @@ export type CalendarTranslation = {
     clash: string;
     periodStarts: string;
     noTeaching: string;
-    dayAria: string;
-    dayAriaClash: string;
     openWeek: string;
   };
   holidays: {
@@ -461,8 +459,6 @@ export const calendarTranslation: CalendarTranslation = {
     clash: '{{first}} × {{second}} {{time}}',
     periodStarts: '{{period}} starts',
     noTeaching: 'No teaching',
-    dayAria: '{{date}}: {{hours}} h of teaching',
-    dayAriaClash: '{{date}}: {{hours}} h of teaching, has a clash',
     openWeek: 'Open week {{week}}',
   },
   holidays: {
@@ -490,14 +486,14 @@ export const calendarTranslation: CalendarTranslation = {
     holiday: 'Public holiday',
     noTeaching: 'No teaching',
     exams: 'Exams',
-    noExams: 'No exams this year',
+    noExams: 'No upcoming exams',
     heaviest: 'Heaviest weeks',
     weekRange: 'Wk {{week}}',
     hours: '{{hours}} h',
     nextTerm: 'Next term',
     autumn: 'autumn',
     spring: 'spring',
-    emptyTerm: 'No enrolments for {{term}} yet.',
+    emptyTerm: 'No classes in your calendar for {{term}} yet.',
     planned_one: '{{count}} course is planned there in your Timeline.',
     planned_other: '{{count}} courses are planned there in your Timeline.',
     cellAria: '{{date}}: {{hours}} h',

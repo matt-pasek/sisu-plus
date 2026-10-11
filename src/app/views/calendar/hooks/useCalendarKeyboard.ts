@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import type { CalendarView } from '../types';
+import { viewForKey } from '../util';
 
 interface Handlers {
   onPrevious: () => void;
@@ -8,8 +9,6 @@ interface Handlers {
   onEscape: () => void;
   onView: (view: CalendarView) => void;
 }
-
-const VIEW_KEYS: Record<string, CalendarView> = { d: 'day', w: 'week', m: 'month', y: 'year' };
 
 const isTyping = (target: EventTarget | null): boolean =>
   target instanceof HTMLElement &&
@@ -24,11 +23,11 @@ export const useCalendarKeyboard = ({ onPrevious, onNext, onToday, onEscape, onV
       }
       // The app lives in a shadow root, so event.target is retargeted to the host; the path holds the real element.
       if (isTyping(event.composedPath()[0] ?? event.target) || event.metaKey || event.ctrlKey || event.altKey) return;
-      const key = event.key.toLowerCase();
+      const view = viewForKey(event.key, event.repeat);
       if (event.key === 'ArrowLeft') onPrevious();
       else if (event.key === 'ArrowRight') onNext();
-      else if (key === 't') onToday();
-      else if (VIEW_KEYS[key]) onView(VIEW_KEYS[key]);
+      else if (event.key.toLowerCase() === 't') onToday();
+      else if (view) onView(view);
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);

@@ -3,7 +3,7 @@ import type { RoomInfo } from '@/app/api/dataPoints/calendar/types';
 import { Panel } from '@/app/components/ui/Panel.comp';
 import { PanelEyebrow } from '@/app/components/ui/PanelEyebrow.comp';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
-import { addDaysToDateKey, type Clash, type Session } from '@/app/schedule';
+import { addDaysToDateKey, type Clash, type DateRange, type Session } from '@/app/schedule';
 import { agendaFor, formatSessionDate, joinNames, sessionRoom } from '../util';
 import { AgendaRow } from './AgendaRow.comp';
 import { NextClassCard } from './NextClassCard.comp';
@@ -17,6 +17,7 @@ interface Props {
   sessionsById: Map<string, Session>;
   clashesBySession: Map<string, Clash[]>;
   rooms: Record<string, RoomInfo>;
+  range: DateRange;
   locale: string;
 }
 
@@ -29,11 +30,15 @@ export const DayAgenda: React.FC<Props> = ({
   sessionsById,
   clashesBySession,
   rooms,
+  range,
   locale,
 }) => {
   const { t } = useTranslationWithPrefix('views.calendar');
   const roomLabels = { noRoom: t('event.noRoom'), unavailable: t('event.roomUnavailable') };
-  const agenda = useMemo(() => agendaFor(attended, skipped, dateKey, now), [attended, skipped, dateKey, now]);
+  const agenda = useMemo(
+    () => agendaFor(attended, skipped, dateKey, now, range),
+    [attended, skipped, dateKey, now, range],
+  );
   const skippedIds = useMemo(() => new Set(skipped.map((session) => session.id)), [skipped]);
   const isToday = dateKey === todayKey;
   const clashNamesOf = (session: Session): string | null => {
@@ -75,7 +80,7 @@ export const DayAgenda: React.FC<Props> = ({
             locale={locale}
           />
         ) : (
-          <p className="text-[12.5px] text-lightGrey">{t('agenda.noUpcoming')}</p>
+          agenda.nextKnown && <p className="text-[12.5px] text-lightGrey">{t('agenda.noUpcoming')}</p>
         )}
         <section>
           <PanelEyebrow>

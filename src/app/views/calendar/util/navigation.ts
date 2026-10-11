@@ -13,8 +13,17 @@ import { formatAcademicYear, formatDayTitle, formatMonthTitle, formatWeekRange }
 
 export const CALENDAR_VIEWS: CalendarView[] = ['day', 'week', 'month', 'year'];
 
+const VIEW_KEYS: Record<string, CalendarView> = { d: 'day', w: 'week', m: 'month', y: 'year' };
+
 export const parseCalendarView = (value: unknown): CalendarView =>
   CALENDAR_VIEWS.find((view) => view === value) ?? 'week';
+
+// The view lives in storage.sync, whose write quota the attendance plans share, so held keys must not write.
+export const viewForKey = (key: string, repeat: boolean): CalendarView | null =>
+  repeat ? null : (VIEW_KEYS[key.toLowerCase()] ?? null);
+
+export const viewChange = (current: CalendarView, next: CalendarView): CalendarView | null =>
+  next === current ? null : next;
 
 export const stepAnchor = (view: CalendarView, anchorKey: string, delta: number): string => {
   if (view === 'day') return addDaysToDateKey(anchorKey, delta);

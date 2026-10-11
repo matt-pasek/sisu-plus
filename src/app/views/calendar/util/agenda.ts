@@ -1,4 +1,4 @@
-import type { Session } from '@/app/schedule';
+import { helsinkiDateKey, type DateRange, type Session } from '@/app/schedule';
 import type { AgendaModel, Countdown } from '../types';
 
 const MINUTE_MS = 60_000;
@@ -6,10 +6,20 @@ const DAY_MINUTES = 24 * 60;
 
 const byStart = (a: Session, b: Session): number => a.start.getTime() - b.start.getTime();
 
-export const agendaFor = (attended: Session[], skipped: Session[], viewedKey: string, now: Date): AgendaModel => {
+// Only the loaded term's sessions are known, so the next class is only knowable when today falls inside it.
+export const agendaFor = (
+  attended: Session[],
+  skipped: Session[],
+  viewedKey: string,
+  now: Date,
+  range: DateRange,
+): AgendaModel => {
   const live = attended.filter((session) => !session.cancelled).sort(byStart);
+  const todayKey = helsinkiDateKey(now);
+  const nextKnown = todayKey >= range.startKey && todayKey < range.endKey;
   return {
-    next: live.find((session) => session.end > now) ?? null,
+    next: nextKnown ? (live.find((session) => session.end > now) ?? null) : null,
+    nextKnown,
     day: [...attended, ...skipped].filter((session) => session.dateKey === viewedKey).sort(byStart),
     following: live.find((session) => session.dateKey > viewedKey) ?? null,
   };

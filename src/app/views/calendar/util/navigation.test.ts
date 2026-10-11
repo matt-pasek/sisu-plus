@@ -4,7 +4,15 @@ import { describe, expect, test } from 'bun:test';
 
 import { buildSession } from '@/app/schedule/__fixtures__/buildSession';
 import { findClashes } from '@/app/schedule';
-import { clashesInRange, parseCalendarView, stepAnchor, viewTitle, visibleRange } from './navigation';
+import {
+  clashesInRange,
+  parseCalendarView,
+  stepAnchor,
+  viewChange,
+  viewForKey,
+  viewTitle,
+  visibleRange,
+} from './navigation';
 
 describe('parseCalendarView', () => {
   test('accepts known views and falls back to week', () => {
@@ -49,5 +57,19 @@ describe('viewTitle', () => {
     expect(viewTitle('month', '2026-10-27', 'en')).toBe('October 2026');
     expect(viewTitle('year', '2026-10-27', 'en')).toBe('2026–27');
     expect(viewTitle('day', '2026-10-27', 'en')).toBe('Tuesday 27 October');
+  });
+});
+
+describe('view switching', () => {
+  test('maps D, W, M and Y to views and ignores held keys', () => {
+    expect(viewForKey('m', false)).toBe('month');
+    expect(viewForKey('Y', false)).toBe('year');
+    expect(viewForKey('w', true)).toBeNull();
+    expect(viewForKey('x', false)).toBeNull();
+  });
+
+  test('switching to the view already shown is no change', () => {
+    expect(viewChange('week', 'week')).toBeNull();
+    expect(viewChange('week', 'day')).toBe('day');
   });
 });

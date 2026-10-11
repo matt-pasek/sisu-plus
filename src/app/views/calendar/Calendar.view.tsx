@@ -42,6 +42,7 @@ import {
   previewModel,
   promptId,
   seriesOf,
+  viewChange,
   viewTitle,
   visibleRange,
   weekDateKeys,
@@ -66,10 +67,12 @@ const CalendarView: React.FC = () => {
   );
   const setView = useCallback(
     (next: CalendarViewMode) => {
+      const change = viewChange(view, next);
+      if (!change) return;
       setPopover(null);
-      setPrefs({ calendarView: next });
+      setPrefs({ calendarView: change });
     },
-    [setPrefs],
+    [view, setPrefs],
   );
   const openWeek = useCallback(
     (dateKey: string) => {
@@ -362,6 +365,7 @@ const CalendarView: React.FC = () => {
             sessionsById={sessionsById}
             clashesBySession={data.clashesBySession}
             rooms={data.rooms}
+            range={data.range}
             locale={locale}
           />
         )}

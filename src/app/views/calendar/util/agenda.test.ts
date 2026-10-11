@@ -7,6 +7,7 @@ import { buildSession } from '@/app/schedule/__fixtures__/buildSession';
 import { agendaFor, countdownTo } from './agenda';
 
 const at = (dateKey: string, hour: number): Date => helsinkiWallTimeToInstant(dateKey, hour * 60);
+const AUTUMN = { startKey: '2026-08-01', endKey: '2027-01-01' };
 
 describe('agendaFor', () => {
   const attended = [
@@ -18,18 +19,25 @@ describe('agendaFor', () => {
   const skipped = [buildSession('skip', '2026-10-27', 16, 18)];
 
   test('next is the first running or upcoming class, the day list holds attended and skipped', () => {
-    const agenda = agendaFor(attended, skipped, '2026-10-27', at('2026-10-27', 13));
+    const agenda = agendaFor(attended, skipped, '2026-10-27', at('2026-10-27', 13), AUTUMN);
     expect(agenda.next?.id).toBe('noon');
     expect(agenda.day.map((session) => session.id)).toEqual(['morning', 'noon', 'gone', 'skip']);
     expect(agenda.following?.id).toBe('thursday');
   });
 
   test('cancelled classes are never next', () => {
-    expect(agendaFor(attended, [], '2026-10-27', at('2026-10-27', 14.5)).next?.id).toBe('thursday');
+    expect(agendaFor(attended, [], '2026-10-27', at('2026-10-27', 14.5), AUTUMN).next?.id).toBe('thursday');
+  });
+
+  test('next is unknown when today is outside the loaded term', () => {
+    const agenda = agendaFor(attended, [], '2026-10-27', at('2027-02-01', 9), AUTUMN);
+    expect(agenda.next).toBeNull();
+    expect(agenda.nextKnown).toBe(false);
+    expect(agenda.day.map((session) => session.id)).toEqual(['morning', 'noon', 'gone']);
   });
 
   test('another viewed day keeps next about now', () => {
-    const agenda = agendaFor(attended, [], '2026-10-29', at('2026-10-27', 9));
+    const agenda = agendaFor(attended, [], '2026-10-29', at('2026-10-27', 9), AUTUMN);
     expect(agenda.next?.id).toBe('morning');
     expect(agenda.day.map((session) => session.id)).toEqual(['thursday']);
     expect(agenda.following).toBeNull();

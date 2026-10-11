@@ -2,6 +2,7 @@ export * from './dates';
 export * from './format';
 export * from './geometry';
 export * from './groups';
+export * from './month';
 export * from './navigation';
 export * from './popover';
 export * from './rooms';

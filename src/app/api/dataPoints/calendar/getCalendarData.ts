@@ -20,6 +20,7 @@ import type { CalendarData, CalendarDataOptions, CalendarRowsResult, CourseUnitI
 import { useAttendancePlans } from './useAttendancePlans';
 import { useGroupCandidates } from './useGroupCandidates';
 import { useLinkedTimetables } from './useLinkedTimetables';
+import { useTimelessCourses } from './useTimelessCourses';
 
 const FIVE_MINUTES = 5 * 60 * 1000;
 const ONE_DAY = 24 * 60 * 60 * 1000;
@@ -43,7 +44,11 @@ export const getCalendarData = (anchorKey: string, options: CalendarDataOptions)
       ),
     { enabled: personId != null, staleTime: FIVE_MINUTES },
   );
-  const rows = rowsQuery.data ?? EMPTY_ROWS;
+  const timeless = useTimelessCourses(rowsQuery.data?.courses, range);
+  const rows = useMemo(() => {
+    const base = rowsQuery.data ?? EMPTY_ROWS;
+    return timeless.length > 0 ? { sessions: base.sessions, courses: [...base.courses, ...timeless] } : base;
+  }, [rowsQuery.data, timeless]);
 
   const courseUnitIds = useMemo(
     () => [...new Set(rows.courses.flatMap((course) => (course.courseUnitId ? [course.courseUnitId] : [])))].sort(),
@@ -131,6 +136,7 @@ export const getCalendarData = (anchorKey: string, options: CalendarDataOptions)
     candidates: candidates.sessions,
     candidatesLoading: candidates.isFetching,
     candidatesFailed: candidates.failed,
+    retryCandidates: candidates.retry,
     pool,
     groups,
     plans,

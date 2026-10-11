@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import type { CalendarCourse, RoomInfo } from '@/app/api/dataPoints/calendar/types';
+import { Button } from '@/app/components/ui/Button.comp';
 import { Panel } from '@/app/components/ui/Panel.comp';
 import { PanelEyebrow } from '@/app/components/ui/PanelEyebrow.comp';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
@@ -22,6 +23,7 @@ interface Props {
   locale: string;
   actions: CalendarActions;
   onPreview: (groupId: string | null) => void;
+  onRetry: () => void;
   onClose: () => void;
 }
 
@@ -37,6 +39,7 @@ export const GroupPicker: React.FC<Props> = ({
   locale,
   actions,
   onPreview,
+  onRetry,
   onClose,
 }) => {
   const { t } = useTranslationWithPrefix('views.calendar');
@@ -87,7 +90,12 @@ export const GroupPicker: React.FC<Props> = ({
     >
       <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3.5" onMouseLeave={() => onPreview(null)}>
         {isFailed ? (
-          <p className="py-6 text-center text-sm text-lightGrey">{t('groups.failed')}</p>
+          <div className="flex flex-col items-center gap-2.5 py-6 text-sm text-lightGrey">
+            <p>{t('groups.failed')}</p>
+            <Button variant="onSurface" className="min-h-8 px-2.5" onClick={onRetry}>
+              {t('states.retry')}
+            </Button>
+          </div>
         ) : isLoading && byGroup.size === 0 ? (
           <p className="py-6 text-center text-sm text-lightGrey">{t('groups.loading')}</p>
         ) : (

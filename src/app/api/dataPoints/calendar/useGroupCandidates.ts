@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { keepPreviousData } from '@tanstack/react-query';
 import { fetchStudyEvents } from '@/app/api/endpoints/studyEvents';
 import { useSisuQuery } from '@/app/hooks/useSisuQuery';
@@ -38,5 +38,7 @@ export const useGroupCandidates = (
     () => wanted.flatMap((course) => mapCandidateSessions(course, events, range, pickCalendarLabel)),
     [wanted, events, range],
   );
-  return { sessions, isFetching: query.isFetching, failed: query.isError };
+  const { refetch } = query;
+  const retry = useCallback(() => void refetch(), [refetch]);
+  return { sessions, isFetching: query.isFetching, failed: query.isError, retry };
 };

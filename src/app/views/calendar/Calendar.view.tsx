@@ -286,6 +286,7 @@ const CalendarView: React.FC = () => {
             locale={locale}
             actions={actions}
             onPreview={setPreviewGroupId}
+            onRetry={data.retryCandidates}
             onClose={closeInspector}
           />
         )}

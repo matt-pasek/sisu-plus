@@ -4,4 +4,5 @@ export interface GroupCandidates {
   sessions: Session[];
   isFetching: boolean;
   failed: boolean;
+  retry: () => void;
 }

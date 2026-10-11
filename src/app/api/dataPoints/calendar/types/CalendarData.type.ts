@@ -22,6 +22,7 @@ export interface CalendarData {
   candidates: Session[];
   candidatesLoading: boolean;
   candidatesFailed: boolean;
+  retryCandidates: () => void;
   pool: Session[];
   groups: Map<string, GroupRef>;
   plans: Record<string, AttendancePlan>;

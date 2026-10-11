@@ -87,10 +87,12 @@ export const GroupCard: React.FC<Props> = ({
       {relations.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-1.5">
           {relations.map((relation) => (
-            <StatusChip key={relation.groupId} tone="info">
-              {relation.kind === 'identical'
-                ? t('groups.sameAs', { name: nameOf(relation.groupId) })
-                : t('groups.sharesWith', { count: relation.count, name: nameOf(relation.groupId) })}
+            <StatusChip key={relation.groupId} tone="info" className="max-w-full">
+              <span className="min-w-0 truncate">
+                {relation.kind === 'identical'
+                  ? t('groups.sameAs', { name: nameOf(relation.groupId) })
+                  : t('groups.sharesWith', { count: relation.count, name: nameOf(relation.groupId) })}
+              </span>
             </StatusChip>
           ))}
         </div>

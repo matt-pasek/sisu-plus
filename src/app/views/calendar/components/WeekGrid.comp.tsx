@@ -23,7 +23,7 @@ interface Props {
   activeSessionId: string | null;
   locale: string;
   onSelect: (session: Session, element: HTMLElement) => void;
-  onScroll: () => void;
+  onUserScroll: () => void;
 }
 
 export const WeekGrid: React.FC<Props> = ({
@@ -38,7 +38,7 @@ export const WeekGrid: React.FC<Props> = ({
   activeSessionId,
   locale,
   onSelect,
-  onScroll,
+  onUserScroll,
 }) => {
   const { t } = useTranslationWithPrefix('views.calendar');
   const hourRange = useMemo(() => visibleHourRange(sessions, DEFAULT_HOURS), [sessions]);
@@ -57,7 +57,8 @@ export const WeekGrid: React.FC<Props> = ({
     nowMinutes <= hourRange.endHour * 60;
 
   return (
-    <div className="relative min-h-0 flex-1 overflow-y-auto" onScroll={onScroll}>
+    // Only user input closes the popover; scroll events also fire for scrollIntoView from the clash chip.
+    <div className="relative min-h-0 flex-1 overflow-y-auto" onWheel={onUserScroll} onTouchMove={onUserScroll}>
       <div
         className="sticky top-0 z-20 grid border-b border-border2 bg-container"
         style={{ gridTemplateColumns: template }}
@@ -72,7 +73,10 @@ export const WeekGrid: React.FC<Props> = ({
           </div>
         )}
       </div>
-      <div className="relative grid" style={{ gridTemplateColumns: template, height: hours.length * HOUR_HEIGHT }}>
+      <div
+        className="relative grid bg-background"
+        style={{ gridTemplateColumns: template, height: hours.length * HOUR_HEIGHT }}
+      >
         <HourGutter
           hours={hours}
           hourHeight={HOUR_HEIGHT}

@@ -12,3 +12,4 @@ export * from './collections';
 export * from './attendance';
 export * from './prune';
 export * from './swaps';
+export * from './groupStats';

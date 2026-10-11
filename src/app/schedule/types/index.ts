@@ -8,6 +8,7 @@ export type { DateRange } from './DateRange.type';
 export type { DayLayout } from './DayLayout.type';
 export type { GroupEvents } from './GroupEvents.type';
 export type { GroupRef } from './GroupRef.type';
+export type { GroupStats } from './GroupStats.type';
 export type { HourRange } from './HourRange.type';
 export type { Occurrence } from './Occurrence.type';
 export type { OverflowSlot } from './OverflowSlot.type';

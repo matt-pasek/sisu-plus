@@ -6,6 +6,7 @@ import type { Session } from '@/app/schedule';
 import type { CalendarView, PreviewModel, WeekModel } from '../types';
 import { monthStartKey } from '../util';
 import { MonthView } from './MonthView.comp';
+import { YearView } from './YearView.comp';
 import { WeekGrid } from './WeekGrid.comp';
 
 interface Props {
@@ -48,6 +49,9 @@ export const CalendarBody: React.FC<Props> = ({
   onUserScroll,
 }) => {
   const { t } = useTranslationWithPrefix('views.calendar');
+  if (view === 'year') {
+    return <YearView data={data} todayKey={todayKey} periods={periods} locale={locale} onOpenWeek={onOpenWeek} />;
+  }
   if (view === 'month') {
     return (
       <MonthView

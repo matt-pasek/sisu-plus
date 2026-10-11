@@ -229,6 +229,26 @@ export type CalendarTranslation = {
     christmasDay: string;
     stStephens: string;
   };
+  year: {
+    less: string;
+    more: string;
+    exam: string;
+    clash: string;
+    holiday: string;
+    noTeaching: string;
+    exams: string;
+    noExams: string;
+    heaviest: string;
+    weekRange: string;
+    hours: string;
+    nextTerm: string;
+    autumn: string;
+    spring: string;
+    emptyTerm: string;
+    planned_one: string;
+    planned_other: string;
+    cellAria: string;
+  };
 };
 
 export const calendarTranslation: CalendarTranslation = {
@@ -461,5 +481,25 @@ export const calendarTranslation: CalendarTranslation = {
     christmasEve: 'Christmas Eve',
     christmasDay: 'Christmas Day',
     stStephens: "St Stephen's Day",
+  },
+  year: {
+    less: 'Less',
+    more: 'More',
+    exam: 'Exam',
+    clash: 'Clash',
+    holiday: 'Public holiday',
+    noTeaching: 'No teaching',
+    exams: 'Exams',
+    noExams: 'No exams this year',
+    heaviest: 'Heaviest weeks',
+    weekRange: 'Wk {{week}}',
+    hours: '{{hours}} h',
+    nextTerm: 'Next term',
+    autumn: 'autumn',
+    spring: 'spring',
+    emptyTerm: 'No enrolments for {{term}} yet.',
+    planned_one: '{{count}} course is planned there in your Timeline.',
+    planned_other: '{{count}} courses are planned there in your Timeline.',
+    cellAria: '{{date}}: {{hours}} h',
   },
 };

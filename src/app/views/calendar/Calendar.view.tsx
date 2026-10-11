@@ -35,6 +35,7 @@ import { usePopoverModel } from './hooks/usePopoverModel';
 import { useWeekModel } from './hooks/useWeekModel';
 import type { CalendarView as CalendarViewMode, InspectorState, PopoverTarget, TimetableControls } from './types';
 import {
+  CALENDAR_VIEWS,
   clashesInRange,
   findPeriodName,
   parseCalendarView,
@@ -48,7 +49,6 @@ import {
 
 const browserTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 const NO_COURSE_KEYS: string[] = [];
-const ENABLED_VIEWS: CalendarViewMode[] = ['day', 'week', 'month'];
 
 const CalendarView: React.FC = () => {
   const { t, i18n } = useTranslationWithPrefix('views.calendar');
@@ -58,8 +58,7 @@ const CalendarView: React.FC = () => {
   const today = todayKey(now);
   const [popover, setPopover] = useState<PopoverTarget | null>(null);
   const closePopover = useCallback(() => setPopover(null), []);
-  const storedView = parseCalendarView(prefs.calendarView);
-  const view = ENABLED_VIEWS.includes(storedView) ? storedView : 'week';
+  const view = parseCalendarView(prefs.calendarView);
   const { anchorKey, setAnchorKey, goToPrevious, goToNext, goToToday } = useCalendarNavigation(
     view,
     today,
@@ -67,7 +66,6 @@ const CalendarView: React.FC = () => {
   );
   const setView = useCallback(
     (next: CalendarViewMode) => {
-      if (!ENABLED_VIEWS.includes(next)) return;
       setPopover(null);
       setPrefs({ calendarView: next });
     },
@@ -275,7 +273,7 @@ const CalendarView: React.FC = () => {
         >
           <CalendarToolbar
             view={view}
-            enabledViews={ENABLED_VIEWS}
+            enabledViews={CALENDAR_VIEWS}
             title={viewTitle(view, anchorKey, locale)}
             eyebrow={eyebrow}
             clashCount={rangeClashes.length}

@@ -16,6 +16,7 @@ export type { LinkedImport } from './LinkedImport.type';
 export type { LinkedSeries } from './LinkedSeries.type';
 export type { Occurrence } from './Occurrence.type';
 export type { OverflowSlot } from './OverflowSlot.type';
+export type { PeriodSpan } from './PeriodSpan.type';
 export type { Placement } from './Placement.type';
 export type { PruneContext } from './PruneContext.type';
 export type { RecurrenceRule } from './RecurrenceRule.type';

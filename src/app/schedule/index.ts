@@ -16,3 +16,4 @@ export * from './groupStats';
 export * from './linked';
 export * from './holidays';
 export * from './dayShape';
+export * from './teachingWeeks';

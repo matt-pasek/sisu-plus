@@ -1,8 +1,8 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { getCalendarData } from '@/app/api/dataPoints/calendar/getCalendarData';
 import { getStudyPeriodMap } from '@/app/api/dataPoints/getStudyPeriodMap';
-import { PageHeader } from '@/app/components/ui/PageHeader.comp';
 import { notify } from '@/app/components/ui/notify';
+import { PageHeader } from '@/app/components/ui/PageHeader.comp';
 import { Panel } from '@/app/components/ui/Panel.comp';
 import { useChromeStorage } from '@/app/hooks/useChromeStorage';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
@@ -25,8 +25,9 @@ import { SessionsInspector } from './components/SessionsInspector.comp';
 import { WeekGrid } from './components/WeekGrid.comp';
 import { useCalendarKeyboard } from './hooks/useCalendarKeyboard';
 import { useNow } from './hooks/useNow';
+import { useWeekModel } from './hooks/useWeekModel';
 import type { PopoverTarget } from './types';
-import { findPeriodName, formatWeekRange, seriesOf, sessionsInRange, weekDateKeys } from './util';
+import { findPeriodName, formatWeekRange, seriesOf, weekDateKeys } from './util';
 
 const browserTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 const NO_COURSE_KEYS: string[] = [];
@@ -47,21 +48,9 @@ const CalendarView: React.FC = () => {
 
   const weekKeys = useMemo(() => weekDateKeys(anchorKey), [anchorKey]);
   const weekNumber = isoWeekNumber(weekKeys[0]);
-  const visibleSessions = useMemo(
-    () => (prefs.calendarShowCancelled ? data.sessions : data.sessions.filter((session) => !session.cancelled)),
-    [data.sessions, prefs.calendarShowCancelled],
-  );
-  const weekSessions = useMemo(
-    () => sessionsInRange(visibleSessions, weekKeys[0], addDaysToDateKey(weekKeys[6], 1)),
-    [visibleSessions, weekKeys],
-  );
-  const weekSessionIds = useMemo(() => new Set(weekSessions.map((session) => session.id)), [weekSessions]);
-  const weekClashes = useMemo(
-    () => data.clashes.filter((clash) => clash.sessionIds.some((id) => weekSessionIds.has(id))),
-    [data.clashes, weekSessionIds],
-  );
-  const busyDateKeys = useMemo(() => new Set(data.sessions.map((session) => session.dateKey)), [data.sessions]);
-  const sessionsById = useMemo(() => new Map(data.sessions.map((session) => [session.id, session])), [data.sessions]);
+  const { weekSessions, weekAlternatives, weekClashes, weekSessionIds, badges, knownSessions, sessionsById } =
+    useWeekModel(data, weekKeys, prefs.calendarShowCancelled);
+  const busyDateKeys = useMemo(() => new Set(data.attended.map((session) => session.dateKey)), [data.attended]);
   const periodName = useMemo(
     () => findPeriodName(anchorKey, [...studyPeriodMap.values()]),
     [anchorKey, studyPeriodMap],
@@ -72,16 +61,16 @@ const CalendarView: React.FC = () => {
   );
   const popoverSeriesKey = popover ? seriesKeyOf(popover.session) : null;
   const popoverSeries = useMemo(
-    () => (popoverSeriesKey ? seriesOf(popoverSeriesKey, data.sessions) : []),
-    [popoverSeriesKey, data.sessions],
+    () => (popoverSeriesKey ? seriesOf(popoverSeriesKey, knownSessions) : []),
+    [popoverSeriesKey, knownSessions],
   );
   const popoverSummary = useMemo(
     () => (popoverSeriesKey ? summarizeSeriesClashes(popoverSeriesKey, data.attended, data.clashesBySession) : null),
     [popoverSeriesKey, data.attended, data.clashesBySession],
   );
   const inspectorSeries = useMemo(
-    () => (inspectorSeriesKey ? seriesOf(inspectorSeriesKey, data.sessions) : []),
-    [inspectorSeriesKey, data.sessions],
+    () => (inspectorSeriesKey ? seriesOf(inspectorSeriesKey, knownSessions) : []),
+    [inspectorSeriesKey, knownSessions],
   );
 
   const closePopover = useCallback(() => setPopover(null), []);
@@ -177,8 +166,10 @@ const CalendarView: React.FC = () => {
                 todayKey={today}
                 now={now}
                 sessions={weekSessions}
+                alternatives={weekAlternatives}
                 sessionsById={sessionsById}
                 clashesBySession={data.clashesBySession}
+                badges={badges}
                 rooms={data.rooms}
                 courseUnits={data.courseUnits}
                 activeSessionId={popover?.session.id ?? null}
@@ -193,6 +184,7 @@ const CalendarView: React.FC = () => {
           <SessionsInspector
             series={inspectorSeries}
             clashesBySession={data.clashesBySession}
+            badges={badges}
             rooms={data.rooms}
             now={now}
             locale={locale}

@@ -58,6 +58,9 @@ export type CalendarTranslation = {
       partialClash: string;
       roomChanged: string;
       cancelled: string;
+      swapped: string;
+      skipping: string;
+      swapUnavailable: string;
     };
   };
   footer: {
@@ -75,6 +78,7 @@ export type CalendarTranslation = {
     session: string;
     clash: string;
     moreSessions: string;
+    alternative: string;
   };
   plan: {
     saveFailed: string;
@@ -141,6 +145,9 @@ export const calendarTranslation: CalendarTranslation = {
       partialClash: '{{minutes}} min clash',
       roomChanged: 'Room changed',
       cancelled: 'Cancelled',
+      swapped: 'Swapped',
+      skipping: 'Skipping',
+      swapUnavailable: 'Swap unavailable',
     },
   },
   footer: {
@@ -158,6 +165,7 @@ export const calendarTranslation: CalendarTranslation = {
     session: '{{kind}}, {{course}}, {{date}} {{start}} to {{end}}, {{room}}',
     clash: 'clashes with {{names}}',
     moreSessions: '{{count}} more at this time: {{names}}',
+    alternative: 'Other group, not attending: {{course}}, {{group}}, {{date}} {{start}} to {{end}}',
   },
   plan: {
     saveFailed: "Couldn't save that change. It only lasts until you leave this page.",

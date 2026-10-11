@@ -3,7 +3,7 @@ import type { RoomInfo } from '@/app/api/dataPoints/calendar/types';
 import { StatusChip } from '@/app/components/ui/StatusChip.comp';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import type { Clash, Session } from '@/app/schedule';
-import type { RoomLabels } from '../types';
+import type { RoomLabels, SessionBadge } from '../types';
 import { describeRoom, describeRoomShort, formatClock, formatSessionDate, sessionChips } from '../util';
 import { SessionChipBadge } from './SessionChipBadge.comp';
 
@@ -11,6 +11,7 @@ interface Props {
   session: Session;
   previous: Session | undefined;
   clashes: Clash[] | undefined;
+  badge: SessionBadge | null;
   rooms: Record<string, RoomInfo>;
   roomLabels: RoomLabels;
   weekLabel: string | null;
@@ -23,6 +24,7 @@ export const SessionRow: React.FC<Props> = ({
   session,
   previous,
   clashes,
+  badge,
   rooms,
   roomLabels,
   weekLabel,
@@ -31,7 +33,7 @@ export const SessionRow: React.FC<Props> = ({
   locale,
 }) => {
   const { t } = useTranslationWithPrefix('views.calendar');
-  const chips = sessionChips(session, previous, clashes);
+  const chips = sessionChips(session, previous, clashes, badge);
   return (
     <div
       className={`-mx-2 grid grid-cols-[38px_68px_76px_minmax(0,1fr)] items-baseline gap-x-2 rounded-lg px-2 py-1.5 text-[12px] ${

@@ -1,5 +1,5 @@
 import { isoWeekNumber, seriesKeyOf, type Clash, type Session } from '@/app/schedule';
-import type { SessionChip } from '../types';
+import type { SessionBadge, SessionChip } from '../types';
 
 const byStart = (a: Session, b: Session): number => a.start.getTime() - b.start.getTime();
 
@@ -28,11 +28,30 @@ const clashChip = (clashes: Clash[] | undefined): SessionChip[] => {
     : [{ type: 'partialClash', minutes: Math.max(...clashes.map((clash) => clash.minutes)) }];
 };
 
+const BADGE_CHIPS: Record<SessionBadge, SessionChip> = {
+  swapped: { type: 'swapped' },
+  skipping: { type: 'skipping' },
+  swapUnavailable: { type: 'swapUnavailable' },
+};
+
+export const sessionBadges = (
+  skipped: Session[],
+  swappedIn: Set<string>,
+  unavailableSwaps: Set<string>,
+): Map<string, SessionBadge> =>
+  new Map<string, SessionBadge>([
+    ...[...swappedIn].map((id): [string, SessionBadge] => [id, 'swapped']),
+    ...[...unavailableSwaps].map((id): [string, SessionBadge] => [id, 'swapUnavailable']),
+    ...skipped.map((session): [string, SessionBadge] => [session.id, 'skipping']),
+  ]);
+
 export const sessionChips = (
   session: Session,
   previous: Session | undefined,
   clashes: Clash[] | undefined,
+  badge: SessionBadge | null = null,
 ): SessionChip[] => [
+  ...(badge ? [BADGE_CHIPS[badge]] : []),
   ...(session.cancelled ? [{ type: 'cancelled' } as const] : []),
   ...clashChip(clashes),
   ...(previous && previous.locationIds.join() !== session.locationIds.join() ? [{ type: 'roomChanged' } as const] : []),

@@ -3,6 +3,7 @@ import type { CourseUnitInfo, RoomInfo } from '@/app/api/dataPoints/calendar/typ
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { helsinkiMinutesOfDay, visibleHourRange, type Clash, type HourRange, type Session } from '@/app/schedule';
 import { useElementHeight } from '../hooks/useElementHeight';
+import type { SessionBadge } from '../types';
 import { fitHourHeight, formatClock, minutesToOffset, sessionsOnDay } from '../util';
 import { HourGutter } from './HourGutter.comp';
 import { WeekDayColumn } from './WeekDayColumn.comp';
@@ -18,8 +19,10 @@ interface Props {
   todayKey: string;
   now: Date;
   sessions: Session[];
+  alternatives: Session[];
   sessionsById: Map<string, Session>;
   clashesBySession: Map<string, Clash[]>;
+  badges: Map<string, SessionBadge>;
   rooms: Record<string, RoomInfo>;
   courseUnits: Record<string, CourseUnitInfo>;
   activeSessionId: string | null;
@@ -33,8 +36,10 @@ export const WeekGrid: React.FC<Props> = ({
   todayKey,
   now,
   sessions,
+  alternatives,
   sessionsById,
   clashesBySession,
+  badges,
   rooms,
   courseUnits,
   activeSessionId,
@@ -46,12 +51,20 @@ export const WeekGrid: React.FC<Props> = ({
   const scrollRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const viewportHeight = useElementHeight(scrollRef);
-  const hourRange = useMemo(() => visibleHourRange(sessions, DEFAULT_HOURS), [sessions]);
-  const days = useMemo(
-    () => weekKeys.map((dateKey) => ({ dateKey, sessions: sessionsOnDay(sessions, dateKey) })),
-    [weekKeys, sessions],
+  const hourRange = useMemo(
+    () => visibleHourRange([...sessions, ...alternatives], DEFAULT_HOURS),
+    [sessions, alternatives],
   );
-  const weekendEmpty = days.slice(WEEKDAYS).every((day) => day.sessions.length === 0);
+  const days = useMemo(
+    () =>
+      weekKeys.map((dateKey) => ({
+        dateKey,
+        sessions: sessionsOnDay(sessions, dateKey),
+        alternatives: sessionsOnDay(alternatives, dateKey),
+      })),
+    [weekKeys, sessions, alternatives],
+  );
+  const weekendEmpty = days.slice(WEEKDAYS).every((day) => day.sessions.length === 0 && day.alternatives.length === 0);
   const columns = weekendEmpty ? days.slice(0, WEEKDAYS) : days;
   const template = `52px repeat(${columns.length}, minmax(0, 1fr))${weekendEmpty ? ' 34px' : ''}`;
   const hours = Array.from({ length: hourRange.endHour - hourRange.startHour }, (_, i) => hourRange.startHour + i);
@@ -101,18 +114,20 @@ export const WeekGrid: React.FC<Props> = ({
             showNowLabel ? { top: minutesToOffset(nowMinutes, hourRange, hourHeight), text: formatClock(now) } : null
           }
         />
-        {columns.map(({ dateKey, sessions: daySessions }) => (
+        {columns.map(({ dateKey, sessions: daySessions, alternatives: dayAlternatives }) => (
           <WeekDayColumn
             key={dateKey}
             dateKey={dateKey}
             isToday={dateKey === todayKey}
             now={now}
             sessions={daySessions}
+            alternatives={dayAlternatives}
             sessionsById={sessionsById}
             hourRange={hourRange}
             hourHeight={hourHeight}
             inset={GRID_INSET}
             clashesBySession={clashesBySession}
+            badges={badges}
             rooms={rooms}
             courseUnits={courseUnits}
             activeSessionId={activeSessionId}
@@ -128,7 +143,7 @@ export const WeekGrid: React.FC<Props> = ({
           </div>
         )}
       </div>
-      {sessions.length === 0 && (
+      {sessions.length === 0 && alternatives.length === 0 && (
         <p className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-lightGrey">
           {t('states.emptyWeek')}
         </p>

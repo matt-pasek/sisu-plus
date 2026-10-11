@@ -6,6 +6,7 @@ import { StatusChip } from '@/app/components/ui/StatusChip.comp';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import type { Clash, Session } from '@/app/schedule';
 import { getModuleColorValueByIndex } from '@/app/theme/moduleColors';
+import type { SessionBadge } from '../types';
 import { groupByWeek } from '../util';
 import { CloseIcon, WarningIcon } from './icons';
 import { SessionRow } from './SessionRow.comp';
@@ -13,13 +14,22 @@ import { SessionRow } from './SessionRow.comp';
 interface Props {
   series: Session[];
   clashesBySession: Map<string, Clash[]>;
+  badges: Map<string, SessionBadge>;
   rooms: Record<string, RoomInfo>;
   now: Date;
   locale: string;
   onClose: () => void;
 }
 
-export const SessionsInspector: React.FC<Props> = ({ series, clashesBySession, rooms, now, locale, onClose }) => {
+export const SessionsInspector: React.FC<Props> = ({
+  series,
+  clashesBySession,
+  badges,
+  rooms,
+  now,
+  locale,
+  onClose,
+}) => {
   const { t } = useTranslationWithPrefix('views.calendar');
   const first = series[0];
   if (!first) return null;
@@ -74,6 +84,7 @@ export const SessionsInspector: React.FC<Props> = ({ series, clashesBySession, r
                 session={session}
                 previous={series[series.indexOf(session) - 1]}
                 clashes={clashesBySession.get(session.id)}
+                badge={badges.get(session.id) ?? null}
                 rooms={rooms}
                 roomLabels={roomLabels}
                 weekLabel={index === 0 ? t('weekShort', { week }) : null}

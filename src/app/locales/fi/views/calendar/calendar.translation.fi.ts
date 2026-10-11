@@ -60,6 +60,9 @@ export const calendarTranslation: CalendarTranslation = {
       partialClash: '{{minutes}} min päällekkäin',
       roomChanged: 'Tila vaihtui',
       cancelled: 'Peruttu',
+      swapped: 'Vaihdettu',
+      skipping: 'Ohitetaan',
+      swapUnavailable: 'Vaihto ei saatavilla',
     },
   },
   footer: {
@@ -77,6 +80,7 @@ export const calendarTranslation: CalendarTranslation = {
     session: '{{kind}}, {{course}}, {{date}} {{start}}–{{end}}, {{room}}',
     clash: 'päällekkäin: {{names}}',
     moreSessions: '{{count}} lisää samaan aikaan: {{names}}',
+    alternative: 'Toinen ryhmä, et osallistu: {{course}}, {{group}}, {{date}} {{start}}–{{end}}',
   },
   plan: {
     saveFailed: 'Muutosta ei voitu tallentaa. Se säilyy vain, kunnes poistut sivulta.',

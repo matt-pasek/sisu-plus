@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import type { CourseUnitInfo, RoomInfo } from '@/app/api/dataPoints/calendar/types';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { helsinkiMinutesOfDay, layoutDay, type Clash, type HourRange, type Session } from '@/app/schedule';
+import type { SessionBadge } from '../types';
 import {
   describeRoom,
   describeRoomShort,
@@ -11,6 +12,7 @@ import {
   minutesToOffset,
   sessionBox,
 } from '../util';
+import { AlternativeBlock } from './AlternativeBlock.comp';
 import { NowLine } from './NowLine.comp';
 import { OVERFLOW_STRIP_WIDTH, OverflowChip } from './OverflowChip.comp';
 import { SessionBlock } from './SessionBlock.comp';
@@ -20,11 +22,13 @@ interface Props {
   isToday: boolean;
   now: Date;
   sessions: Session[];
+  alternatives: Session[];
   sessionsById: Map<string, Session>;
   hourRange: HourRange;
   hourHeight: number;
   inset: number;
   clashesBySession: Map<string, Clash[]>;
+  badges: Map<string, SessionBadge>;
   rooms: Record<string, RoomInfo>;
   courseUnits: Record<string, CourseUnitInfo>;
   activeSessionId: string | null;
@@ -37,11 +41,13 @@ export const WeekDayColumn: React.FC<Props> = ({
   isToday,
   now,
   sessions,
+  alternatives,
   sessionsById,
   hourRange,
   hourHeight,
   inset,
   clashesBySession,
+  badges,
   rooms,
   courseUnits,
   activeSessionId,
@@ -50,6 +56,7 @@ export const WeekDayColumn: React.FC<Props> = ({
 }) => {
   const { t } = useTranslationWithPrefix('views.calendar');
   const layout = useMemo(() => layoutDay(sessions), [sessions]);
+  const alternativeLayout = useMemo(() => layoutDay(alternatives), [alternatives]);
   const roomLabels = { noRoom: t('event.noRoom'), unavailable: t('event.roomUnavailable') };
   const nowMinutes = helsinkiMinutesOfDay(now);
   const showNow = isToday && nowMinutes >= hourRange.startHour * 60 && nowMinutes <= hourRange.endHour * 60;
@@ -81,10 +88,34 @@ export const WeekDayColumn: React.FC<Props> = ({
         backgroundPosition: `0 ${inset}px`,
       }}
     >
+      {alternatives.map((session) => {
+        const placement = alternativeLayout.placements[session.id];
+        if (!placement) return null;
+        const box = sessionBox(session, hourRange, hourHeight);
+        return (
+          <AlternativeBlock
+            key={`alt-${session.id}`}
+            session={session}
+            placement={placement}
+            box={{ ...box, top: box.top + inset }}
+            variant="alternative"
+            isClashing={false}
+            ariaLabel={t('aria.alternative', {
+              course: session.courseName,
+              group: session.groupName ?? '',
+              date: formatSessionDate(dateKey, locale),
+              start: formatClock(session.start),
+              end: formatClock(session.end),
+            })}
+            onSelect={onSelect}
+          />
+        );
+      })}
       {sessions.map((session) => {
         const placement = layout.placements[session.id];
         if (!placement) return null;
         const clashes = clashesBySession.get(session.id) ?? [];
+        const badge = badges.get(session.id) ?? null;
         const room = describeRoom(session.locationIds, rooms, roomLabels);
         const box = sessionBox(session, hourRange, hourHeight);
         return (
@@ -102,6 +133,8 @@ export const WeekDayColumn: React.FC<Props> = ({
             kindLabel={t(`kinds.${session.kind}`)}
             roomName={describeRoomShort(session.locationIds, rooms, roomLabels)}
             ariaLabel={ariaLabelFor(session, room, clashes)}
+            badge={badge}
+            badgeLabel={badge ? t(`sessions.chips.${badge}`) : null}
             onSelect={onSelect}
           />
         );

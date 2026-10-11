@@ -4,7 +4,7 @@ import { describe, expect, test } from 'bun:test';
 
 import { buildSession } from '@/app/schedule/__fixtures__/buildSession';
 import { findClashes, groupClashesBySession, seriesKeyOf } from '@/app/schedule';
-import { groupByWeek, seriesOf, sessionChips, sessionsInRange } from './sessions';
+import { groupByWeek, seriesOf, sessionBadges, sessionChips, sessionsInRange } from './sessions';
 
 const series = [
   buildSession('a', '2026-10-27', 14, 16, { seriesId: 's', locationIds: ['r1'] }),
@@ -53,6 +53,25 @@ describe('sessionChips', () => {
     const partial = [buildSession('x', '2026-10-27', 14, 16), buildSession('y', '2026-10-27', 15, 17)];
     expect(sessionChips(partial[0], undefined, groupClashesBySession(findClashes(partial)).get('x'))).toEqual([
       { type: 'partialClash', minutes: 60 },
+    ]);
+  });
+});
+
+describe('badges', () => {
+  const skipped = buildSession('s', '2026-10-05', 14, 16);
+
+  test('marks swapped, unavailable and skipped sessions, skipping first', () => {
+    const badges = sessionBadges([skipped], new Set(['in', 's']), new Set(['gone']));
+    expect(badges.get('in')).toBe('swapped');
+    expect(badges.get('gone')).toBe('swapUnavailable');
+    expect(badges.get('s')).toBe('skipping');
+  });
+
+  test('puts the badge chip before the other chips', () => {
+    const cancelled = { ...skipped, cancelled: true };
+    expect(sessionChips(cancelled, undefined, undefined, 'skipping').map((chip) => chip.type)).toEqual([
+      'skipping',
+      'cancelled',
     ]);
   });
 });

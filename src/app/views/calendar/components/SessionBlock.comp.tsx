@@ -1,10 +1,14 @@
 import React from 'react';
+import { StatusChip } from '@/app/components/ui/StatusChip.comp';
+import type { StatusTone } from '@/app/components/ui/types';
 import type { Placement, Session } from '@/app/schedule';
 import { getModuleColorValueByIndex } from '@/app/theme/moduleColors';
+import type { SessionBadge } from '../types';
 import { formatClock } from '../util';
 import { PinIcon, WarningIcon } from './icons';
 
 const META_HEIGHT = 64;
+const BADGE_TONE: Record<SessionBadge, StatusTone> = { swapped: 'info', skipping: 'neutral', swapUnavailable: 'warn' };
 
 interface Props {
   session: Session;
@@ -19,6 +23,8 @@ interface Props {
   kindLabel: string;
   roomName: string;
   ariaLabel: string;
+  badge: SessionBadge | null;
+  badgeLabel: string | null;
   onSelect: (session: Session, element: HTMLElement) => void;
 }
 
@@ -28,9 +34,9 @@ const shadowFor = (color: string, isActive: boolean, isClashing: boolean): strin
   return '0 0 0 1px rgba(255,255,255,0.055), 0 14px 34px -28px rgba(0,0,0,0.8)';
 };
 
-const opacityFor = (isDimmed: boolean, isPast: boolean, cancelled: boolean): string => {
+const opacityFor = (isDimmed: boolean, isPast: boolean, cancelled: boolean, skipped: boolean): string => {
   if (isDimmed) return 'opacity-35';
-  if (cancelled) return 'opacity-50';
+  if (cancelled || skipped) return 'opacity-50';
   return isPast ? 'opacity-75' : '';
 };
 
@@ -47,6 +53,8 @@ export const SessionBlock: React.FC<Props> = ({
   kindLabel,
   roomName,
   ariaLabel,
+  badge,
+  badgeLabel,
   onSelect,
 }) => {
   const color = getModuleColorValueByIndex(session.colorIndex);
@@ -58,7 +66,7 @@ export const SessionBlock: React.FC<Props> = ({
       data-session-id={session.id}
       aria-label={ariaLabel}
       onClick={(event) => onSelect(session, event.currentTarget)}
-      className={`absolute flex cursor-pointer flex-col justify-center overflow-hidden rounded-xl bg-container px-2.5 py-2 text-left transition-[opacity,box-shadow,transform] duration-150 ease-out hover:-translate-y-px focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lighterGreen active:scale-[0.96] ${opacityFor(isDimmed, isPast, session.cancelled)}`}
+      className={`absolute flex cursor-pointer flex-col justify-center overflow-hidden rounded-xl bg-container px-2.5 py-2 text-left transition-[opacity,box-shadow,transform] duration-150 ease-out hover:-translate-y-px focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lighterGreen active:scale-[0.96] ${opacityFor(isDimmed, isPast, session.cancelled, badge === 'skipping')}`}
       style={{
         top: box.top + 2,
         height: Math.max(box.height - 4, 18),
@@ -72,7 +80,12 @@ export const SessionBlock: React.FC<Props> = ({
         className="absolute top-2 bottom-2 left-2.5 w-1 rounded-full"
         style={{ backgroundColor: color }}
       />
-      <span className="flex min-w-0 gap-2.5 pl-3.5">
+      {badge && badgeLabel && (
+        <span className="absolute top-1.5 right-1.5">
+          <StatusChip tone={BADGE_TONE[badge]}>{badgeLabel}</StatusChip>
+        </span>
+      )}
+      <span className={`flex min-w-0 gap-2.5 pl-3.5 ${badge ? 'pr-14' : ''}`}>
         <span className="min-w-0 flex-1">
           <span
             className={`line-clamp-2 block text-[13px] leading-[1.3] font-semibold text-offwhite ${session.cancelled ? 'line-through' : ''}`}

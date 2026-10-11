@@ -14,13 +14,13 @@ import { pickCalendarLabel } from './labels';
 import { mapCalendarRows } from './mapCalendarRows';
 import { mapCourseUnits } from './mapCourseUnits';
 import { mapLocations } from './mapLocations';
-import { pruneBase, visibleGroupIdsOf } from './pruneContext';
+import { pruneBase, pruneReady, visibleGroupIdsOf } from './pruneContext';
 import { coursesWithoutTimes } from './timetableLinks';
 import type { CalendarData, CalendarDataOptions, CalendarRowsResult, CourseUnitInfo, RoomInfo } from './types';
 import { useAttendancePlans } from './useAttendancePlans';
 import { useGroupCandidates } from './useGroupCandidates';
 import { useLinkedTimetables } from './useLinkedTimetables';
-import { useTimelessCourses } from './useTimelessCourses';
+import { useOmittedCourses } from './useOmittedCourses';
 
 const FIVE_MINUTES = 5 * 60 * 1000;
 const ONE_DAY = 24 * 60 * 60 * 1000;
@@ -44,11 +44,13 @@ export const getCalendarData = (anchorKey: string, options: CalendarDataOptions)
       ),
     { enabled: personId != null, staleTime: FIVE_MINUTES },
   );
-  const timeless = useTimelessCourses(rowsQuery.data?.courses, range);
+  const omitted = useOmittedCourses(rowsQuery.data?.courses, range);
   const rows = useMemo(() => {
     const base = rowsQuery.data ?? EMPTY_ROWS;
-    return timeless.length > 0 ? { sessions: base.sessions, courses: [...base.courses, ...timeless] } : base;
-  }, [rowsQuery.data, timeless]);
+    return omitted.courses.length > 0
+      ? { sessions: base.sessions, courses: [...base.courses, ...omitted.courses] }
+      : base;
+  }, [rowsQuery.data, omitted.courses]);
 
   const courseUnitIds = useMemo(
     () => [...new Set(rows.courses.flatMap((course) => (course.courseUnitId ? [course.courseUnitId] : [])))].sort(),
@@ -105,8 +107,14 @@ export const getCalendarData = (anchorKey: string, options: CalendarDataOptions)
     [attendance.alternatives, candidates.sessions],
   );
 
-  const canPrune =
-    plansLoaded && rowsQuery.isSuccess && !rowsQuery.isFetching && !candidates.isFetching && !candidates.failed;
+  const canPrune = pruneReady({
+    plansLoaded,
+    rowsSettled: rowsQuery.isSuccess && !rowsQuery.isFetching,
+    candidatesSettled: !candidates.isFetching && !candidates.failed,
+    extraCoursesSettled: omitted.settled,
+    linksLoaded: linked.linksLoaded,
+    linkedStates: Object.values(linked.states),
+  });
   useEffect(() => {
     if (!canPrune) return;
     const base = pruneBase(range, sessions, candidates.sessions, clashes);

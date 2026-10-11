@@ -52,6 +52,22 @@ describe('updaters', () => {
     expect(first.swaps).toEqual([{ fromSessionId: 'a', toSessionId: 'b' }]);
   });
 
+  test('swapping away from a swapped-in session moves the original swap', () => {
+    const moved = withSwap(withSwap(EMPTY_PLAN, { fromSessionId: 'a', toSessionId: 'x' }), {
+      fromSessionId: 'x',
+      toSessionId: 'y',
+    });
+    expect(moved.swaps).toEqual([{ fromSessionId: 'a', toSessionId: 'y' }]);
+  });
+
+  test('swapping a swapped-in session back to its original undoes the swap', () => {
+    const back = withSwap(withSwap(EMPTY_PLAN, { fromSessionId: 'a', toSessionId: 'x' }), {
+      fromSessionId: 'x',
+      toSessionId: 'a',
+    });
+    expect(back.swaps).toEqual([]);
+  });
+
   test('adds several swaps and removes one by either side', () => {
     const plan = withSwaps(EMPTY_PLAN, [
       { fromSessionId: 'a', toSessionId: 'b' },

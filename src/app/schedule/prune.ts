@@ -14,12 +14,11 @@ const keepSwap = (swap: Swap, context: PruneContext): boolean =>
   !inRange(sessionDateKey(swap.fromSessionId), context.range) ||
   (context.sessionIds.has(swap.fromSessionId) && context.sessionIds.has(swap.toSessionId));
 
+// An every-time skip only acts where its series overlap, and a year-long group can clash in one term only.
 const keepSkip = (skip: ClashSkip, context: PruneContext): boolean => {
-  const everyTime = skip.dateKey === ALL_DATES;
-  if (!everyTime && !inRange(skip.dateKey, context.range)) return true;
+  if (skip.dateKey === ALL_DATES || !inRange(skip.dateKey, context.range)) return true;
   const bothHere = context.seriesKeys.has(skip.keepSeriesKey) && context.seriesKeys.has(skip.skipSeriesKey);
-  if (!bothHere) return everyTime;
-  return context.overlappingPairs.has(pairKey(skip.keepSeriesKey, skip.skipSeriesKey));
+  return bothHere && context.overlappingPairs.has(pairKey(skip.keepSeriesKey, skip.skipSeriesKey));
 };
 
 const keepDismissal = (id: string, context: PruneContext): boolean => {

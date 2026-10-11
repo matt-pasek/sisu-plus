@@ -6,10 +6,12 @@ type Links = Record<string, TimetableLink>;
 
 export const useTimetableLinks = (): {
   links: Links;
+  loaded: boolean;
   saveLink: (courseKey: string, link: TimetableLink) => void;
   removeLink: (courseKey: string) => void;
 } => {
   const [links, setLinks] = useState<Links>({});
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -18,7 +20,10 @@ export const useTimetableLinks = (): {
       .then((items) => {
         if (active) setLinks(parseLinks(items[LINKS_KEY]));
       })
-      .catch(() => undefined);
+      .catch(() => undefined)
+      .finally(() => {
+        if (active) setLoaded(true);
+      });
     const listener = (changes: Record<string, chrome.storage.StorageChange>, areaName: string) => {
       if (areaName === 'sync' && changes[LINKS_KEY]) setLinks(parseLinks(changes[LINKS_KEY].newValue));
     };
@@ -39,5 +44,5 @@ export const useTimetableLinks = (): {
   );
   const removeLink = useCallback((courseKey: string) => write(withoutLink(links, courseKey)), [links, write]);
 
-  return { links, saveLink, removeLink };
+  return { links, loaded, saveLink, removeLink };
 };

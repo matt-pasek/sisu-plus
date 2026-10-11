@@ -43,13 +43,21 @@ export const parsePlans = (items: Record<string, unknown>): Record<string, Atten
 const touches = (swap: Swap, sessionId: string): boolean =>
   swap.fromSessionId === sessionId || swap.toSessionId === sessionId;
 
-export const withSwap = (plan: AttendancePlan, swap: Swap): AttendancePlan => ({
-  ...plan,
-  swaps: [
-    ...plan.swaps.filter((existing) => !touches(existing, swap.fromSessionId) && !touches(existing, swap.toSessionId)),
-    swap,
-  ],
-});
+const chained = (plan: AttendancePlan, swap: Swap): Swap => {
+  const earlier = plan.swaps.find((existing) => existing.toSessionId === swap.fromSessionId);
+  return earlier ? { fromSessionId: earlier.fromSessionId, toSessionId: swap.toSessionId } : swap;
+};
+
+export const withSwap = (plan: AttendancePlan, swap: Swap): AttendancePlan => {
+  const next = chained(plan, swap);
+  const rest = plan.swaps.filter(
+    (existing) =>
+      !touches(existing, swap.fromSessionId) &&
+      !touches(existing, next.fromSessionId) &&
+      !touches(existing, next.toSessionId),
+  );
+  return { ...plan, swaps: next.fromSessionId === next.toSessionId ? rest : [...rest, next] };
+};
 
 export const withSwaps = (plan: AttendancePlan, swaps: Swap[]): AttendancePlan => swaps.reduce(withSwap, plan);
 

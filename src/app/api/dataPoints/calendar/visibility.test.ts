@@ -6,7 +6,7 @@ import type { Enrolment } from '@/app/api/generated/IlmoApi';
 import { CHINESE_SHARED_ROW, FIXTURE_RANGE } from './__fixtures__/calendarRows.fixture';
 import { mapCalendarRows } from './mapCalendarRows';
 import type { LabelPicker } from './types';
-import { applyVisibilityToRows, withCalendarFlags } from './visibility';
+import { applyVisibilityToEnrolments, applyVisibilityToRows, withCalendarFlags } from './visibility';
 
 const label: LabelPicker = (value) => value?.en ?? value?.fi ?? null;
 
@@ -74,5 +74,20 @@ describe('applyVisibilityToRows', () => {
   test('showing a group keeps the current sessions until the refetch', () => {
     const next = applyVisibilityToRows(rows, change([{ groupId: 'sub-hdd-lec', visible: true }]));
     expect(next.sessions).toHaveLength(rows.sessions.length);
+  });
+});
+
+describe('applyVisibilityToEnrolments', () => {
+  const other = { ...fresh, id: 'enr-other' } as Enrolment;
+
+  test('flips the flags on the matching enrolment only', () => {
+    const [changed, untouched] = applyVisibilityToEnrolments([fresh, other], change([], false));
+    expect(changed.isInCalendar).toBe(false);
+    expect(untouched).toBe(other);
+  });
+
+  test('leaves the enrolment as it is when a group has no entry', () => {
+    const [same] = applyVisibilityToEnrolments([fresh], change([{ groupId: 'sub-missing', visible: false }]));
+    expect(same).toBe(fresh);
   });
 });

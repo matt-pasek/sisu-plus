@@ -58,9 +58,9 @@ describe('prunePlan', () => {
     expect(prunePlan(plan, context()).skips).toEqual([overlapping, otherTerm]);
   });
 
-  test('drops every-time skips whose series are both here but no longer overlap', () => {
+  test('keeps every-time skips whose series do not overlap in the loaded term', () => {
     const skip = { keepSeriesKey: 'group:c:net', skipSeriesKey: 'group:c:t1', dateKey: ALL_DATES };
-    expect(prunePlan({ ...EMPTY, skips: [skip] }, context({ overlappingPairs: new Set() })).skips).toEqual([]);
+    expect(prunePlan({ ...EMPTY, skips: [skip] }, context({ overlappingPairs: new Set() })).skips).toEqual([skip]);
   });
 
   test('drops dismissals for clashes that are gone and keeps prompt dismissals', () => {

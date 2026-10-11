@@ -12,6 +12,7 @@ export type { LinkedTimetables } from './LinkedTimetables.type';
 export type { LinkedTimetableState } from './LinkedTimetableState.type';
 export type { LoadedTimetable } from './LoadedTimetable.type';
 export type { LocalizedText } from './LocalizedText.type';
+export type { PruneReadiness } from './PruneReadiness.type';
 export type { RoomInfo } from './RoomInfo.type';
 export type { StudyEventLike } from './StudyEventLike.type';
 export type { TimetableLink } from './TimetableLink.type';

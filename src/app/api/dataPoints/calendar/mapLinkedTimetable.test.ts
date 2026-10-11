@@ -5,7 +5,7 @@ import { describe, expect, test } from 'bun:test';
 import { helsinkiMinutesOfDay } from '@/app/schedule';
 import { FIXTURE_RANGE } from './__fixtures__/calendarRows.fixture';
 import { TIMEEDIT_FEED } from './__fixtures__/timeedit.fixture';
-import { importTimetable, mapLinkedSessions } from './mapLinkedTimetable';
+import { importTimetable, mapLinkedSessions, shownLinkedSessions } from './mapLinkedTimetable';
 import type { CalendarCourse } from './types';
 
 const course: CalendarCourse = {
@@ -36,6 +36,39 @@ describe('linked timetable mapping', () => {
       kind: 'lecture',
       colorIndex: 4,
     });
+  });
+
+  test('reads floating times as Finnish local time', () => {
+    const feed = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//test//EN',
+      'BEGIN:VEVENT',
+      'UID:floating-1',
+      'DTSTAMP:20261001T000000Z',
+      'DTSTART:20261005T120000',
+      'DTEND:20261005T140000',
+      'SUMMARY:Finnish 5',
+      'END:VEVENT',
+      'BEGIN:VEVENT',
+      'UID:floating-2',
+      'DTSTAMP:20261001T000000Z',
+      'DTSTART:20261102T120000',
+      'DTEND:20261102T140000',
+      'SUMMARY:Finnish 5',
+      'END:VEVENT',
+      'END:VCALENDAR',
+    ].join('\r\n');
+    const imported = importTimetable(feed, null);
+    const sessions = imported ? mapLinkedSessions(course, imported, FIXTURE_RANGE) : [];
+    expect(sessions.map((session) => helsinkiMinutesOfDay(session.start))).toEqual([720, 720]);
+    expect(sessions.map((session) => helsinkiMinutesOfDay(session.end))).toEqual([840, 840]);
+  });
+
+  test('shows no linked sessions for a hidden course', () => {
+    const imported = importTimetable(TIMEEDIT_FEED, 'K200DK03');
+    expect(imported && shownLinkedSessions(course, imported, FIXTURE_RANGE)).toHaveLength(2);
+    expect(imported && shownLinkedSessions({ ...course, isInCalendar: false }, imported, FIXTURE_RANGE)).toEqual([]);
   });
 
   test('returns null for text that is not a calendar', () => {

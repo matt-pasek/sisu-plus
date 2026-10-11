@@ -47,3 +47,8 @@ export const applyVisibilityToRows = (rows: CalendarRowsResult, change: Visibili
   });
   return { sessions, courses };
 };
+
+export const applyVisibilityToEnrolments = (enrolments: Enrolment[], change: VisibilityChange): Enrolment[] =>
+  enrolments.map((enrolment) =>
+    enrolment.id === change.enrolmentId ? (withCalendarFlags(enrolment, change) ?? enrolment) : enrolment,
+  );

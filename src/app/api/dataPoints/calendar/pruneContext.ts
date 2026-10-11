@@ -6,8 +6,9 @@ import {
   type DateRange,
   type PruneContext,
   type Session,
+  uniqueBy,
 } from '@/app/schedule';
-import type { CalendarCourse } from './types';
+import type { CalendarCourse, PruneReadiness } from './types';
 
 export const pruneBase = (
   range: DateRange,
@@ -15,10 +16,10 @@ export const pruneBase = (
   candidates: Session[],
   clashes: Clash[],
 ): Omit<PruneContext, 'visibleGroupIds'> => {
-  const all = [...sessions, ...candidates];
+  const all = uniqueBy([...sessions, ...candidates], (session) => session.id);
   const byId = new Map(all.map((session) => [session.id, session]));
   const overlappingPairs = new Set(
-    findClashes(sessions).flatMap((clash) => {
+    findClashes(all).flatMap((clash) => {
       const [a, b] = clash.sessionIds.map((id) => byId.get(id));
       return a && b ? [pairKey(seriesKeyOf(a), seriesKeyOf(b))] : [];
     }),
@@ -34,3 +35,12 @@ export const pruneBase = (
 
 export const visibleGroupIdsOf = (course: CalendarCourse): Set<string> =>
   new Set(course.groupSets.flatMap((set) => set.groups.filter((group) => group.isInCalendar).map((group) => group.id)));
+
+// Pruning against a partial picture deletes rules for sessions that simply have not arrived yet.
+export const pruneReady = (readiness: PruneReadiness): boolean =>
+  readiness.plansLoaded &&
+  readiness.rowsSettled &&
+  readiness.candidatesSettled &&
+  readiness.extraCoursesSettled &&
+  readiness.linksLoaded &&
+  readiness.linkedStates.every((state) => state.status === 'ok' || state.status === 'stale');

@@ -10,13 +10,14 @@ import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import {
   addDaysToDateKey,
   HELSINKI_TIME_ZONE,
+  helsinkiDateKey,
   isoWeekNumber,
   seriesKeyOf,
-  startOfWeekKey,
   summarizeSeriesClashes,
   todayKey,
   type Session,
 } from '@/app/schedule';
+import { CalendarBody } from './components/CalendarBody.comp';
 import { CalendarSidebar } from './components/CalendarSidebar.comp';
 import { CalendarState } from './components/CalendarState.comp';
 import { CalendarToolbar } from './components/CalendarToolbar.comp';
@@ -25,17 +26,28 @@ import { GroupPicker } from './components/GroupPicker.comp';
 import { ProvenanceFooter } from './components/ProvenanceFooter.comp';
 import { SessionsInspector } from './components/SessionsInspector.comp';
 import { TimetableInspector } from './components/TimetableInspector.comp';
-import { WeekGrid } from './components/WeekGrid.comp';
 import { useCalendarActions } from './hooks/useCalendarActions';
 import { useCalendarKeyboard } from './hooks/useCalendarKeyboard';
+import { useCalendarNavigation } from './hooks/useCalendarNavigation';
 import { useNow } from './hooks/useNow';
 import { usePopoverModel } from './hooks/usePopoverModel';
 import { useWeekModel } from './hooks/useWeekModel';
-import type { InspectorState, PopoverTarget, TimetableControls } from './types';
-import { findPeriodName, formatWeekRange, previewModel, promptId, seriesOf, weekDateKeys } from './util';
+import type { CalendarView as CalendarViewMode, InspectorState, PopoverTarget, TimetableControls } from './types';
+import {
+  clashesInRange,
+  findPeriodName,
+  parseCalendarView,
+  previewModel,
+  promptId,
+  seriesOf,
+  viewTitle,
+  visibleRange,
+  weekDateKeys,
+} from './util';
 
 const browserTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 const NO_COURSE_KEYS: string[] = [];
+const ENABLED_VIEWS: CalendarViewMode[] = ['week'];
 
 const CalendarView: React.FC = () => {
   const { t, i18n } = useTranslationWithPrefix('views.calendar');
@@ -43,8 +55,30 @@ const CalendarView: React.FC = () => {
   const [prefs, setPrefs] = useChromeStorage();
   const now = useNow();
   const today = todayKey(now);
-  const [anchorKey, setAnchorKey] = useState(today);
   const [popover, setPopover] = useState<PopoverTarget | null>(null);
+  const closePopover = useCallback(() => setPopover(null), []);
+  const storedView = parseCalendarView(prefs.calendarView);
+  const view = ENABLED_VIEWS.includes(storedView) ? storedView : 'week';
+  const { anchorKey, setAnchorKey, goToPrevious, goToNext, goToToday } = useCalendarNavigation(
+    view,
+    today,
+    closePopover,
+  );
+  const setView = useCallback(
+    (next: CalendarViewMode) => {
+      if (!ENABLED_VIEWS.includes(next)) return;
+      setPopover(null);
+      setPrefs({ calendarView: next });
+    },
+    [setPrefs],
+  );
+  const openWeek = useCallback(
+    (dateKey: string) => {
+      setAnchorKey(dateKey);
+      setView('week');
+    },
+    [setAnchorKey, setView],
+  );
   const [inspector, setInspector] = useState<InspectorState | null>(null);
   const [previewGroupId, setPreviewGroupId] = useState<string | null>(null);
   const inspectorSeriesKey = inspector?.type === 'sessions' ? inspector.seriesKey : null;
@@ -52,7 +86,11 @@ const CalendarView: React.FC = () => {
   const candidateCourseKeys = useMemo(() => (pickerCourseKey ? [pickerCourseKey] : NO_COURSE_KEYS), [pickerCourseKey]);
   const gridRef = useRef<HTMLDivElement>(null);
   const onPlanWriteError = useCallback(() => notify.error(t('plan.saveFailed')), [t]);
-  const data = getCalendarData(anchorKey, { candidateCourseKeys, onPlanWriteError });
+  const data = getCalendarData(anchorKey, {
+    candidateCourseKeys,
+    onPlanWriteError,
+    span: view === 'year' ? 'academicYear' : 'term',
+  });
   const onVisibilityError = useCallback(() => notify.error(t('visibility.failed')), [t]);
   const visibility = useCalendarVisibility(onVisibilityError);
   const actions = useCalendarActions(data.updatePlan, visibility.mutate);
@@ -75,8 +113,12 @@ const CalendarView: React.FC = () => {
     ? data.courses.find((course) => course.realisationId === pickerCourseKey)
     : undefined;
   const weekNumber = isoWeekNumber(weekKeys[0]);
-  const { weekSessions, weekAlternatives, weekClashes, weekSessionIds, badges, knownSessions, sessionsById } =
-    useWeekModel(data, weekKeys, prefs.calendarShowCancelled);
+  const weekModel = useWeekModel(data, weekKeys, prefs.calendarShowCancelled);
+  const { weekClashes, weekSessionIds, badges, knownSessions, sessionsById } = weekModel;
+  const range = visibleRange(view, anchorKey);
+  const rangeClashes = view === 'week' ? weekClashes : clashesInRange(data.clashes, sessionsById, range);
+  const eyebrow =
+    view === 'month' ? null : view === 'year' ? t('toolbar.academicYear') : t('weekShort', { week: weekNumber });
   const busyDateKeys = useMemo(() => new Set(data.attended.map((session) => session.dateKey)), [data.attended]);
   const periodName = useMemo(
     () => findPeriodName(anchorKey, [...studyPeriodMap.values()]),
@@ -100,34 +142,30 @@ const CalendarView: React.FC = () => {
     [inspectorSeriesKey, knownSessions],
   );
 
-  const closePopover = useCallback(() => setPopover(null), []);
-  const goToWeek = useCallback((delta: number) => {
-    setPopover(null);
-    setAnchorKey((current) => addDaysToDateKey(startOfWeekKey(current), delta * 7));
-  }, []);
-  const goToPreviousWeek = useCallback(() => goToWeek(-1), [goToWeek]);
-  const goToNextWeek = useCallback(() => goToWeek(1), [goToWeek]);
-  const goToToday = useCallback(() => {
-    setPopover(null);
-    setAnchorKey(today);
-  }, [today]);
   const closeOverlays = useCallback(() => {
     if (popover) setPopover(null);
     else setInspector(null);
   }, [popover]);
 
   useCalendarKeyboard({
-    onPrevious: goToPreviousWeek,
-    onNext: goToNextWeek,
+    onPrevious: goToPrevious,
+    onNext: goToNext,
     onToday: goToToday,
     onEscape: closeOverlays,
+    onView: setView,
   });
 
   const selectSession = useCallback((session: Session, element: HTMLElement) => setPopover({ session, element }), []);
 
   // The app renders inside a shadow root, so document.querySelector cannot reach session blocks.
   const showFirstClash = () => {
-    const sessionId = weekClashes[0]?.sessionIds.find((id) => weekSessionIds.has(id));
+    const first = rangeClashes[0];
+    if (!first) return;
+    if (view === 'month' || view === 'year') {
+      openWeek(helsinkiDateKey(first.start));
+      return;
+    }
+    const sessionId = first.sessionIds.find((id) => weekSessionIds.has(id));
     const session = sessionId ? sessionsById.get(sessionId) : undefined;
     const element = sessionId
       ? gridRef.current?.querySelector<HTMLElement>(`[data-session-id="${CSS.escape(sessionId)}"]`)
@@ -228,34 +266,32 @@ const CalendarView: React.FC = () => {
           }
         >
           <CalendarToolbar
-            rangeLabel={formatWeekRange(weekKeys[0], weekKeys[6], locale)}
-            weekNumber={weekNumber}
-            clashCount={weekClashes.length}
+            view={view}
+            enabledViews={ENABLED_VIEWS}
+            title={viewTitle(view, anchorKey, locale)}
+            eyebrow={eyebrow}
+            clashCount={rangeClashes.length}
+            onViewChange={setView}
             onToday={goToToday}
-            onPrevious={goToPreviousWeek}
-            onNext={goToNextWeek}
+            onPrevious={goToPrevious}
+            onNext={goToNext}
             onShowClash={showFirstClash}
           />
           {status ? (
             <CalendarState status={status} onRetry={data.refetch} />
           ) : (
             <div ref={gridRef} className="flex min-h-0 flex-1 flex-col">
-              <WeekGrid
+              <CalendarBody
+                view={view}
                 weekKeys={weekKeys}
                 todayKey={today}
                 now={now}
-                sessions={weekSessions}
-                alternatives={weekAlternatives}
-                preview={preview.sessions}
-                previewClashIds={preview.clashIds}
-                sessionsById={sessionsById}
-                clashesBySession={data.clashesBySession}
-                badges={badges}
-                rooms={data.rooms}
-                courseUnits={data.courseUnits}
+                locale={locale}
+                data={data}
+                week={weekModel}
+                preview={preview}
                 linkedLabels={linkedLabels}
                 activeSessionId={popover?.session.id ?? null}
-                locale={locale}
                 onSelect={selectSession}
                 onUserScroll={closePopover}
               />

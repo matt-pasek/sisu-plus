@@ -28,6 +28,7 @@ export type CalendarTranslation = {
   toolbar: {
     clashes_one: string;
     clashes_other: string;
+    academicYear: string;
   };
   sidebar: {
     courses: string;
@@ -172,6 +173,17 @@ export type CalendarTranslation = {
   visibility: {
     failed: string;
   };
+  views: {
+    label: string;
+    day: string;
+    week: string;
+    month: string;
+    year: string;
+  };
+  navigation: {
+    previous: { day: string; week: string; month: string; year: string };
+    next: { day: string; week: string; month: string; year: string };
+  };
 };
 
 export const calendarTranslation: CalendarTranslation = {
@@ -204,6 +216,7 @@ export const calendarTranslation: CalendarTranslation = {
   toolbar: {
     clashes_one: '{{count}} clash',
     clashes_other: '{{count}} clashes',
+    academicYear: 'Academic year',
   },
   sidebar: {
     courses: 'Courses',
@@ -347,5 +360,16 @@ export const calendarTranslation: CalendarTranslation = {
   },
   visibility: {
     failed: "Sisu didn't accept the change. Try again.",
+  },
+  views: {
+    label: 'Calendar view',
+    day: 'Day',
+    week: 'Week',
+    month: 'Month',
+    year: 'Year',
+  },
+  navigation: {
+    previous: { day: 'Previous day', week: 'Previous week', month: 'Previous month', year: 'Previous academic year' },
+    next: { day: 'Next day', week: 'Next week', month: 'Next month', year: 'Next academic year' },
   },
 };

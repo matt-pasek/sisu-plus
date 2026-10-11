@@ -4,6 +4,7 @@ import { DashboardWidgetLayout, HeroStatId, HeroPanelId } from '@/app/views/dash
 import { DEFAULT_DASHBOARD_LAYOUT } from '@/app/views/dashboard/constants/widgetDefinitions.const';
 import { DEFAULT_HERO_PANEL, DEFAULT_HERO_STATS } from '@/app/views/dashboard/constants/heroDefinitions.const';
 import type { NotificationPrefs } from '@/app/types/NotificationPrefs.type';
+import type { CalendarView } from '@/app/views/calendar/types';
 
 export const DEFAULT_NOTIFICATION_PREFS: NotificationPrefs = {
   delivery: {
@@ -23,6 +24,7 @@ export interface SisuPrefs {
   heroStats: HeroStatId[];
   heroPanel: HeroPanelId;
   calendarShowCancelled: boolean;
+  calendarView: CalendarView;
   lastSeenChangelogVersion: string | null;
   notificationNudgeDismissed: boolean;
   notificationPrefs: NotificationPrefs;
@@ -39,6 +41,7 @@ export const DEFAULT_PREFS: SisuPrefs = {
   heroStats: DEFAULT_HERO_STATS,
   heroPanel: DEFAULT_HERO_PANEL,
   calendarShowCancelled: false,
+  calendarView: 'week',
   lastSeenChangelogVersion: null,
   notificationNudgeDismissed: false,
   notificationPrefs: DEFAULT_NOTIFICATION_PREFS,

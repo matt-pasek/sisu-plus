@@ -30,6 +30,7 @@ export const calendarTranslation: CalendarTranslation = {
   toolbar: {
     clashes_one: '{{count}} päällekkäisyys',
     clashes_other: '{{count}} päällekkäisyyttä',
+    academicYear: 'Lukuvuosi',
   },
   sidebar: {
     courses: 'Kurssit',
@@ -173,5 +174,21 @@ export const calendarTranslation: CalendarTranslation = {
   },
   visibility: {
     failed: 'Sisu ei hyväksynyt muutosta. Yritä uudelleen.',
+  },
+  views: {
+    label: 'Kalenterinäkymä',
+    day: 'Päivä',
+    week: 'Viikko',
+    month: 'Kuukausi',
+    year: 'Vuosi',
+  },
+  navigation: {
+    previous: {
+      day: 'Edellinen päivä',
+      week: 'Edellinen viikko',
+      month: 'Edellinen kuukausi',
+      year: 'Edellinen lukuvuosi',
+    },
+    next: { day: 'Seuraava päivä', week: 'Seuraava viikko', month: 'Seuraava kuukausi', year: 'Seuraava lukuvuosi' },
   },
 };

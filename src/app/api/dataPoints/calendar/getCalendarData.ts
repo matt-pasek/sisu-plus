@@ -5,7 +5,15 @@ import { fetchCourseUnit } from '@/app/api/endpoints/courseUnit';
 import { fetchLocations } from '@/app/api/endpoints/locations';
 import { fetchStudyEventsInCalendar } from '@/app/api/endpoints/studyEventsInCalendar';
 import { useSisuQuery } from '@/app/hooks/useSisuQuery';
-import { applyAttendance, findClashes, groupClashesBySession, prunePlan, termRangeFor, uniqueBy } from '@/app/schedule';
+import {
+  academicYearRangeFor,
+  applyAttendance,
+  findClashes,
+  groupClashesBySession,
+  prunePlan,
+  termRangeFor,
+  uniqueBy,
+} from '@/app/schedule';
 import { applyCourseUnitNames } from './applyCourseUnitNames';
 import { samePlan } from './attendancePlan';
 import { candidateCourseKeys } from './candidateCourseKeys';
@@ -29,7 +37,8 @@ const EMPTY_ROOMS: Record<string, RoomInfo> = {};
 const EMPTY_COURSE_UNITS: Record<string, CourseUnitInfo> = {};
 
 export const getCalendarData = (anchorKey: string, options: CalendarDataOptions): CalendarData => {
-  const { startKey, endKey } = termRangeFor(anchorKey);
+  const { startKey, endKey } =
+    options.span === 'academicYear' ? academicYearRangeFor(anchorKey) : termRangeFor(anchorKey);
   const range = useMemo(() => ({ startKey, endKey }), [startKey, endKey]);
   const { userDetails, loadingDetails } = getUserDetails();
   const personId = userDetails?.id ?? null;

@@ -25,5 +25,7 @@ export type { SeriesOccurrence } from './SeriesOccurrence.type';
 export type { Session } from './Session.type';
 export type { SessionKind } from './SessionKind.type';
 export type { SessionSource } from './SessionSource.type';
+export type { ShapeLane } from './ShapeLane.type';
+export type { ShapeSegment } from './ShapeSegment.type';
 export type { SharedRelation } from './SharedRelation.type';
 export type { Swap } from './Swap.type';

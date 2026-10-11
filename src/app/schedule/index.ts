@@ -15,3 +15,4 @@ export * from './swaps';
 export * from './groupStats';
 export * from './linked';
 export * from './holidays';
+export * from './dayShape';

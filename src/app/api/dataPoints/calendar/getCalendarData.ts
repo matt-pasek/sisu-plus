@@ -4,22 +4,20 @@ import { getUserDetails } from '@/app/api/dataPoints/getUserDetails';
 import { fetchCourseUnit } from '@/app/api/endpoints/courseUnit';
 import { fetchLocations } from '@/app/api/endpoints/locations';
 import { fetchStudyEventsInCalendar } from '@/app/api/endpoints/studyEventsInCalendar';
-import { pickLabel } from '@/app/api/resolvers/helpers/pickLabel';
 import { useSisuQuery } from '@/app/hooks/useSisuQuery';
 import { findClashes, groupClashesBySession, termRangeFor } from '@/app/schedule';
 import { applyCourseUnitNames } from './applyCourseUnitNames';
+import { pickCalendarLabel } from './labels';
 import { mapCalendarRows } from './mapCalendarRows';
 import { mapCourseUnits } from './mapCourseUnits';
 import { mapLocations } from './mapLocations';
-import type { CalendarData, CalendarRowsResult, CourseUnitInfo, LabelPicker, RoomInfo } from './types';
+import type { CalendarData, CalendarRowsResult, CourseUnitInfo, RoomInfo } from './types';
 
 const FIVE_MINUTES = 5 * 60 * 1000;
 const ONE_DAY = 24 * 60 * 60 * 1000;
 const EMPTY_ROWS: CalendarRowsResult = { sessions: [], courses: [] };
 const EMPTY_ROOMS: Record<string, RoomInfo> = {};
 const EMPTY_COURSE_UNITS: Record<string, CourseUnitInfo> = {};
-
-const pickCalendarLabel: LabelPicker = (value) => (value ? pickLabel(value) : null);
 
 export const getCalendarData = (anchorKey: string): CalendarData => {
   const { startKey, endKey } = termRangeFor(anchorKey);

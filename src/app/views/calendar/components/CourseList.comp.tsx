@@ -4,12 +4,14 @@ import { Panel } from '@/app/components/ui/Panel.comp';
 import { PanelEyebrow } from '@/app/components/ui/PanelEyebrow.comp';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import type { AttendancePlan } from '@/app/schedule';
+import type { TimetableControls } from '../types';
 import { CourseRow } from './CourseRow.comp';
 
 interface Props {
   courses: CalendarCourse[];
   courseUnits: Record<string, CourseUnitInfo>;
   plans: Record<string, AttendancePlan>;
+  timetables: TimetableControls;
   onToggleCourse: (course: CalendarCourse, visible: boolean) => void;
   onOpenGroups: (courseKey: string, setId: string | null) => void;
   onDismissPrompt: (courseKey: string, setId: string) => void;
@@ -19,6 +21,7 @@ export const CourseList: React.FC<Props> = ({
   courses,
   courseUnits,
   plans,
+  timetables,
   onToggleCourse,
   onOpenGroups,
   onDismissPrompt,
@@ -41,6 +44,7 @@ export const CourseList: React.FC<Props> = ({
             course={course}
             code={course.courseUnitId ? courseUnits[course.courseUnitId]?.code : undefined}
             plan={plans[course.realisationId]}
+            timetables={timetables}
             onToggleCourse={onToggleCourse}
             onOpenGroups={onOpenGroups}
             onDismissPrompt={onDismissPrompt}

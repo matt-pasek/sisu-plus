@@ -1,6 +1,11 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
-import type { CalendarCourse, CourseUnitInfo, RoomInfo } from '@/app/api/dataPoints/calendar/types';
+import type {
+  CalendarCourse,
+  CourseUnitInfo,
+  LinkedTimetableState,
+  RoomInfo,
+} from '@/app/api/dataPoints/calendar/types';
 import { StatusChip } from '@/app/components/ui/StatusChip.comp';
 import { formatCredits } from '@/app/helpers/formatCredits';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
@@ -36,6 +41,7 @@ interface Props {
   courseUnit: CourseUnitInfo | undefined;
   locale: string;
   model: PopoverModel;
+  linkedState?: LinkedTimetableState;
   onClose: () => void;
 }
 
@@ -48,6 +54,7 @@ export const EventPopover: React.FC<Props> = ({
   courseUnit,
   locale,
   model,
+  linkedState,
   onClose,
 }) => {
   const { t } = useTranslationWithPrefix('views.calendar');
@@ -62,6 +69,7 @@ export const EventPopover: React.FC<Props> = ({
   const next = position >= 0 ? series[position + 1] : undefined;
   const nextMoves = next != null && next.locationIds.join() !== session.locationIds.join();
   const kindLabel = t(`kinds.${session.kind}`);
+  const isLinked = session.source === 'linked';
   const otherNames = joinNames(
     summary.otherSessions.map((other) => `${other.courseName} ${t(`kinds.${other.kind}`).toLowerCase()}`),
     locale,
@@ -160,7 +168,16 @@ export const EventPopover: React.FC<Props> = ({
             {model.badge && <SessionChipBadge chip={{ type: model.badge }} />}
           </span>
           <span className="block truncate text-[11.5px] text-lightGrey">
-            {session.groupName ? `${kindLabel} · ${session.groupName}` : kindLabel}
+            {linkedState
+              ? linkedState.fetchedAt != null
+                ? t('event.fromSource', {
+                    source: linkedState.label,
+                    time: formatClock(new Date(linkedState.fetchedAt)),
+                  })
+                : t('event.fromSourcePlain', { source: linkedState.label })
+              : session.groupName
+                ? `${kindLabel} · ${session.groupName}`
+                : kindLabel}
           </span>
         </dd>
         <dt className="pt-px text-darkishGrey">
@@ -180,8 +197,10 @@ export const EventPopover: React.FC<Props> = ({
           <PinIcon className="size-3.5" />
         </dt>
         <dd className="text-offwhite">
-          {describeRoomWithBuilding(session.locationIds, rooms, roomLabels)}
-          {next && (
+          {isLinked
+            ? (session.locationText ?? roomLabels.noRoom)
+            : describeRoomWithBuilding(session.locationIds, rooms, roomLabels)}
+          {next && !isLinked && (
             <span className={`block text-[11.5px] ${nextMoves ? 'text-blue-300' : 'text-lightGrey'}`}>
               {t(nextMoves ? 'event.nextSessionMoves' : 'event.nextSession', {
                 date: formatSessionDate(next.dateKey, locale),

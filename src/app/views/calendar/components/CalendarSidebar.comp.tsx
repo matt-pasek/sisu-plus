@@ -1,6 +1,7 @@
 import React from 'react';
 import type { CalendarCourse, CourseUnitInfo } from '@/app/api/dataPoints/calendar/types';
 import type { AttendancePlan } from '@/app/schedule';
+import type { TimetableControls } from '../types';
 import { CourseList } from './CourseList.comp';
 import { LayersPanel } from './LayersPanel.comp';
 import { MiniMonth } from './MiniMonth.comp';
@@ -13,6 +14,7 @@ interface Props {
   courses: CalendarCourse[];
   courseUnits: Record<string, CourseUnitInfo>;
   plans: Record<string, AttendancePlan>;
+  timetables: TimetableControls;
   showCancelled: boolean;
   onSelectDate: (dateKey: string) => void;
   onShowCancelledChange: (value: boolean) => void;
@@ -29,6 +31,7 @@ export const CalendarSidebar: React.FC<Props> = ({
   courses,
   courseUnits,
   plans,
+  timetables,
   showCancelled,
   onSelectDate,
   onShowCancelledChange,
@@ -48,6 +51,7 @@ export const CalendarSidebar: React.FC<Props> = ({
       courses={courses}
       courseUnits={courseUnits}
       plans={plans}
+      timetables={timetables}
       onToggleCourse={onToggleCourse}
       onOpenGroups={onOpenGroups}
       onDismissPrompt={onDismissPrompt}

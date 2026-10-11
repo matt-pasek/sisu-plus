@@ -33,6 +33,7 @@ interface Props {
   badges: Map<string, SessionBadge>;
   rooms: Record<string, RoomInfo>;
   courseUnits: Record<string, CourseUnitInfo>;
+  linkedLabels: Record<string, string>;
   activeSessionId: string | null;
   locale: string;
   onSelect: (session: Session, element: HTMLElement) => void;
@@ -54,6 +55,7 @@ export const WeekDayColumn: React.FC<Props> = ({
   badges,
   rooms,
   courseUnits,
+  linkedLabels,
   activeSessionId,
   locale,
   onSelect,
@@ -120,7 +122,9 @@ export const WeekDayColumn: React.FC<Props> = ({
         if (!placement) return null;
         const clashes = clashesBySession.get(session.id) ?? [];
         const badge = badges.get(session.id) ?? null;
-        const room = describeRoom(session.locationIds, rooms, roomLabels);
+        const isLinked = session.source !== 'sisu';
+        const linkedRoom = session.locationText ?? roomLabels.noRoom;
+        const room = isLinked ? linkedRoom : describeRoom(session.locationIds, rooms, roomLabels);
         const box = sessionBox(session, hourRange, hourHeight);
         return (
           <SessionBlock
@@ -135,10 +139,11 @@ export const WeekDayColumn: React.FC<Props> = ({
             isDimmed={activeSessionId != null && activeSessionId !== session.id}
             isPast={session.end <= now}
             kindLabel={t(`kinds.${session.kind}`)}
-            roomName={describeRoomShort(session.locationIds, rooms, roomLabels)}
+            roomName={isLinked ? linkedRoom : describeRoomShort(session.locationIds, rooms, roomLabels)}
             ariaLabel={ariaLabelFor(session, room, clashes)}
             badge={badge}
             badgeLabel={badge ? t(`sessions.chips.${badge}`) : null}
+            sourceLabel={isLinked ? (linkedLabels[session.courseKey] ?? null) : null}
             onSelect={onSelect}
           />
         );

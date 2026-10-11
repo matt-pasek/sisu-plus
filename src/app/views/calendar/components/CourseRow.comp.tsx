@@ -4,19 +4,32 @@ import { StatusChip } from '@/app/components/ui/StatusChip.comp';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import type { AttendancePlan } from '@/app/schedule';
 import { getModuleColorValueByIndex } from '@/app/theme/moduleColors';
+import type { TimetableControls } from '../types';
 import { hasGroupChoice, promptSets, requiredSetWithoutGroup } from '../util';
 import { AlternativesPrompt } from './AlternativesPrompt.comp';
+import { LinkedCourseStatus } from './LinkedCourseStatus.comp';
 
 interface Props {
   course: CalendarCourse;
   code: string | undefined;
   plan: AttendancePlan | undefined;
+  timetables: TimetableControls;
   onToggleCourse: (course: CalendarCourse, visible: boolean) => void;
   onOpenGroups: (courseKey: string, setId: string | null) => void;
   onDismissPrompt: (courseKey: string, setId: string) => void;
 }
 
-export const CourseRow: React.FC<Props> = ({ course, code, plan, onToggleCourse, onOpenGroups, onDismissPrompt }) => {
+export const CourseRow: React.FC<Props> = ({
+  course,
+  code,
+  plan,
+  timetables,
+  onToggleCourse,
+  onOpenGroups,
+  onDismissPrompt,
+}) => {
+  const key = course.realisationId;
+  const linked = timetables.linked[key];
   const { t } = useTranslationWithPrefix('views.calendar');
   const color = getModuleColorValueByIndex(course.colorIndex);
   const requiredSet = requiredSetWithoutGroup(course);
@@ -40,7 +53,7 @@ export const CourseRow: React.FC<Props> = ({ course, code, plan, onToggleCourse,
           {hasGroupChoice(course) ? (
             <button
               type="button"
-              onClick={() => onOpenGroups(course.realisationId, null)}
+              onClick={() => onOpenGroups(key, null)}
               className="block cursor-pointer text-left text-[13px] leading-snug font-semibold text-offwhite decoration-lightGrey/60 underline-offset-2 hover:underline"
             >
               {course.name}
@@ -53,11 +66,7 @@ export const CourseRow: React.FC<Props> = ({ course, code, plan, onToggleCourse,
               {code && <span className="font-mono text-[11px] text-lightGrey">{code}</span>}
               {course.isExam && <StatusChip tone="neutral">{t('sidebar.exam')}</StatusChip>}
               {requiredSet && (
-                <button
-                  type="button"
-                  className="cursor-pointer"
-                  onClick={() => onOpenGroups(course.realisationId, requiredSet)}
-                >
+                <button type="button" className="cursor-pointer" onClick={() => onOpenGroups(key, requiredSet)}>
                   <StatusChip tone="warn">{t('sidebar.chooseGroup')}</StatusChip>
                 </button>
               )}
@@ -65,12 +74,20 @@ export const CourseRow: React.FC<Props> = ({ course, code, plan, onToggleCourse,
           )}
         </span>
       </div>
+      <LinkedCourseStatus
+        noTimes={timetables.noTimesCourseKeys.has(key)}
+        hasSisuTimes={linked != null && timetables.sisuCourseKeys.has(key)}
+        state={linked}
+        onAdd={() => timetables.onAdd(key)}
+        onRefresh={() => timetables.onRefresh(key)}
+        onRemove={() => timetables.onRemove(key)}
+      />
       {promptSets(course, plan).map((set) => (
         <AlternativesPrompt
           key={set.id}
           setName={set.name}
-          onPick={() => onOpenGroups(course.realisationId, set.id)}
-          onDismiss={() => onDismissPrompt(course.realisationId, set.id)}
+          onPick={() => onOpenGroups(key, set.id)}
+          onDismiss={() => onDismissPrompt(key, set.id)}
         />
       ))}
     </li>

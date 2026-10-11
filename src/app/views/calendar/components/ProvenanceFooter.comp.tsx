@@ -6,15 +6,16 @@ import { RefreshIcon } from './icons';
 interface Props {
   updatedAt: number;
   isFetching: boolean;
+  linkedCount: number;
   onRefresh: () => void;
 }
 
-export const ProvenanceFooter: React.FC<Props> = ({ updatedAt, isFetching, onRefresh }) => {
+export const ProvenanceFooter: React.FC<Props> = ({ updatedAt, isFetching, linkedCount, onRefresh }) => {
   const { t } = useTranslationWithPrefix('views.calendar');
   return (
     <div className="flex items-center gap-3">
       <span className="tabular-nums">
-        {t('footer.source')}
+        {linkedCount > 0 ? t('footer.sourceWithLinked', { count: linkedCount }) : t('footer.source')}
         {updatedAt > 0 && ` · ${t('footer.updated', { time: formatClock(new Date(updatedAt)) })}`}
       </span>
       <span aria-hidden="true" className="text-darkishGrey">

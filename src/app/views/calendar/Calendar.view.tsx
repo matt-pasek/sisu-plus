@@ -24,13 +24,14 @@ import { EventPopover } from './components/EventPopover.comp';
 import { GroupPicker } from './components/GroupPicker.comp';
 import { ProvenanceFooter } from './components/ProvenanceFooter.comp';
 import { SessionsInspector } from './components/SessionsInspector.comp';
+import { TimetableInspector } from './components/TimetableInspector.comp';
 import { WeekGrid } from './components/WeekGrid.comp';
 import { useCalendarActions } from './hooks/useCalendarActions';
 import { useCalendarKeyboard } from './hooks/useCalendarKeyboard';
 import { useNow } from './hooks/useNow';
 import { usePopoverModel } from './hooks/usePopoverModel';
 import { useWeekModel } from './hooks/useWeekModel';
-import type { InspectorState, PopoverTarget } from './types';
+import type { InspectorState, PopoverTarget, TimetableControls } from './types';
 import { findPeriodName, formatWeekRange, previewModel, promptId, seriesOf, weekDateKeys } from './util';
 
 const browserTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -148,6 +149,33 @@ const CalendarView: React.FC = () => {
     setInspector(null);
     setPreviewGroupId(null);
   }, []);
+  const openTimetable = useCallback((courseKey: string) => {
+    setPopover(null);
+    setInspector({ type: 'timetable', courseKey });
+  }, []);
+  const timetableCourse =
+    inspector?.type === 'timetable'
+      ? data.courses.find((course) => course.realisationId === inspector.courseKey)
+      : undefined;
+  const linkedLabels = useMemo(
+    () => Object.fromEntries(Object.entries(data.linked).map(([courseKey, state]) => [courseKey, state.label])),
+    [data.linked],
+  );
+  const sisuCourseKeys = useMemo(
+    () => new Set(data.sessions.filter((session) => session.source === 'sisu').map((session) => session.courseKey)),
+    [data.sessions],
+  );
+  const timetables = useMemo<TimetableControls>(
+    () => ({
+      noTimesCourseKeys: data.noTimesCourseKeys,
+      sisuCourseKeys,
+      linked: data.linked,
+      onAdd: openTimetable,
+      onRefresh: data.refreshTimetable,
+      onRemove: data.removeTimetable,
+    }),
+    [data.noTimesCourseKeys, sisuCourseKeys, data.linked, openTimetable, data.refreshTimetable, data.removeTimetable],
+  );
   const popoverView = useMemo(
     () => ({ showAllSessions, openGroups, close: closePopover }),
     [showAllSessions, openGroups, closePopover],
@@ -155,7 +183,7 @@ const CalendarView: React.FC = () => {
   const popoverModel = usePopoverModel(popover?.session ?? null, data, badges, sessionsById, actions, popoverView);
 
   const status = data.isLoading ? 'loading' : data.error ? 'error' : data.courses.length === 0 ? 'emptyTerm' : null;
-  const inspectorOpen = inspectorSeries.length > 0 || pickerCourse != null;
+  const inspectorOpen = inspectorSeries.length > 0 || pickerCourse != null || timetableCourse != null;
 
   return (
     <div className="-mx-6 -mt-6 flex h-[calc(100dvh-3rem)] flex-col gap-4 overflow-hidden px-6 pt-6 pb-6">
@@ -181,6 +209,7 @@ const CalendarView: React.FC = () => {
           courses={data.courses}
           courseUnits={data.courseUnits}
           plans={data.plans}
+          timetables={timetables}
           showCancelled={prefs.calendarShowCancelled}
           onSelectDate={setAnchorKey}
           onShowCancelledChange={(value) => setPrefs({ calendarShowCancelled: value })}
@@ -189,7 +218,14 @@ const CalendarView: React.FC = () => {
           onDismissPrompt={(courseKey, setId) => actions.dismiss(courseKey, promptId(setId))}
         />
         <Panel
-          footer={<ProvenanceFooter updatedAt={data.updatedAt} isFetching={data.isFetching} onRefresh={data.refetch} />}
+          footer={
+            <ProvenanceFooter
+              updatedAt={data.updatedAt}
+              isFetching={data.isFetching}
+              linkedCount={Object.keys(data.linked).length}
+              onRefresh={data.refetch}
+            />
+          }
         >
           <CalendarToolbar
             rangeLabel={formatWeekRange(weekKeys[0], weekKeys[6], locale)}
@@ -217,6 +253,7 @@ const CalendarView: React.FC = () => {
                 badges={badges}
                 rooms={data.rooms}
                 courseUnits={data.courseUnits}
+                linkedLabels={linkedLabels}
                 activeSessionId={popover?.session.id ?? null}
                 locale={locale}
                 onSelect={selectSession}
@@ -252,6 +289,21 @@ const CalendarView: React.FC = () => {
             onClose={closeInspector}
           />
         )}
+        {timetableCourse && (
+          <TimetableInspector
+            key={timetableCourse.realisationId}
+            course={timetableCourse}
+            code={timetableCourse.courseUnitId ? (data.courseUnits[timetableCourse.courseUnitId]?.code ?? null) : null}
+            range={data.range}
+            existingUrl={data.linked[timetableCourse.realisationId]?.url ?? null}
+            locale={locale}
+            onSave={(link) => {
+              data.saveTimetable(timetableCourse.realisationId, link);
+              closeInspector();
+            }}
+            onClose={closeInspector}
+          />
+        )}
       </div>
       {popover && popoverSeriesKey && popoverSummary && popoverModel && (
         <EventPopover
@@ -263,6 +315,7 @@ const CalendarView: React.FC = () => {
           courseUnit={popover.session.courseUnitId ? data.courseUnits[popover.session.courseUnitId] : undefined}
           locale={locale}
           model={popoverModel}
+          linkedState={popover.session.source === 'linked' ? data.linked[popover.session.courseKey] : undefined}
           onClose={closePopover}
         />
       )}

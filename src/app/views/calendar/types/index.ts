@@ -14,4 +14,6 @@ export type { SessionBadge } from './SessionBadge.type';
 export type { SessionChip } from './SessionChip.type';
 export type { Size } from './Size.type';
 export type { SwapSuggestionModel } from './SwapSuggestionModel.type';
+export type { TimetableControls } from './TimetableControls.type';
+export type { TimetableDraft } from './TimetableDraft.type';
 export type { WeekModel } from './WeekModel.type';

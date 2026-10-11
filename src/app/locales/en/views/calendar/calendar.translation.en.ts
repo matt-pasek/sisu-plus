@@ -38,6 +38,8 @@ export type CalendarTranslation = {
     nextMonth: string;
     showCourse: string;
     chooseGroup: string;
+    noTimes: string;
+    addTimetable: string;
   };
   prompt: {
     question: string;
@@ -61,6 +63,8 @@ export type CalendarTranslation = {
     clashesWith: string;
     otherTimes: string;
     alternativeChip: string;
+    fromSource: string;
+    fromSourcePlain: string;
   };
   suggestion: {
     free: string;
@@ -90,6 +94,42 @@ export type CalendarTranslation = {
   footer: {
     source: string;
     updated: string;
+    sourceWithLinked_one: string;
+    sourceWithLinked_other: string;
+  };
+  linked: {
+    unreachable: string;
+    retry: string;
+    refresh: string;
+    edit: string;
+    remove: string;
+    sisuHasTimes: string;
+  };
+  timetable: {
+    title: string;
+    label: string;
+    preview: string;
+    save: string;
+    cancel: string;
+    loading: string;
+    needsPermission: string;
+    allow: string;
+    waiting: string;
+    summary_one: string;
+    summary_other: string;
+    pattern: string;
+    matched: string;
+    firstOnly_one: string;
+    firstOnly_other: string;
+    recentOnly: string;
+    empty: string;
+    errors: {
+      invalid: string;
+      permission: string;
+      network: string;
+      notCalendar: string;
+      tooLarge: string;
+    };
   };
   states: {
     loading: string;
@@ -174,6 +214,8 @@ export const calendarTranslation: CalendarTranslation = {
     nextMonth: 'Next month',
     showCourse: 'Show {{course}} in the calendar',
     chooseGroup: 'Choose tutorial group',
+    noTimes: 'Sisu has no times for this course',
+    addTimetable: 'Add timetable link',
   },
   prompt: {
     question: 'Go to one of these each week?',
@@ -197,6 +239,8 @@ export const calendarTranslation: CalendarTranslation = {
     clashesWith: 'Clashes with {{names}} in {{count}} of {{total}} sessions',
     otherTimes: 'Other times this week',
     alternativeChip: 'Alternative',
+    fromSource: 'From {{source}} · updated {{time}}',
+    fromSourcePlain: 'From {{source}}',
   },
   suggestion: {
     free: '{{group}} on {{date}} {{start}}–{{end}} is free this week',
@@ -226,6 +270,42 @@ export const calendarTranslation: CalendarTranslation = {
   footer: {
     source: 'Times from Sisu',
     updated: 'updated {{time}}',
+    sourceWithLinked_one: 'Times from Sisu and {{count}} linked timetable',
+    sourceWithLinked_other: 'Times from Sisu and {{count}} linked timetables',
+  },
+  linked: {
+    unreachable: 'Timetable link unreachable',
+    retry: 'Retry',
+    refresh: 'Refresh',
+    edit: 'Edit link',
+    remove: 'Remove link',
+    sisuHasTimes: 'Sisu now has times for this course',
+  },
+  timetable: {
+    title: 'Timetable link',
+    label: 'Timetable link (TimeEdit, or any calendar link ending in .ics)',
+    preview: 'Preview',
+    save: 'Save',
+    cancel: 'Cancel',
+    loading: 'Loading timetable',
+    needsPermission: 'Sisu+ needs permission to read {{host}}',
+    allow: 'Allow',
+    waiting: 'Waiting for permission…',
+    summary_one: '{{count}} session · {{first}}–{{last}}',
+    summary_other: '{{count}} sessions · {{first}}–{{last}}',
+    pattern: 'Mostly {{pattern}}',
+    matched: '{{matched}} of {{total}} events mention {{code}}',
+    firstOnly_one: '{{count}} repeating event shown once',
+    firstOnly_other: '{{count}} repeating events shown once',
+    recentOnly: '{{source}} only shares recent and upcoming sessions',
+    empty: 'No sessions in this term',
+    errors: {
+      invalid: "That doesn't look like a calendar link. Paste a https link to a TimeEdit page or an .ics file.",
+      permission: 'Sisu+ is not allowed to read this site.',
+      network: 'The timetable could not be reached.',
+      notCalendar: 'That link did not return a calendar.',
+      tooLarge: 'That calendar is too large to load.',
+    },
   },
   states: {
     loading: 'Loading calendar',

@@ -27,6 +27,7 @@ interface Props {
   badges: Map<string, SessionBadge>;
   rooms: Record<string, RoomInfo>;
   courseUnits: Record<string, CourseUnitInfo>;
+  linkedLabels: Record<string, string>;
   activeSessionId: string | null;
   locale: string;
   onSelect: (session: Session, element: HTMLElement) => void;
@@ -46,6 +47,7 @@ export const WeekGrid: React.FC<Props> = ({
   badges,
   rooms,
   courseUnits,
+  linkedLabels,
   activeSessionId,
   locale,
   onSelect,
@@ -137,6 +139,7 @@ export const WeekGrid: React.FC<Props> = ({
             badges={badges}
             rooms={rooms}
             courseUnits={courseUnits}
+            linkedLabels={linkedLabels}
             activeSessionId={activeSessionId}
             locale={locale}
             onSelect={onSelect}

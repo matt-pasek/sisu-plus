@@ -14,6 +14,7 @@ interface Props {
   showCancelled: boolean;
   onSelectDate: (dateKey: string) => void;
   onShowCancelledChange: (value: boolean) => void;
+  onOpenGroups: (courseKey: string, setId: string | null) => void;
 }
 
 export const CalendarSidebar: React.FC<Props> = ({
@@ -26,6 +27,7 @@ export const CalendarSidebar: React.FC<Props> = ({
   showCancelled,
   onSelectDate,
   onShowCancelledChange,
+  onOpenGroups,
 }) => (
   <aside className="hidden min-h-0 flex-col gap-4 overflow-y-auto pb-1 lg:flex">
     <MiniMonth
@@ -35,7 +37,7 @@ export const CalendarSidebar: React.FC<Props> = ({
       locale={locale}
       onSelect={onSelectDate}
     />
-    <CourseList courses={courses} courseUnits={courseUnits} />
+    <CourseList courses={courses} courseUnits={courseUnits} onOpenGroups={onOpenGroups} />
     <LayersPanel showCancelled={showCancelled} onShowCancelledChange={onShowCancelledChange} />
   </aside>
 );

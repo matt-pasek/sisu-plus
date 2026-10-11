@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { getCalendarData } from '@/app/api/dataPoints/calendar/getCalendarData';
+import { useCalendarVisibility } from '@/app/api/dataPoints/calendar/useCalendarVisibility';
 import { getStudyPeriodMap } from '@/app/api/dataPoints/getStudyPeriodMap';
 import { notify } from '@/app/components/ui/notify';
 import { PageHeader } from '@/app/components/ui/PageHeader.comp';
@@ -20,14 +21,16 @@ import { CalendarSidebar } from './components/CalendarSidebar.comp';
 import { CalendarState } from './components/CalendarState.comp';
 import { CalendarToolbar } from './components/CalendarToolbar.comp';
 import { EventPopover } from './components/EventPopover.comp';
+import { GroupPicker } from './components/GroupPicker.comp';
 import { ProvenanceFooter } from './components/ProvenanceFooter.comp';
 import { SessionsInspector } from './components/SessionsInspector.comp';
 import { WeekGrid } from './components/WeekGrid.comp';
+import { useCalendarActions } from './hooks/useCalendarActions';
 import { useCalendarKeyboard } from './hooks/useCalendarKeyboard';
 import { useNow } from './hooks/useNow';
 import { useWeekModel } from './hooks/useWeekModel';
-import type { PopoverTarget } from './types';
-import { findPeriodName, formatWeekRange, seriesOf, weekDateKeys } from './util';
+import type { InspectorState, PopoverTarget } from './types';
+import { findPeriodName, formatWeekRange, previewModel, seriesOf, weekDateKeys } from './util';
 
 const browserTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 const NO_COURSE_KEYS: string[] = [];
@@ -40,13 +43,35 @@ const CalendarView: React.FC = () => {
   const today = todayKey(now);
   const [anchorKey, setAnchorKey] = useState(today);
   const [popover, setPopover] = useState<PopoverTarget | null>(null);
-  const [inspectorSeriesKey, setInspectorSeriesKey] = useState<string | null>(null);
+  const [inspector, setInspector] = useState<InspectorState | null>(null);
+  const [previewGroupId, setPreviewGroupId] = useState<string | null>(null);
+  const inspectorSeriesKey = inspector?.type === 'sessions' ? inspector.seriesKey : null;
+  const pickerCourseKey = inspector?.type === 'groups' ? inspector.courseKey : null;
+  const candidateCourseKeys = useMemo(() => (pickerCourseKey ? [pickerCourseKey] : NO_COURSE_KEYS), [pickerCourseKey]);
   const gridRef = useRef<HTMLDivElement>(null);
   const onPlanWriteError = useCallback(() => notify.error(t('plan.saveFailed')), [t]);
-  const data = getCalendarData(anchorKey, { candidateCourseKeys: NO_COURSE_KEYS, onPlanWriteError });
+  const data = getCalendarData(anchorKey, { candidateCourseKeys, onPlanWriteError });
+  const onVisibilityError = useCallback(() => notify.error(t('visibility.failed')), [t]);
+  const visibility = useCalendarVisibility(onVisibilityError);
+  const actions = useCalendarActions(data.updatePlan, visibility.mutate);
   const { studyPeriodMap } = getStudyPeriodMap();
 
   const weekKeys = useMemo(() => weekDateKeys(anchorKey), [anchorKey]);
+  const preview = useMemo(
+    () =>
+      previewModel(
+        data.candidates,
+        data.attended,
+        data.groups,
+        pickerCourseKey ? previewGroupId : null,
+        weekKeys[0],
+        addDaysToDateKey(weekKeys[6], 1),
+      ),
+    [data.candidates, data.attended, data.groups, pickerCourseKey, previewGroupId, weekKeys],
+  );
+  const pickerCourse = pickerCourseKey
+    ? data.courses.find((course) => course.realisationId === pickerCourseKey)
+    : undefined;
   const weekNumber = isoWeekNumber(weekKeys[0]);
   const { weekSessions, weekAlternatives, weekClashes, weekSessionIds, badges, knownSessions, sessionsById } =
     useWeekModel(data, weekKeys, prefs.calendarShowCancelled);
@@ -86,7 +111,7 @@ const CalendarView: React.FC = () => {
   }, [today]);
   const closeOverlays = useCallback(() => {
     if (popover) setPopover(null);
-    else setInspectorSeriesKey(null);
+    else setInspector(null);
   }, [popover]);
 
   useCalendarKeyboard({
@@ -110,13 +135,21 @@ const CalendarView: React.FC = () => {
     setPopover({ session, element });
   };
 
-  const showAllSessions = (seriesKey: string) => {
-    setInspectorSeriesKey(seriesKey);
+  const showAllSessions = useCallback((seriesKey: string) => {
+    setInspector({ type: 'sessions', seriesKey });
     setPopover(null);
-  };
+  }, []);
+  const openGroups = useCallback((courseKey: string, setId: string | null) => {
+    setPopover(null);
+    setInspector({ type: 'groups', courseKey, setId });
+  }, []);
+  const closeInspector = useCallback(() => {
+    setInspector(null);
+    setPreviewGroupId(null);
+  }, []);
 
   const status = data.isLoading ? 'loading' : data.error ? 'error' : data.courses.length === 0 ? 'emptyTerm' : null;
-  const inspectorOpen = inspectorSeries.length > 0;
+  const inspectorOpen = inspectorSeries.length > 0 || pickerCourse != null;
 
   return (
     <div className="-mx-6 -mt-6 flex h-[calc(100dvh-3rem)] flex-col gap-4 overflow-hidden px-6 pt-6 pb-6">
@@ -144,6 +177,7 @@ const CalendarView: React.FC = () => {
           showCancelled={prefs.calendarShowCancelled}
           onSelectDate={setAnchorKey}
           onShowCancelledChange={(value) => setPrefs({ calendarShowCancelled: value })}
+          onOpenGroups={openGroups}
         />
         <Panel
           footer={<ProvenanceFooter updatedAt={data.updatedAt} isFetching={data.isFetching} onRefresh={data.refetch} />}
@@ -167,6 +201,8 @@ const CalendarView: React.FC = () => {
                 now={now}
                 sessions={weekSessions}
                 alternatives={weekAlternatives}
+                preview={preview.sessions}
+                previewClashIds={preview.clashIds}
                 sessionsById={sessionsById}
                 clashesBySession={data.clashesBySession}
                 badges={badges}
@@ -180,7 +216,7 @@ const CalendarView: React.FC = () => {
             </div>
           )}
         </Panel>
-        {inspectorOpen && (
+        {inspectorSeries.length > 0 && (
           <SessionsInspector
             series={inspectorSeries}
             clashesBySession={data.clashesBySession}
@@ -188,7 +224,23 @@ const CalendarView: React.FC = () => {
             rooms={data.rooms}
             now={now}
             locale={locale}
-            onClose={() => setInspectorSeriesKey(null)}
+            onClose={closeInspector}
+          />
+        )}
+        {pickerCourse && inspector?.type === 'groups' && (
+          <GroupPicker
+            course={pickerCourse}
+            focusSetId={inspector.setId}
+            candidates={data.candidates}
+            attended={data.attended}
+            plan={data.plans[pickerCourse.realisationId]}
+            rooms={data.rooms}
+            isLoading={data.candidatesLoading}
+            isFailed={data.candidatesFailed}
+            locale={locale}
+            actions={actions}
+            onPreview={setPreviewGroupId}
+            onClose={closeInspector}
           />
         )}
       </div>

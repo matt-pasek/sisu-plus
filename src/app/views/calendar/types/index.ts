@@ -1,7 +1,10 @@
 export type { AnchorRect } from './AnchorRect.type';
+export type { CalendarActions } from './CalendarActions.type';
 export type { IconProps } from './IconProps.type';
+export type { InspectorState } from './InspectorState.type';
 export type { PopoverPlacement } from './PopoverPlacement.type';
 export type { PopoverTarget } from './PopoverTarget.type';
+export type { PreviewModel } from './PreviewModel.type';
 export type { RoomLabels } from './RoomLabels.type';
 export type { SessionBadge } from './SessionBadge.type';
 export type { SessionChip } from './SessionChip.type';

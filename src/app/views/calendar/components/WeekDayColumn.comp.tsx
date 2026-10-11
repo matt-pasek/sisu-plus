@@ -23,6 +23,8 @@ interface Props {
   now: Date;
   sessions: Session[];
   alternatives: Session[];
+  preview: Session[];
+  previewClashIds: Set<string>;
   sessionsById: Map<string, Session>;
   hourRange: HourRange;
   hourHeight: number;
@@ -42,6 +44,8 @@ export const WeekDayColumn: React.FC<Props> = ({
   now,
   sessions,
   alternatives,
+  preview,
+  previewClashIds,
   sessionsById,
   hourRange,
   hourHeight,
@@ -55,7 +59,7 @@ export const WeekDayColumn: React.FC<Props> = ({
   onSelect,
 }) => {
   const { t } = useTranslationWithPrefix('views.calendar');
-  const layout = useMemo(() => layoutDay(sessions), [sessions]);
+  const layout = useMemo(() => layoutDay([...sessions, ...preview]), [sessions, preview]);
   const alternativeLayout = useMemo(() => layoutDay(alternatives), [alternatives]);
   const roomLabels = { noRoom: t('event.noRoom'), unavailable: t('event.roomUnavailable') };
   const nowMinutes = helsinkiMinutesOfDay(now);
@@ -136,6 +140,22 @@ export const WeekDayColumn: React.FC<Props> = ({
             badge={badge}
             badgeLabel={badge ? t(`sessions.chips.${badge}`) : null}
             onSelect={onSelect}
+          />
+        );
+      })}
+      {preview.map((session) => {
+        const placement = layout.placements[session.id];
+        if (!placement) return null;
+        const box = sessionBox(session, hourRange, hourHeight);
+        return (
+          <AlternativeBlock
+            key={`preview-${session.id}`}
+            session={session}
+            placement={placement}
+            box={{ ...box, top: box.top + inset }}
+            variant="preview"
+            isClashing={previewClashIds.has(session.id)}
+            ariaLabel=""
           />
         );
       })}

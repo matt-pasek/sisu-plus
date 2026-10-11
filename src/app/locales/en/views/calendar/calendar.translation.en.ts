@@ -83,6 +83,31 @@ export type CalendarTranslation = {
   plan: {
     saveFailed: string;
   };
+  groups: {
+    title: string;
+    choose: string;
+    count_one: string;
+    count_other: string;
+    usualHint: string;
+    usual: string;
+    showInCalendar: string;
+    useGroup: string;
+    sessions_one: string;
+    sessions_other: string;
+    fitsAll: string;
+    clashes: string;
+    noSessions: string;
+    sameAs: string;
+    sharesWith: string;
+    stillShown: string;
+    hideThatToo: string;
+    changeInSisu: string;
+    loading: string;
+    failed: string;
+  };
+  visibility: {
+    failed: string;
+  };
 };
 
 export const calendarTranslation: CalendarTranslation = {
@@ -169,5 +194,30 @@ export const calendarTranslation: CalendarTranslation = {
   },
   plan: {
     saveFailed: "Couldn't save that change. It only lasts until you leave this page.",
+  },
+  groups: {
+    title: 'Groups',
+    choose: 'choose {{max}} of {{count}}',
+    count_one: '{{count}} group',
+    count_other: '{{count}} groups',
+    usualHint: 'Pick the group you usually go to. The others become alternatives you can swap to.',
+    usual: 'Usual',
+    showInCalendar: 'Show in calendar',
+    useGroup: 'Use this group',
+    sessions_one: '{{count}} session',
+    sessions_other: '{{count}} sessions',
+    fitsAll: 'Fits all {{count}}',
+    clashes: 'Clashes {{count}} of {{total}} · {{names}}',
+    noSessions: 'No sessions this term',
+    sameAs: 'Same sessions as {{name}}',
+    sharesWith: 'Shares {{count}} sessions with {{name}}',
+    stillShown: 'Still shown through {{names}}',
+    hideThatToo: 'Hide that too',
+    changeInSisu: 'Change this in Sisu',
+    loading: 'Loading groups',
+    failed: 'Group times could not be loaded.',
+  },
+  visibility: {
+    failed: "Sisu didn't accept the change. Try again.",
   },
 };

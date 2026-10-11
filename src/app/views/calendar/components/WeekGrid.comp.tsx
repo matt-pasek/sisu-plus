@@ -20,6 +20,8 @@ interface Props {
   now: Date;
   sessions: Session[];
   alternatives: Session[];
+  preview: Session[];
+  previewClashIds: Set<string>;
   sessionsById: Map<string, Session>;
   clashesBySession: Map<string, Clash[]>;
   badges: Map<string, SessionBadge>;
@@ -37,6 +39,8 @@ export const WeekGrid: React.FC<Props> = ({
   now,
   sessions,
   alternatives,
+  preview,
+  previewClashIds,
   sessionsById,
   clashesBySession,
   badges,
@@ -52,8 +56,8 @@ export const WeekGrid: React.FC<Props> = ({
   const headerRef = useRef<HTMLDivElement>(null);
   const viewportHeight = useElementHeight(scrollRef);
   const hourRange = useMemo(
-    () => visibleHourRange([...sessions, ...alternatives], DEFAULT_HOURS),
-    [sessions, alternatives],
+    () => visibleHourRange([...sessions, ...alternatives, ...preview], DEFAULT_HOURS),
+    [sessions, alternatives, preview],
   );
   const days = useMemo(
     () =>
@@ -61,8 +65,9 @@ export const WeekGrid: React.FC<Props> = ({
         dateKey,
         sessions: sessionsOnDay(sessions, dateKey),
         alternatives: sessionsOnDay(alternatives, dateKey),
+        preview: sessionsOnDay(preview, dateKey),
       })),
-    [weekKeys, sessions, alternatives],
+    [weekKeys, sessions, alternatives, preview],
   );
   const weekendEmpty = days.slice(WEEKDAYS).every((day) => day.sessions.length === 0 && day.alternatives.length === 0);
   const columns = weekendEmpty ? days.slice(0, WEEKDAYS) : days;
@@ -114,7 +119,7 @@ export const WeekGrid: React.FC<Props> = ({
             showNowLabel ? { top: minutesToOffset(nowMinutes, hourRange, hourHeight), text: formatClock(now) } : null
           }
         />
-        {columns.map(({ dateKey, sessions: daySessions, alternatives: dayAlternatives }) => (
+        {columns.map(({ dateKey, sessions: daySessions, alternatives: dayAlternatives, preview: dayPreview }) => (
           <WeekDayColumn
             key={dateKey}
             dateKey={dateKey}
@@ -122,6 +127,8 @@ export const WeekGrid: React.FC<Props> = ({
             now={now}
             sessions={daySessions}
             alternatives={dayAlternatives}
+            preview={dayPreview}
+            previewClashIds={previewClashIds}
             sessionsById={sessionsById}
             hourRange={hourRange}
             hourHeight={hourHeight}

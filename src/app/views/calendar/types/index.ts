@@ -1,6 +1,8 @@
+export type { AgendaModel } from './AgendaModel.type';
 export type { AnchorRect } from './AnchorRect.type';
 export type { CalendarActions } from './CalendarActions.type';
 export type { CalendarView } from './CalendarView.type';
+export type { Countdown } from './Countdown.type';
 export type { GroupContext } from './GroupContext.type';
 export type { HeavyWeek } from './HeavyWeek.type';
 export type { IconProps } from './IconProps.type';

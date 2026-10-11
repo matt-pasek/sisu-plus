@@ -1,3 +1,4 @@
+export * from './agenda';
 export * from './dates';
 export * from './format';
 export * from './geometry';

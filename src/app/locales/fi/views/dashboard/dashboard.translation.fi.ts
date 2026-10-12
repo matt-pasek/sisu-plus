@@ -78,6 +78,7 @@ export const dashboardTranslation: DashboardTranslation = {
       closeEditor: 'Sulje etusivun muokkaus',
       grow: 'Suurenna {{title}}',
       noSpace: 'Ei tilaa',
+      openCalendar: 'Kalenteri',
       openRegistration: 'Ilmoittautuminen',
       openTimeline: 'Aikajana',
       remove: 'Poista {{title}}',
@@ -116,6 +117,7 @@ export const dashboardTranslation: DashboardTranslation = {
       gradeTrend: 'Suoriutuminen',
       moodleDeadlines: 'Moodle',
       nextExam: 'Tentit',
+      nextClass: 'Seuraava opetus',
       recentAchievements: 'Suoritettu',
       semesterStats: 'Yhteenveto',
       timelinePeek: 'Tulossa',
@@ -136,6 +138,7 @@ export const dashboardTranslation: DashboardTranslation = {
       gradeDonut: 'Arvosanajakauma',
       creditPace: 'Opintopistetahti',
       nextExam: 'Seuraava tentti',
+      nextClass: 'Seuraava opetus',
       upcomingRegistrations: 'Tulevat ilmoittautumiset',
     },
     descriptions: {
@@ -152,6 +155,7 @@ export const dashboardTranslation: DashboardTranslation = {
       gradeDonut: 'Numeeristen arvosanojen jakauma ja keskiarvo.',
       creditPace: 'Jäljellä olevat opintopisteet ja tarvittava päivittäinen tahti.',
       nextExam: 'Lähin tuleva tentti ja kaksi seuraavaa päivämäärää.',
+      nextClass: 'Seuraava opetuksesi: sali, aikalaskuri ja päällekkäisyydet.',
       upcomingRegistrations: 'Avoimet ja tulevat kurssi-ilmoittautumiset nykyisestä Study Planista.',
     },
     courseMap: {
@@ -201,6 +205,14 @@ export const dashboardTranslation: DashboardTranslation = {
       creditsPerDay: 'Op/päivä tarvitaan',
       creditsPerDayValue: '{{value}} {{unit}}/päivä',
       degreePercent: '{{percent}} % tutkinnosta',
+    },
+    nextClass: {
+      laterToday: 'Myöhemmin tänään',
+      failed: 'Lukujärjestystä ei voitu ladata',
+      retry: 'Yritä uudelleen',
+      noneLeft: 'Ei enää opetusta tällä lukukaudella',
+      noCourses: 'Kalenterissasi ei ole opetusta',
+      openRegistration: 'Avaa ilmoittautuminen',
     },
     registration: {
       closesIn: 'Sulkeutuu {{count}} pv',

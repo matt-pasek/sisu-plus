@@ -2,6 +2,7 @@ import React from 'react';
 import { type DashboardCompletedCourse, DashboardWidgetId } from '@/app/views/dashboard/types';
 import { MoodleMissingToken } from '@/app/views/dashboard/components/MoodleMissingToken.comp';
 import { InlineLoader } from '@/app/components/ui/InlineLoader.comp';
+import { NextClassContent } from '@/app/views/dashboard/components/widget/contents/NextClassContent.comp';
 import { MoodleDeadlinesContent } from '@/app/views/dashboard/components/widget/contents/MoodleDeadlinesContent.comp';
 import { DegreeCompletionContent } from '@/app/views/dashboard/components/widget/contents/DegreeCompletionContent.comp';
 import { ActiveCoursesContent } from '@/app/views/dashboard/components/widget/contents/ActiveCoursesContent.comp';
@@ -120,6 +121,10 @@ const WIDGETS: Record<
         studyRightEndDate={ctx.studyRightEndDate}
       />
     ),
+  },
+  'next-class': {
+    loading: () => false,
+    render: () => <NextClassContent />,
   },
   'next-exam': {
     loading: (ctx) => ctx.registrationCoursesLoading,

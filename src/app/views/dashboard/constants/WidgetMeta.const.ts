@@ -21,6 +21,7 @@ export const WIDGET_META: Record<DashboardWidgetId, WidgetMeta> = {
   'grade-donut': { icon: 'donut', eyebrowKey: 'gradeDonut' },
   'credit-pace': { icon: 'pace', eyebrowKey: 'creditPace' },
   'next-exam': { icon: 'exam', eyebrowKey: 'nextExam' },
+  'next-class': { icon: 'clock', eyebrowKey: 'nextClass' },
   'upcoming-registrations': { icon: 'registration', eyebrowKey: 'upcomingRegistrations' },
   'course-map': { icon: 'map', eyebrowKey: 'courseMap' },
 };

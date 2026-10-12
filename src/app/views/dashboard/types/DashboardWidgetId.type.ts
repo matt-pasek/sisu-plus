@@ -11,5 +11,6 @@ export type DashboardWidgetId =
   | 'grade-donut'
   | 'credit-pace'
   | 'next-exam'
+  | 'next-class'
   | 'upcoming-registrations'
   | 'course-map';

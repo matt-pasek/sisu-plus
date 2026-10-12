@@ -20,6 +20,9 @@ export interface WidgetBadgeContext {
 export const getWidgetBadge = (id: DashboardWidgetId, ctx: WidgetBadgeContext): React.ReactNode => {
   const { t, navigate, selectedPlanId, missingToken, registrationCourses, completedCourses } = ctx;
 
+  if (id === 'next-class') {
+    return <HeaderLink onClick={() => navigate('/student/calendar')}>{t('widgets.actions.openCalendar')}</HeaderLink>;
+  }
   if (id === 'next-exam') {
     return (
       <HeaderLink onClick={() => navigate('/student/enrolments')}>{t('widgets.actions.openRegistration')}</HeaderLink>

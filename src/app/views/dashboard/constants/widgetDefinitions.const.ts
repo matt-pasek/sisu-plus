@@ -101,6 +101,14 @@ export const DASHBOARD_WIDGETS: DashboardWidgetDefinition[] = [
     maxSize: { w: 4, h: 4 },
   },
   {
+    id: 'next-class',
+    title: 'Next Class',
+    description: 'Your next class with its room, a countdown and any clash.',
+    size: { w: 3, h: 3 },
+    minSize: { w: 3, h: 3 },
+    maxSize: { w: 4, h: 5 },
+  },
+  {
     id: 'upcoming-registrations',
     title: 'Upcoming Registrations',
     description: 'Open and upcoming course registrations from the current Study Plan.',
@@ -120,11 +128,12 @@ export const DASHBOARD_WIDGETS: DashboardWidgetDefinition[] = [
 
 export const DEFAULT_DASHBOARD_LAYOUT: DashboardWidgetLayout[] = [
   { id: 'degree-completion', x: 0, y: 0, w: 7, h: 4 },
-  { id: 'moodle-deadlines', x: 7, y: 0, w: 3, h: 5 },
+  { id: 'next-class', x: 7, y: 0, w: 3, h: 3 },
+  { id: 'moodle-deadlines', x: 7, y: 3, w: 3, h: 5 },
   { id: 'active-courses', x: 0, y: 4, w: 7, h: 4 },
-  { id: 'semester-stats', x: 7, y: 5, w: 3, h: 3 },
   { id: 'grade-trend', x: 0, y: 8, w: 5, h: 4 },
   { id: 'credits-velocity', x: 5, y: 8, w: 5, h: 3 },
+  { id: 'semester-stats', x: 7, y: 11, w: 3, h: 3 },
 ];
 
 export const DASHBOARD_WIDGET_IDS = new Set(DASHBOARD_WIDGETS.map((widget) => widget.id));

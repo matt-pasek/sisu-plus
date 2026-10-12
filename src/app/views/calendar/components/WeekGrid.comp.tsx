@@ -10,7 +10,7 @@ import {
   type Session,
 } from '@/app/schedule';
 import { useElementHeight } from '../hooks/useElementHeight';
-import type { NoteSlot, SessionBadge } from '../types';
+import type { AnchorRect, NoteSlot, SessionBadge } from '../types';
 import { fitHourHeight, formatClock, minutesToOffset, sessionsOnDay, slotBlock } from '../util';
 import { HourGutter } from './HourGutter.comp';
 import { WeekDayColumn } from './WeekDayColumn.comp';
@@ -45,6 +45,7 @@ interface Props {
   locale: string;
   onSelect: (session: Session, element: HTMLElement) => void;
   onSelectNote: (note: NoteOccurrence, element: HTMLElement) => void;
+  onDraft: (slot: NoteSlot, anchor: AnchorRect) => void;
   onUserScroll: () => void;
 }
 
@@ -72,6 +73,7 @@ export const WeekGrid: React.FC<Props> = ({
   locale,
   onSelect,
   onSelectNote,
+  onDraft,
   onUserScroll,
 }) => {
   const { t } = useTranslationWithPrefix('views.calendar');
@@ -190,6 +192,7 @@ export const WeekGrid: React.FC<Props> = ({
               locale={locale}
               onSelect={onSelect}
               onSelectNote={onSelectNote}
+              onDraft={(times, anchor) => onDraft({ dateKey, ...times }, anchor)}
             />
           ),
         )}

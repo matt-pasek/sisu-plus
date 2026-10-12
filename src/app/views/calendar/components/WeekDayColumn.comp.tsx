@@ -11,7 +11,8 @@ import {
   type Session,
   type TimedBlock,
 } from '@/app/schedule';
-import type { SessionBadge } from '../types';
+import { useNoteDrag } from '../hooks/useNoteDrag';
+import type { AnchorRect, SessionBadge } from '../types';
 import {
   describeRoom,
   describeRoomShort,
@@ -22,6 +23,7 @@ import {
   minutesToOffset,
   sessionBox,
   sessionRoom,
+  slotBlock,
 } from '../util';
 import { AlternativeBlock } from './AlternativeBlock.comp';
 import { NoteBlock } from './NoteBlock.comp';
@@ -54,6 +56,7 @@ interface Props {
   locale: string;
   onSelect: (session: Session, element: HTMLElement) => void;
   onSelectNote: (note: NoteOccurrence, element: HTMLElement) => void;
+  onDraft: (times: { startMinutes: number; endMinutes: number }, anchor: AnchorRect) => void;
 }
 
 export const WeekDayColumn: React.FC<Props> = ({
@@ -81,11 +84,17 @@ export const WeekDayColumn: React.FC<Props> = ({
   locale,
   onSelect,
   onSelectNote,
+  onDraft,
 }) => {
   const { t } = useTranslationWithPrefix('views.calendar');
+  const { liveTimes, handlers } = useNoteDrag({ hourRange, hourHeight, inset, onDraft });
+  const shownDraft = useMemo(
+    () => (liveTimes ? slotBlock({ dateKey, ...liveTimes }) : draft),
+    [liveTimes, draft, dateKey],
+  );
   const layout = useMemo(
-    () => layoutDay([...sessions, ...preview, ...notes, ...(draft ? [draft] : [])]),
-    [sessions, preview, notes, draft],
+    () => layoutDay([...sessions, ...preview, ...notes, ...(shownDraft ? [shownDraft] : [])]),
+    [sessions, preview, notes, shownDraft],
   );
   const notesById = useMemo(() => new Map(notes.map((note) => [note.id, note])), [notes]);
   const alternativeLayout = useMemo(() => layoutDay(alternatives), [alternatives]);
@@ -95,8 +104,8 @@ export const WeekDayColumn: React.FC<Props> = ({
   const inOverflowCluster = (block: TimedBlock): boolean =>
     layout.overflow.some((slot) => block.start < slot.end && block.end > slot.start);
 
-  const draftBox = draft ? sessionBox(draft, hourRange, hourHeight) : null;
-  const draftPlacement = draft ? layout.placements[draft.id] : undefined;
+  const draftBox = shownDraft ? sessionBox(shownDraft, hourRange, hourHeight) : null;
+  const draftPlacement = shownDraft ? layout.placements[shownDraft.id] : undefined;
 
   const ariaLabelFor = (session: Session, room: string, clashes: Clash[]): string => {
     const base = t('aria.session', {
@@ -122,6 +131,7 @@ export const WeekDayColumn: React.FC<Props> = ({
         backgroundImage: `repeating-linear-gradient(to bottom, rgba(34,34,40,0.8) 0, rgba(34,34,40,0.8) 1px, transparent 1px, transparent ${hourHeight}px)`,
         backgroundPosition: `0 ${inset}px`,
       }}
+      {...handlers}
     >
       {alternatives.map((session) => {
         const placement = alternativeLayout.placements[session.id];
@@ -208,13 +218,13 @@ export const WeekDayColumn: React.FC<Props> = ({
           />
         );
       })}
-      {draft && draftBox && draftPlacement && (
+      {shownDraft && draftBox && draftPlacement && (
         <NoteBlock
           placement={draftPlacement}
           box={{ ...draftBox, top: draftBox.top + inset }}
           reservedRight={0}
           title={draftTitle}
-          timeLabel={`${formatClock(draft.start)}–${formatClock(draft.end)}`}
+          timeLabel={`${formatClock(shownDraft.start)}–${formatClock(shownDraft.end)}`}
           ariaLabel=""
           variant="draft"
           isPast={false}

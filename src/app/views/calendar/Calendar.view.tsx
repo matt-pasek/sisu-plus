@@ -17,8 +17,6 @@ import {
   seriesKeyOf,
   summarizeSeriesClashes,
   todayKey,
-  type NoteOccurrence,
-  type Session,
 } from '@/app/schedule';
 import { CalendarBody } from './components/CalendarBody.comp';
 import { CalendarHeaderActions } from './components/CalendarHeaderActions.comp';
@@ -32,6 +30,7 @@ import { ProvenanceFooter } from './components/ProvenanceFooter.comp';
 import { useCalendarActions } from './hooks/useCalendarActions';
 import { useCalendarKeyboard } from './hooks/useCalendarKeyboard';
 import { useCalendarLayers } from './hooks/useCalendarLayers';
+import { useCalendarSelection } from './hooks/useCalendarSelection';
 import { useCalendarNavigation } from './hooks/useCalendarNavigation';
 import { useNewNote } from './hooks/useNewNote';
 import { useNoteController } from './hooks/useNoteController';
@@ -182,25 +181,7 @@ const CalendarView: React.FC = () => {
     onNewNote: newNoteFromKeyboard,
   });
 
-  const { closePopover: closeNotePopover, openNote } = notes;
-  const selectSession = useCallback(
-    (session: Session, element: HTMLElement) => {
-      closeNotePopover();
-      setPopover({ session, element });
-    },
-    [closeNotePopover],
-  );
-  const selectNote = useCallback(
-    (note: NoteOccurrence, element: HTMLElement) => {
-      setPopover(null);
-      openNote(note, element);
-    },
-    [openNote],
-  );
-  const closeTransient = useCallback(() => {
-    setPopover(null);
-    closeNotePopover();
-  }, [closeNotePopover]);
+  const { selectSession, selectNote, draftNote, closeTransient } = useCalendarSelection({ notes, setPopover });
 
   // The app renders inside a shadow root, so document.querySelector cannot reach session blocks.
   const showFirstClash = () => {
@@ -349,6 +330,7 @@ const CalendarView: React.FC = () => {
                 onOpenWeek={openWeek}
                 onSelect={selectSession}
                 onSelectNote={selectNote}
+                onDraft={draftNote}
                 onUserScroll={closeTransient}
               />
             </div>

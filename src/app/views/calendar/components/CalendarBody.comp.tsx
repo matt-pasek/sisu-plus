@@ -3,7 +3,7 @@ import type { CalendarData } from '@/app/api/dataPoints/calendar/types';
 import type { StudyPeriodInfo } from '@/app/api/dataPoints/getStudyPeriodMap';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import type { NoteOccurrence, Session } from '@/app/schedule';
-import type { CalendarView, NoteSlot, PreviewModel, WeekModel } from '../types';
+import type { AnchorRect, CalendarView, NoteSlot, PreviewModel, WeekModel } from '../types';
 import { monthStartKey } from '../util';
 import { MonthView } from './MonthView.comp';
 import { YearView } from './YearView.comp';
@@ -30,6 +30,7 @@ interface Props {
   onOpenWeek: (dateKey: string) => void;
   onSelect: (session: Session, element: HTMLElement) => void;
   onSelectNote: (note: NoteOccurrence, element: HTMLElement) => void;
+  onDraft: (slot: NoteSlot, anchor: AnchorRect) => void;
   onUserScroll: () => void;
 }
 
@@ -54,6 +55,7 @@ export const CalendarBody: React.FC<Props> = ({
   onOpenWeek,
   onSelect,
   onSelectNote,
+  onDraft,
   onUserScroll,
 }) => {
   const { t } = useTranslationWithPrefix('views.calendar');
@@ -102,6 +104,7 @@ export const CalendarBody: React.FC<Props> = ({
       locale={locale}
       onSelect={onSelect}
       onSelectNote={onSelectNote}
+      onDraft={onDraft}
       onUserScroll={onUserScroll}
     />
   );

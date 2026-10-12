@@ -3,7 +3,7 @@
 import { describe, expect, test } from 'bun:test';
 
 import type { CalendarEvent } from '@/app/api/generated/IlmoApi';
-import { applyNoteChange, withoutId } from './noteCache';
+import { applyNoteChange, noteStillExists, withoutId } from './noteCache';
 
 const note = (id: string, name = 'Note'): CalendarEvent => ({
   id,
@@ -33,5 +33,13 @@ describe('applyNoteChange', () => {
 
   test('withoutId strips the temporary id before POST', () => {
     expect(JSON.parse(JSON.stringify(withoutId(note('pending-1')))).id).toBeUndefined();
+  });
+});
+
+describe('noteStillExists', () => {
+  test('finds a note in any cached range and ignores empty caches', () => {
+    expect(noteStillExists([undefined, [note('a'), note('b')]], 'b')).toBe(true);
+    expect(noteStillExists([undefined, [note('a')]], 'b')).toBe(false);
+    expect(noteStillExists([], 'b')).toBe(false);
   });
 });

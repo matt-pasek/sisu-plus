@@ -15,3 +15,6 @@ export const applyNoteChange = (events: CalendarEvent[], change: NoteChange): Ca
 };
 
 export const withoutId = (event: CalendarEvent): CalendarEvent => ({ ...event, id: undefined });
+
+export const noteStillExists = (lists: (CalendarEvent[] | undefined)[], noteId: string): boolean =>
+  lists.some((events) => events?.some((event) => event.id === noteId) ?? false);

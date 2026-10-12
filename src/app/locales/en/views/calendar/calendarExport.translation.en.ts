@@ -74,7 +74,7 @@ export const calendarExportTranslation: CalendarExportTranslation = {
   moodleTitle: 'Moodle deadlines feed',
   moodleHint: 'Subscribe to this link too to see deadlines in your calendar app.',
   reset: 'Reset link',
-  resetQuestion: "Old subscriptions stop updating; you'll add the new link again.",
+  resetQuestion: 'This link stops working; add the new one to your calendar app again.',
   resetConfirm: 'Reset',
   resetCancel: 'Cancel',
   resetDone: 'New link created.',

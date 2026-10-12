@@ -41,7 +41,7 @@ export const calendarExportTranslation: CalendarExportTranslation = {
   moodleTitle: 'Moodlen määräajat',
   moodleHint: 'Tilaa tämäkin linkki, niin määräajat näkyvät kalenterisovelluksessasi.',
   reset: 'Luo uusi linkki',
-  resetQuestion: 'Vanhat tilaukset lakkaavat päivittymästä, ja uusi linkki pitää lisätä uudelleen.',
+  resetQuestion: 'Tämä linkki lakkaa toimimasta; lisää uusi linkki kalenterisovellukseesi uudelleen.',
   resetConfirm: 'Luo uusi',
   resetCancel: 'Peruuta',
   resetDone: 'Uusi linkki luotu.',

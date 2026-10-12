@@ -1,5 +1,5 @@
 import React from 'react';
-import type { CalendarCourse, CalendarData } from '@/app/api/dataPoints/calendar/types';
+import type { CalendarCourse, CalendarData, CalendarDeadline } from '@/app/api/dataPoints/calendar/types';
 import type { NoteOccurrence, Session } from '@/app/schedule';
 import type { CalendarActions, InspectorState, SessionBadge } from '../types';
 import { DayAgenda } from './DayAgenda.comp';
@@ -17,6 +17,7 @@ interface Props {
   badges: Map<string, SessionBadge>;
   sessionsById: Map<string, Session>;
   notes: NoteOccurrence[];
+  deadlines: CalendarDeadline[];
   actions: CalendarActions;
   anchorKey: string;
   todayKey: string;
@@ -36,6 +37,7 @@ export const CalendarInspector: React.FC<Props> = ({
   badges,
   sessionsById,
   notes,
+  deadlines,
   actions,
   anchorKey,
   todayKey,
@@ -100,6 +102,7 @@ export const CalendarInspector: React.FC<Props> = ({
         rooms={data.rooms}
         range={data.range}
         notes={notes}
+        deadlines={deadlines}
         locale={locale}
       />
     )}

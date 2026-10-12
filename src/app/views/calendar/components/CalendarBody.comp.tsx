@@ -74,7 +74,16 @@ export const CalendarBody: React.FC<Props> = ({
     [dayKeys, periods, deadlines],
   );
   if (view === 'year') {
-    return <YearView data={data} todayKey={todayKey} periods={periods} locale={locale} onOpenWeek={onOpenWeek} />;
+    return (
+      <YearView
+        data={data}
+        deadlines={deadlines}
+        todayKey={todayKey}
+        periods={periods}
+        locale={locale}
+        onOpenWeek={onOpenWeek}
+      />
+    );
   }
   if (view === 'month') {
     return (
@@ -86,6 +95,7 @@ export const CalendarBody: React.FC<Props> = ({
         periods={periods}
         showCancelled={showCancelled}
         notes={notes}
+        deadlines={deadlines}
         locale={locale}
         onOpenDay={onOpenDay}
         onOpenWeek={onOpenWeek}

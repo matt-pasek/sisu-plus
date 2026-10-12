@@ -2,6 +2,7 @@
 
 import { describe, expect, test } from 'bun:test';
 
+import { buildDeadline } from '@/app/api/dataPoints/calendar/__fixtures__/buildDeadline';
 import { findClashes, type Session } from '@/app/schedule';
 import { buildNote } from '@/app/schedule/__fixtures__/buildNote';
 import { buildSession } from '@/app/schedule/__fixtures__/buildSession';
@@ -19,6 +20,7 @@ const input = (overrides: Partial<MonthInput> = {}): MonthInput => ({
   roomChangeIds: new Set(),
   showCancelled: false,
   notes: [],
+  deadlines: [],
   ...overrides,
 });
 
@@ -141,5 +143,13 @@ describe('month notes', () => {
     const cell = cellOf(monthWeeks(input({ notes: [buildNote('dentist', '2026-10-21', 14, 15)] })), '2026-10-21');
     expect(cell?.minutes).toBe(0);
     expect(cell?.shape).toEqual([]);
+  });
+});
+
+describe('month deadlines', () => {
+  test('each deadline gets a line on its day', () => {
+    const weeks = monthWeeks(input({ deadlines: [buildDeadline('report', '2026-10-23', 23.98)] }));
+    const lines = cellOf(weeks, '2026-10-23')?.exceptions ?? [];
+    expect(lines.find((line) => line.kind === 'deadline')).toMatchObject({ deadline: { id: 'report' } });
   });
 });

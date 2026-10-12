@@ -1,3 +1,4 @@
+import type { CalendarDeadline } from '@/app/api/dataPoints/calendar/types';
 import type { Clash, Holiday, NoteOccurrence, Session } from '@/app/schedule';
 
 export type MonthException =
@@ -8,4 +9,5 @@ export type MonthException =
   | { kind: 'periodStart'; name: string }
   | { kind: 'holiday'; holiday: Holiday }
   | { kind: 'noTeaching' }
-  | { kind: 'note'; note: NoteOccurrence };
+  | { kind: 'note'; note: NoteOccurrence }
+  | { kind: 'deadline'; deadline: CalendarDeadline };

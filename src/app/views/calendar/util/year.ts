@@ -34,6 +34,10 @@ export const yearWeeks = (input: YearInput): YearWeek[] => {
   const clashDays = new Set(input.clashes.map((clash) => helsinkiDateKey(clash.start)));
   const holidays = new Map(input.holidays.map((holiday) => [holiday.dateKey, holiday]));
   const currentWeek = startOfWeekKey(input.todayKey);
+  const deadlineCounts = input.deadlines.reduce(
+    (counts, deadline) => new Map(counts).set(deadline.dateKey, (counts.get(deadline.dateKey) ?? 0) + 1),
+    new Map<string, number>(),
+  );
   return Array.from({ length: count }, (_, weekIndex) => {
     const weekKey = addDaysToDateKey(first, weekIndex * 7);
     return {
@@ -54,6 +58,7 @@ export const yearWeeks = (input: YearInput): YearWeek[] => {
           clash: inYear && clashDays.has(dateKey),
           holiday: inYear ? (holidays.get(dateKey) ?? null) : null,
           isToday: dateKey === input.todayKey,
+          deadlines: inYear ? (deadlineCounts.get(dateKey) ?? 0) : 0,
         };
       }),
     };

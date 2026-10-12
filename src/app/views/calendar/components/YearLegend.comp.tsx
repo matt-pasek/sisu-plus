@@ -33,6 +33,12 @@ export const YearLegend: React.FC = () => {
         />
         {t('year.holiday')}
       </span>
+      <span className="inline-flex items-center gap-1.5">
+        <span className={`${SWATCH} ${LOAD_LEVEL_CLASS[0]}`}>
+          <span className="absolute top-[2px] right-[2px] size-[3px] rounded-full bg-offwhite/85" />
+        </span>
+        {t('deadlines.legend')}
+      </span>
     </div>
   );
 };

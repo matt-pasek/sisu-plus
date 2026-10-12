@@ -1,12 +1,13 @@
 import React, { useMemo } from 'react';
-import type { RoomInfo } from '@/app/api/dataPoints/calendar/types';
+import type { CalendarDeadline, RoomInfo } from '@/app/api/dataPoints/calendar/types';
 import { Panel } from '@/app/components/ui/Panel.comp';
 import { PanelEyebrow } from '@/app/components/ui/PanelEyebrow.comp';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { addDaysToDateKey, type Clash, type DateRange, type NoteOccurrence, type Session } from '@/app/schedule';
-import { agendaFor, formatSessionDate, joinNames, mergeDay, sessionRoom } from '../util';
+import { agendaFor, dueSoon, formatSessionDate, joinNames, mergeDay, sessionRoom } from '../util';
 import { AgendaNoteRow } from './AgendaNoteRow.comp';
 import { AgendaRow } from './AgendaRow.comp';
+import { DueSoonList } from './DueSoonList.comp';
 import { NextClassCard } from './NextClassCard.comp';
 
 interface Props {
@@ -20,6 +21,7 @@ interface Props {
   rooms: Record<string, RoomInfo>;
   range: DateRange;
   notes: NoteOccurrence[];
+  deadlines: CalendarDeadline[];
   locale: string;
 }
 
@@ -34,6 +36,7 @@ export const DayAgenda: React.FC<Props> = ({
   rooms,
   range,
   notes,
+  deadlines,
   locale,
 }) => {
   const { t } = useTranslationWithPrefix('views.calendar');
@@ -51,6 +54,7 @@ export const DayAgenda: React.FC<Props> = ({
       ),
     [agenda.day, notes, dateKey],
   );
+  const soon = useMemo(() => dueSoon(deadlines, now), [deadlines, now]);
   const isToday = dateKey === todayKey;
   const clashNamesOf = (session: Session): string | null => {
     const names = (clashesBySession.get(session.id) ?? [])
@@ -121,6 +125,7 @@ export const DayAgenda: React.FC<Props> = ({
             </div>
           )}
         </section>
+        <DueSoonList deadlines={soon} todayKey={todayKey} locale={locale} />
         {agenda.following && followingLabel && (
           <section>
             <PanelEyebrow>{followingLabel}</PanelEyebrow>

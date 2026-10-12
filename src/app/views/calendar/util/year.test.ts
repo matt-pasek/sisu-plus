@@ -2,6 +2,7 @@
 
 import { describe, expect, test } from 'bun:test';
 
+import { buildDeadline } from '@/app/api/dataPoints/calendar/__fixtures__/buildDeadline';
 import { findClashes } from '@/app/schedule';
 import { buildSession } from '@/app/schedule/__fixtures__/buildSession';
 import type { YearInput } from '../types';
@@ -25,6 +26,7 @@ const input = (overrides: Partial<YearInput> = {}): YearInput => ({
   attended: [],
   clashes: [],
   holidays: [],
+  deadlines: [],
   ...overrides,
 });
 
@@ -148,5 +150,22 @@ describe('footer helpers', () => {
       { isEnrolled: false, plannedPeriods: [period('2026-09-01', '2026-10-26')] },
     ];
     expect(plannedCourseCount(courses, spring)).toBe(1);
+  });
+});
+
+describe('year deadlines', () => {
+  test('counts deadlines per weekday cell inside the year', () => {
+    const weeks = yearWeeks(
+      input({
+        deadlines: [
+          buildDeadline('a', '2026-10-23', 23.98),
+          buildDeadline('b', '2026-10-23', 12),
+          buildDeadline('outside', '2027-08-03', 12),
+        ],
+      }),
+    );
+    const day = weeks.flatMap((week) => week.days).find((item) => item.dateKey === '2026-10-23');
+    expect(day?.deadlines).toBe(2);
+    expect(weeks.flatMap((week) => week.days).reduce((sum, item) => sum + item.deadlines, 0)).toBe(2);
   });
 });

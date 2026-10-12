@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import type { CalendarData } from '@/app/api/dataPoints/calendar/types';
+import type { CalendarData, CalendarDeadline } from '@/app/api/dataPoints/calendar/types';
 import type { StudyPeriodInfo } from '@/app/api/dataPoints/getStudyPeriodMap';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { addDaysToDateKey, holidaysInRange, noTeachingWeeks, type NoteOccurrence, type Session } from '@/app/schedule';
@@ -14,6 +14,7 @@ interface Props {
   periods: StudyPeriodInfo[];
   showCancelled: boolean;
   notes: NoteOccurrence[];
+  deadlines: CalendarDeadline[];
   locale: string;
   onOpenDay: (dateKey: string) => void;
   onOpenWeek: (dateKey: string) => void;
@@ -27,6 +28,7 @@ export const MonthView: React.FC<Props> = ({
   periods,
   showCancelled,
   notes,
+  deadlines,
   locale,
   onOpenDay,
   onOpenWeek,
@@ -46,8 +48,9 @@ export const MonthView: React.FC<Props> = ({
       roomChangeIds: roomChangeIds(data.attended),
       showCancelled,
       notes,
+      deadlines,
     });
-  }, [data.attended, data.clashes, data.range, monthKey, todayKey, periods, showCancelled, notes]);
+  }, [data.attended, data.clashes, data.range, monthKey, todayKey, periods, showCancelled, notes, deadlines]);
 
   return (
     <div className="min-h-0 flex-1 overflow-y-auto bg-background">

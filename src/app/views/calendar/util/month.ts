@@ -65,6 +65,9 @@ const exceptionsFor = (
     ? [{ kind: 'noTeaching' } as const]
     : []),
   ...live.filter((session) => session.kind === 'exam').map((session): MonthException => ({ kind: 'exam', session })),
+  ...input.deadlines
+    .filter((deadline) => deadline.dateKey === dateKey)
+    .map((deadline): MonthException => ({ kind: 'deadline', deadline })),
   ...clashes.map((clash): MonthException => ({ kind: 'clash', clash })),
   ...live
     .filter((session) => input.roomChangeIds.has(session.id))

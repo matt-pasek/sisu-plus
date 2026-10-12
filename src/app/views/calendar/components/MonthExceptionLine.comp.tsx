@@ -3,7 +3,7 @@ import type { RoomInfo } from '@/app/api/dataPoints/calendar/types';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import type { Session } from '@/app/schedule';
 import type { MonthException } from '../types';
-import { describeRoomShort, formatClock } from '../util';
+import { deadlineColor, describeRoomShort, formatClock } from '../util';
 import { ArrowRightIcon, CalendarIcon, CrossIcon, DiamondIcon, NoteIcon, PinIcon, WarningIcon } from './icons';
 
 const ICON = 'size-[11px] shrink-0';
@@ -79,6 +79,22 @@ export const MonthExceptionLine: React.FC<Props> = ({ exception, sessionsById, r
           className: 'bg-lighterGreen/[0.07] text-[#9be3bb]',
           icon: <NoteIcon className={ICON} />,
           text: t('notes.monthLine', { time: formatClock(exception.note.start), name: exception.note.name }),
+          struck: false,
+        };
+      case 'deadline':
+        return {
+          className: 'bg-offwhite/5 text-offwhite',
+          icon: (
+            <span
+              aria-hidden="true"
+              className="size-[7px] shrink-0 rounded-full"
+              style={{ backgroundColor: deadlineColor(exception.deadline) }}
+            />
+          ),
+          text: t('deadlines.monthLine', {
+            time: formatClock(exception.deadline.dueAt),
+            title: exception.deadline.title,
+          }),
           struck: false,
         };
     }

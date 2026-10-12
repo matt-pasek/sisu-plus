@@ -356,6 +356,7 @@ const CalendarView: React.FC = () => {
           badges={badges}
           sessionsById={sessionsById}
           notes={shownNotes}
+          deadlines={shownDeadlines}
           actions={actions}
           anchorKey={anchorKey}
           todayKey={today}

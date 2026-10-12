@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import type { CalendarData } from '@/app/api/dataPoints/calendar/types';
+import type { CalendarData, CalendarDeadline } from '@/app/api/dataPoints/calendar/types';
 import type { StudyPeriodInfo } from '@/app/api/dataPoints/getStudyPeriodMap';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { holidaysInRange, noTeachingWeeks } from '@/app/schedule';
@@ -18,13 +18,14 @@ import { YearLegend } from './YearLegend.comp';
 
 interface Props {
   data: CalendarData;
+  deadlines: CalendarDeadline[];
   todayKey: string;
   periods: StudyPeriodInfo[];
   locale: string;
   onOpenWeek: (dateKey: string) => void;
 }
 
-export const YearView: React.FC<Props> = ({ data, todayKey, periods, locale, onOpenWeek }) => {
+export const YearView: React.FC<Props> = ({ data, deadlines, todayKey, periods, locale, onOpenWeek }) => {
   const { t } = useTranslationWithPrefix('views.calendar');
   const noTeachingLabel = t('year.noTeaching');
   const model = useMemo(() => {
@@ -34,6 +35,7 @@ export const YearView: React.FC<Props> = ({ data, todayKey, periods, locale, onO
       attended: data.attended,
       clashes: data.clashes,
       holidays: holidaysInRange(data.range),
+      deadlines,
     });
     return {
       weeks,
@@ -44,7 +46,7 @@ export const YearView: React.FC<Props> = ({ data, todayKey, periods, locale, onO
       heaviest: heaviestWeeks(weeks),
       emptyTerm: emptyFutureTerm(data.range, data.attended, todayKey),
     };
-  }, [data.range, data.attended, data.clashes, periods, todayKey, locale, noTeachingLabel]);
+  }, [data.range, data.attended, data.clashes, deadlines, periods, todayKey, locale, noTeachingLabel]);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-y-auto bg-background">

@@ -10,4 +10,5 @@ export interface YearDay {
   clash: boolean;
   holiday: Holiday | null;
   isToday: boolean;
+  deadlines: number;
 }

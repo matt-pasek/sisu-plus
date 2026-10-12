@@ -1,3 +1,4 @@
+import type { CalendarDeadline } from '@/app/api/dataPoints/calendar/types';
 import type { Clash, Holiday, NoteOccurrence, Session } from '@/app/schedule';
 
 export interface MonthInput {
@@ -11,4 +12,5 @@ export interface MonthInput {
   roomChangeIds: Set<string>;
   showCancelled: boolean;
   notes: NoteOccurrence[];
+  deadlines: CalendarDeadline[];
 }

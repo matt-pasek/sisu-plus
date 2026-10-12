@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useShareLink } from '@/app/api/dataPoints/calendar/useShareLink';
+import { getUserDetails } from '@/app/api/dataPoints/getUserDetails';
 import { notify } from '@/app/components/ui/notify';
 import { Panel } from '@/app/components/ui/Panel.comp';
 import { PanelEyebrow } from '@/app/components/ui/PanelEyebrow.comp';
@@ -22,7 +23,8 @@ interface Props {
 export const ExportInspector: React.FC<Props> = ({ moodleUrl, locale, onConnectMoodle, onClose }) => {
   const { t } = useTranslationWithPrefix('views.calendar');
   const [confirming, setConfirming] = useState(false);
-  const link = useShareLink(shareLanguage(locale), {
+  const { userDetails } = getUserDetails();
+  const link = useShareLink(userDetails?.id ?? null, shareLanguage(locale), {
     onResetDone: () => notify.success(t('exportPanel.resetDone')),
     onResetFailed: () => notify.error(t('exportPanel.resetFailed')),
   });
@@ -118,7 +120,12 @@ export const ExportInspector: React.FC<Props> = ({ moodleUrl, locale, onConnectM
                 </button>
               </>
             ) : (
-              <button type="button" onClick={() => setConfirming(true)} className={`${LINK_BUTTON} text-lightGrey`}>
+              <button
+                type="button"
+                disabled={link.isResetting}
+                onClick={() => setConfirming(true)}
+                className={`${LINK_BUTTON} text-lightGrey disabled:cursor-wait disabled:opacity-50`}
+              >
                 {t('exportPanel.reset')}
               </button>
             )}

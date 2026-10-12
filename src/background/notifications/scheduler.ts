@@ -1,6 +1,12 @@
 import { parseIcsCalendar } from '@ts-ics/schema-zod';
 import type { IcsEvent } from 'ts-ics';
 import { fetchMoodleCalendar } from '@/background/moodle/moodleFetch';
+import { classReminderPayload } from '@/background/notifications/classReminderPayload';
+import {
+  classReminderAlarms,
+  isClassReminderSnapshot,
+  parseClassReminderAlarm,
+} from '@/background/notifications/classReminders';
 import { deliverNotification } from '@/background/notifications/delivery';
 import { getNotificationPrefs } from '@/background/notifications/prefs';
 import { getNotificationCache, patchNotificationCache, setNotificationCache } from '@/background/notifications/storage';
@@ -121,7 +127,19 @@ export const scheduleNotificationAlarms = async () => {
     scheduledAlarms.push(SISU_SYNC_CHECK_ALARM);
   }
 
+  for (const alarm of classReminderAlarms(cache.calendar, prefs, Date.now())) {
+    const name = await createAlarm(alarm.name, alarm.when);
+    if (name) scheduledAlarms.push(name);
+  }
+
   await setNotificationCache({ ...cache, scheduledAlarms });
+};
+
+export const syncClassReminders = async (payload: unknown): Promise<boolean> => {
+  if (!isClassReminderSnapshot(payload)) return false;
+  await patchNotificationCache((cache) => ({ ...cache, calendar: payload }));
+  await scheduleNotificationAlarms();
+  return true;
 };
 
 export const refreshMoodleDeadlines = async () => {
@@ -241,6 +259,13 @@ export const handleNotificationAlarm = async (alarmName: string) => {
     getBackgroundLocale(),
   ]);
   const s = getNotificationStrings(locale);
+
+  const classAlarm = parseClassReminderAlarm(alarmName);
+  if (classAlarm) {
+    const payload = classReminderPayload(cache.calendar, classAlarm, Date.now(), s);
+    if (payload) await deliverNotification(payload);
+    return;
+  }
 
   if (alarmName === SISU_SYNC_CHECK_ALARM) {
     const payload = getSisuSyncPayload(cache, s);

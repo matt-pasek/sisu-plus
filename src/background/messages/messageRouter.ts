@@ -6,7 +6,11 @@ import {
   getNotificationCache,
   queueUnreadNotification,
 } from '@/background/notifications/storage';
-import { scheduleNotificationAlarms, syncSisuNotificationCache } from '@/background/notifications/scheduler';
+import {
+  scheduleNotificationAlarms,
+  syncClassReminders,
+  syncSisuNotificationCache,
+} from '@/background/notifications/scheduler';
 import type { SisuNotificationSyncPayload } from '@/background/notifications/types';
 import { clearSessionForOrigin, syncRuntimeForConfig } from '@/background/runtime/sisuRuntime';
 import { stashResume, takeResume } from '@/background/session/resumeStore';
@@ -134,6 +138,14 @@ export const createMessageRouter =
     if (message.type === 'SYNC_SISU_NOTIFICATION_CACHE') {
       syncSisuNotificationCache(message.payload as SisuNotificationSyncPayload)
         .then(() => sendResponse({ ok: true }))
+        .catch((err) => sendResponse({ ok: false, err }));
+
+      return true;
+    }
+
+    if (message.type === 'SYNC_CLASS_REMINDERS') {
+      syncClassReminders(message.payload)
+        .then((ok) => sendResponse({ ok }))
         .catch((err) => sendResponse({ ok: false, err }));
 
       return true;

@@ -1,4 +1,5 @@
 import type { UniversityConfig } from '@/app/types/universityConfig';
+import { notificationTargetPath, shouldQueueUnread } from '@/background/notifications/deliveryRules';
 import { getNotificationPrefs } from '@/background/notifications/prefs';
 import { queueUnreadNotification } from '@/background/notifications/storage';
 import type {
@@ -9,10 +10,10 @@ import type {
 
 const getNotificationId = (payload: NotificationPayload) => `sisu-plus-notification:${payload.type}:${payload.eventId}`;
 
-const getSisuDashboardUrl = async (): Promise<string | null> => {
+const getSisuUrl = async (path: string): Promise<string | null> => {
   const { universityConfig } = await chrome.storage.sync.get('universityConfig');
   const config = (universityConfig as UniversityConfig | null) ?? null;
-  return config ? `${config.sisuOrigin}/student/frontpage` : null;
+  return config ? `${config.sisuOrigin}${path}` : null;
 };
 
 const getSisuTabs = async (): Promise<chrome.tabs.Tab[]> => {
@@ -59,7 +60,7 @@ export const deliverNotification = async (payload: NotificationPayload): Promise
   const desktopSent = shouldSendDesktop ? await sendDesktopNotification(payload) : false;
   const visibleTabCount = shouldSendInApp ? await sendInAppNotification(payload) : 0;
 
-  if (shouldSendInApp && visibleTabCount === 0 && !desktopSent) {
+  if (shouldQueueUnread(payload.type, mode, visibleTabCount, desktopSent)) {
     const queued: QueuedInAppNotification = {
       ...payload,
       createdAt: Date.now(),
@@ -73,8 +74,8 @@ export const deliverNotification = async (payload: NotificationPayload): Promise
   return { desktopSent, mode, visibleTabCount };
 };
 
-export const openNotificationTarget = async () => {
-  const url = await getSisuDashboardUrl();
+export const openNotificationTarget = async (notificationId: string) => {
+  const url = await getSisuUrl(notificationTargetPath(notificationId));
   if (!url) return;
 
   const tabs = await getSisuTabs();

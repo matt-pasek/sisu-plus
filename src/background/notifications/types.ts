@@ -30,6 +30,7 @@ export interface NotificationCache {
     registrations: CachedRegistrationEvent[];
   };
   unread: QueuedInAppNotification[];
+  calendar: ClassReminderSnapshot | null;
 }
 
 export interface NotificationPayload {

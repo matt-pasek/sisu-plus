@@ -55,5 +55,5 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
 chrome.notifications.onClicked.addListener((notificationId) => {
   if (!notificationId.startsWith('sisu-plus-notification')) return;
-  void openNotificationTarget();
+  void openNotificationTarget(notificationId);
 });

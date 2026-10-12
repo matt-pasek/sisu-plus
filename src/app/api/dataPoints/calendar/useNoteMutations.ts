@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient, type QueryKey } from '@tanstack/react-query';
 import { createCalendarEvent, removeCalendarEvent, updateCalendarEvent } from '@/app/api/endpoints/calendarEvents';
 import type { CalendarEvent } from '@/app/api/generated/IlmoApi';
-import { applyNoteChange, noteStillExists, NOTES_KEY, withoutId } from './noteCache';
+import { applyNoteChange, deleteFailed, NOTES_KEY, withoutId } from './noteCache';
 import type { NoteChange } from './types';
 
 type Snapshot = [QueryKey, CalendarEvent[] | undefined][];
@@ -33,13 +33,21 @@ export const useNoteMutations = (onError: (change: NoteChange) => void) => {
       return snapshot;
     },
     onError: async (_error, change, snapshot) => {
-      snapshot?.forEach(([key, events]) => queryClient.setQueryData(key, events));
-      // Sisu answers DELETE with 503 even when the note is gone, so fresh data decides whether it failed.
-      if (change.type === 'delete') {
-        await queryClient.refetchQueries({ queryKey: NOTES_KEY });
-        const lists = queryClient.getQueriesData<CalendarEvent[]>({ queryKey: NOTES_KEY }).map(([, events]) => events);
-        if (!noteStillExists(lists, change.noteId)) return;
+      const restore = () => snapshot?.forEach(([key, events]) => queryClient.setQueryData(key, events));
+      if (change.type !== 'delete') {
+        restore();
+        onError(change);
+        return;
       }
+      // Sisu answers DELETE with 503 even when the note is gone, so fresh data decides; restoring first would flash it back.
+      await queryClient.refetchQueries({ queryKey: NOTES_KEY });
+      const refetchFailed = queryClient
+        .getQueryCache()
+        .findAll({ queryKey: NOTES_KEY })
+        .some((query) => query.state.status === 'error');
+      const lists = queryClient.getQueriesData<CalendarEvent[]>({ queryKey: NOTES_KEY }).map(([, events]) => events);
+      if (!deleteFailed(lists, refetchFailed, change.noteId)) return;
+      if (refetchFailed) restore();
       onError(change);
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: NOTES_KEY }),

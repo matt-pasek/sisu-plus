@@ -3,7 +3,7 @@
 import { describe, expect, test } from 'bun:test';
 
 import type { CalendarEvent } from '@/app/api/generated/IlmoApi';
-import { applyNoteChange, noteStillExists, withoutId } from './noteCache';
+import { applyNoteChange, deleteFailed, noteStillExists, withoutId } from './noteCache';
 
 const note = (id: string, name = 'Note'): CalendarEvent => ({
   id,
@@ -41,5 +41,13 @@ describe('noteStillExists', () => {
     expect(noteStillExists([undefined, [note('a'), note('b')]], 'b')).toBe(true);
     expect(noteStillExists([undefined, [note('a')]], 'b')).toBe(false);
     expect(noteStillExists([], 'b')).toBe(false);
+  });
+});
+
+describe('deleteFailed', () => {
+  test('a delete failed only when fresh data still lists the note or could not be fetched', () => {
+    expect(deleteFailed([[note('a')]], false, 'b')).toBe(false);
+    expect(deleteFailed([[note('a'), note('b')]], false, 'b')).toBe(true);
+    expect(deleteFailed([[note('a')]], true, 'b')).toBe(true);
   });
 });

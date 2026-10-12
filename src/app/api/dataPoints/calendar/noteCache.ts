@@ -18,3 +18,6 @@ export const withoutId = (event: CalendarEvent): CalendarEvent => ({ ...event, i
 
 export const noteStillExists = (lists: (CalendarEvent[] | undefined)[], noteId: string): boolean =>
   lists.some((events) => events?.some((event) => event.id === noteId) ?? false);
+
+export const deleteFailed = (lists: (CalendarEvent[] | undefined)[], refetchFailed: boolean, noteId: string): boolean =>
+  refetchFailed || noteStillExists(lists, noteId);

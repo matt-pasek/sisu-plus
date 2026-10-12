@@ -2,7 +2,7 @@ import React from 'react';
 import type { CalendarDeadline } from '@/app/api/dataPoints/calendar/types';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import type { AllDayItem } from '../types';
-import { formatSessionDate, splitAllDay } from '../util';
+import { allDayLimit, formatSessionDate, splitAllDay } from '../util';
 import { AllDayChip } from './AllDayChip.comp';
 
 interface Props {
@@ -31,7 +31,7 @@ export const AllDayRow: React.FC<Props> = ({
         {t('deadlines.allDay')}
       </div>
       {dayKeys.map((dateKey) => {
-        const { shown, hidden } = splitAllDay(itemsByDay[dateKey] ?? []);
+        const { shown, hidden } = splitAllDay(itemsByDay[dateKey] ?? [], allDayLimit(dayKeys.length));
         return (
           <div key={dateKey} className="flex min-w-0 flex-col gap-0.5 border-t border-l border-border px-1 py-1">
             {shown.map((item, index) => (

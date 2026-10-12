@@ -21,6 +21,8 @@ export const allDayItems = (dateKey: string, input: AllDayInput): AllDayItem[] =
 export const allDayByDay = (dayKeys: string[], input: AllDayInput): Record<string, AllDayItem[]> =>
   Object.fromEntries(dayKeys.map((dateKey) => [dateKey, allDayItems(dateKey, input)]));
 
+export const allDayLimit = (dayCount: number): number => (dayCount === 1 ? Infinity : ALL_DAY_LIMIT);
+
 export const splitAllDay = (items: AllDayItem[], limit = ALL_DAY_LIMIT): { shown: AllDayItem[]; hidden: number } => ({
   shown: items.slice(0, limit),
   hidden: Math.max(items.length - limit, 0),

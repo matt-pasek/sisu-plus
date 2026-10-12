@@ -3,7 +3,7 @@
 import { describe, expect, test } from 'bun:test';
 
 import { buildDeadline } from '@/app/api/dataPoints/calendar/__fixtures__/buildDeadline';
-import { allDayByDay, allDayItems, splitAllDay } from './allDay';
+import { allDayByDay, allDayItems, allDayLimit, splitAllDay } from './allDay';
 
 const DAY = '2026-11-02';
 const input = {
@@ -34,5 +34,16 @@ describe('splitAllDay', () => {
     const { shown, hidden } = splitAllDay(allDayItems(DAY, input));
     expect(shown).toHaveLength(3);
     expect(hidden).toBe(1);
+  });
+});
+
+describe('allDayLimit', () => {
+  test('a single day shows every item, since +N there would open the same day', () => {
+    expect(allDayLimit(1)).toBe(Infinity);
+    expect(splitAllDay(allDayItems(DAY, input), allDayLimit(1)).hidden).toBe(0);
+  });
+
+  test('a week keeps three per day', () => {
+    expect(allDayLimit(7)).toBe(3);
   });
 });

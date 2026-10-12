@@ -18,15 +18,12 @@ import {
   type Session,
 } from '@/app/schedule';
 import { CalendarBody } from './components/CalendarBody.comp';
+import { CalendarInspector } from './components/CalendarInspector.comp';
 import { CalendarSidebar } from './components/CalendarSidebar.comp';
 import { CalendarState } from './components/CalendarState.comp';
 import { CalendarToolbar } from './components/CalendarToolbar.comp';
-import { DayAgenda } from './components/DayAgenda.comp';
 import { EventPopover } from './components/EventPopover.comp';
-import { GroupPicker } from './components/GroupPicker.comp';
 import { ProvenanceFooter } from './components/ProvenanceFooter.comp';
-import { SessionsInspector } from './components/SessionsInspector.comp';
-import { TimetableInspector } from './components/TimetableInspector.comp';
 import { useCalendarActions } from './hooks/useCalendarActions';
 import { useCalendarKeyboard } from './hooks/useCalendarKeyboard';
 import { useCalendarNavigation } from './hooks/useCalendarNavigation';
@@ -312,63 +309,23 @@ const CalendarView: React.FC = () => {
             </div>
           )}
         </Panel>
-        {inspectorSeries.length > 0 && (
-          <SessionsInspector
-            series={inspectorSeries}
-            clashesBySession={data.clashesBySession}
-            badges={badges}
-            rooms={data.rooms}
-            now={now}
-            locale={locale}
-            onClose={closeInspector}
-          />
-        )}
-        {pickerCourse && inspector?.type === 'groups' && (
-          <GroupPicker
-            course={pickerCourse}
-            focusSetId={inspector.setId}
-            candidates={data.candidates}
-            attended={data.attended}
-            plan={data.plans[pickerCourse.realisationId]}
-            rooms={data.rooms}
-            isLoading={data.candidatesLoading}
-            isFailed={data.candidatesFailed}
-            locale={locale}
-            actions={actions}
-            onPreview={setPreviewGroupId}
-            onRetry={data.retryCandidates}
-            onClose={closeInspector}
-          />
-        )}
-        {timetableCourse && (
-          <TimetableInspector
-            key={timetableCourse.realisationId}
-            course={timetableCourse}
-            code={timetableCourse.courseUnitId ? (data.courseUnits[timetableCourse.courseUnitId]?.code ?? null) : null}
-            range={data.range}
-            existingUrl={data.linked[timetableCourse.realisationId]?.url ?? null}
-            locale={locale}
-            onSave={(link) => {
-              data.saveTimetable(timetableCourse.realisationId, link);
-              closeInspector();
-            }}
-            onClose={closeInspector}
-          />
-        )}
-        {showAgenda && (
-          <DayAgenda
-            dateKey={anchorKey}
-            todayKey={today}
-            now={now}
-            attended={data.attended}
-            skipped={data.skipped}
-            sessionsById={sessionsById}
-            clashesBySession={data.clashesBySession}
-            rooms={data.rooms}
-            range={data.range}
-            locale={locale}
-          />
-        )}
+        <CalendarInspector
+          inspector={inspector}
+          inspectorSeries={inspectorSeries}
+          pickerCourse={pickerCourse}
+          timetableCourse={timetableCourse}
+          showAgenda={showAgenda}
+          data={data}
+          badges={badges}
+          sessionsById={sessionsById}
+          actions={actions}
+          anchorKey={anchorKey}
+          todayKey={today}
+          now={now}
+          locale={locale}
+          onPreview={setPreviewGroupId}
+          onClose={closeInspector}
+        />
       </div>
       {popover && popoverSeriesKey && popoverSummary && popoverModel && (
         <EventPopover

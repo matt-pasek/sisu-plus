@@ -15,6 +15,7 @@ export type { MonthException } from './MonthException.type';
 export type { MonthInput } from './MonthInput.type';
 export type { MonthWeek } from './MonthWeek.type';
 export type { NoteController } from './NoteController.type';
+export type { NoteEditorState } from './NoteEditorState.type';
 export type { NotePopoverState } from './NotePopoverState.type';
 export type { NoteSlot } from './NoteSlot.type';
 export type { PopoverActionHandlers } from './PopoverActionHandlers.type';

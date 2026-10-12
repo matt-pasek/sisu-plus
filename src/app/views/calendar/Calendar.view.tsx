@@ -21,6 +21,7 @@ import {
   type Session,
 } from '@/app/schedule';
 import { CalendarBody } from './components/CalendarBody.comp';
+import { CalendarHeaderActions } from './components/CalendarHeaderActions.comp';
 import { CalendarInspector } from './components/CalendarInspector.comp';
 import { CalendarOverlays } from './components/CalendarOverlays.comp';
 import { CalendarSidebar } from './components/CalendarSidebar.comp';
@@ -32,6 +33,7 @@ import { useCalendarActions } from './hooks/useCalendarActions';
 import { useCalendarKeyboard } from './hooks/useCalendarKeyboard';
 import { useCalendarLayers } from './hooks/useCalendarLayers';
 import { useCalendarNavigation } from './hooks/useCalendarNavigation';
+import { useNewNote } from './hooks/useNewNote';
 import { useNoteController } from './hooks/useNoteController';
 import { useNow } from './hooks/useNow';
 import { usePopoverModel } from './hooks/usePopoverModel';
@@ -131,7 +133,7 @@ const CalendarView: React.FC = () => {
   const weekNumber = isoWeekNumber(weekKeys[0]);
   const weekModel = useWeekModel(data, weekKeys, prefs.calendarShowCancelled);
   const { weekClashes, weekSessionIds, badges, knownSessions, sessionsById } = weekModel;
-  const range = visibleRange(view, anchorKey);
+  const range = useMemo(() => visibleRange(view, anchorKey), [view, anchorKey]);
   const rangeClashes = view === 'week' ? weekClashes : clashesInRange(data.clashes, sessionsById, range);
   const eyebrow =
     view === 'month' ? null : view === 'year' ? t('toolbar.academicYear') : t('weekShort', { week: weekNumber });
@@ -162,12 +164,22 @@ const CalendarView: React.FC = () => {
     else setInspector(null);
   }, [notes, popover]);
 
+  const { addNoteRef, openNewNote, newNoteFromKeyboard } = useNewNote({
+    attended: data.attended,
+    notes: notesData.notes,
+    openNew: notes.openNew,
+    range,
+    todayKey: today,
+    now,
+  });
+
   useCalendarKeyboard({
     onPrevious: goToPrevious,
     onNext: goToNext,
     onToday: goToToday,
     onEscape: closeOverlays,
     onView: setView,
+    onNewNote: newNoteFromKeyboard,
   });
 
   const { closePopover: closeNotePopover, openNote } = notes;
@@ -268,6 +280,7 @@ const CalendarView: React.FC = () => {
             <span className="font-mono text-[11px] text-lightGrey">{t('timeZoneNote')}</span>
           ) : undefined
         }
+        actions={<CalendarHeaderActions addNoteRef={addNoteRef} onAddNote={openNewNote} />}
       />
       <div
         className={`grid min-h-0 flex-1 gap-4 ${
@@ -330,6 +343,8 @@ const CalendarView: React.FC = () => {
                 periods={periods}
                 showCancelled={prefs.calendarShowCancelled}
                 notes={shownNotes}
+                draft={notes.draftSlot}
+                draftTitle={notes.editor?.draft.title.trim() || t('notes.newTitle')}
                 onOpenDay={openDay}
                 onOpenWeek={openWeek}
                 onSelect={selectSession}

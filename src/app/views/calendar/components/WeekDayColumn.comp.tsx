@@ -37,6 +37,8 @@ interface Props {
   alternatives: Session[];
   preview: Session[];
   notes: NoteOccurrence[];
+  draft: TimedBlock | null;
+  draftTitle: string;
   previewClashIds: Set<string>;
   sessionsById: Map<string, Session>;
   hourRange: HourRange;
@@ -62,6 +64,8 @@ export const WeekDayColumn: React.FC<Props> = ({
   alternatives,
   preview,
   notes,
+  draft,
+  draftTitle,
   previewClashIds,
   sessionsById,
   hourRange,
@@ -79,7 +83,10 @@ export const WeekDayColumn: React.FC<Props> = ({
   onSelectNote,
 }) => {
   const { t } = useTranslationWithPrefix('views.calendar');
-  const layout = useMemo(() => layoutDay([...sessions, ...preview, ...notes]), [sessions, preview, notes]);
+  const layout = useMemo(
+    () => layoutDay([...sessions, ...preview, ...notes, ...(draft ? [draft] : [])]),
+    [sessions, preview, notes, draft],
+  );
   const notesById = useMemo(() => new Map(notes.map((note) => [note.id, note])), [notes]);
   const alternativeLayout = useMemo(() => layoutDay(alternatives), [alternatives]);
   const roomLabels = { noRoom: t('event.noRoom'), unavailable: t('event.roomUnavailable') };
@@ -87,6 +94,9 @@ export const WeekDayColumn: React.FC<Props> = ({
   const showNow = isToday && nowMinutes >= hourRange.startHour * 60 && nowMinutes <= hourRange.endHour * 60;
   const inOverflowCluster = (block: TimedBlock): boolean =>
     layout.overflow.some((slot) => block.start < slot.end && block.end > slot.start);
+
+  const draftBox = draft ? sessionBox(draft, hourRange, hourHeight) : null;
+  const draftPlacement = draft ? layout.placements[draft.id] : undefined;
 
   const ariaLabelFor = (session: Session, room: string, clashes: Clash[]): string => {
     const base = t('aria.session', {
@@ -198,6 +208,18 @@ export const WeekDayColumn: React.FC<Props> = ({
           />
         );
       })}
+      {draft && draftBox && draftPlacement && (
+        <NoteBlock
+          placement={draftPlacement}
+          box={{ ...draftBox, top: draftBox.top + inset }}
+          reservedRight={0}
+          title={draftTitle}
+          timeLabel={`${formatClock(draft.start)}–${formatClock(draft.end)}`}
+          ariaLabel=""
+          variant="draft"
+          isPast={false}
+        />
+      )}
       {preview.map((session) => {
         const placement = layout.placements[session.id];
         if (!placement) return null;

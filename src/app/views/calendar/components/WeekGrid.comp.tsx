@@ -10,8 +10,8 @@ import {
   type Session,
 } from '@/app/schedule';
 import { useElementHeight } from '../hooks/useElementHeight';
-import type { SessionBadge } from '../types';
-import { fitHourHeight, formatClock, minutesToOffset, sessionsOnDay } from '../util';
+import type { NoteSlot, SessionBadge } from '../types';
+import { fitHourHeight, formatClock, minutesToOffset, sessionsOnDay, slotBlock } from '../util';
 import { HourGutter } from './HourGutter.comp';
 import { WeekDayColumn } from './WeekDayColumn.comp';
 import { WeekDayHeader } from './WeekDayHeader.comp';
@@ -32,6 +32,8 @@ interface Props {
   alternatives: Session[];
   preview: Session[];
   notes: NoteOccurrence[];
+  draft: NoteSlot | null;
+  draftTitle: string;
   previewClashIds: Set<string>;
   sessionsById: Map<string, Session>;
   clashesBySession: Map<string, Clash[]>;
@@ -57,6 +59,8 @@ export const WeekGrid: React.FC<Props> = ({
   alternatives,
   preview,
   notes,
+  draft,
+  draftTitle,
   previewClashIds,
   sessionsById,
   clashesBySession,
@@ -75,9 +79,17 @@ export const WeekGrid: React.FC<Props> = ({
   const headerRef = useRef<HTMLDivElement>(null);
   const viewportHeight = useElementHeight(scrollRef);
   const visibleNotes = useMemo(() => notes.filter((note) => dayKeys.includes(note.dateKey)), [notes, dayKeys]);
+  const draftBlock = useMemo(
+    () => (draft && draft.endMinutes > draft.startMinutes && dayKeys.includes(draft.dateKey) ? slotBlock(draft) : null),
+    [draft, dayKeys],
+  );
   const hourRange = useMemo(
-    () => visibleHourRange([...sessions, ...alternatives, ...preview, ...visibleNotes], DEFAULT_HOURS),
-    [sessions, alternatives, preview, visibleNotes],
+    () =>
+      visibleHourRange(
+        [...sessions, ...alternatives, ...preview, ...visibleNotes, ...(draftBlock ? [draftBlock] : [])],
+        DEFAULT_HOURS,
+      ),
+    [sessions, alternatives, preview, visibleNotes, draftBlock],
   );
   const days = useMemo(
     () =>
@@ -94,7 +106,13 @@ export const WeekGrid: React.FC<Props> = ({
     collapseWeekend &&
     days
       .slice(WEEKDAYS)
-      .every((day) => day.sessions.length === 0 && day.alternatives.length === 0 && day.notes.length === 0);
+      .every(
+        (day) =>
+          day.sessions.length === 0 &&
+          day.alternatives.length === 0 &&
+          day.notes.length === 0 &&
+          day.dateKey !== draftBlock?.dateKey,
+      );
   const columns = weekendEmpty ? days.slice(0, WEEKDAYS) : days;
   const template = `52px repeat(${columns.length}, minmax(0, 1fr))${weekendEmpty ? ' 34px' : ''}`;
   const hours = Array.from({ length: hourRange.endHour - hourRange.startHour }, (_, i) => hourRange.startHour + i);
@@ -155,6 +173,8 @@ export const WeekGrid: React.FC<Props> = ({
               alternatives={dayAlternatives}
               preview={dayPreview}
               notes={dayNotes}
+              draft={draftBlock?.dateKey === dateKey ? draftBlock : null}
+              draftTitle={draftTitle}
               previewClashIds={previewClashIds}
               sessionsById={sessionsById}
               hourRange={hourRange}

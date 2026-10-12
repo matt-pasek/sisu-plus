@@ -76,7 +76,9 @@ export const toCalendarEventPayload = (draft: NoteDraft, base?: CalendarEvent): 
     exceptions: [],
   };
   const series = toNoteSeries({ ...next, id: base?.id ?? 'draft' });
-  const kept = series ? (base?.exceptions ?? []).filter((dateKey) => occursOn(series, dateKey)) : [];
+  // A one-off note's only day can itself be an exception, which would leave a note Sisu keeps but nobody sees.
+  const kept =
+    series && draft.repeat !== 'NEVER' ? (base?.exceptions ?? []).filter((dateKey) => occursOn(series, dateKey)) : [];
   return { ...next, exceptions: kept };
 };
 
@@ -94,7 +96,8 @@ const visibleDays = (event: CalendarEvent): string[] => {
   const series = toNoteSeries(event);
   if (!series) return [];
   const firstKey = helsinkiDateKey(parseSisuDateTime(series.startTime));
-  const lastKey = series.recursUntil?.slice(0, 10) ?? firstKey;
+  const lastKey =
+    series.recursUntil?.slice(0, 10) ?? (series.recursEvery === 'NEVER' ? firstKey : maxUntilKey(firstKey));
   return expandSeries(series, { startKey: firstKey, endKey: addDaysToDateKey(lastKey, 1) }).map(
     (occurrence) => occurrence.dateKey,
   );

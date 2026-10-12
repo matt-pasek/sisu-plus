@@ -221,3 +221,16 @@ describe('noteChangeFor', () => {
     expect(change.type === 'create' ? change.event.id : null).toBe('pending-1');
   });
 });
+
+describe('edits that would hide a note', () => {
+  test('turning a repeating note into a one-off clears its exceptions so the note stays visible', () => {
+    const base = event({ recursEvery: 'WEEKLY', recursUntil: '2026-11-24', exceptions: ['2026-10-20'] });
+    const once = { ...draftFromEvent(base, AUTUMN), repeat: 'NEVER' as const };
+    expect(toCalendarEventPayload(once, base).exceptions).toEqual([]);
+  });
+
+  test('only this day on a repeating note without an until date keeps the rest of the series', () => {
+    const open = event({ recursEvery: 'WEEKLY', recursUntil: undefined });
+    expect(deleteDayAction(open, '2026-10-20').type).toBe('update');
+  });
+});

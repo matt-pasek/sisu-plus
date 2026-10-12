@@ -157,6 +157,7 @@ export const getCalendarData = (anchorKey: string, options: CalendarDataOptions)
     pool,
     groups,
     plans,
+    plansLoaded,
     updatePlan,
     linked: linked.states,
     noTimesCourseKeys,

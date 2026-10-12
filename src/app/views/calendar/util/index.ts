@@ -10,6 +10,7 @@ export * from './navigation';
 export * from './noteForm';
 export * from './noteSlots';
 export * from './popover';
+export * from './reminders';
 export * from './rooms';
 export * from './sessions';
 export * from './share';

@@ -29,6 +29,7 @@ import { CalendarToolbar } from './components/CalendarToolbar.comp';
 import { EventPopover } from './components/EventPopover.comp';
 import { ProvenanceFooter } from './components/ProvenanceFooter.comp';
 import { useCalendarActions } from './hooks/useCalendarActions';
+import { useClassReminderSync } from './hooks/useClassReminderSync';
 import { useCalendarKeyboard } from './hooks/useCalendarKeyboard';
 import { useCalendarLayers } from './hooks/useCalendarLayers';
 import { useCalendarSelection } from './hooks/useCalendarSelection';
@@ -105,6 +106,7 @@ const CalendarView: React.FC = () => {
     onPlanWriteError,
     span: view === 'year' ? 'academicYear' : 'term',
   });
+  useClassReminderSync(data, now);
   const notesData = useCalendarNotes(data.range);
   const onNoteFailed = useCallback((change: NoteChange) => notify.error(t(`notes.failed.${change.type}`)), [t]);
   const notes = useNoteController(notesData.events, data.range, onNoteFailed);

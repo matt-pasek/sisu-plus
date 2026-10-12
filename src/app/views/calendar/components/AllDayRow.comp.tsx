@@ -27,7 +27,7 @@ export const AllDayRow: React.FC<Props> = ({
   const { t } = useTranslationWithPrefix('views.calendar');
   return (
     <>
-      <div className="flex justify-end border-t border-border pt-1.5 pr-2 font-mono text-[9.5px] tracking-[0.06em] text-darkishGrey uppercase">
+      <div className="flex justify-end border-t border-border pt-1.5 pr-2 font-mono text-[9px] whitespace-nowrap text-darkishGrey uppercase">
         {t('deadlines.allDay')}
       </div>
       {dayKeys.map((dateKey) => {

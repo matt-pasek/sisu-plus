@@ -11,7 +11,7 @@ import {
 } from '@/app/schedule';
 import { useElementHeight } from '../hooks/useElementHeight';
 import type { AllDayItem, AnchorRect, NoteSlot, SessionBadge } from '../types';
-import { fitHourHeight, formatClock, minutesToOffset, sessionsOnDay, slotBlock } from '../util';
+import { fitHourHeight, formatClock, minutesToOffset, sessionsOnDay, slotBlock, weekendHasContent } from '../util';
 import { AllDayRow } from './AllDayRow.comp';
 import { HourGutter } from './HourGutter.comp';
 import { WeekDayColumn } from './WeekDayColumn.comp';
@@ -113,15 +113,11 @@ export const WeekGrid: React.FC<Props> = ({
   );
   const weekendEmpty =
     collapseWeekend &&
-    days
-      .slice(WEEKDAYS)
-      .every(
-        (day) =>
-          day.sessions.length === 0 &&
-          day.alternatives.length === 0 &&
-          day.notes.length === 0 &&
-          day.dateKey !== draftBlock?.dateKey,
-      );
+    !weekendHasContent(
+      dayKeys.slice(WEEKDAYS),
+      [...sessions, ...alternatives, ...visibleNotes, ...(draftBlock ? [draftBlock] : [])],
+      allDay,
+    );
   const columns = weekendEmpty ? days.slice(0, WEEKDAYS) : days;
   const template = `52px repeat(${columns.length}, minmax(0, 1fr))${weekendEmpty ? ' 34px' : ''}`;
   const hours = Array.from({ length: hourRange.endHour - hourRange.startHour }, (_, i) => hourRange.startHour + i);

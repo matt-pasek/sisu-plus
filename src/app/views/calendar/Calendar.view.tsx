@@ -225,6 +225,10 @@ const CalendarView: React.FC = () => {
     setPopover(null);
     setInspector({ type: 'timetable', courseKey });
   }, []);
+  const openExport = useCallback(() => {
+    setPopover(null);
+    setInspector({ type: 'export' });
+  }, []);
   const timetableCourse =
     inspector?.type === 'timetable'
       ? data.courses.find((course) => course.realisationId === inspector.courseKey)
@@ -255,7 +259,8 @@ const CalendarView: React.FC = () => {
   const popoverModel = usePopoverModel(popover?.session ?? null, data, badges, sessionsById, actions, popoverView);
 
   const status = data.isLoading ? 'loading' : data.error ? 'error' : data.courses.length === 0 ? 'emptyTerm' : null;
-  const explicitInspector = inspectorSeries.length > 0 || pickerCourse != null || timetableCourse != null;
+  const explicitInspector =
+    inspectorSeries.length > 0 || pickerCourse != null || timetableCourse != null || inspector?.type === 'export';
   const showAgenda = view === 'day' && !explicitInspector;
   const inspectorOpen = explicitInspector || showAgenda;
 
@@ -269,7 +274,7 @@ const CalendarView: React.FC = () => {
             <span className="font-mono text-[11px] text-lightGrey">{t('timeZoneNote')}</span>
           ) : undefined
         }
-        actions={<CalendarHeaderActions addNoteRef={addNoteRef} onAddNote={openNewNote} />}
+        actions={<CalendarHeaderActions addNoteRef={addNoteRef} onAddNote={openNewNote} onExport={openExport} />}
       />
       <div
         className={`grid min-h-0 flex-1 gap-4 ${
@@ -362,6 +367,8 @@ const CalendarView: React.FC = () => {
           todayKey={today}
           now={now}
           locale={locale}
+          moodleUrl={prefs.moodleToken}
+          onConnectMoodle={layers.onConnectMoodle}
           onPreview={setPreviewGroupId}
           onClose={closeInspector}
         />

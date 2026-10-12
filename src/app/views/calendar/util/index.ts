@@ -12,5 +12,6 @@ export * from './noteSlots';
 export * from './popover';
 export * from './rooms';
 export * from './sessions';
+export * from './share';
 export * from './timetable';
 export * from './year';

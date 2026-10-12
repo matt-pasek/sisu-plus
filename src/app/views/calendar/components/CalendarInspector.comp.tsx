@@ -3,6 +3,7 @@ import type { CalendarCourse, CalendarData, CalendarDeadline } from '@/app/api/d
 import type { NoteOccurrence, Session } from '@/app/schedule';
 import type { CalendarActions, InspectorState, SessionBadge } from '../types';
 import { DayAgenda } from './DayAgenda.comp';
+import { ExportInspector } from './ExportInspector.comp';
 import { GroupPicker } from './GroupPicker.comp';
 import { SessionsInspector } from './SessionsInspector.comp';
 import { TimetableInspector } from './TimetableInspector.comp';
@@ -23,6 +24,8 @@ interface Props {
   todayKey: string;
   now: Date;
   locale: string;
+  moodleUrl: string | null;
+  onConnectMoodle: () => void;
   onPreview: (groupId: string | null) => void;
   onClose: () => void;
 }
@@ -43,6 +46,8 @@ export const CalendarInspector: React.FC<Props> = ({
   todayKey,
   now,
   locale,
+  moodleUrl,
+  onConnectMoodle,
   onPreview,
   onClose,
 }) => (
@@ -89,6 +94,9 @@ export const CalendarInspector: React.FC<Props> = ({
         }}
         onClose={onClose}
       />
+    )}
+    {inspector?.type === 'export' && (
+      <ExportInspector moodleUrl={moodleUrl} locale={locale} onConnectMoodle={onConnectMoodle} onClose={onClose} />
     )}
     {showAgenda && (
       <DayAgenda

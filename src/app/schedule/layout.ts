@@ -1,41 +1,41 @@
 import { helsinkiDateKey, helsinkiMinutesOfDay } from './time';
-import type { DayLayout, HourRange, Session } from './types';
+import type { DayLayout, HourRange, TimedBlock } from './types';
 
 export const MAX_COLUMNS = 3;
 
-const byStartThenLongest = (a: Session, b: Session): number =>
+const byStartThenLongest = (a: TimedBlock, b: TimedBlock): number =>
   a.start.getTime() - b.start.getTime() || b.end.getTime() - a.end.getTime();
 
-const toClusters = (sessions: Session[]): Session[][] =>
-  [...sessions].sort(byStartThenLongest).reduce<{ clusters: Session[][]; clusterEnd: number }>(
-    (acc, session) => {
-      const startsNew = acc.clusters.length === 0 || session.start.getTime() >= acc.clusterEnd;
+const toClusters = (blocks: TimedBlock[]): TimedBlock[][] =>
+  [...blocks].sort(byStartThenLongest).reduce<{ clusters: TimedBlock[][]; clusterEnd: number }>(
+    (acc, block) => {
+      const startsNew = acc.clusters.length === 0 || block.start.getTime() >= acc.clusterEnd;
       return startsNew
-        ? { clusters: [...acc.clusters, [session]], clusterEnd: session.end.getTime() }
+        ? { clusters: [...acc.clusters, [block]], clusterEnd: block.end.getTime() }
         : {
-            clusters: [...acc.clusters.slice(0, -1), [...acc.clusters[acc.clusters.length - 1], session]],
-            clusterEnd: Math.max(acc.clusterEnd, session.end.getTime()),
+            clusters: [...acc.clusters.slice(0, -1), [...acc.clusters[acc.clusters.length - 1], block]],
+            clusterEnd: Math.max(acc.clusterEnd, block.end.getTime()),
           };
     },
     { clusters: [], clusterEnd: 0 },
   ).clusters;
 
-const assignColumns = (cluster: Session[]): { id: string; col: number }[] =>
+const assignColumns = (cluster: TimedBlock[]): { id: string; col: number }[] =>
   cluster.reduce<{ columnEnds: number[]; assigned: { id: string; col: number }[] }>(
-    (acc, session) => {
-      const free = acc.columnEnds.findIndex((end) => end <= session.start.getTime());
+    (acc, block) => {
+      const free = acc.columnEnds.findIndex((end) => end <= block.start.getTime());
       const col = free === -1 ? acc.columnEnds.length : free;
       const columnEnds =
         free === -1
-          ? [...acc.columnEnds, session.end.getTime()]
-          : acc.columnEnds.map((end, index) => (index === col ? session.end.getTime() : end));
-      return { columnEnds, assigned: [...acc.assigned, { id: session.id, col }] };
+          ? [...acc.columnEnds, block.end.getTime()]
+          : acc.columnEnds.map((end, index) => (index === col ? block.end.getTime() : end));
+      return { columnEnds, assigned: [...acc.assigned, { id: block.id, col }] };
     },
     { columnEnds: [], assigned: [] },
   ).assigned;
 
-export const layoutDay = (sessions: Session[]): DayLayout =>
-  toClusters(sessions).reduce<DayLayout>(
+export const layoutDay = (blocks: TimedBlock[]): DayLayout =>
+  toClusters(blocks).reduce<DayLayout>(
     (layout, cluster) => {
       const assigned = assignColumns(cluster);
       const cols = Math.min(Math.max(...assigned.map((entry) => entry.col)) + 1, MAX_COLUMNS);
@@ -55,11 +55,11 @@ export const layoutDay = (sessions: Session[]): DayLayout =>
                   start: new Date(
                     Math.min(
                       ...cluster
-                        .filter((session) => hidden.some((entry) => entry.id === session.id))
-                        .map((session) => session.start.getTime()),
+                        .filter((block) => hidden.some((entry) => entry.id === block.id))
+                        .map((block) => block.start.getTime()),
                     ),
                   ),
-                  end: new Date(Math.max(...cluster.map((session) => session.end.getTime()))),
+                  end: new Date(Math.max(...cluster.map((block) => block.end.getTime()))),
                   sessionIds: hidden.map((entry) => entry.id),
                 },
               ],
@@ -68,14 +68,14 @@ export const layoutDay = (sessions: Session[]): DayLayout =>
     { placements: {}, overflow: [] },
   );
 
-export const endMinutesOfDay = (session: Session): number =>
-  helsinkiDateKey(session.end) > session.dateKey ? 24 * 60 : helsinkiMinutesOfDay(session.end);
+export const endMinutesOfDay = (block: TimedBlock): number =>
+  helsinkiDateKey(block.end) > block.dateKey ? 24 * 60 : helsinkiMinutesOfDay(block.end);
 
-export const visibleHourRange = (sessions: Session[], fallback: HourRange): HourRange =>
-  sessions.reduce<HourRange>(
-    (range, session) => ({
-      startHour: Math.min(range.startHour, Math.floor(helsinkiMinutesOfDay(session.start) / 60)),
-      endHour: Math.max(range.endHour, Math.ceil(endMinutesOfDay(session) / 60)),
+export const visibleHourRange = (blocks: TimedBlock[], fallback: HourRange): HourRange =>
+  blocks.reduce<HourRange>(
+    (range, block) => ({
+      startHour: Math.min(range.startHour, Math.floor(helsinkiMinutesOfDay(block.start) / 60)),
+      endHour: Math.max(range.endHour, Math.ceil(endMinutesOfDay(block) / 60)),
     }),
     fallback,
   );

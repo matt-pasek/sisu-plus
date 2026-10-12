@@ -2,6 +2,7 @@
 
 import { describe, expect, test } from 'bun:test';
 
+import { buildNote } from './__fixtures__/buildNote';
 import { buildSession } from './__fixtures__/buildSession';
 import { layoutDay, visibleHourRange } from './layout';
 
@@ -69,5 +70,21 @@ describe('visibleHourRange', () => {
 
   test('returns the fallback for an empty day', () => {
     expect(visibleHourRange([], fallback)).toEqual(fallback);
+  });
+});
+
+describe('layoutDay with notes', () => {
+  test('places any timed block, so a note sits beside a class', () => {
+    const note = buildNote('n1', DAY, 14, 15);
+    const { placements } = layoutDay([buildSession('a', DAY, 14, 16), note]);
+    expect(placements.a).toEqual({ col: 0, cols: 2 });
+    expect(placements[note.id]).toEqual({ col: 1, cols: 2 });
+  });
+
+  test('stretches the visible hours for a late note', () => {
+    expect(visibleHourRange([buildNote('late', DAY, 19, 20.5)], { startHour: 8, endHour: 18 })).toEqual({
+      startHour: 8,
+      endHour: 21,
+    });
   });
 });

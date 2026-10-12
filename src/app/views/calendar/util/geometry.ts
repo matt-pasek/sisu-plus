@@ -1,4 +1,4 @@
-import { endMinutesOfDay, helsinkiMinutesOfDay, type HourRange, type Session } from '@/app/schedule';
+import { endMinutesOfDay, helsinkiMinutesOfDay, type HourRange, type TimedBlock } from '@/app/schedule';
 import type { AnchorRect, PopoverPlacement, Size } from '../types';
 
 const VIEWPORT_MARGIN = 8;
@@ -11,9 +11,13 @@ export const fitHourHeight = (available: number, hours: number, bounds: { min: n
 export const minutesToOffset = (minutes: number, range: HourRange, hourHeight: number): number =>
   ((minutes - range.startHour * 60) / 60) * hourHeight;
 
-export const sessionBox = (session: Session, range: HourRange, hourHeight: number): { top: number; height: number } => {
-  const top = minutesToOffset(helsinkiMinutesOfDay(session.start), range, hourHeight);
-  return { top, height: minutesToOffset(endMinutesOfDay(session), range, hourHeight) - top };
+export const sessionBox = (
+  block: TimedBlock,
+  range: HourRange,
+  hourHeight: number,
+): { top: number; height: number } => {
+  const top = minutesToOffset(helsinkiMinutesOfDay(block.start), range, hourHeight);
+  return { top, height: minutesToOffset(endMinutesOfDay(block), range, hourHeight) - top };
 };
 
 export const placePopover = (anchor: AnchorRect, size: Size, viewport: Size, gap = 12): PopoverPlacement => {

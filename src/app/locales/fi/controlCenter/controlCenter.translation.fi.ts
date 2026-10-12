@@ -47,6 +47,12 @@ export const controlCenterTranslation: ControlCenterTranslation = {
       body: 'Toimitustavat, lukemattomat ja synkronoinnin tila',
       title: 'Ilmoitusasetukset',
     },
+    classReminders: {
+      leadTitle: 'Muistuta',
+      leadOptions: { 5: '5 min ennen', 10: '10 min ennen', 15: '15 min ennen', 30: '30 min ennen' },
+      scopeTitle: 'Koskee',
+      scope: { all: 'Kaikkia opetuksia', exams: 'Vain tenttejä' },
+    },
     eyebrow: 'Ilmoitukset',
     lead: {
       body: 'Kuinka aikaisin SISU+ muistuttaa ennen ilmoittautumisikkunan avautumista.',
@@ -74,6 +80,8 @@ export const controlCenterTranslation: ControlCenterTranslation = {
       sisuValue: 'Sisu: {{value}}',
       unread: 'Lukematta',
       unreadCount: '{{count}} lukematta',
+      remindersValue: 'Tuntimuistutukset: {{count}} ajastettu {{date}} asti',
+      remindersNone: 'Tuntimuistutukset: avaa kalenteri tai etusivu ajastaaksesi',
     },
     title: 'Ilmoitusten hallinta',
     types: {

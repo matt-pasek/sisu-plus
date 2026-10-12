@@ -1,6 +1,7 @@
 import { calendarDeadlinesTranslation, type CalendarDeadlinesTranslation } from './calendarDeadlines.translation.en';
 import { calendarExportTranslation, type CalendarExportTranslation } from './calendarExport.translation.en';
 import { calendarNotesTranslation, type CalendarNotesTranslation } from './calendarNotes.translation.en';
+import { calendarRemindersTranslation, type CalendarRemindersTranslation } from './calendarReminders.translation.en';
 
 export type CalendarTranslation = {
   title: string;
@@ -254,6 +255,7 @@ export type CalendarTranslation = {
   notes: CalendarNotesTranslation;
   deadlines: CalendarDeadlinesTranslation;
   exportPanel: CalendarExportTranslation;
+  reminders: CalendarRemindersTranslation;
 };
 
 export const calendarTranslation: CalendarTranslation = {
@@ -508,4 +510,5 @@ export const calendarTranslation: CalendarTranslation = {
   notes: calendarNotesTranslation,
   deadlines: calendarDeadlinesTranslation,
   exportPanel: calendarExportTranslation,
+  reminders: calendarRemindersTranslation,
 };

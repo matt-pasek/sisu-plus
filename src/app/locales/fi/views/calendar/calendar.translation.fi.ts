@@ -2,6 +2,7 @@ import { CalendarTranslation } from '@/app/locales/en/views/calendar/calendar.tr
 import { calendarDeadlinesTranslation } from './calendarDeadlines.translation.fi';
 import { calendarExportTranslation } from './calendarExport.translation.fi';
 import { calendarNotesTranslation } from './calendarNotes.translation.fi';
+import { calendarRemindersTranslation } from './calendarReminders.translation.fi';
 
 export const calendarTranslation: CalendarTranslation = {
   title: 'Kalenteri',
@@ -260,4 +261,5 @@ export const calendarTranslation: CalendarTranslation = {
   notes: calendarNotesTranslation,
   deadlines: calendarDeadlinesTranslation,
   exportPanel: calendarExportTranslation,
+  reminders: calendarRemindersTranslation,
 };

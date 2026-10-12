@@ -5,6 +5,7 @@ import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import type { LayerControls } from '../types';
 import { LayerProblem } from './LayerProblem.comp';
 import { LayerSwitch } from './LayerSwitch.comp';
+import { ReminderStatusLine } from './ReminderStatusLine.comp';
 
 interface Props {
   layers: LayerControls;
@@ -55,6 +56,7 @@ export const LayersPanel: React.FC<Props> = ({ layers }) => {
           checked={layers.showCancelled}
           onChange={(value) => layers.onChange({ calendarShowCancelled: value })}
         />
+        <ReminderStatusLine status={layers.reminders} onSetUp={layers.onSetUpReminders} />
       </div>
     </Panel>
   );

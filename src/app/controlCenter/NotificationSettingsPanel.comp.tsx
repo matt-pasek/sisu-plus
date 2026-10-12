@@ -5,6 +5,8 @@ import type { NotificationDeliveryMode } from '@/app/types/NotificationDeliveryM
 import type { NotificationType } from '@/app/types/NotificationType.type';
 import { useNotificationCache } from '@/app/hooks/useNotificationCache';
 import { notify } from '@/app/components/ui/notify';
+import { ClassReminderOptions } from '@/app/controlCenter/ClassReminderOptions.comp';
+import { countClassReminderAlarms } from '@/background/notifications/classReminders';
 import { DEV_TEST_NOTIFICATION_PAYLOADS } from '@/shared/notifications/devTestPayloads';
 import { formatLeadTime } from '@/shared/notifications/formatLeadTime';
 
@@ -49,6 +51,13 @@ export const NotificationSettingsPanel: React.FC<NotificationSettingsPanelProps>
     ? new Date(cache.moodle.lastFetch).toLocaleString()
     : t('notifications.never');
   const lastSisuSync = cache?.sisu.lastSync ? new Date(cache.sisu.lastSync).toLocaleString() : t('notifications.never');
+  const remindersOn = notificationPrefs.delivery['class-reminder'] !== 'off';
+  const remindersChip = cache?.calendar
+    ? t('notifications.stats.remindersValue', {
+        count: countClassReminderAlarms(cache.scheduledAlarms),
+        date: cache.calendar.horizonLabel,
+      })
+    : t('notifications.stats.remindersNone');
 
   const setDeliveryMode = (type: NotificationType, mode: NotificationDeliveryMode) => {
     onPrefsChange({
@@ -106,6 +115,11 @@ export const NotificationSettingsPanel: React.FC<NotificationSettingsPanelProps>
             <span className="rounded-lg bg-container px-2 py-0.5 text-[10px] font-semibold text-lightGrey shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]">
               {t('notifications.stats.sisuValue', { value: lastSisuSync })}
             </span>
+            {remindersOn && (
+              <span className="rounded-lg bg-container px-2 py-0.5 text-[10px] font-semibold text-lightGrey shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]">
+                {remindersChip}
+              </span>
+            )}
           </div>
         </div>
         <button
@@ -155,6 +169,13 @@ export const NotificationSettingsPanel: React.FC<NotificationSettingsPanelProps>
                   })}
                 </div>
               </div>
+              {type === 'class-reminder' && remindersOn && (
+                <ClassReminderOptions
+                  notificationPrefs={notificationPrefs}
+                  onChange={(patch) => onPrefsChange({ ...notificationPrefs, ...patch })}
+                  t={t}
+                />
+              )}
             </section>
           ))}
 

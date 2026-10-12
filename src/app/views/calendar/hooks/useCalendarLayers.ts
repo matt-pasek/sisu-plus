@@ -1,9 +1,13 @@
 import { useMemo } from 'react';
 import type { CalendarDeadline, CalendarDeadlines, CalendarNotes } from '@/app/api/dataPoints/calendar/types';
-import type { NoteOccurrence } from '@/app/schedule';
+import { requestNotificationSettingsOpen } from '@/app/controlCenter/notificationSettingsEvents';
+import { useNotificationCache } from '@/app/hooks/useNotificationCache';
+import { todayKey, type NoteOccurrence } from '@/app/schedule';
 import type { SisuPrefs } from '@/app/types/prefs';
 import { getMoodleCalendarExportUrlFromConfig } from '@/shared/domains';
+import { normalizeNotificationPrefs } from '@/shared/notifications/normalizeNotificationPrefs';
 import type { LayerControls } from '../types';
+import { reminderStatus } from '../util';
 
 const NO_NOTES: NoteOccurrence[] = [];
 const NO_DEADLINES: CalendarDeadline[] = [];
@@ -16,6 +20,12 @@ interface Options {
 }
 
 export const useCalendarLayers = ({ prefs, setPrefs, notes, deadlines }: Options) => {
+  const { cache } = useNotificationCache();
+  const snapshot = cache?.calendar ?? null;
+  const reminders = useMemo(
+    () => reminderStatus(normalizeNotificationPrefs(prefs.notificationPrefs), snapshot, todayKey()),
+    [prefs.notificationPrefs, snapshot],
+  );
   const layers = useMemo<LayerControls>(
     () => ({
       showCancelled: prefs.calendarShowCancelled,
@@ -29,6 +39,8 @@ export const useCalendarLayers = ({ prefs, setPrefs, notes, deadlines }: Options
       onConnectMoodle: () => {
         if (prefs.universityConfig) window.open(getMoodleCalendarExportUrlFromConfig(prefs.universityConfig));
       },
+      reminders,
+      onSetUpReminders: requestNotificationSettingsOpen,
     }),
     [
       prefs.calendarShowCancelled,
@@ -40,6 +52,7 @@ export const useCalendarLayers = ({ prefs, setPrefs, notes, deadlines }: Options
       deadlines.status,
       deadlines.refetch,
       setPrefs,
+      reminders,
     ],
   );
   return {

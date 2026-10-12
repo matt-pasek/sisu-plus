@@ -30,6 +30,7 @@ export type { PopoverTarget } from './PopoverTarget.type';
 export type { PopoverViewCallbacks } from './PopoverViewCallbacks.type';
 export type { PreviewModel } from './PreviewModel.type';
 export type { ReminderLabels } from './ReminderLabels.type';
+export type { ReminderStatus } from './ReminderStatus.type';
 export type { RoomLabels } from './RoomLabels.type';
 export type { SessionBadge } from './SessionBadge.type';
 export type { SessionChip } from './SessionChip.type';

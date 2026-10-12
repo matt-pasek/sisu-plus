@@ -12,11 +12,13 @@ const notificationTypes: NotificationType[] = [
   'moodle-deadline',
   'registration-close',
   'registration-open',
+  'class-reminder',
   'sisu-sync',
 ];
 const deliveryModes: NotificationDeliveryMode[] = ['off', 'in-app', 'out-of-app', 'both'];
 
 const TYPE_COLORS: Record<NotificationType, string> = {
+  'class-reminder': '#2dd4bf',
   'moodle-deadline': '#3b82f6',
   'registration-close': '#f06b6b',
   'registration-open': '#52c989',

@@ -2,6 +2,13 @@ import type { NotificationType } from '@/app/types/NotificationType.type';
 import type { NotificationPayload } from '@/background/notifications/types';
 
 export const DEV_TEST_NOTIFICATION_PAYLOADS: Record<NotificationType, NotificationPayload> = {
+  'class-reminder': {
+    body: 'Lecture · AUD1B, LAB',
+    eventId: 'dev-test-class-reminder',
+    source: 'sisu',
+    title: 'Computer Networks in 10 minutes',
+    type: 'class-reminder',
+  },
   'moodle-deadline': {
     body: 'Data Structures essay (CS-A1141) · due tomorrow 23:59',
     eventId: 'dev-test-moodle',

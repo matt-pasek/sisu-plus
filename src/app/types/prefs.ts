@@ -8,12 +8,15 @@ import type { CalendarView } from '@/app/views/calendar/types';
 
 export const DEFAULT_NOTIFICATION_PREFS: NotificationPrefs = {
   delivery: {
+    'class-reminder': 'off',
     'moodle-deadline': 'in-app',
     'registration-close': 'in-app',
     'registration-open': 'in-app',
     'sisu-sync': 'in-app',
   },
   registrationOpenLeadMinutes: 0,
+  classReminderLeadMinutes: 10,
+  classReminderScope: 'all',
 };
 
 export interface SisuPrefs {

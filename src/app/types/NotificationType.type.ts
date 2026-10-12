@@ -1,1 +1,6 @@
-export type NotificationType = 'moodle-deadline' | 'registration-close' | 'registration-open' | 'sisu-sync';
+export type NotificationType =
+  | 'class-reminder'
+  | 'moodle-deadline'
+  | 'registration-close'
+  | 'registration-open'
+  | 'sisu-sync';

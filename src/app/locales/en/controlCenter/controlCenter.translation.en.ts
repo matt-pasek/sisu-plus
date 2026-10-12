@@ -72,6 +72,7 @@ export type ControlCenterTranslation = {
       'registration-close': { body: string; title: string };
       'registration-open': { body: string; title: string };
       'sisu-sync': { body: string; title: string };
+      'class-reminder': { body: string; title: string };
     };
     unread: {
       empty: string;
@@ -265,6 +266,10 @@ export const controlCenterTranslation: ControlCenterTranslation = {
       'sisu-sync': {
         body: 'A quiet reminder to open Sisu when cached registration data is more than five days old.',
         title: 'Sisu sync nudge',
+      },
+      'class-reminder': {
+        body: 'A heads-up before each class or exam in your calendar.',
+        title: 'Class reminders',
       },
     },
     unread: {

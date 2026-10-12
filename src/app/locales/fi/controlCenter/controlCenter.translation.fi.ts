@@ -93,6 +93,10 @@ export const controlCenterTranslation: ControlCenterTranslation = {
         body: 'Rauhallinen muistutus avata Sisu, kun välimuistissa oleva ilmoittautumisdata on yli viisi päivää vanhaa.',
         title: 'Sisu-synkronoinnin muistutus',
       },
+      'class-reminder': {
+        body: 'Ilmoitus ennen jokaista kalenterisi opetusta tai tenttiä.',
+        title: 'Tuntimuistutukset',
+      },
     },
     unread: {
       empty: 'Ei lukemattomia SISU+ ilmoituksia.',

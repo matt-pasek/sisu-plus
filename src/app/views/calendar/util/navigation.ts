@@ -22,6 +22,8 @@ export const parseCalendarView = (value: unknown): CalendarView =>
 export const viewForKey = (key: string, repeat: boolean): CalendarView | null =>
   repeat ? null : (VIEW_KEYS[key.toLowerCase()] ?? null);
 
+export const isNewNoteKey = (key: string, repeat: boolean): boolean => !repeat && key.toLowerCase() === 'n';
+
 export const viewChange = (current: CalendarView, next: CalendarView): CalendarView | null =>
   next === current ? null : next;
 

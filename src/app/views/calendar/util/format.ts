@@ -20,6 +20,9 @@ export const formatWeekdayNarrow = (dateKey: string, locale: string): string =>
 export const formatSessionDate = (dateKey: string, locale: string): string =>
   `${formatWeekday(dateKey, locale)} ${Number(dateKey.slice(8, 10))}.${Number(dateKey.slice(5, 7))}`;
 
+export const formatDayMonth = (dateKey: string): string =>
+  `${Number(dateKey.slice(8, 10))}.${Number(dateKey.slice(5, 7))}`;
+
 export const formatWeekRange = (firstKey: string, lastKey: string, locale: string): string => {
   const options: Intl.DateTimeFormatOptions = locale.startsWith('fi')
     ? { day: 'numeric', month: 'numeric', timeZone: 'UTC' }

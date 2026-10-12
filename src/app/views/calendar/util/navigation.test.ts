@@ -6,6 +6,7 @@ import { buildSession } from '@/app/schedule/__fixtures__/buildSession';
 import { findClashes } from '@/app/schedule';
 import {
   clashesInRange,
+  isNewNoteKey,
   parseCalendarView,
   stepAnchor,
   viewChange,
@@ -71,5 +72,14 @@ describe('view switching', () => {
   test('switching to the view already shown is no change', () => {
     expect(viewChange('week', 'week')).toBeNull();
     expect(viewChange('week', 'day')).toBe('day');
+  });
+});
+
+describe('isNewNoteKey', () => {
+  test('N makes a note, held keys and other letters do not', () => {
+    expect(isNewNoteKey('n', false)).toBe(true);
+    expect(isNewNoteKey('N', false)).toBe(true);
+    expect(isNewNoteKey('n', true)).toBe(false);
+    expect(isNewNoteKey('m', false)).toBe(false);
   });
 });

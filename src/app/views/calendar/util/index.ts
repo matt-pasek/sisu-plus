@@ -5,6 +5,8 @@ export * from './geometry';
 export * from './groups';
 export * from './month';
 export * from './navigation';
+export * from './noteForm';
+export * from './noteSlots';
 export * from './popover';
 export * from './rooms';
 export * from './sessions';

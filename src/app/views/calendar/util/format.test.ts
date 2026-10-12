@@ -2,7 +2,7 @@
 
 import { describe, expect, test } from 'bun:test';
 
-import { formatClock, formatMonthTitle, formatSessionDate, formatWeekRange, joinNames } from './format';
+import { formatClock, formatDayMonth, formatMonthTitle, formatSessionDate, formatWeekRange, joinNames } from './format';
 
 describe('format', () => {
   test('formats clock times in Helsinki with a dot', () => {
@@ -28,5 +28,11 @@ describe('format', () => {
     expect(joinNames(['Basic Chinese 1 lecture', 'Advanced Networks lab'], 'en')).toBe(
       'Basic Chinese 1 lecture and Advanced Networks lab',
     );
+  });
+});
+
+describe('formatDayMonth', () => {
+  test('writes day.month without leading zeros', () => {
+    expect(formatDayMonth('2026-12-05')).toBe('5.12');
   });
 });

@@ -12,6 +12,7 @@ export type { MonthCell } from './MonthCell.type';
 export type { MonthException } from './MonthException.type';
 export type { MonthInput } from './MonthInput.type';
 export type { MonthWeek } from './MonthWeek.type';
+export type { NoteSlot } from './NoteSlot.type';
 export type { PopoverActionHandlers } from './PopoverActionHandlers.type';
 export type { PopoverModel } from './PopoverModel.type';
 export type { PopoverPlacement } from './PopoverPlacement.type';

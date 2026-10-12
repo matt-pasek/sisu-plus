@@ -1,4 +1,4 @@
-import type { Clash, Holiday, Session } from '@/app/schedule';
+import type { Clash, Holiday, NoteOccurrence, Session } from '@/app/schedule';
 
 export interface MonthInput {
   monthKey: string;
@@ -10,4 +10,5 @@ export interface MonthInput {
   noTeachingWeeks: Set<string>;
   roomChangeIds: Set<string>;
   showCancelled: boolean;
+  notes: NoteOccurrence[];
 }

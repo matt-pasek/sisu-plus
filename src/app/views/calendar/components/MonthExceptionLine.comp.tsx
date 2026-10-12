@@ -4,7 +4,7 @@ import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import type { Session } from '@/app/schedule';
 import type { MonthException } from '../types';
 import { describeRoomShort, formatClock } from '../util';
-import { ArrowRightIcon, CalendarIcon, CrossIcon, DiamondIcon, PinIcon, WarningIcon } from './icons';
+import { ArrowRightIcon, CalendarIcon, CrossIcon, DiamondIcon, NoteIcon, PinIcon, WarningIcon } from './icons';
 
 const ICON = 'size-[11px] shrink-0';
 
@@ -74,6 +74,13 @@ export const MonthExceptionLine: React.FC<Props> = ({ exception, sessionsById, r
         };
       case 'noTeaching':
         return { className: 'bg-offwhite/5 text-lightGrey', icon: null, text: t('month.noTeaching'), struck: false };
+      case 'note':
+        return {
+          className: 'bg-lighterGreen/[0.07] text-[#9be3bb]',
+          icon: <NoteIcon className={ICON} />,
+          text: t('notes.monthLine', { time: formatClock(exception.note.start), name: exception.note.name }),
+          struck: false,
+        };
     }
   })();
   return (

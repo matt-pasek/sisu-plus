@@ -1,5 +1,5 @@
-import { helsinkiDateKey, type DateRange, type Session } from '@/app/schedule';
-import type { AgendaModel, Countdown } from '../types';
+import { helsinkiDateKey, type DateRange, type NoteOccurrence, type Session } from '@/app/schedule';
+import type { AgendaEntry, AgendaModel, Countdown } from '../types';
 
 const MINUTE_MS = 60_000;
 const DAY_MINUTES = 24 * 60;
@@ -30,3 +30,12 @@ export const countdownTo = (session: Session, now: Date): Countdown => {
   const minutes = Math.ceil((session.start.getTime() - now.getTime()) / MINUTE_MS);
   return minutes < DAY_MINUTES ? { kind: 'soon', minutes } : { kind: 'later' };
 };
+
+const entryStart = (entry: AgendaEntry): number =>
+  (entry.type === 'session' ? entry.session.start : entry.note.start).getTime();
+
+export const mergeDay = (sessions: Session[], notes: NoteOccurrence[]): AgendaEntry[] =>
+  [
+    ...sessions.map((session): AgendaEntry => ({ type: 'session', session })),
+    ...notes.map((note): AgendaEntry => ({ type: 'note', note })),
+  ].sort((a, b) => entryStart(a) - entryStart(b));

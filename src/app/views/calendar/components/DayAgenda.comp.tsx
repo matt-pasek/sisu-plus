@@ -3,8 +3,9 @@ import type { RoomInfo } from '@/app/api/dataPoints/calendar/types';
 import { Panel } from '@/app/components/ui/Panel.comp';
 import { PanelEyebrow } from '@/app/components/ui/PanelEyebrow.comp';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
-import { addDaysToDateKey, type Clash, type DateRange, type Session } from '@/app/schedule';
-import { agendaFor, formatSessionDate, joinNames, sessionRoom } from '../util';
+import { addDaysToDateKey, type Clash, type DateRange, type NoteOccurrence, type Session } from '@/app/schedule';
+import { agendaFor, formatSessionDate, joinNames, mergeDay, sessionRoom } from '../util';
+import { AgendaNoteRow } from './AgendaNoteRow.comp';
 import { AgendaRow } from './AgendaRow.comp';
 import { NextClassCard } from './NextClassCard.comp';
 
@@ -18,6 +19,7 @@ interface Props {
   clashesBySession: Map<string, Clash[]>;
   rooms: Record<string, RoomInfo>;
   range: DateRange;
+  notes: NoteOccurrence[];
   locale: string;
 }
 
@@ -31,6 +33,7 @@ export const DayAgenda: React.FC<Props> = ({
   clashesBySession,
   rooms,
   range,
+  notes,
   locale,
 }) => {
   const { t } = useTranslationWithPrefix('views.calendar');
@@ -40,6 +43,14 @@ export const DayAgenda: React.FC<Props> = ({
     [attended, skipped, dateKey, now, range],
   );
   const skippedIds = useMemo(() => new Set(skipped.map((session) => session.id)), [skipped]);
+  const entries = useMemo(
+    () =>
+      mergeDay(
+        agenda.day,
+        notes.filter((note) => note.dateKey === dateKey),
+      ),
+    [agenda.day, notes, dateKey],
+  );
   const isToday = dateKey === todayKey;
   const clashNamesOf = (session: Session): string | null => {
     const names = (clashesBySession.get(session.id) ?? [])
@@ -86,18 +97,27 @@ export const DayAgenda: React.FC<Props> = ({
           <PanelEyebrow>
             {isToday ? t('agenda.restOfToday') : t('agenda.onDay', { date: formatSessionDate(dateKey, locale) })}
           </PanelEyebrow>
-          {agenda.day.length === 0 ? (
+          {entries.length === 0 ? (
             <p className="mt-1.5 text-[12.5px] text-lightGrey">{t('states.emptyDay')}</p>
           ) : (
             <div className="mt-1">
-              {agenda.day.map((session) => (
-                <AgendaRow
-                  key={session.id}
-                  session={session}
-                  subtitle={subtitleOf(session)}
-                  isFaded={session.end <= now || skippedIds.has(session.id)}
-                />
-              ))}
+              {entries.map((entry) =>
+                entry.type === 'session' ? (
+                  <AgendaRow
+                    key={entry.session.id}
+                    session={entry.session}
+                    subtitle={subtitleOf(entry.session)}
+                    isFaded={entry.session.end <= now || skippedIds.has(entry.session.id)}
+                  />
+                ) : (
+                  <AgendaNoteRow
+                    key={entry.note.id}
+                    note={entry.note}
+                    subtitle={t('notes.agendaSubtitle')}
+                    isFaded={entry.note.end <= now}
+                  />
+                ),
+              )}
             </div>
           )}
         </section>

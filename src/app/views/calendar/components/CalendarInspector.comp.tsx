@@ -1,6 +1,6 @@
 import React from 'react';
 import type { CalendarCourse, CalendarData } from '@/app/api/dataPoints/calendar/types';
-import type { Session } from '@/app/schedule';
+import type { NoteOccurrence, Session } from '@/app/schedule';
 import type { CalendarActions, InspectorState, SessionBadge } from '../types';
 import { DayAgenda } from './DayAgenda.comp';
 import { GroupPicker } from './GroupPicker.comp';
@@ -16,6 +16,7 @@ interface Props {
   data: CalendarData;
   badges: Map<string, SessionBadge>;
   sessionsById: Map<string, Session>;
+  notes: NoteOccurrence[];
   actions: CalendarActions;
   anchorKey: string;
   todayKey: string;
@@ -34,6 +35,7 @@ export const CalendarInspector: React.FC<Props> = ({
   data,
   badges,
   sessionsById,
+  notes,
   actions,
   anchorKey,
   todayKey,
@@ -97,6 +99,7 @@ export const CalendarInspector: React.FC<Props> = ({
         clashesBySession={data.clashesBySession}
         rooms={data.rooms}
         range={data.range}
+        notes={notes}
         locale={locale}
       />
     )}

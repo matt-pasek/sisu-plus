@@ -1,3 +1,4 @@
+export type { AgendaEntry } from './AgendaEntry.type';
 export type { AgendaModel } from './AgendaModel.type';
 export type { AnchorRect } from './AnchorRect.type';
 export type { CalendarActions } from './CalendarActions.type';

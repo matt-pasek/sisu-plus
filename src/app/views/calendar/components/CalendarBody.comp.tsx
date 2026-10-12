@@ -71,6 +71,7 @@ export const CalendarBody: React.FC<Props> = ({
         todayKey={todayKey}
         periods={periods}
         showCancelled={showCancelled}
+        notes={notes}
         locale={locale}
         onOpenDay={onOpenDay}
         onOpenWeek={onOpenWeek}

@@ -1,4 +1,4 @@
-import type { Clash, Holiday, Session } from '@/app/schedule';
+import type { Clash, Holiday, NoteOccurrence, Session } from '@/app/schedule';
 
 export type MonthException =
   | { kind: 'exam'; session: Session }
@@ -7,4 +7,5 @@ export type MonthException =
   | { kind: 'clash'; clash: Clash }
   | { kind: 'periodStart'; name: string }
   | { kind: 'holiday'; holiday: Holiday }
-  | { kind: 'noTeaching' };
+  | { kind: 'noTeaching' }
+  | { kind: 'note'; note: NoteOccurrence };

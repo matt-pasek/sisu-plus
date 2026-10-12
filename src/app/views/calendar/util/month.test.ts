@@ -3,6 +3,7 @@
 import { describe, expect, test } from 'bun:test';
 
 import { findClashes, type Session } from '@/app/schedule';
+import { buildNote } from '@/app/schedule/__fixtures__/buildNote';
 import { buildSession } from '@/app/schedule/__fixtures__/buildSession';
 import type { MonthInput } from '../types';
 import { monthWeeks, roomChangeIds } from './month';
@@ -17,6 +18,7 @@ const input = (overrides: Partial<MonthInput> = {}): MonthInput => ({
   noTeachingWeeks: new Set(),
   roomChangeIds: new Set(),
   showCancelled: false,
+  notes: [],
   ...overrides,
 });
 
@@ -117,5 +119,27 @@ describe('roomChangeIds', () => {
       slot(`t${index}`, dateKey, 'b103'),
     );
     expect(roomChangeIds([...monday, ...tuesday]).size).toBe(0);
+  });
+});
+
+describe('month notes', () => {
+  test('one-off notes get a line, repeating notes stay out', () => {
+    const weeks = monthWeeks(
+      input({
+        notes: [
+          buildNote('dentist', '2026-10-21', 14, 15),
+          buildNote('gym', '2026-10-21', 17, 18, { recurring: true }),
+        ],
+      }),
+    );
+    const lines = cellOf(weeks, '2026-10-21')?.exceptions ?? [];
+    expect(lines.filter((line) => line.kind === 'note')).toHaveLength(1);
+    expect(lines.find((line) => line.kind === 'note')).toMatchObject({ note: { noteId: 'dentist' } });
+  });
+
+  test('notes never add hours or a day shape', () => {
+    const cell = cellOf(monthWeeks(input({ notes: [buildNote('dentist', '2026-10-21', 14, 15)] })), '2026-10-21');
+    expect(cell?.minutes).toBe(0);
+    expect(cell?.shape).toEqual([]);
   });
 });

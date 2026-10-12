@@ -69,6 +69,9 @@ const exceptionsFor = (
   ...live
     .filter((session) => input.roomChangeIds.has(session.id))
     .map((session): MonthException => ({ kind: 'roomChange', session })),
+  ...input.notes
+    .filter((note) => note.dateKey === dateKey && !note.recurring)
+    .map((note): MonthException => ({ kind: 'note', note })),
   ...(input.showCancelled
     ? day.filter((session) => session.cancelled).map((session): MonthException => ({ kind: 'cancelled', session }))
     : []),

@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import type { CalendarData } from '@/app/api/dataPoints/calendar/types';
 import type { StudyPeriodInfo } from '@/app/api/dataPoints/getStudyPeriodMap';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
-import { addDaysToDateKey, holidaysInRange, noTeachingWeeks, type Session } from '@/app/schedule';
+import { addDaysToDateKey, holidaysInRange, noTeachingWeeks, type NoteOccurrence, type Session } from '@/app/schedule';
 import { formatWeekday, monthGrid, monthWeeks, roomChangeIds } from '../util';
 import { MonthDayCell } from './MonthDayCell.comp';
 
@@ -13,6 +13,7 @@ interface Props {
   todayKey: string;
   periods: StudyPeriodInfo[];
   showCancelled: boolean;
+  notes: NoteOccurrence[];
   locale: string;
   onOpenDay: (dateKey: string) => void;
   onOpenWeek: (dateKey: string) => void;
@@ -25,6 +26,7 @@ export const MonthView: React.FC<Props> = ({
   todayKey,
   periods,
   showCancelled,
+  notes,
   locale,
   onOpenDay,
   onOpenWeek,
@@ -43,8 +45,9 @@ export const MonthView: React.FC<Props> = ({
       noTeachingWeeks: noTeachingWeeks(data.attended, periods, data.range),
       roomChangeIds: roomChangeIds(data.attended),
       showCancelled,
+      notes,
     });
-  }, [data.attended, data.clashes, data.range, monthKey, todayKey, periods, showCancelled]);
+  }, [data.attended, data.clashes, data.range, monthKey, todayKey, periods, showCancelled, notes]);
 
   return (
     <div className="min-h-0 flex-1 overflow-y-auto bg-background">

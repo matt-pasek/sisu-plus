@@ -24,6 +24,8 @@ export interface SisuPrefs {
   heroStats: HeroStatId[];
   heroPanel: HeroPanelId;
   calendarShowCancelled: boolean;
+  calendarShowNotes: boolean;
+  calendarShowDeadlines: boolean;
   calendarView: CalendarView;
   lastSeenChangelogVersion: string | null;
   notificationNudgeDismissed: boolean;
@@ -41,6 +43,8 @@ export const DEFAULT_PREFS: SisuPrefs = {
   heroStats: DEFAULT_HERO_STATS,
   heroPanel: DEFAULT_HERO_PANEL,
   calendarShowCancelled: false,
+  calendarShowNotes: true,
+  calendarShowDeadlines: true,
   calendarView: 'week',
   lastSeenChangelogVersion: null,
   notificationNudgeDismissed: false,

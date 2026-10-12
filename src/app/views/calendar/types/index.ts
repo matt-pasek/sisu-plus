@@ -4,6 +4,7 @@ export type { AllDayInput } from './AllDayInput.type';
 export type { AllDayItem } from './AllDayItem.type';
 export type { AnchorRect } from './AnchorRect.type';
 export type { CalendarActions } from './CalendarActions.type';
+export type { CalendarShortcut } from './CalendarShortcut.type';
 export type { CalendarView } from './CalendarView.type';
 export type { Countdown } from './Countdown.type';
 export type { DeadlinePopoverState } from './DeadlinePopoverState.type';

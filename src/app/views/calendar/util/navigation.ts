@@ -7,7 +7,7 @@ import {
   type DateRange,
   type Session,
 } from '@/app/schedule';
-import type { CalendarView } from '../types';
+import type { CalendarShortcut, CalendarView } from '../types';
 import { monthStartKey, weekDateKeys } from './dates';
 import { formatAcademicYear, formatDayTitle, formatMonthTitle, formatWeekRange } from './format';
 
@@ -23,6 +23,16 @@ export const viewForKey = (key: string, repeat: boolean): CalendarView | null =>
   repeat ? null : (VIEW_KEYS[key.toLowerCase()] ?? null);
 
 export const isNewNoteKey = (key: string, repeat: boolean): boolean => !repeat && key.toLowerCase() === 'n';
+
+export const shortcutFor = (key: string, repeat: boolean, editing: boolean): CalendarShortcut | null => {
+  if (editing) return null;
+  if (key === 'ArrowLeft') return { type: 'previous' };
+  if (key === 'ArrowRight') return { type: 'next' };
+  if (key.toLowerCase() === 't') return { type: 'today' };
+  if (isNewNoteKey(key, repeat)) return { type: 'newNote' };
+  const view = viewForKey(key, repeat);
+  return view ? { type: 'view', view } : null;
+};
 
 export const viewChange = (current: CalendarView, next: CalendarView): CalendarView | null =>
   next === current ? null : next;

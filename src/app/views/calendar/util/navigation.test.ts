@@ -8,6 +8,7 @@ import {
   clashesInRange,
   isNewNoteKey,
   parseCalendarView,
+  shortcutFor,
   stepAnchor,
   viewChange,
   viewForKey,
@@ -81,5 +82,28 @@ describe('isNewNoteKey', () => {
     expect(isNewNoteKey('N', false)).toBe(true);
     expect(isNewNoteKey('n', true)).toBe(false);
     expect(isNewNoteKey('m', false)).toBe(false);
+  });
+});
+
+describe('shortcutFor', () => {
+  test('maps keys to calendar shortcuts', () => {
+    expect(shortcutFor('ArrowLeft', false, false)).toEqual({ type: 'previous' });
+    expect(shortcutFor('ArrowRight', false, false)).toEqual({ type: 'next' });
+    expect(shortcutFor('T', false, false)).toEqual({ type: 'today' });
+    expect(shortcutFor('n', false, false)).toEqual({ type: 'newNote' });
+    expect(shortcutFor('w', false, false)).toEqual({ type: 'view', view: 'week' });
+    expect(shortcutFor('x', false, false)).toBeNull();
+  });
+
+  test('held view and note keys do nothing', () => {
+    expect(shortcutFor('n', true, false)).toBeNull();
+    expect(shortcutFor('m', true, false)).toBeNull();
+  });
+
+  test('nothing fires while the note editor is open, so a draft is never replaced or hidden', () => {
+    expect(shortcutFor('n', false, true)).toBeNull();
+    expect(shortcutFor('w', false, true)).toBeNull();
+    expect(shortcutFor('ArrowLeft', false, true)).toBeNull();
+    expect(shortcutFor('t', false, true)).toBeNull();
   });
 });

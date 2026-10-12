@@ -28,7 +28,6 @@ export const useNoteController = (
   );
 
   const openNote = useCallback((note: NoteOccurrence, element: HTMLElement) => {
-    setEditor(null);
     setPopover({ note, element, anchor: element.getBoundingClientRect() });
   }, []);
   const closePopover = useCallback(() => setPopover(null), []);

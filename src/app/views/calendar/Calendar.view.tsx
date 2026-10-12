@@ -168,8 +168,9 @@ const CalendarView: React.FC = () => {
     useCalendarSelection({ notes, setPopover });
   const closeOverlays = useCallback(() => {
     if (deadline) closeDeadline();
-    else if (notes.hasOverlay) notes.closeOverlay();
     else if (popover) setPopover(null);
+    else if (notes.popover) notes.closePopover();
+    else if (notes.editor) notes.cancel();
     else setInspector(null);
   }, [deadline, closeDeadline, notes, popover]);
 
@@ -183,6 +184,7 @@ const CalendarView: React.FC = () => {
   });
 
   useCalendarKeyboard({
+    editing: notes.editor != null,
     onPrevious: goToPrevious,
     onNext: goToNext,
     onToday: goToToday,

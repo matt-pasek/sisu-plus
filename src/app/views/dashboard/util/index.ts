@@ -4,6 +4,7 @@ export * from './attainmentHelpers';
 export * from './dndHandlers';
 export * from './getWidgetBadge';
 export * from './hexA';
+export * from './nextClass';
 export * from './periodLabel';
 export * from './registrationWidgetData';
 export * from './renderWidgetContent';

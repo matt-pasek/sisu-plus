@@ -22,6 +22,7 @@ export type { NoteDayAction } from './NoteDayAction.type';
 export type { NoteDraft } from './NoteDraft.type';
 export type { NoteDraftErrors } from './NoteDraftErrors.type';
 export type { PruneReadiness } from './PruneReadiness.type';
+export type { ReminderReadiness } from './ReminderReadiness.type';
 export type { RoomInfo } from './RoomInfo.type';
 export type { ShareLink } from './ShareLink.type';
 export type { StudyEventLike } from './StudyEventLike.type';

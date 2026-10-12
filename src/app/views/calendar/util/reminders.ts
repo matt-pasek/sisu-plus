@@ -6,15 +6,6 @@ import { sessionRoom } from './rooms';
 
 const WINDOW_DAYS = 7;
 
-interface SyncState {
-  isLoading: boolean;
-  error: Error | null;
-  plansLoaded: boolean;
-}
-
-export const canSyncReminders = ({ isLoading, error, plansLoaded }: SyncState): boolean =>
-  !isLoading && error == null && plansLoaded;
-
 const toCached = (session: Session, rooms: Record<string, RoomInfo>, labels: ReminderLabels): CachedClassSession => ({
   id: session.id,
   startsAt: session.start.toISOString(),

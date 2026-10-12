@@ -26,7 +26,7 @@ export interface CalendarData {
   pool: Session[];
   groups: Map<string, GroupRef>;
   plans: Record<string, AttendancePlan>;
-  plansLoaded: boolean;
+  remindersReady: boolean;
   updatePlan: (courseKey: string, update: (plan: AttendancePlan) => AttendancePlan) => void;
   linked: Record<string, LinkedTimetableState>;
   noTimesCourseKeys: Set<string>;

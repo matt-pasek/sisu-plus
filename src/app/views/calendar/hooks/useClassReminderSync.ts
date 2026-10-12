@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useRef } from 'react';
 import type { CalendarData } from '@/app/api/dataPoints/calendar/types';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
-import { canSyncReminders, formatSessionDate, reminderSyncKey, toReminderSnapshot } from '../util';
+import { formatSessionDate, reminderSyncKey, toReminderSnapshot } from '../util';
 
 export const useClassReminderSync = (data: CalendarData, now: Date): void => {
   const { t, i18n } = useTranslationWithPrefix('views.calendar');
   const locale = i18n.language;
-  const ready = canSyncReminders(data);
+  const ready = data.remindersReady;
   const snapshot = useMemo(
     () =>
       ready

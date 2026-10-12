@@ -7,6 +7,7 @@ import { formatClock, joinNames, sessionRoom } from '@/app/views/calendar/util';
 import { EmptyWidgetState } from '@/app/views/dashboard/components/widget/EmptyWidgetState.comp';
 import { useNextClass } from '@/app/views/dashboard/hooks/useNextClass';
 import { clashCourseNames } from '@/app/views/dashboard/util/nextClass';
+import { nextClassView } from '@/app/views/dashboard/util/nextClassView';
 
 const MESSAGE_CLASS = 'flex h-full flex-col items-center justify-center gap-2 text-center text-sm text-lightGrey';
 const LINK_CLASS = 'cursor-pointer text-xs font-semibold text-lighterGreen underline-offset-2 hover:underline';
@@ -17,9 +18,15 @@ export const NextClassContent: React.FC = () => {
   const navigate = useNavigate();
   const { data, model, now } = useNextClass();
   const locale = i18n.language;
+  const view = nextClassView({
+    error: data.error,
+    updatedAt: data.updatedAt,
+    courseCount: data.courses.length,
+    model,
+  });
 
-  if (data.isLoading) return <InlineLoader />;
-  if (data.error) {
+  if (view === 'loading') return <InlineLoader />;
+  if (view === 'failed') {
     return (
       <div className={MESSAGE_CLASS}>
         <p>{t('widgets.nextClass.failed')}</p>
@@ -29,7 +36,7 @@ export const NextClassContent: React.FC = () => {
       </div>
     );
   }
-  if (data.courses.length === 0) {
+  if (view === 'noCourses') {
     return (
       <div className={MESSAGE_CLASS}>
         <p>{t('widgets.nextClass.noCourses')}</p>

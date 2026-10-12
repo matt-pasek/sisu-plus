@@ -5,7 +5,7 @@ import { describe, expect, test } from 'bun:test';
 import { helsinkiWallTimeToInstant } from '@/app/schedule';
 import { buildSession } from '@/app/schedule/__fixtures__/buildSession';
 import type { ReminderLabels } from '../types';
-import { canSyncReminders, reminderSyncKey, toReminderSnapshot } from './reminders';
+import { reminderSyncKey, toReminderSnapshot } from './reminders';
 
 const at = (dateKey: string, hour: number): Date => helsinkiWallTimeToInstant(dateKey, Math.round(hour * 60));
 const AUTUMN = { startKey: '2026-08-01', endKey: '2027-01-01' };
@@ -100,14 +100,5 @@ describe('reminderSyncKey', () => {
     expect(before?.horizonKey).toBe('2026-10-19');
     expect(after?.horizonKey).toBe('2026-10-20');
     expect(before && after && reminderSyncKey(before) !== reminderSyncKey(after)).toBe(true);
-  });
-});
-
-describe('canSyncReminders', () => {
-  test('only once teaching data and the attendance plan have loaded without an error', () => {
-    expect(canSyncReminders({ isLoading: false, error: null, plansLoaded: true })).toBe(true);
-    expect(canSyncReminders({ isLoading: true, error: null, plansLoaded: true })).toBe(false);
-    expect(canSyncReminders({ isLoading: false, error: new Error('x'), plansLoaded: true })).toBe(false);
-    expect(canSyncReminders({ isLoading: false, error: null, plansLoaded: false })).toBe(false);
   });
 });

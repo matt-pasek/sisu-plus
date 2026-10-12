@@ -23,6 +23,7 @@ import { mapCalendarRows } from './mapCalendarRows';
 import { mapCourseUnits } from './mapCourseUnits';
 import { mapLocations } from './mapLocations';
 import { pruneBase, pruneReady, visibleGroupIdsOf } from './pruneContext';
+import { remindersReady } from './reminderReadiness';
 import { coursesWithoutTimes } from './timetableLinks';
 import type { CalendarData, CalendarDataOptions, CalendarRowsResult, CourseUnitInfo, RoomInfo } from './types';
 import { useAttendancePlans } from './useAttendancePlans';
@@ -40,7 +41,7 @@ export const getCalendarData = (anchorKey: string, options: CalendarDataOptions)
   const { startKey, endKey } =
     options.span === 'academicYear' ? academicYearRangeFor(anchorKey) : termRangeFor(anchorKey);
   const range = useMemo(() => ({ startKey, endKey }), [startKey, endKey]);
-  const { userDetails, loadingDetails } = getUserDetails();
+  const { userDetails, loadingDetails, detailsError } = getUserDetails();
   const personId = userDetails?.id ?? null;
 
   const rowsQuery = useSisuQuery(
@@ -116,9 +117,10 @@ export const getCalendarData = (anchorKey: string, options: CalendarDataOptions)
     [attendance.alternatives, candidates.sessions],
   );
 
+  const rowsSettled = rowsQuery.isSuccess && !rowsQuery.isFetching;
   const canPrune = pruneReady({
     plansLoaded,
-    rowsSettled: rowsQuery.isSuccess && !rowsQuery.isFetching,
+    rowsSettled,
     candidatesSettled: !candidates.isFetching && !candidates.failed,
     extraCoursesSettled: omitted.settled,
     linksLoaded: linked.linksLoaded,
@@ -157,7 +159,16 @@ export const getCalendarData = (anchorKey: string, options: CalendarDataOptions)
     pool,
     groups,
     plans,
-    plansLoaded,
+    remindersReady: remindersReady({
+      plansLoaded,
+      rowsSettled,
+      courseUnitsSettled: courseUnitIds.length === 0 || (!courseUnitsQuery.isPending && !courseUnitsQuery.isFetching),
+      roomsSettled: locationIds.length === 0 || (!roomsQuery.isPending && !roomsQuery.isFetching),
+      candidatesSettled: !candidates.isFetching,
+      extraCoursesSettled: omitted.settled,
+      linksLoaded: linked.linksLoaded,
+      linkedStates: Object.values(linked.states),
+    }),
     updatePlan,
     linked: linked.states,
     noTimesCourseKeys,
@@ -166,7 +177,7 @@ export const getCalendarData = (anchorKey: string, options: CalendarDataOptions)
     refreshTimetable: linked.refresh,
     isLoading: loadingDetails || rowsQuery.isLoading,
     isFetching: rowsQuery.isFetching,
-    error: rowsQuery.error ?? null,
+    error: rowsQuery.error ?? detailsError ?? null,
     updatedAt: rowsQuery.dataUpdatedAt,
     refetch: () => {
       void rowsQuery.refetch();

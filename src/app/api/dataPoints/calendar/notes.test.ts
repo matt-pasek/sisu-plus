@@ -14,6 +14,7 @@ import {
   mapNotes,
   maxUntilKey,
   newNoteDraft,
+  noteChangeFor,
   toCalendarEventPayload,
   validateNoteDraft,
 } from './notes';
@@ -203,5 +204,20 @@ describe('note drafts', () => {
       repeat: 'WEEKLY',
       untilKey: '2026-11-24',
     });
+  });
+});
+
+describe('noteChangeFor', () => {
+  test('an edit updates the event it was opened with, even if that note is no longer loaded', () => {
+    const base = event({ recursEvery: 'WEEKLY', recursUntil: '2026-11-24' });
+    const change = noteChangeFor({ ...draftFromEvent(base, AUTUMN), title: 'Renamed' }, base, 'pending-1');
+    expect(change.type).toBe('update');
+    expect(change.type === 'update' ? [change.event.id, change.event.name] : []).toEqual(['otm-note-1', 'Renamed']);
+  });
+
+  test('a new draft becomes a create with the pending id', () => {
+    const change = noteChangeFor({ ...newNoteDraft('2026-10-21', 600, 660, AUTUMN), title: 'Gym' }, null, 'pending-1');
+    expect(change.type).toBe('create');
+    expect(change.type === 'create' ? change.event.id : null).toBe('pending-1');
   });
 });

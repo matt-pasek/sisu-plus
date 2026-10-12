@@ -4,8 +4,8 @@ import {
   draftFromEvent,
   hasErrors,
   newNoteDraft,
+  noteChangeFor,
   PENDING_NOTE_PREFIX,
-  toCalendarEventPayload,
   validateNoteDraft,
 } from '@/app/api/dataPoints/calendar/notes';
 import type { NoteChange, NoteDraft } from '@/app/api/dataPoints/calendar/types';
@@ -56,6 +56,7 @@ export const useNoteController = (
       setEditor({
         draft: newNoteDraft(slot.dateKey, slot.startMinutes, slot.endMinutes, range),
         noteId: null,
+        base: null,
         anchor,
         returnFocus,
         attempted: false,
@@ -70,6 +71,7 @@ export const useNoteController = (
       setEditor({
         draft: draftFromEvent(event, range),
         noteId: note.noteId,
+        base: event,
         anchor: popover.anchor,
         returnFocus: popover.element,
         attempted: false,
@@ -89,17 +91,9 @@ export const useNoteController = (
       setEditor({ ...editor, attempted: true });
       return;
     }
-    const base = editor.noteId ? eventsById.get(editor.noteId) : undefined;
-    mutate(
-      base
-        ? { type: 'update', event: toCalendarEventPayload(editor.draft, base) }
-        : {
-            type: 'create',
-            event: { ...toCalendarEventPayload(editor.draft), id: `${PENDING_NOTE_PREFIX}${Date.now()}` },
-          },
-    );
+    mutate(noteChangeFor(editor.draft, editor.base, `${PENDING_NOTE_PREFIX}${Date.now()}`));
     setEditor(null);
-  }, [editor, eventsById, mutate]);
+  }, [editor, mutate]);
   const closeOverlay = useCallback(() => {
     setPopover(null);
     setEditor(null);

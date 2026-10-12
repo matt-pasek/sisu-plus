@@ -12,7 +12,7 @@ import {
   type NoteOccurrence,
   type RecurringSeries,
 } from '@/app/schedule';
-import type { NoteDayAction, NoteDraft, NoteDraftErrors } from './types';
+import type { NoteChange, NoteDayAction, NoteDraft, NoteDraftErrors } from './types';
 
 const MINUTE_MS = 60_000;
 const LAST_MINUTE = 24 * 60 - 1;
@@ -79,6 +79,11 @@ export const toCalendarEventPayload = (draft: NoteDraft, base?: CalendarEvent): 
   const kept = series ? (base?.exceptions ?? []).filter((dateKey) => occursOn(series, dateKey)) : [];
   return { ...next, exceptions: kept };
 };
+
+export const noteChangeFor = (draft: NoteDraft, base: CalendarEvent | null, pendingId: string): NoteChange =>
+  base
+    ? { type: 'update', event: toCalendarEventPayload(draft, base) }
+    : { type: 'create', event: { ...toCalendarEventPayload(draft), id: pendingId } };
 
 export const addException = (event: CalendarEvent, dateKey: string): CalendarEvent => ({
   ...event,

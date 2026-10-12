@@ -28,8 +28,11 @@ export const useCalendarKeyboard = ({ onPrevious, onNext, onToday, onEscape, onV
       if (event.key === 'ArrowLeft') onPrevious();
       else if (event.key === 'ArrowRight') onNext();
       else if (event.key.toLowerCase() === 't') onToday();
-      else if (isNewNoteKey(event.key, event.repeat)) onNewNote();
-      else if (view) onView(view);
+      else if (isNewNoteKey(event.key, event.repeat)) {
+        // The editor focuses its title field during this keydown; without this the key would type an "n" into it.
+        event.preventDefault();
+        onNewNote();
+      } else if (view) onView(view);
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);

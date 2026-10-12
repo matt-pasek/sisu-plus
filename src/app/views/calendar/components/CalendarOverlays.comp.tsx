@@ -1,14 +1,18 @@
 import React from 'react';
-import type { NoteController } from '../types';
+import type { DeadlinePopoverState, NoteController } from '../types';
+import { DeadlinePopover } from './DeadlinePopover.comp';
 import { NoteEditor } from './NoteEditor.comp';
 import { NotePopover } from './NotePopover.comp';
 
 interface Props {
   notes: NoteController;
+  deadline: DeadlinePopoverState | null;
+  now: Date;
   locale: string;
+  onCloseDeadline: () => void;
 }
 
-export const CalendarOverlays: React.FC<Props> = ({ notes, locale }) => {
+export const CalendarOverlays: React.FC<Props> = ({ notes, deadline, now, locale, onCloseDeadline }) => {
   const { popover, editor } = notes;
   return (
     <>
@@ -31,6 +35,15 @@ export const CalendarOverlays: React.FC<Props> = ({ notes, locale }) => {
           onChange={notes.changeDraft}
           onSave={notes.save}
           onCancel={notes.cancel}
+        />
+      )}
+      {deadline && (
+        <DeadlinePopover
+          key={deadline.deadline.id}
+          state={deadline}
+          now={now}
+          locale={locale}
+          onClose={onCloseDeadline}
         />
       )}
     </>

@@ -109,7 +109,12 @@ const CalendarView: React.FC = () => {
   const onNoteFailed = useCallback((change: NoteChange) => notify.error(t(`notes.failed.${change.type}`)), [t]);
   const notes = useNoteController(notesData.events, data.range, onNoteFailed);
   const deadlinesData = useCalendarDeadlines(data.courses, data.courseUnits, data.range);
-  const { layers, shownNotes } = useCalendarLayers({ prefs, setPrefs, notes: notesData, deadlines: deadlinesData });
+  const { layers, shownNotes, shownDeadlines } = useCalendarLayers({
+    prefs,
+    setPrefs,
+    notes: notesData,
+    deadlines: deadlinesData,
+  });
   const onVisibilityError = useCallback(() => notify.error(t('visibility.failed')), [t]);
   const visibility = useCalendarVisibility(onVisibilityError);
   const actions = useCalendarActions(data.updatePlan, visibility.mutate);
@@ -159,11 +164,14 @@ const CalendarView: React.FC = () => {
     [inspectorSeriesKey, knownSessions],
   );
 
+  const { selectSession, selectNote, selectDeadline, draftNote, closeTransient, deadline, closeDeadline } =
+    useCalendarSelection({ notes, setPopover });
   const closeOverlays = useCallback(() => {
-    if (notes.hasOverlay) notes.closeOverlay();
+    if (deadline) closeDeadline();
+    else if (notes.hasOverlay) notes.closeOverlay();
     else if (popover) setPopover(null);
     else setInspector(null);
-  }, [notes, popover]);
+  }, [deadline, closeDeadline, notes, popover]);
 
   const { addNoteRef, openNewNote, newNoteFromKeyboard } = useNewNote({
     attended: data.attended,
@@ -182,8 +190,6 @@ const CalendarView: React.FC = () => {
     onView: setView,
     onNewNote: newNoteFromKeyboard,
   });
-
-  const { selectSession, selectNote, draftNote, closeTransient } = useCalendarSelection({ notes, setPopover });
 
   // The app renders inside a shadow root, so document.querySelector cannot reach session blocks.
   const showFirstClash = () => {
@@ -333,6 +339,8 @@ const CalendarView: React.FC = () => {
                 onSelect={selectSession}
                 onSelectNote={selectNote}
                 onDraft={draftNote}
+                deadlines={shownDeadlines}
+                onSelectDeadline={selectDeadline}
                 onUserScroll={closeTransient}
               />
             </div>
@@ -371,7 +379,7 @@ const CalendarView: React.FC = () => {
           onClose={closePopover}
         />
       )}
-      <CalendarOverlays notes={notes} locale={locale} />
+      <CalendarOverlays notes={notes} deadline={deadline} now={now} locale={locale} onCloseDeadline={closeDeadline} />
     </div>
   );
 };

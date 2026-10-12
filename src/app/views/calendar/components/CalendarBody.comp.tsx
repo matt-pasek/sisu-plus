@@ -1,10 +1,10 @@
-import React from 'react';
-import type { CalendarData } from '@/app/api/dataPoints/calendar/types';
+import React, { useMemo } from 'react';
+import type { CalendarData, CalendarDeadline } from '@/app/api/dataPoints/calendar/types';
 import type { StudyPeriodInfo } from '@/app/api/dataPoints/getStudyPeriodMap';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
-import type { NoteOccurrence, Session } from '@/app/schedule';
+import { addDaysToDateKey, holidaysInRange, type NoteOccurrence, type Session } from '@/app/schedule';
 import type { AnchorRect, CalendarView, NoteSlot, PreviewModel, WeekModel } from '../types';
-import { monthStartKey } from '../util';
+import { allDayByDay, monthStartKey } from '../util';
 import { MonthView } from './MonthView.comp';
 import { YearView } from './YearView.comp';
 import { WeekGrid } from './WeekGrid.comp';
@@ -26,11 +26,13 @@ interface Props {
   notes: NoteOccurrence[];
   draft: NoteSlot | null;
   draftTitle: string;
+  deadlines: CalendarDeadline[];
   onOpenDay: (dateKey: string) => void;
   onOpenWeek: (dateKey: string) => void;
   onSelect: (session: Session, element: HTMLElement) => void;
   onSelectNote: (note: NoteOccurrence, element: HTMLElement) => void;
   onDraft: (slot: NoteSlot, anchor: AnchorRect) => void;
+  onSelectDeadline: (deadline: CalendarDeadline, element: HTMLElement) => void;
   onUserScroll: () => void;
 }
 
@@ -51,14 +53,26 @@ export const CalendarBody: React.FC<Props> = ({
   notes,
   draft,
   draftTitle,
+  deadlines,
   onOpenDay,
   onOpenWeek,
   onSelect,
   onSelectNote,
   onDraft,
+  onSelectDeadline,
   onUserScroll,
 }) => {
   const { t } = useTranslationWithPrefix('views.calendar');
+  const dayKeys = useMemo(() => (view === 'day' ? [anchorKey] : weekKeys), [view, anchorKey, weekKeys]);
+  const allDay = useMemo(
+    () =>
+      allDayByDay(dayKeys, {
+        holidays: holidaysInRange({ startKey: dayKeys[0], endKey: addDaysToDateKey(dayKeys[dayKeys.length - 1], 1) }),
+        periods,
+        deadlines,
+      }),
+    [dayKeys, periods, deadlines],
+  );
   if (view === 'year') {
     return <YearView data={data} todayKey={todayKey} periods={periods} locale={locale} onOpenWeek={onOpenWeek} />;
   }
@@ -82,7 +96,7 @@ export const CalendarBody: React.FC<Props> = ({
   const isDay = view === 'day';
   return (
     <WeekGrid
-      dayKeys={isDay ? [anchorKey] : weekKeys}
+      dayKeys={dayKeys}
       collapseWeekend={!isDay}
       detailed={isDay}
       emptyLabel={isDay ? t('states.emptyDay') : t('states.emptyWeek')}
@@ -106,6 +120,9 @@ export const CalendarBody: React.FC<Props> = ({
       onSelect={onSelect}
       onSelectNote={onSelectNote}
       onDraft={onDraft}
+      allDay={allDay}
+      onOpenDay={onOpenDay}
+      onSelectDeadline={onSelectDeadline}
       onUserScroll={onUserScroll}
     />
   );

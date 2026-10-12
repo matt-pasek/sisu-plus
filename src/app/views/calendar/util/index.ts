@@ -1,5 +1,7 @@
 export * from './agenda';
+export * from './allDay';
 export * from './dates';
+export * from './deadlines';
 export * from './format';
 export * from './geometry';
 export * from './groups';

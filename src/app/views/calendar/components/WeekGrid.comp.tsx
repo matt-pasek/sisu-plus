@@ -1,5 +1,5 @@
 import React, { useMemo, useRef } from 'react';
-import type { CourseUnitInfo, RoomInfo } from '@/app/api/dataPoints/calendar/types';
+import type { CalendarDeadline, CourseUnitInfo, RoomInfo } from '@/app/api/dataPoints/calendar/types';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import {
   helsinkiMinutesOfDay,
@@ -10,8 +10,9 @@ import {
   type Session,
 } from '@/app/schedule';
 import { useElementHeight } from '../hooks/useElementHeight';
-import type { AnchorRect, NoteSlot, SessionBadge } from '../types';
+import type { AllDayItem, AnchorRect, NoteSlot, SessionBadge } from '../types';
 import { fitHourHeight, formatClock, minutesToOffset, sessionsOnDay, slotBlock } from '../util';
+import { AllDayRow } from './AllDayRow.comp';
 import { HourGutter } from './HourGutter.comp';
 import { WeekDayColumn } from './WeekDayColumn.comp';
 import { WeekDayHeader } from './WeekDayHeader.comp';
@@ -46,6 +47,9 @@ interface Props {
   onSelect: (session: Session, element: HTMLElement) => void;
   onSelectNote: (note: NoteOccurrence, element: HTMLElement) => void;
   onDraft: (slot: NoteSlot, anchor: AnchorRect) => void;
+  allDay: Record<string, AllDayItem[]>;
+  onOpenDay: (dateKey: string) => void;
+  onSelectDeadline: (deadline: CalendarDeadline, element: HTMLElement) => void;
   onUserScroll: () => void;
 }
 
@@ -74,6 +78,9 @@ export const WeekGrid: React.FC<Props> = ({
   onSelect,
   onSelectNote,
   onDraft,
+  allDay,
+  onOpenDay,
+  onSelectDeadline,
   onUserScroll,
 }) => {
   const { t } = useTranslationWithPrefix('views.calendar');
@@ -150,6 +157,17 @@ export const WeekGrid: React.FC<Props> = ({
           <div className="flex items-center justify-center border-l border-border font-mono text-[10px] text-darkishGrey">
             {t('weekendShort')}
           </div>
+        )}
+        {columns.some(({ dateKey }) => (allDay[dateKey] ?? []).length > 0) && (
+          <AllDayRow
+            dayKeys={columns.map(({ dateKey }) => dateKey)}
+            weekendCollapsed={weekendEmpty}
+            itemsByDay={allDay}
+            now={now}
+            locale={locale}
+            onOpenDay={onOpenDay}
+            onSelectDeadline={onSelectDeadline}
+          />
         )}
       </div>
       <div

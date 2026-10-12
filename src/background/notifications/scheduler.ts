@@ -9,7 +9,7 @@ import {
 } from '@/background/notifications/classReminders';
 import { deliverNotification } from '@/background/notifications/delivery';
 import { getNotificationPrefs } from '@/background/notifications/prefs';
-import { getNotificationCache, patchNotificationCache, setNotificationCache } from '@/background/notifications/storage';
+import { getNotificationCache, patchNotificationCache } from '@/background/notifications/storage';
 import type {
   CachedMoodleDeadline,
   CachedRegistrationEvent,
@@ -83,7 +83,16 @@ const getRegistrationOpenGroups = (registrations: CachedRegistrationEvent[]) => 
   return groups;
 };
 
-export const scheduleNotificationAlarms = async () => {
+// Each writer reads the whole cache and writes it back; overlapping runs would drop each other's changes.
+let cacheQueue: Promise<unknown> = Promise.resolve();
+
+const serialized = <T>(task: () => Promise<T>): Promise<T> => {
+  const run = cacheQueue.then(task, task);
+  cacheQueue = run.catch(() => undefined);
+  return run;
+};
+
+const rescheduleAlarms = async () => {
   const prefs = await getNotificationPrefs();
   const cache = await getNotificationCache();
   const scheduledAlarms: string[] = [];
@@ -132,13 +141,17 @@ export const scheduleNotificationAlarms = async () => {
     if (name) scheduledAlarms.push(name);
   }
 
-  await setNotificationCache({ ...cache, scheduledAlarms });
+  await patchNotificationCache((current) => ({ ...current, scheduledAlarms }));
 };
+
+export const scheduleNotificationAlarms = (): Promise<void> => serialized(rescheduleAlarms);
 
 export const syncClassReminders = async (payload: unknown): Promise<boolean> => {
   if (!isClassReminderSnapshot(payload)) return false;
-  await patchNotificationCache((cache) => ({ ...cache, calendar: payload }));
-  await scheduleNotificationAlarms();
+  await serialized(async () => {
+    await patchNotificationCache((cache) => ({ ...cache, calendar: payload }));
+    await rescheduleAlarms();
+  });
   return true;
 };
 
@@ -152,28 +165,29 @@ export const refreshMoodleDeadlines = async () => {
     .sort((first, second) => first.dueAt.localeCompare(second.dueAt))
     .slice(0, 40);
 
-  await patchNotificationCache((cache) => ({
-    ...cache,
-    moodle: {
-      deadlines,
-      lastFetch: Date.now(),
-    },
-  }));
-
-  await scheduleNotificationAlarms();
+  await serialized(async () => {
+    await patchNotificationCache((cache) => ({
+      ...cache,
+      moodle: {
+        deadlines,
+        lastFetch: Date.now(),
+      },
+    }));
+    await rescheduleAlarms();
+  });
 };
 
-export const syncSisuNotificationCache = async (payload: SisuNotificationSyncPayload) => {
-  await patchNotificationCache((cache) => ({
-    ...cache,
-    sisu: {
-      lastSync: payload.syncedAt ?? Date.now(),
-      registrations: payload.registrations,
-    },
-  }));
-
-  await scheduleNotificationAlarms();
-};
+export const syncSisuNotificationCache = (payload: SisuNotificationSyncPayload) =>
+  serialized(async () => {
+    await patchNotificationCache((cache) => ({
+      ...cache,
+      sisu: {
+        lastSync: payload.syncedAt ?? Date.now(),
+        registrations: payload.registrations,
+      },
+    }));
+    await rescheduleAlarms();
+  });
 
 const getMoodlePayload = (
   cache: NotificationCache,

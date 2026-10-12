@@ -23,6 +23,33 @@ export const LayersPanel: React.FC<Props> = ({ layers }) => {
         {layers.notesFailed && (
           <LayerProblem text={t('notes.unavailable')} retryLabel={t('notes.retry')} onRetry={layers.onRetryNotes} />
         )}
+        {layers.deadlineStatus === 'missingToken' ? (
+          <div className="flex flex-col gap-1 py-1.5">
+            <button
+              type="button"
+              onClick={layers.onConnectMoodle}
+              className="w-fit cursor-pointer text-[13px] font-medium text-lighterGreen underline-offset-2 hover:underline"
+            >
+              {t('deadlines.connect')}
+            </button>
+            <p className="text-[11.5px] leading-snug text-lightGrey">{t('deadlines.connectHint')}</p>
+          </div>
+        ) : (
+          <>
+            <LayerSwitch
+              label={t('deadlines.layer')}
+              checked={layers.showDeadlines}
+              onChange={(value) => layers.onChange({ calendarShowDeadlines: value })}
+            />
+            {layers.deadlineStatus === 'failed' && (
+              <LayerProblem
+                text={t('deadlines.unavailable')}
+                retryLabel={t('deadlines.retry')}
+                onRetry={layers.onRetryDeadlines}
+              />
+            )}
+          </>
+        )}
         <LayerSwitch
           label={t('sidebar.cancelled')}
           checked={layers.showCancelled}

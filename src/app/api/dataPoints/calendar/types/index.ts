@@ -1,11 +1,15 @@
 export type { CalendarCourse } from './CalendarCourse.type';
 export type { CalendarData } from './CalendarData.type';
+export type { CalendarDeadline } from './CalendarDeadline.type';
+export type { CalendarDeadlines } from './CalendarDeadlines.type';
 export type { CalendarDataOptions } from './CalendarDataOptions.type';
 export type { CalendarGroup } from './CalendarGroup.type';
 export type { CalendarGroupSet } from './CalendarGroupSet.type';
 export type { CalendarNotes } from './CalendarNotes.type';
 export type { CalendarRowsResult } from './CalendarRowsResult.type';
 export type { CourseUnitInfo } from './CourseUnitInfo.type';
+export type { DeadlineCourse } from './DeadlineCourse.type';
+export type { DeadlineStatus } from './DeadlineStatus.type';
 export type { GroupCandidates } from './GroupCandidates.type';
 export type { GroupFlagChange } from './GroupFlagChange.type';
 export type { LabelPicker } from './LabelPicker.type';

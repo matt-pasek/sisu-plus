@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { getCalendarData } from '@/app/api/dataPoints/calendar/getCalendarData';
 import type { NoteChange } from '@/app/api/dataPoints/calendar/types';
+import { useCalendarDeadlines } from '@/app/api/dataPoints/calendar/useCalendarDeadlines';
 import { useCalendarNotes } from '@/app/api/dataPoints/calendar/useCalendarNotes';
 import { useCalendarVisibility } from '@/app/api/dataPoints/calendar/useCalendarVisibility';
 import { getStudyPeriodMap } from '@/app/api/dataPoints/getStudyPeriodMap';
@@ -107,7 +108,8 @@ const CalendarView: React.FC = () => {
   const notesData = useCalendarNotes(data.range);
   const onNoteFailed = useCallback((change: NoteChange) => notify.error(t(`notes.failed.${change.type}`)), [t]);
   const notes = useNoteController(notesData.events, data.range, onNoteFailed);
-  const { layers, shownNotes } = useCalendarLayers({ prefs, setPrefs, notes: notesData });
+  const deadlinesData = useCalendarDeadlines(data.courses, data.courseUnits, data.range);
+  const { layers, shownNotes } = useCalendarLayers({ prefs, setPrefs, notes: notesData, deadlines: deadlinesData });
   const onVisibilityError = useCallback(() => notify.error(t('visibility.failed')), [t]);
   const visibility = useCalendarVisibility(onVisibilityError);
   const actions = useCalendarActions(data.updatePlan, visibility.mutate);

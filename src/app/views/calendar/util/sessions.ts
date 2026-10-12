@@ -3,8 +3,8 @@ import type { SessionBadge, SessionChip } from '../types';
 
 const byStart = (a: Session, b: Session): number => a.start.getTime() - b.start.getTime();
 
-export const sessionsOnDay = (sessions: Session[], dateKey: string): Session[] =>
-  sessions.filter((session) => session.dateKey === dateKey);
+export const sessionsOnDay = <T extends { dateKey: string }>(items: T[], dateKey: string): T[] =>
+  items.filter((item) => item.dateKey === dateKey);
 
 export const sessionsInRange = (sessions: Session[], startKey: string, endKey: string): Session[] =>
   sessions.filter((session) => session.dateKey >= startKey && session.dateKey < endKey);

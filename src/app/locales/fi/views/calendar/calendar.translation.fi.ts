@@ -1,4 +1,7 @@
 import { CalendarTranslation } from '@/app/locales/en/views/calendar/calendar.translation.en';
+import { calendarDeadlinesTranslation } from './calendarDeadlines.translation.fi';
+import { calendarExportTranslation } from './calendarExport.translation.fi';
+import { calendarNotesTranslation } from './calendarNotes.translation.fi';
 
 export const calendarTranslation: CalendarTranslation = {
   title: 'Kalenteri',
@@ -254,4 +257,7 @@ export const calendarTranslation: CalendarTranslation = {
     planned_other: 'Aikajanallasi on sinne suunniteltu {{count}} kurssia.',
     cellAria: '{{date}}: {{hours}} h',
   },
+  notes: calendarNotesTranslation,
+  deadlines: calendarDeadlinesTranslation,
+  exportPanel: calendarExportTranslation,
 };

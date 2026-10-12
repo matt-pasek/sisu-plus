@@ -2,9 +2,10 @@
 
 import { describe, expect, test } from 'bun:test';
 
+import { buildNote } from '@/app/schedule/__fixtures__/buildNote';
 import { buildSession } from '@/app/schedule/__fixtures__/buildSession';
 import { findClashes, groupClashesBySession, seriesKeyOf } from '@/app/schedule';
-import { groupByWeek, seriesOf, sessionBadges, sessionChips, sessionsInRange } from './sessions';
+import { groupByWeek, seriesOf, sessionBadges, sessionChips, sessionsInRange, sessionsOnDay } from './sessions';
 
 const series = [
   buildSession('a', '2026-10-27', 14, 16, { seriesId: 's', locationIds: ['r1'] }),
@@ -73,5 +74,12 @@ describe('badges', () => {
       'skipping',
       'cancelled',
     ]);
+  });
+});
+
+describe('sessionsOnDay', () => {
+  test('filters any dated block, notes included', () => {
+    const notes = [buildNote('a', '2026-10-27', 9, 10), buildNote('b', '2026-10-28', 9, 10)];
+    expect(sessionsOnDay(notes, '2026-10-27').map((note) => note.noteId)).toEqual(['a']);
   });
 });

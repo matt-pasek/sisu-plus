@@ -1,7 +1,14 @@
 import React, { useMemo, useRef } from 'react';
 import type { CourseUnitInfo, RoomInfo } from '@/app/api/dataPoints/calendar/types';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
-import { helsinkiMinutesOfDay, visibleHourRange, type Clash, type HourRange, type Session } from '@/app/schedule';
+import {
+  helsinkiMinutesOfDay,
+  visibleHourRange,
+  type Clash,
+  type HourRange,
+  type NoteOccurrence,
+  type Session,
+} from '@/app/schedule';
 import { useElementHeight } from '../hooks/useElementHeight';
 import type { SessionBadge } from '../types';
 import { fitHourHeight, formatClock, minutesToOffset, sessionsOnDay } from '../util';
@@ -24,6 +31,7 @@ interface Props {
   sessions: Session[];
   alternatives: Session[];
   preview: Session[];
+  notes: NoteOccurrence[];
   previewClashIds: Set<string>;
   sessionsById: Map<string, Session>;
   clashesBySession: Map<string, Clash[]>;
@@ -34,6 +42,7 @@ interface Props {
   activeSessionId: string | null;
   locale: string;
   onSelect: (session: Session, element: HTMLElement) => void;
+  onSelectNote: (note: NoteOccurrence, element: HTMLElement) => void;
   onUserScroll: () => void;
 }
 
@@ -47,6 +56,7 @@ export const WeekGrid: React.FC<Props> = ({
   sessions,
   alternatives,
   preview,
+  notes,
   previewClashIds,
   sessionsById,
   clashesBySession,
@@ -57,15 +67,17 @@ export const WeekGrid: React.FC<Props> = ({
   activeSessionId,
   locale,
   onSelect,
+  onSelectNote,
   onUserScroll,
 }) => {
   const { t } = useTranslationWithPrefix('views.calendar');
   const scrollRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const viewportHeight = useElementHeight(scrollRef);
+  const visibleNotes = useMemo(() => notes.filter((note) => dayKeys.includes(note.dateKey)), [notes, dayKeys]);
   const hourRange = useMemo(
-    () => visibleHourRange([...sessions, ...alternatives, ...preview], DEFAULT_HOURS),
-    [sessions, alternatives, preview],
+    () => visibleHourRange([...sessions, ...alternatives, ...preview, ...visibleNotes], DEFAULT_HOURS),
+    [sessions, alternatives, preview, visibleNotes],
   );
   const days = useMemo(
     () =>
@@ -74,11 +86,15 @@ export const WeekGrid: React.FC<Props> = ({
         sessions: sessionsOnDay(sessions, dateKey),
         alternatives: sessionsOnDay(alternatives, dateKey),
         preview: sessionsOnDay(preview, dateKey),
+        notes: sessionsOnDay(visibleNotes, dateKey),
       })),
-    [dayKeys, sessions, alternatives, preview],
+    [dayKeys, sessions, alternatives, preview, visibleNotes],
   );
   const weekendEmpty =
-    collapseWeekend && days.slice(WEEKDAYS).every((day) => day.sessions.length === 0 && day.alternatives.length === 0);
+    collapseWeekend &&
+    days
+      .slice(WEEKDAYS)
+      .every((day) => day.sessions.length === 0 && day.alternatives.length === 0 && day.notes.length === 0);
   const columns = weekendEmpty ? days.slice(0, WEEKDAYS) : days;
   const template = `52px repeat(${columns.length}, minmax(0, 1fr))${weekendEmpty ? ' 34px' : ''}`;
   const hours = Array.from({ length: hourRange.endHour - hourRange.startHour }, (_, i) => hourRange.startHour + i);
@@ -128,31 +144,35 @@ export const WeekGrid: React.FC<Props> = ({
             showNowLabel ? { top: minutesToOffset(nowMinutes, hourRange, hourHeight), text: formatClock(now) } : null
           }
         />
-        {columns.map(({ dateKey, sessions: daySessions, alternatives: dayAlternatives, preview: dayPreview }) => (
-          <WeekDayColumn
-            key={dateKey}
-            dateKey={dateKey}
-            isToday={dateKey === todayKey}
-            now={now}
-            sessions={daySessions}
-            alternatives={dayAlternatives}
-            preview={dayPreview}
-            previewClashIds={previewClashIds}
-            sessionsById={sessionsById}
-            hourRange={hourRange}
-            hourHeight={hourHeight}
-            inset={GRID_INSET}
-            clashesBySession={clashesBySession}
-            badges={badges}
-            rooms={rooms}
-            courseUnits={courseUnits}
-            linkedLabels={linkedLabels}
-            detailed={detailed}
-            activeSessionId={activeSessionId}
-            locale={locale}
-            onSelect={onSelect}
-          />
-        ))}
+        {columns.map(
+          ({ dateKey, sessions: daySessions, alternatives: dayAlternatives, preview: dayPreview, notes: dayNotes }) => (
+            <WeekDayColumn
+              key={dateKey}
+              dateKey={dateKey}
+              isToday={dateKey === todayKey}
+              now={now}
+              sessions={daySessions}
+              alternatives={dayAlternatives}
+              preview={dayPreview}
+              notes={dayNotes}
+              previewClashIds={previewClashIds}
+              sessionsById={sessionsById}
+              hourRange={hourRange}
+              hourHeight={hourHeight}
+              inset={GRID_INSET}
+              clashesBySession={clashesBySession}
+              badges={badges}
+              rooms={rooms}
+              courseUnits={courseUnits}
+              linkedLabels={linkedLabels}
+              detailed={detailed}
+              activeSessionId={activeSessionId}
+              locale={locale}
+              onSelect={onSelect}
+              onSelectNote={onSelectNote}
+            />
+          ),
+        )}
         {weekendEmpty && (
           <div className="relative border-l border-border bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.012)_0_6px,transparent_6px_12px)]">
             <span className="absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-90 font-mono text-[10px] font-medium tracking-[0.08em] whitespace-nowrap text-darkishGrey uppercase">
@@ -161,7 +181,7 @@ export const WeekGrid: React.FC<Props> = ({
           </div>
         )}
       </div>
-      {columns.every((day) => day.sessions.length === 0 && day.alternatives.length === 0) && (
+      {columns.every((day) => day.sessions.length === 0 && day.alternatives.length === 0 && day.notes.length === 0) && (
         <p className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-lightGrey">
           {emptyLabel}
         </p>

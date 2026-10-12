@@ -1,5 +1,7 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { getCalendarData } from '@/app/api/dataPoints/calendar/getCalendarData';
+import type { NoteChange } from '@/app/api/dataPoints/calendar/types';
+import { useCalendarNotes } from '@/app/api/dataPoints/calendar/useCalendarNotes';
 import { useCalendarVisibility } from '@/app/api/dataPoints/calendar/useCalendarVisibility';
 import { getStudyPeriodMap } from '@/app/api/dataPoints/getStudyPeriodMap';
 import { notify } from '@/app/components/ui/notify';
@@ -15,10 +17,12 @@ import {
   seriesKeyOf,
   summarizeSeriesClashes,
   todayKey,
+  type NoteOccurrence,
   type Session,
 } from '@/app/schedule';
 import { CalendarBody } from './components/CalendarBody.comp';
 import { CalendarInspector } from './components/CalendarInspector.comp';
+import { CalendarOverlays } from './components/CalendarOverlays.comp';
 import { CalendarSidebar } from './components/CalendarSidebar.comp';
 import { CalendarState } from './components/CalendarState.comp';
 import { CalendarToolbar } from './components/CalendarToolbar.comp';
@@ -26,7 +30,9 @@ import { EventPopover } from './components/EventPopover.comp';
 import { ProvenanceFooter } from './components/ProvenanceFooter.comp';
 import { useCalendarActions } from './hooks/useCalendarActions';
 import { useCalendarKeyboard } from './hooks/useCalendarKeyboard';
+import { useCalendarLayers } from './hooks/useCalendarLayers';
 import { useCalendarNavigation } from './hooks/useCalendarNavigation';
+import { useNoteController } from './hooks/useNoteController';
 import { useNow } from './hooks/useNow';
 import { usePopoverModel } from './hooks/usePopoverModel';
 import { useWeekModel } from './hooks/useWeekModel';
@@ -97,6 +103,10 @@ const CalendarView: React.FC = () => {
     onPlanWriteError,
     span: view === 'year' ? 'academicYear' : 'term',
   });
+  const notesData = useCalendarNotes(data.range);
+  const onNoteFailed = useCallback((change: NoteChange) => notify.error(t(`notes.failed.${change.type}`)), [t]);
+  const notes = useNoteController(notesData.events, data.range, onNoteFailed);
+  const { layers, shownNotes } = useCalendarLayers({ prefs, setPrefs, notes: notesData });
   const onVisibilityError = useCallback(() => notify.error(t('visibility.failed')), [t]);
   const visibility = useCalendarVisibility(onVisibilityError);
   const actions = useCalendarActions(data.updatePlan, visibility.mutate);
@@ -147,9 +157,10 @@ const CalendarView: React.FC = () => {
   );
 
   const closeOverlays = useCallback(() => {
-    if (popover) setPopover(null);
+    if (notes.hasOverlay) notes.closeOverlay();
+    else if (popover) setPopover(null);
     else setInspector(null);
-  }, [popover]);
+  }, [notes, popover]);
 
   useCalendarKeyboard({
     onPrevious: goToPrevious,
@@ -159,7 +170,25 @@ const CalendarView: React.FC = () => {
     onView: setView,
   });
 
-  const selectSession = useCallback((session: Session, element: HTMLElement) => setPopover({ session, element }), []);
+  const { closePopover: closeNotePopover, openNote } = notes;
+  const selectSession = useCallback(
+    (session: Session, element: HTMLElement) => {
+      closeNotePopover();
+      setPopover({ session, element });
+    },
+    [closeNotePopover],
+  );
+  const selectNote = useCallback(
+    (note: NoteOccurrence, element: HTMLElement) => {
+      setPopover(null);
+      openNote(note, element);
+    },
+    [openNote],
+  );
+  const closeTransient = useCallback(() => {
+    setPopover(null);
+    closeNotePopover();
+  }, [closeNotePopover]);
 
   // The app renders inside a shadow root, so document.querySelector cannot reach session blocks.
   const showFirstClash = () => {
@@ -254,9 +283,8 @@ const CalendarView: React.FC = () => {
           courseUnits={data.courseUnits}
           plans={data.plans}
           timetables={timetables}
-          showCancelled={prefs.calendarShowCancelled}
+          layers={layers}
           onSelectDate={setAnchorKey}
-          onShowCancelledChange={(value) => setPrefs({ calendarShowCancelled: value })}
           onToggleCourse={actions.setCourseVisible}
           onOpenGroups={openGroups}
           onDismissPrompt={(courseKey, setId) => actions.dismiss(courseKey, promptId(setId))}
@@ -301,10 +329,12 @@ const CalendarView: React.FC = () => {
                 activeSessionId={popover?.session.id ?? null}
                 periods={periods}
                 showCancelled={prefs.calendarShowCancelled}
+                notes={shownNotes}
                 onOpenDay={openDay}
                 onOpenWeek={openWeek}
                 onSelect={selectSession}
-                onUserScroll={closePopover}
+                onSelectNote={selectNote}
+                onUserScroll={closeTransient}
               />
             </div>
           )}
@@ -341,6 +371,7 @@ const CalendarView: React.FC = () => {
           onClose={closePopover}
         />
       )}
+      <CalendarOverlays notes={notes} locale={locale} />
     </div>
   );
 };

@@ -2,7 +2,7 @@ import React from 'react';
 import type { CalendarData } from '@/app/api/dataPoints/calendar/types';
 import type { StudyPeriodInfo } from '@/app/api/dataPoints/getStudyPeriodMap';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
-import type { Session } from '@/app/schedule';
+import type { NoteOccurrence, Session } from '@/app/schedule';
 import type { CalendarView, PreviewModel, WeekModel } from '../types';
 import { monthStartKey } from '../util';
 import { MonthView } from './MonthView.comp';
@@ -23,9 +23,11 @@ interface Props {
   activeSessionId: string | null;
   periods: StudyPeriodInfo[];
   showCancelled: boolean;
+  notes: NoteOccurrence[];
   onOpenDay: (dateKey: string) => void;
   onOpenWeek: (dateKey: string) => void;
   onSelect: (session: Session, element: HTMLElement) => void;
+  onSelectNote: (note: NoteOccurrence, element: HTMLElement) => void;
   onUserScroll: () => void;
 }
 
@@ -43,9 +45,11 @@ export const CalendarBody: React.FC<Props> = ({
   activeSessionId,
   periods,
   showCancelled,
+  notes,
   onOpenDay,
   onOpenWeek,
   onSelect,
+  onSelectNote,
   onUserScroll,
 }) => {
   const { t } = useTranslationWithPrefix('views.calendar');
@@ -80,6 +84,7 @@ export const CalendarBody: React.FC<Props> = ({
       sessions={week.weekSessions}
       alternatives={week.weekAlternatives}
       preview={preview.sessions}
+      notes={notes}
       previewClashIds={preview.clashIds}
       sessionsById={week.sessionsById}
       clashesBySession={data.clashesBySession}
@@ -90,6 +95,7 @@ export const CalendarBody: React.FC<Props> = ({
       activeSessionId={activeSessionId}
       locale={locale}
       onSelect={onSelect}
+      onSelectNote={onSelectNote}
       onUserScroll={onUserScroll}
     />
   );

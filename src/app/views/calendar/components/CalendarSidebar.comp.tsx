@@ -1,7 +1,7 @@
 import React from 'react';
 import type { CalendarCourse, CourseUnitInfo } from '@/app/api/dataPoints/calendar/types';
 import type { AttendancePlan } from '@/app/schedule';
-import type { TimetableControls } from '../types';
+import type { LayerControls, TimetableControls } from '../types';
 import { CourseList } from './CourseList.comp';
 import { LayersPanel } from './LayersPanel.comp';
 import { MiniMonth } from './MiniMonth.comp';
@@ -15,9 +15,8 @@ interface Props {
   courseUnits: Record<string, CourseUnitInfo>;
   plans: Record<string, AttendancePlan>;
   timetables: TimetableControls;
-  showCancelled: boolean;
+  layers: LayerControls;
   onSelectDate: (dateKey: string) => void;
-  onShowCancelledChange: (value: boolean) => void;
   onToggleCourse: (course: CalendarCourse, visible: boolean) => void;
   onOpenGroups: (courseKey: string, setId: string | null) => void;
   onDismissPrompt: (courseKey: string, setId: string) => void;
@@ -32,9 +31,8 @@ export const CalendarSidebar: React.FC<Props> = ({
   courseUnits,
   plans,
   timetables,
-  showCancelled,
+  layers,
   onSelectDate,
-  onShowCancelledChange,
   onToggleCourse,
   onOpenGroups,
   onDismissPrompt,
@@ -56,6 +54,6 @@ export const CalendarSidebar: React.FC<Props> = ({
       onOpenGroups={onOpenGroups}
       onDismissPrompt={onDismissPrompt}
     />
-    <LayersPanel showCancelled={showCancelled} onShowCancelledChange={onShowCancelledChange} />
+    <LayersPanel layers={layers} />
   </aside>
 );

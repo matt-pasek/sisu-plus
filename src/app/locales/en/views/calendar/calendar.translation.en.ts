@@ -1,3 +1,7 @@
+import { calendarDeadlinesTranslation, type CalendarDeadlinesTranslation } from './calendarDeadlines.translation.en';
+import { calendarExportTranslation, type CalendarExportTranslation } from './calendarExport.translation.en';
+import { calendarNotesTranslation, type CalendarNotesTranslation } from './calendarNotes.translation.en';
+
 export type CalendarTranslation = {
   title: string;
   weekLabel: string;
@@ -247,6 +251,9 @@ export type CalendarTranslation = {
     planned_other: string;
     cellAria: string;
   };
+  notes: CalendarNotesTranslation;
+  deadlines: CalendarDeadlinesTranslation;
+  exportPanel: CalendarExportTranslation;
 };
 
 export const calendarTranslation: CalendarTranslation = {
@@ -498,4 +505,7 @@ export const calendarTranslation: CalendarTranslation = {
     planned_other: '{{count}} courses are planned there in your Timeline.',
     cellAria: '{{date}}: {{hours}} h',
   },
+  notes: calendarNotesTranslation,
+  deadlines: calendarDeadlinesTranslation,
+  exportPanel: calendarExportTranslation,
 };

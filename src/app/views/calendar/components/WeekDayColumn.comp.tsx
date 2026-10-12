@@ -1,7 +1,16 @@
 import React, { useMemo } from 'react';
+import { isPendingNote } from '@/app/api/dataPoints/calendar/notes';
 import type { CourseUnitInfo, RoomInfo } from '@/app/api/dataPoints/calendar/types';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
-import { helsinkiMinutesOfDay, layoutDay, type Clash, type HourRange, type Session } from '@/app/schedule';
+import {
+  helsinkiMinutesOfDay,
+  layoutDay,
+  type Clash,
+  type HourRange,
+  type NoteOccurrence,
+  type Session,
+  type TimedBlock,
+} from '@/app/schedule';
 import type { SessionBadge } from '../types';
 import {
   describeRoom,
@@ -15,6 +24,7 @@ import {
   sessionRoom,
 } from '../util';
 import { AlternativeBlock } from './AlternativeBlock.comp';
+import { NoteBlock } from './NoteBlock.comp';
 import { NowLine } from './NowLine.comp';
 import { OVERFLOW_STRIP_WIDTH, OverflowChip } from './OverflowChip.comp';
 import { SessionBlock } from './SessionBlock.comp';
@@ -26,6 +36,7 @@ interface Props {
   sessions: Session[];
   alternatives: Session[];
   preview: Session[];
+  notes: NoteOccurrence[];
   previewClashIds: Set<string>;
   sessionsById: Map<string, Session>;
   hourRange: HourRange;
@@ -40,6 +51,7 @@ interface Props {
   activeSessionId: string | null;
   locale: string;
   onSelect: (session: Session, element: HTMLElement) => void;
+  onSelectNote: (note: NoteOccurrence, element: HTMLElement) => void;
 }
 
 export const WeekDayColumn: React.FC<Props> = ({
@@ -49,6 +61,7 @@ export const WeekDayColumn: React.FC<Props> = ({
   sessions,
   alternatives,
   preview,
+  notes,
   previewClashIds,
   sessionsById,
   hourRange,
@@ -63,15 +76,17 @@ export const WeekDayColumn: React.FC<Props> = ({
   activeSessionId,
   locale,
   onSelect,
+  onSelectNote,
 }) => {
   const { t } = useTranslationWithPrefix('views.calendar');
-  const layout = useMemo(() => layoutDay([...sessions, ...preview]), [sessions, preview]);
+  const layout = useMemo(() => layoutDay([...sessions, ...preview, ...notes]), [sessions, preview, notes]);
+  const notesById = useMemo(() => new Map(notes.map((note) => [note.id, note])), [notes]);
   const alternativeLayout = useMemo(() => layoutDay(alternatives), [alternatives]);
   const roomLabels = { noRoom: t('event.noRoom'), unavailable: t('event.roomUnavailable') };
   const nowMinutes = helsinkiMinutesOfDay(now);
   const showNow = isToday && nowMinutes >= hourRange.startHour * 60 && nowMinutes <= hourRange.endHour * 60;
-  const inOverflowCluster = (session: Session): boolean =>
-    layout.overflow.some((slot) => session.start < slot.end && session.end > slot.start);
+  const inOverflowCluster = (block: TimedBlock): boolean =>
+    layout.overflow.some((slot) => block.start < slot.end && block.end > slot.start);
 
   const ariaLabelFor = (session: Session, room: string, clashes: Clash[]): string => {
     const base = t('aria.session', {
@@ -158,6 +173,31 @@ export const WeekDayColumn: React.FC<Props> = ({
           />
         );
       })}
+      {notes.map((note) => {
+        const placement = layout.placements[note.id];
+        if (!placement) return null;
+        const box = sessionBox(note, hourRange, hourHeight);
+        const pending = isPendingNote(note.noteId);
+        return (
+          <NoteBlock
+            key={note.id}
+            placement={placement}
+            box={{ ...box, top: box.top + inset }}
+            reservedRight={inOverflowCluster(note) ? OVERFLOW_STRIP_WIDTH : 0}
+            title={note.name}
+            timeLabel={`${formatClock(note.start)}–${formatClock(note.end)}`}
+            ariaLabel={t('notes.aria', {
+              name: note.name,
+              date: formatSessionDate(dateKey, locale),
+              start: formatClock(note.start),
+              end: formatClock(note.end),
+            })}
+            variant={pending ? 'pending' : 'saved'}
+            isPast={note.end <= now}
+            onSelect={pending ? undefined : (element) => onSelectNote(note, element)}
+          />
+        );
+      })}
       {preview.map((session) => {
         const placement = layout.placements[session.id];
         if (!placement) return null;
@@ -178,20 +218,27 @@ export const WeekDayColumn: React.FC<Props> = ({
         const hidden = slot.sessionIds
           .map((id) => sessionsById.get(id))
           .filter((session): session is Session => session != null);
+        const hiddenNotes = slot.sessionIds
+          .map((id) => notesById.get(id))
+          .filter((note): note is NoteOccurrence => note != null);
         return (
           <OverflowChip
             key={slot.sessionIds.join()}
             top={minutesToOffset(helsinkiMinutesOfDay(slot.start), hourRange, hourHeight) + inset}
             count={slot.sessionIds.length}
             ariaLabel={t('aria.moreSessions', {
-              count: hidden.length,
+              count: hidden.length + hiddenNotes.length,
               names: joinNames(
-                hidden.map((session) => `${session.courseName} ${formatClock(session.start)}`),
+                [
+                  ...hidden.map((session) => `${session.courseName} ${formatClock(session.start)}`),
+                  ...hiddenNotes.map((note) => `${note.name} ${formatClock(note.start)}`),
+                ],
                 locale,
               ),
             })}
             onOpen={(element) => {
               if (hidden[0]) onSelect(hidden[0], element);
+              else if (hiddenNotes[0]) onSelectNote(hiddenNotes[0], element);
             }}
           />
         );

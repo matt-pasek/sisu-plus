@@ -56,3 +56,21 @@ export interface SisuNotificationSyncPayload {
   registrations: CachedRegistrationEvent[];
   syncedAt?: number;
 }
+
+export interface CachedClassSession {
+  id: string;
+  startsAt: string;
+  endsAt: string;
+  courseName: string;
+  kindLabel: string;
+  room: string;
+  isExam: boolean;
+}
+
+export interface ClassReminderSnapshot {
+  sessions: CachedClassSession[];
+  horizonKey: string;
+  horizonLabel: string;
+  hasMoreAfter: boolean;
+  syncedAt: number;
+}

@@ -6,6 +6,7 @@ import type { NotificationType } from '@/app/types/NotificationType.type';
 import { useNotificationCache } from '@/app/hooks/useNotificationCache';
 import { notify } from '@/app/components/ui/notify';
 import { ClassReminderOptions } from '@/app/controlCenter/ClassReminderOptions.comp';
+import { todayKey } from '@/app/schedule';
 import { countClassReminderAlarms } from '@/background/notifications/classReminders';
 import { DEV_TEST_NOTIFICATION_PAYLOADS } from '@/shared/notifications/devTestPayloads';
 import { formatLeadTime } from '@/shared/notifications/formatLeadTime';
@@ -52,12 +53,13 @@ export const NotificationSettingsPanel: React.FC<NotificationSettingsPanelProps>
     : t('notifications.never');
   const lastSisuSync = cache?.sisu.lastSync ? new Date(cache.sisu.lastSync).toLocaleString() : t('notifications.never');
   const remindersOn = notificationPrefs.delivery['class-reminder'] !== 'off';
-  const remindersChip = cache?.calendar
-    ? t('notifications.stats.remindersValue', {
-        count: countClassReminderAlarms(cache.scheduledAlarms),
-        date: cache.calendar.horizonLabel,
-      })
-    : t('notifications.stats.remindersNone');
+  const remindersChip =
+    cache?.calendar && cache.calendar.horizonKey >= todayKey()
+      ? t('notifications.stats.remindersValue', {
+          count: countClassReminderAlarms(cache.scheduledAlarms),
+          date: cache.calendar.horizonLabel,
+        })
+      : t('notifications.stats.remindersNone');
 
   const setDeliveryMode = (type: NotificationType, mode: NotificationDeliveryMode) => {
     onPrefsChange({

@@ -34,7 +34,13 @@ describe('toReminderSnapshot', () => {
     expect(snapshot?.horizonKey).toBe('2026-10-19');
     expect(snapshot?.horizonLabel).toBe('day 2026-10-19');
     expect(snapshot?.hasMoreAfter).toBe(true);
+    expect(snapshot?.hasExamsAfter).toBe(false);
     expect(snapshot?.syncedAt).toBe(now.getTime());
+  });
+
+  test('knows separately whether exams follow the horizon, for exams-only reminders', () => {
+    const withLaterExam = [...attended, buildSession('final', '2026-12-02', 9, 12, { kind: 'exam' })];
+    expect(toReminderSnapshot(withLaterExam, ROOMS, AUTUMN, now, labels)?.hasExamsAfter).toBe(true);
   });
 
   test('stores instants, labels, the short room and whether it is an exam', () => {

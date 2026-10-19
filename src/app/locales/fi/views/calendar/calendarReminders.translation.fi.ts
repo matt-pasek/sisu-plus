@@ -6,7 +6,7 @@ export const calendarRemindersTranslation: CalendarRemindersTranslation = {
   lead: '{{minutes}} min ennen',
   until: '{{date}} asti',
   setUp: 'Ota käyttöön',
-  setUpAria: 'Ota tuntimuistutukset käyttöön',
+  setUpAria: 'Ota käyttöön tuntimuistutukset',
   change: 'Muuta',
   changeAria: 'Muuta tuntimuistutuksia',
 };

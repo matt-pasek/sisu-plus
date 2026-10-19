@@ -18,6 +18,7 @@ export type CalendarDeadlinesTranslation = {
   yearDots_one: string;
   yearDots_other: string;
   dueSoon: string;
+  dueWeek: string;
   dueToday: string;
   dueTomorrow: string;
   dueInDays: string;
@@ -44,6 +45,7 @@ export const calendarDeadlinesTranslation: CalendarDeadlinesTranslation = {
   yearDots_one: '{{count}} deadline',
   yearDots_other: '{{count}} deadlines',
   dueSoon: 'Due soon',
+  dueWeek: 'Due within a week',
   dueToday: 'today',
   dueTomorrow: 'tomorrow',
   dueInDays: 'in {{count}} days',

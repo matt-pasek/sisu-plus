@@ -5,6 +5,7 @@ import { notify } from '@/app/components/ui/notify';
 import { Panel } from '@/app/components/ui/Panel.comp';
 import { PanelEyebrow } from '@/app/components/ui/PanelEyebrow.comp';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
+import { SECTION_TITLE_CLASS } from '../constants/sectionTitle.const';
 import { shareFeedUrl, shareLanguage } from '../util';
 import { CopyField } from './CopyField.comp';
 import { ExportSteps } from './ExportSteps.comp';
@@ -69,16 +70,16 @@ export const ExportInspector: React.FC<Props> = ({ moodleUrl, locale, onConnectM
         </section>
         <section className="grid grid-cols-2 gap-3">
           <div>
-            <PanelEyebrow>{t('exportPanel.includedTitle')}</PanelEyebrow>
+            <h4 className={SECTION_TITLE_CLASS}>{t('exportPanel.includedTitle')}</h4>
             {list(['includedGroups', 'includedExams', 'includedNotes'])}
           </div>
           <div>
-            <PanelEyebrow>{t('exportPanel.notIncludedTitle')}</PanelEyebrow>
+            <h4 className={SECTION_TITLE_CLASS}>{t('exportPanel.notIncludedTitle')}</h4>
             {list(['notIncludedSwaps', 'notIncludedLinked', 'notIncludedMoodle'])}
           </div>
         </section>
         <section>
-          <PanelEyebrow>{t('exportPanel.howTitle')}</PanelEyebrow>
+          <h4 className={SECTION_TITLE_CLASS}>{t('exportPanel.howTitle')}</h4>
           <div className="mt-1">
             <ExportSteps />
           </div>
@@ -92,7 +93,7 @@ export const ExportInspector: React.FC<Props> = ({ moodleUrl, locale, onConnectM
             </>
           ) : (
             <>
-              <PanelEyebrow>{t('exportPanel.moodleTitle')}</PanelEyebrow>
+              <h4 className={SECTION_TITLE_CLASS}>{t('exportPanel.moodleTitle')}</h4>
               <button type="button" onClick={onConnectMoodle} className={`${LINK_BUTTON} w-fit text-lighterGreen`}>
                 {t('deadlines.connect')}
               </button>

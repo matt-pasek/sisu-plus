@@ -37,6 +37,7 @@ export const toReminderSnapshot = (
     horizonKey,
     horizonLabel: labels.date(horizonKey),
     hasMoreAfter: live.some((session) => session.dateKey > horizonKey),
+    hasExamsAfter: live.some((session) => session.dateKey > horizonKey && session.kind === 'exam'),
     syncedAt: now.getTime(),
   };
 };

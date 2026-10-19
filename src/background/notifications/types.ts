@@ -73,5 +73,6 @@ export interface ClassReminderSnapshot {
   horizonKey: string;
   horizonLabel: string;
   hasMoreAfter: boolean;
+  hasExamsAfter?: boolean;
   syncedAt: number;
 }

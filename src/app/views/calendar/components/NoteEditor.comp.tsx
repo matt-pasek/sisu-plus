@@ -1,5 +1,5 @@
 import React, { useId } from 'react';
-import { maxUntilKey, validateNoteDraft } from '@/app/api/dataPoints/calendar/notes';
+import { clampUntilKey, maxUntilKey, validateNoteDraft } from '@/app/api/dataPoints/calendar/notes';
 import type { NoteDraft } from '@/app/api/dataPoints/calendar/types';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { HELSINKI_TIME_ZONE } from '@/app/schedule';
@@ -128,7 +128,10 @@ export const NoteEditor: React.FC<Props> = ({ state, onChange, onSave, onCancel 
             <select
               id={`${id}-repeat`}
               value={draft.repeat}
-              onChange={(event) => set({ repeat: parseRepeat(event.target.value) })}
+              onChange={(event) => {
+                const repeat = parseRepeat(event.target.value);
+                set({ repeat, untilKey: clampUntilKey(draft.untilKey, draft.dateKey, repeat) });
+              }}
               className={INPUT_CLASS}
             >
               {REPEAT_OPTIONS.map((option) => (
@@ -149,7 +152,7 @@ export const NoteEditor: React.FC<Props> = ({ state, onChange, onSave, onCancel 
                 type="date"
                 value={draft.untilKey}
                 min={draft.dateKey}
-                max={maxUntilKey(draft.dateKey)}
+                max={maxUntilKey(draft.dateKey, draft.repeat)}
                 aria-invalid={errors.until != null}
                 aria-describedby={describedBy('until', errors.until != null)}
                 onChange={(event) => event.target.value && set({ untilKey: event.target.value })}

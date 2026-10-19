@@ -44,6 +44,7 @@ export const isClassReminderSnapshot = (value: unknown): value is ClassReminderS
   DATE_KEY.test(value.horizonKey) &&
   isString(value.horizonLabel) &&
   typeof value.hasMoreAfter === 'boolean' &&
+  (value.hasExamsAfter === undefined || typeof value.hasExamsAfter === 'boolean') &&
   typeof value.syncedAt === 'number' &&
   Number.isFinite(value.syncedAt);
 
@@ -75,6 +76,10 @@ export const parseClassReminderAlarm = (name: string): ClassReminderAlarm | null
 const nudgeTime = (horizonKey: string): number =>
   helsinkiWallTimeToInstant(addDaysToDateKey(horizonKey, -1), NUDGE_MINUTES_OF_DAY).getTime();
 
+// Snapshots stored before hasExamsAfter existed fall back to any later class.
+export const wantsHorizonNudge = (snapshot: ClassReminderSnapshot, scope: NotificationPrefs['classReminderScope']) =>
+  scope === 'exams' ? (snapshot.hasExamsAfter ?? snapshot.hasMoreAfter) : snapshot.hasMoreAfter;
+
 export const classReminderAlarms = (
   snapshot: ClassReminderSnapshot | null,
   prefs: NotificationPrefs,
@@ -88,7 +93,7 @@ export const classReminderAlarms = (
       name: classAlarmName(lead, session.id),
       when: Date.parse(session.startsAt) - lead * MINUTE_MS,
     }));
-  const nudge = snapshot.hasMoreAfter
+  const nudge = wantsHorizonNudge(snapshot, prefs.classReminderScope)
     ? [{ name: horizonAlarmName(snapshot.horizonKey), when: nudgeTime(snapshot.horizonKey) }]
     : [];
   return [...classes, ...nudge].filter((alarm) => alarm.when > now);

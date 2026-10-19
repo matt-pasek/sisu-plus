@@ -10,12 +10,14 @@ import {
   tryParseIsoDurationMs,
   type DateRange,
   type NoteOccurrence,
+  type RecurrenceRule,
   type RecurringSeries,
 } from '@/app/schedule';
 import type { NoteChange, NoteDayAction, NoteDraft, NoteDraftErrors } from './types';
 
 const MINUTE_MS = 60_000;
 const LAST_MINUTE = 24 * 60 - 1;
+const MAX_DAILY_OCCURRENCES = 365;
 const DEFAULT_DURATION_MS = 60 * MINUTE_MS;
 
 export const PENDING_NOTE_PREFIX = 'pending-';
@@ -110,7 +112,15 @@ export const deleteDayAction = (event: CalendarEvent, dateKey: string): NoteDayA
     : { type: 'update', event: addException(event, dateKey) };
 };
 
-export const maxUntilKey = (dateKey: string): string => addDaysToDateKey(addMonthsToDateKey(dateKey, 12), -1);
+export const maxUntilKey = (dateKey: string, repeat?: RecurrenceRule): string =>
+  repeat === 'DAILY'
+    ? addDaysToDateKey(dateKey, MAX_DAILY_OCCURRENCES - 1)
+    : addDaysToDateKey(addMonthsToDateKey(dateKey, 12), -1);
+
+export const clampUntilKey = (untilKey: string, dateKey: string, repeat: RecurrenceRule): string => {
+  const cap = maxUntilKey(dateKey, repeat);
+  return untilKey > cap ? cap : untilKey;
+};
 
 export const defaultUntilKey = (dateKey: string, range: DateRange): string => {
   const rangeLast = addDaysToDateKey(range.endKey, -1);
@@ -128,7 +138,7 @@ export const newNoteDraft = (
   title: '',
   dateKey,
   startMinutes,
-  endMinutes,
+  endMinutes: Math.min(endMinutes, LAST_MINUTE),
   repeat: 'NEVER',
   untilKey: defaultUntilKey(dateKey, range),
 });
@@ -154,7 +164,7 @@ export const validateNoteDraft = (draft: NoteDraft): NoteDraftErrors => {
     ...(draft.title.trim() === '' ? { title: 'required' as const } : {}),
     ...(draft.endMinutes <= draft.startMinutes ? { time: 'endBeforeStart' as const } : {}),
     ...(repeating && draft.untilKey < draft.dateKey ? { until: 'beforeDate' as const } : {}),
-    ...(repeating && draft.untilKey > maxUntilKey(draft.dateKey) ? { until: 'tooFar' as const } : {}),
+    ...(repeating && draft.untilKey > maxUntilKey(draft.dateKey, draft.repeat) ? { until: 'tooFar' as const } : {}),
   };
 };
 

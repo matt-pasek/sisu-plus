@@ -53,6 +53,19 @@ describe('classReminderAlarms', () => {
     expect(classReminderAlarms(null, on(), now)).toEqual([]);
   });
 
+  test('exams-only reminders nudge only when exams follow the horizon', () => {
+    const examsOnly = { ...on(), classReminderScope: 'exams' as const };
+    const names = (hasExamsAfter: boolean) =>
+      classReminderAlarms(buildReminderSnapshot({ hasExamsAfter }), examsOnly, now).map((alarm) => alarm.name);
+    expect(names(false)).toEqual([classAlarmName(10, 'exam')]);
+    expect(names(true)).toEqual([classAlarmName(10, 'exam'), horizonAlarmName('2026-10-19')]);
+  });
+
+  test('a snapshot stored before the exams flag existed still counts as valid', () => {
+    const { hasExamsAfter: _dropped, ...older } = buildReminderSnapshot();
+    expect(isClassReminderSnapshot(older)).toBe(true);
+  });
+
   test('no nudge when the term has no later classes', () => {
     const names = classReminderAlarms(buildReminderSnapshot({ hasMoreAfter: false }), on(), now).map(
       (alarm) => alarm.name,

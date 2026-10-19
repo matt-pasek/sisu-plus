@@ -12,6 +12,7 @@ import {
   hasErrors,
   isPendingNote,
   mapNotes,
+  clampUntilKey,
   maxUntilKey,
   newNoteDraft,
   noteChangeFor,
@@ -167,6 +168,23 @@ describe('deleting one day', () => {
 
 describe('note drafts', () => {
   const valid = { ...newNoteDraft('2026-10-21', 600, 660, AUTUMN), title: 'Dentist' };
+
+  test('a note drawn to the bottom of a midnight grid ends at 23.59, which the End field can show', () => {
+    expect(newNoteDraft('2026-10-21', 22 * 60, 24 * 60, AUTUMN).endMinutes).toBe(24 * 60 - 1);
+  });
+
+  test('switching to daily pulls an until date past 365 occurrences back to the cap', () => {
+    expect(clampUntilKey('2028-07-31', '2027-08-01', 'DAILY')).toBe('2028-07-30');
+    expect(clampUntilKey('2027-12-31', '2027-08-01', 'DAILY')).toBe('2027-12-31');
+    expect(clampUntilKey('2028-07-31', '2027-08-01', 'WEEKLY')).toBe('2028-07-31');
+  });
+
+  test('a daily note stops at 365 occurrences, like Sisu, even across 29 February', () => {
+    const daily = { ...valid, dateKey: '2027-06-01', repeat: 'DAILY' as const };
+    expect(maxUntilKey('2027-06-01', 'DAILY')).toBe('2028-05-30');
+    expect(validateNoteDraft({ ...daily, untilKey: '2028-05-30' })).toEqual({});
+    expect(validateNoteDraft({ ...daily, untilKey: '2028-05-31' })).toEqual({ until: 'tooFar' });
+  });
 
   test('a complete draft has no errors', () => {
     expect(validateNoteDraft(valid)).toEqual({});

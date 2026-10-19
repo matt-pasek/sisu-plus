@@ -20,6 +20,7 @@ export const calendarDeadlinesTranslation: CalendarDeadlinesTranslation = {
   yearDots_one: '{{count}} määräaika',
   yearDots_other: '{{count}} määräaikaa',
   dueSoon: 'Pian erääntyvät',
+  dueWeek: 'Erääntyy viikon sisällä',
   dueToday: 'tänään',
   dueTomorrow: 'huomenna',
   dueInDays: '{{count}} päivän päästä',

@@ -28,6 +28,7 @@ export const buildReminderSnapshot = (overrides: Partial<ClassReminderSnapshot> 
   horizonKey: '2026-10-19',
   horizonLabel: 'Mon 19.10',
   hasMoreAfter: true,
+  hasExamsAfter: true,
   syncedAt: 0,
   ...overrides,
 });

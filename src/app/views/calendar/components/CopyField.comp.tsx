@@ -1,5 +1,6 @@
 import React, { useEffect, useId, useRef, useState } from 'react';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
+import { SECTION_TITLE_CLASS } from '../constants/sectionTitle.const';
 import { CopyIcon } from './icons';
 
 interface Props {
@@ -31,7 +32,7 @@ export const CopyField: React.FC<Props> = ({ label, value }) => {
 
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor={id} className="font-mono text-[10px] font-semibold tracking-[0.1em] text-lightGrey uppercase">
+      <label htmlFor={id} className={SECTION_TITLE_CLASS}>
         {label}
       </label>
       <div className="flex gap-2">
@@ -46,7 +47,7 @@ export const CopyField: React.FC<Props> = ({ label, value }) => {
         <button
           type="button"
           onClick={() => void copy()}
-          className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg px-2.5 text-[12px] font-medium text-offwhite shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)] transition-colors duration-150 hover:bg-offwhite/8"
+          className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg px-2.5 text-[12px] font-medium text-offwhite shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)] transition-colors duration-150 hover:bg-offwhite/8 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lighterGreen"
         >
           <CopyIcon className="size-3.5" />
           {state === 'copied' ? t('exportPanel.copied') : t('exportPanel.copy')}

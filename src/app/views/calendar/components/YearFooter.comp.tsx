@@ -19,7 +19,9 @@ interface Props {
 export const YearFooter: React.FC<Props> = ({ exams, heaviest, emptyTerm, locale }) => {
   const { t } = useTranslationWithPrefix('views.calendar');
   return (
-    <div className={`grid border-t border-border ${emptyTerm ? 'md:grid-cols-[1fr_1fr_1.2fr]' : 'md:grid-cols-2'}`}>
+    <div
+      className={`grid flex-1 content-start border-t border-border md:content-stretch ${emptyTerm ? 'md:grid-cols-[1fr_1fr_1.2fr]' : 'md:grid-cols-2'}`}
+    >
       <div className="px-[18px] py-3">
         <PanelEyebrow>{t('year.exams')}</PanelEyebrow>
         {exams.length === 0 ? (
@@ -46,7 +48,7 @@ export const YearFooter: React.FC<Props> = ({ exams, heaviest, emptyTerm, locale
             <span className="font-mono text-[11px] text-lightGrey">
               {t('year.weekRange', { week: week.weekNumber })}
             </span>
-            <span aria-hidden="true" className="size-[7px] rounded-full bg-lighterGreen" />
+            <span aria-hidden="true" className="size-[7px] rounded-full bg-offwhite/60" />
             <span className="truncate">{formatWeekRange(week.weekKey, addDaysToDateKey(week.weekKey, 6), locale)}</span>
             <span className="font-mono text-[11px] text-lightGrey">
               {t('year.hours', { hours: formatHours(week.minutes, locale) })}

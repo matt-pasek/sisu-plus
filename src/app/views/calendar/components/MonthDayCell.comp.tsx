@@ -21,26 +21,19 @@ export const MonthDayCell: React.FC<Props> = ({ cell, isCurrentWeek, sessionsByI
   const { t } = useTranslationWithPrefix('views.calendar');
   const day = Number(cell.dateKey.slice(8, 10));
   const tone = `${cell.isWeekend ? 'bg-offwhite/[0.012]' : ''} ${isCurrentWeek ? 'bg-offwhite/[0.025]' : ''}`;
-  if (!cell.inMonth) {
-    return (
-      <div className={`min-h-[112px] border-t border-l border-border px-2 py-1.5 opacity-40 ${tone}`}>
-        <span className="text-[13px] font-semibold text-lightGrey tabular-nums">{day}</span>
-      </div>
-    );
-  }
   const hours = formatHours(cell.minutes, locale);
   const date = formatSessionDate(cell.dateKey, locale);
   return (
     <button
       type="button"
       onClick={() => onOpen(cell.dateKey)}
-      className={`flex min-h-[112px] min-w-0 cursor-pointer flex-col gap-[3px] border-t border-l border-border px-2 py-1.5 text-left transition-colors duration-150 hover:bg-offwhite/3 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-lighterGreen ${tone}`}
+      className={`flex min-h-[112px] min-w-0 cursor-pointer flex-col gap-[3px] border-t border-l border-border px-2 py-1.5 text-left transition-colors duration-150 hover:bg-offwhite/3 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-lighterGreen ${tone} ${cell.inMonth ? '' : 'opacity-40'}`}
     >
       <span className="sr-only">{date}</span>
       <span className="mb-0.5 flex items-center justify-between gap-1.5">
         <span
           aria-hidden="true"
-          className={`text-[13px] font-semibold tabular-nums ${cell.isToday ? 'rounded-[7px] bg-accent px-1.5 text-white' : 'text-offwhite'}`}
+          className={`text-[13px] font-semibold tabular-nums ${cell.isToday ? 'rounded-[7px] bg-accent px-1.5 text-white' : cell.inMonth ? 'text-offwhite' : 'text-lightGrey'}`}
         >
           {day}
         </span>

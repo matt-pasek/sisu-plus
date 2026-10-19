@@ -14,7 +14,7 @@ import {
 import type { HeavyWeek, LoadLevel, YearBand, YearInput, YearWeek } from '../types';
 import { formatMonthShort } from './format';
 
-const WEEKDAYS = 5;
+const DAYS_IN_WEEK = 7;
 const THURSDAY_OFFSET = 3;
 
 const byStart = (a: Session, b: Session): number => a.start.getTime() - b.start.getTime();
@@ -44,7 +44,7 @@ export const yearWeeks = (input: YearInput): YearWeek[] => {
       weekKey,
       weekNumber: isoWeekNumber(weekKey),
       isCurrent: weekKey === currentWeek,
-      days: Array.from({ length: WEEKDAYS }, (_, dayIndex) => {
+      days: Array.from({ length: DAYS_IN_WEEK }, (_, dayIndex) => {
         const dateKey = addDaysToDateKey(weekKey, dayIndex);
         const inYear = dateKey >= input.range.startKey && dateKey < input.range.endKey;
         const day = inYear ? live.filter((session) => session.dateKey === dateKey) : [];
@@ -95,8 +95,13 @@ const mergeRuns = (weeks: YearWeek[], kind: YearBand['kind'], labelOf: (week: Ye
 export const noTeachingBands = (weeks: YearWeek[], noTeaching: Set<string>, label: string): YearBand[] =>
   mergeRuns(weeks, 'noTeaching', (week) => (noTeaching.has(week.weekKey) ? label : null));
 
+const monthKeyOf = (week: YearWeek): string => {
+  const thursday = week.days[THURSDAY_OFFSET];
+  return thursday.inYear ? thursday.dateKey : (week.days.find((day) => day.inYear)?.dateKey ?? thursday.dateKey);
+};
+
 export const monthBands = (weeks: YearWeek[], locale: string): YearBand[] =>
-  mergeRuns(weeks, 'month', (week) => formatMonthShort(addDaysToDateKey(week.weekKey, THURSDAY_OFFSET), locale));
+  mergeRuns(weeks, 'month', (week) => formatMonthShort(monthKeyOf(week), locale));
 
 export const heaviestWeeks = (weeks: YearWeek[], count = 3): HeavyWeek[] =>
   weeks

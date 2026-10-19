@@ -57,7 +57,9 @@ export const formatAcademicYear = (range: DateRange): string =>
   `${range.startKey.slice(0, 4)}–${range.endKey.slice(2, 4)}`;
 
 export const formatHours = (minutes: number, locale: string): string =>
-  new Intl.NumberFormat(intlLocale(locale), { maximumFractionDigits: 1 }).format(Math.round(minutes / 30) / 2);
+  new Intl.NumberFormat(intlLocale(locale), { maximumFractionDigits: 1 }).format(
+    minutes > 0 ? Math.max(Math.round(minutes / 30), 1) / 2 : 0,
+  );
 
 export const formatMonthShort = (dateKey: string, locale: string): string =>
   capitalise(new Intl.DateTimeFormat(intlLocale(locale), { month: 'short', timeZone: 'UTC' }).format(noonUtc(dateKey)));

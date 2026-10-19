@@ -53,6 +53,18 @@ describe('dayShape', () => {
     ]);
   });
 
+  test('a chain of overlaps reuses the top lane once it frees up', () => {
+    const lanes = dayShape(
+      [buildSession('a', DAY, 10, 12), buildSession('b', DAY, 11, 13), buildSession('c', DAY, 12, 14)],
+      new Set(),
+    );
+    expect(lanes.map((segment) => [segment.sessionId, segment.lane])).toEqual([
+      ['a', 'top'],
+      ['b', 'bottom'],
+      ['c', 'top'],
+    ]);
+  });
+
   test('keeps wall-clock positions on the day the clocks change', () => {
     const [segment] = dayShape([buildSession('dst', '2026-10-25', 10, 12)], new Set());
     expect(segment.left).toBeCloseTo(2 / 11);

@@ -2,7 +2,27 @@
 
 import { describe, expect, test } from 'bun:test';
 
-import { formatClock, formatDayMonth, formatMonthTitle, formatSessionDate, formatWeekRange, joinNames } from './format';
+import {
+  formatClock,
+  formatDayMonth,
+  formatHours,
+  formatMonthTitle,
+  formatSessionDate,
+  formatWeekRange,
+  joinNames,
+} from './format';
+
+describe('formatHours', () => {
+  test('rounds to the half hour', () => {
+    expect(formatHours(90, 'en')).toBe('1.5');
+    expect(formatHours(130, 'en')).toBe('2');
+  });
+
+  test('a short day never reads 0 h', () => {
+    expect(formatHours(10, 'en')).toBe('0.5');
+    expect(formatHours(0, 'en')).toBe('0');
+  });
+});
 
 describe('format', () => {
   test('formats clock times in Helsinki with a dot', () => {

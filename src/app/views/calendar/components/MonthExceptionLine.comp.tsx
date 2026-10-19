@@ -97,6 +97,13 @@ export const MonthExceptionLine: React.FC<Props> = ({ exception, sessionsById, r
           }),
           struck: false,
         };
+      case 'moreDeadlines':
+        return {
+          className: 'text-lightGrey',
+          icon: null,
+          text: t('month.moreDeadlines', { count: exception.count }),
+          struck: false,
+        };
     }
   })();
   return (

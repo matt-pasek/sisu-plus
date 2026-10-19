@@ -6,7 +6,11 @@ import type { LoadLevel } from '../types';
 const LEVELS: LoadLevel[] = [0, 1, 2, 3, 4];
 const SWATCH = 'relative inline-block size-[11px] rounded-[3px]';
 
-export const YearLegend: React.FC = () => {
+interface Props {
+  showDeadlines: boolean;
+}
+
+export const YearLegend: React.FC<Props> = ({ showDeadlines }) => {
   const { t } = useTranslationWithPrefix('views.calendar');
   return (
     <div className="flex flex-wrap items-center gap-3.5 px-[18px] pt-1.5 pb-3.5 text-[11px] text-lightGrey">
@@ -34,11 +38,17 @@ export const YearLegend: React.FC = () => {
         {t('year.holiday')}
       </span>
       <span className="inline-flex items-center gap-1.5">
-        <span className={`${SWATCH} ${LOAD_LEVEL_CLASS[0]}`}>
-          <span className="absolute top-[2px] right-[2px] size-[3px] rounded-full bg-offwhite/85" />
-        </span>
-        {t('deadlines.legend')}
+        <span className="inline-block h-[11px] w-5 rounded-[3px] bg-warn/14" />
+        {t('year.noTeaching')}
       </span>
+      {showDeadlines && (
+        <span className="inline-flex items-center gap-1.5">
+          <span className={`${SWATCH} ${LOAD_LEVEL_CLASS[0]}`}>
+            <span className="absolute top-[2px] right-[2px] size-[3px] rounded-full bg-offwhite/85" />
+          </span>
+          {t('deadlines.legend')}
+        </span>
+      )}
     </div>
   );
 };

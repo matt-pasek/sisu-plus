@@ -10,10 +10,12 @@ import {
   type Clash,
   type Session,
 } from '@/app/schedule';
+import type { CalendarDeadline } from '@/app/api/dataPoints/calendar/types';
 import type { MonthCell, MonthException, MonthInput, MonthWeek } from '../types';
 import { monthGrid } from './dates';
 
 const WEEKDAYS = 5;
+const MAX_DEADLINE_LINES = 2;
 
 const locationKey = (session: Session): string => [...session.locationIds].sort().join('|');
 
@@ -22,8 +24,9 @@ const slotKey = (session: Session): string =>
 
 const byStart = (a: Session, b: Session): number => a.start.getTime() - b.start.getTime();
 
-// A group can meet in a different room on each weekday, and a slot can move for good between periods,
-// so only a week that differs from the same slot's room the week before and after is a one-off change.
+// A group can meet in a different room on each weekday, a slot can move for good between periods, and some
+// slots alternate rooms week by week, so only a room used once by a slot, between two weeks in the same other
+// room, is a one-off change.
 export const roomChangeIds = (sessions: Session[]): Set<string> => {
   const located = sessions.filter(
     (session) => !session.cancelled && session.source === 'sisu' && session.locationIds.length > 0,
@@ -40,13 +43,22 @@ export const roomChangeIds = (sessions: Session[]): Set<string> => {
             before != null &&
             after != null &&
             locationKey(before) === locationKey(after) &&
-            locationKey(session) !== locationKey(before)
+            locationKey(session) !== locationKey(before) &&
+            members.filter((member) => locationKey(member) === locationKey(session)).length === 1
           );
         })
         .map((session) => session.id);
     }),
   );
 };
+
+const deadlineLines = (deadlines: CalendarDeadline[]): MonthException[] =>
+  deadlines.length > MAX_DEADLINE_LINES
+    ? [
+        { kind: 'deadline', deadline: deadlines[0] },
+        { kind: 'moreDeadlines', count: deadlines.length - 1 },
+      ]
+    : deadlines.map((deadline): MonthException => ({ kind: 'deadline', deadline }));
 
 const exceptionsFor = (
   dateKey: string,
@@ -65,9 +77,7 @@ const exceptionsFor = (
     ? [{ kind: 'noTeaching' } as const]
     : []),
   ...live.filter((session) => session.kind === 'exam').map((session): MonthException => ({ kind: 'exam', session })),
-  ...input.deadlines
-    .filter((deadline) => deadline.dateKey === dateKey)
-    .map((deadline): MonthException => ({ kind: 'deadline', deadline })),
+  ...deadlineLines(input.deadlines.filter((deadline) => deadline.dateKey === dateKey)),
   ...clashes.map((clash): MonthException => ({ kind: 'clash', clash })),
   ...live
     .filter((session) => input.roomChangeIds.has(session.id))
@@ -87,7 +97,6 @@ const monthCell = (dateKey: string, input: MonthInput): MonthCell => {
     isToday: dateKey === input.todayKey,
     isWeekend: weekdayIndex(dateKey) >= WEEKDAYS,
   };
-  if (!base.inMonth) return { ...base, minutes: 0, shape: [], hasClash: false, exceptions: [] };
   const day = input.attended.filter((session) => session.dateKey === dateKey);
   const live = day.filter((session) => !session.cancelled);
   const clashes = input.clashes.filter((clash) => helsinkiDateKey(clash.start) === dateKey);
@@ -97,7 +106,7 @@ const monthCell = (dateKey: string, input: MonthInput): MonthCell => {
     minutes: busyMinutes(live),
     shape: dayShape(live, clashingIds),
     hasClash: clashes.length > 0,
-    exceptions: exceptionsFor(dateKey, day, live, clashes, input),
+    exceptions: base.inMonth ? exceptionsFor(dateKey, day, live, clashes, input) : [],
   };
 };
 

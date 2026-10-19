@@ -37,9 +37,15 @@ describe('monthWeeks', () => {
     expect(cellOf(weeks, '2026-10-31')?.isWeekend).toBe(true);
   });
 
-  test('out-of-month days stay empty even when sessions exist there', () => {
-    const weeks = monthWeeks(input({ attended: [buildSession('a', '2026-09-29', 10, 12)] }));
-    expect(cellOf(weeks, '2026-09-29')).toMatchObject({ inMonth: false, minutes: 0, shape: [], exceptions: [] });
+  test('out-of-month days keep their hours and shape but list no exceptions', () => {
+    const weeks = monthWeeks(
+      input({
+        attended: [buildSession('a', '2026-09-29', 10, 12), buildSession('x', '2026-09-29', 13, 14, { kind: 'exam' })],
+      }),
+    );
+    const cell = cellOf(weeks, '2026-09-29');
+    expect(cell).toMatchObject({ inMonth: false, minutes: 180, exceptions: [] });
+    expect(cell?.shape).toHaveLength(2);
   });
 
   test('sums busy hours and builds the shape from sessions that run', () => {
@@ -102,6 +108,17 @@ describe('roomChangeIds', () => {
     expect([...roomChangeIds(sessions)]).toEqual(['w3']);
   });
 
+  test('a slot that alternates between two rooms every week has no one-off changes', () => {
+    const sessions = [
+      slot('w1', '2026-10-05', 'aud1'),
+      slot('w2', '2026-10-12', 'aud2'),
+      slot('w3', '2026-10-19', 'aud1'),
+      slot('w4', '2026-10-26', 'aud2'),
+      slot('w5', '2026-11-02', 'aud1'),
+    ];
+    expect([...roomChangeIds(sessions)]).toEqual([]);
+  });
+
   test('a lasting move to another room is not a one-off change', () => {
     const sessions = [
       slot('p1', '2026-10-05', 'aud1'),
@@ -147,6 +164,19 @@ describe('month notes', () => {
 });
 
 describe('month deadlines', () => {
+  test('three or more deadlines on a day collapse into the first plus a count', () => {
+    const deadlines = ['a', 'b', 'c'].map((id, index) => buildDeadline(id, '2026-10-21', 12 + index));
+    const lines = cellOf(monthWeeks(input({ deadlines })), '2026-10-21')?.exceptions ?? [];
+    expect(lines.filter((line) => line.kind === 'deadline')).toHaveLength(1);
+    expect(lines.find((line) => line.kind === 'moreDeadlines')).toEqual({ kind: 'moreDeadlines', count: 2 });
+  });
+
+  test('two deadlines on a day both keep their line', () => {
+    const deadlines = ['a', 'b'].map((id, index) => buildDeadline(id, '2026-10-21', 12 + index));
+    const lines = cellOf(monthWeeks(input({ deadlines })), '2026-10-21')?.exceptions ?? [];
+    expect(lines.filter((line) => line.kind === 'deadline')).toHaveLength(2);
+  });
+
   test('each deadline gets a line on its day', () => {
     const weeks = monthWeeks(input({ deadlines: [buildDeadline('report', '2026-10-23', 23.98)] }));
     const lines = cellOf(weeks, '2026-10-23')?.exceptions ?? [];

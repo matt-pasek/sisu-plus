@@ -26,14 +26,20 @@ export const busyMinutes = (sessions: Session[]): number =>
     ).total,
   );
 
-const laneAt = (sorted: Session[], index: number): ShapeLane => {
-  const overlappingIndexes = sorted
-    .map((other, otherIndex) => ({ other, otherIndex }))
-    .filter(({ other, otherIndex }) => otherIndex !== index && overlaps(other, sorted[index]))
-    .map(({ otherIndex }) => otherIndex);
-  if (overlappingIndexes.length === 0) return 'full';
-  return overlappingIndexes.some((otherIndex) => otherIndex < index) ? 'bottom' : 'top';
-};
+// Two lanes fill greedily, so a chain of overlaps alternates instead of stacking in the bottom lane;
+// a third concurrent session can only share the bottom lane.
+const assignLanes = (sorted: Session[]): ShapeLane[] =>
+  sorted.reduce<{ lanes: ShapeLane[]; topEnd: number }>(
+    (acc, session, index) => {
+      if (!sorted.some((other, otherIndex) => otherIndex !== index && overlaps(other, session))) {
+        return { ...acc, lanes: [...acc.lanes, 'full'] };
+      }
+      return session.start.getTime() >= acc.topEnd
+        ? { lanes: [...acc.lanes, 'top'], topEnd: session.end.getTime() }
+        : { ...acc, lanes: [...acc.lanes, 'bottom'] };
+    },
+    { lanes: [], topEnd: 0 },
+  ).lanes;
 
 export const dayShape = (
   sessions: Session[],
@@ -43,6 +49,7 @@ export const dayShape = (
   const offset = range.startHour * 60;
   const span = (range.endHour - range.startHour) * 60;
   const sorted = [...sessions].sort(byStart);
+  const lanes = assignLanes(sorted);
   return sorted.flatMap((session, index) => {
     const from = Math.max(helsinkiMinutesOfDay(session.start) - offset, 0);
     const to = Math.min(endMinutesOfDay(session) - offset, span);
@@ -53,7 +60,7 @@ export const dayShape = (
         colorIndex: session.colorIndex,
         left: from / span,
         width: (to - from) / span,
-        lane: laneAt(sorted, index),
+        lane: lanes[index],
         clashing: clashingIds.has(session.id),
       },
     ];

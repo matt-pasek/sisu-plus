@@ -40,11 +40,16 @@ describe('loadLevel', () => {
 });
 
 describe('yearWeeks', () => {
-  test('covers the academic year in weekday columns from Monday 27.7.2026', () => {
+  test('covers the academic year in week columns from Monday 27.7.2026, weekends included', () => {
     const weeks = yearWeeks(input());
     expect(weeks).toHaveLength(53);
     expect(weeks[0].weekKey).toBe('2026-07-27');
-    expect(weeks[0].days).toHaveLength(5);
+    expect(weeks[0].days).toHaveLength(7);
+  });
+
+  test('a weekend deadline has its own cell', () => {
+    const weeks = yearWeeks(input({ deadlines: [buildDeadline('sun', '2026-10-25', 23.98)] }));
+    expect(dayOf(weeks, '2026-10-25')?.deadlines).toBe(1);
   });
 
   test('days outside the academic year are not in the year', () => {
@@ -92,10 +97,10 @@ describe('bands', () => {
     ]);
   });
 
-  test('labels months by the Thursday of each week', () => {
+  test('labels months by the Thursday of each week, or its first day in the year', () => {
     const months = monthBands(weeks, 'en');
-    expect(months[0]).toEqual({ kind: 'month', label: 'Jul', from: 0, to: 0 });
-    expect(months[1]).toMatchObject({ label: 'Aug', from: 1 });
+    expect(months[0]).toMatchObject({ kind: 'month', label: 'Aug', from: 0 });
+    expect(months.some((band) => band.label === 'Jul' && band.from === 0)).toBe(false);
   });
 });
 

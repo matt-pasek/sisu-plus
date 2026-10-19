@@ -16,6 +16,8 @@ import { YearFooter } from './YearFooter.comp';
 import { YearGrid } from './YearGrid.comp';
 import { YearLegend } from './YearLegend.comp';
 
+const HEAVIEST_COUNT = 5;
+
 interface Props {
   data: CalendarData;
   deadlines: CalendarDeadline[];
@@ -43,7 +45,7 @@ export const YearView: React.FC<Props> = ({ data, deadlines, todayKey, periods, 
       periods: periodBands(weeks, periods),
       gaps: noTeachingBands(weeks, noTeachingWeeks(data.attended, periods, data.range), noTeachingLabel),
       exams: upcomingExams(data.attended, todayKey, data.range),
-      heaviest: heaviestWeeks(weeks),
+      heaviest: heaviestWeeks(weeks, HEAVIEST_COUNT),
       emptyTerm: emptyFutureTerm(data.range, data.attended, todayKey),
     };
   }, [data.range, data.attended, data.clashes, deadlines, periods, todayKey, locale, noTeachingLabel]);
@@ -58,7 +60,7 @@ export const YearView: React.FC<Props> = ({ data, deadlines, todayKey, periods, 
         locale={locale}
         onOpenWeek={onOpenWeek}
       />
-      <YearLegend />
+      <YearLegend showDeadlines={deadlines.length > 0} />
       <YearFooter exams={model.exams} heaviest={model.heaviest} emptyTerm={model.emptyTerm} locale={locale} />
     </div>
   );

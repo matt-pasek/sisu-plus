@@ -10,4 +10,5 @@ export type MonthException =
   | { kind: 'holiday'; holiday: Holiday }
   | { kind: 'noTeaching' }
   | { kind: 'note'; note: NoteOccurrence }
-  | { kind: 'deadline'; deadline: CalendarDeadline };
+  | { kind: 'deadline'; deadline: CalendarDeadline }
+  | { kind: 'moreDeadlines'; count: number };

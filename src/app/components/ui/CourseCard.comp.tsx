@@ -10,6 +10,7 @@ type CourseCardProps = Omit<React.HTMLAttributes<HTMLDivElement>, keyof MotionPr
     credits?: React.ReactNode;
     badge?: React.ReactNode;
     footer?: React.ReactNode;
+    metaAside?: React.ReactNode;
     children?: React.ReactNode;
     headerClassName?: string;
     selected?: boolean;
@@ -26,6 +27,7 @@ export const CourseCard = React.forwardRef<HTMLDivElement, CourseCardProps>(
       footer,
       heading,
       headerClassName = '',
+      metaAside,
       selected = false,
       stripeClassName = 'bg-darkishGrey',
       stripeStyle,
@@ -45,11 +47,20 @@ export const CourseCard = React.forwardRef<HTMLDivElement, CourseCardProps>(
           <span className={`mt-0.5 w-1 shrink-0 self-stretch rounded-full ${stripeClassName}`} style={stripeStyle} />
           <div className="min-w-0">
             <h3 className="text-sm leading-snug font-semibold text-balance text-offwhite">{heading}</h3>
-            {(code || credits) && (
-              <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-xs text-darkishGrey">
-                {code && <span>{code}</span>}
+            {(code || credits || metaAside) && (
+              <p
+                className={`mt-1 flex ${metaAside ? 'flex-nowrap' : 'flex-wrap'} items-center gap-x-2 gap-y-1 font-mono text-xs text-darkishGrey`}
+              >
+                {code && <span className={metaAside ? 'min-w-0 truncate' : undefined}>{code}</span>}
                 {code && credits && <span aria-hidden="true">·</span>}
-                {credits && <span className="font-semibold text-[#7ea0ff]">{credits}</span>}
+                {credits && (
+                  <span
+                    className={metaAside ? 'shrink-0 font-semibold text-[#7ea0ff]' : 'font-semibold text-[#7ea0ff]'}
+                  >
+                    {credits}
+                  </span>
+                )}
+                {metaAside && <span className="ml-auto flex shrink-0 items-center gap-1.5 font-sans">{metaAside}</span>}
               </p>
             )}
           </div>

@@ -1,0 +1,1 @@
+export const HERO_AUTO_FOLD_MAX_HEIGHT = 820;

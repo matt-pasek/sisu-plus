@@ -1,26 +1,23 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useReducedMotion } from 'motion/react';
 import { DragDropProvider, type DragEndEvent, type DragStartEvent } from '@dnd-kit/react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Navigate, useParams } from 'react-router';
-import { updatePlan } from '@/app/api/endpoints/updatePlan';
-import { autoSchedule } from '@/app/api/dataPoints/autoSchedule';
-import { getTimelineCourses, type TimelineCourse } from '@/app/api/dataPoints/getTimelineCourses';
+import { getTimelineCourses } from '@/app/api/dataPoints/getTimelineCourses';
 import { getCreditsByPeriod, getCreditsBySemester } from '@/app/api/dataPoints/getCreditsByPeriod';
-import type { Plan } from '@/app/api/generated/OsuvaApi';
-import { resolvePrerequisites } from '@/app/api/resolvers/resolvePrerequisites';
-import { TimelineToolbar } from '@/app/views/timeline/components/TimelineToolbar.comp';
-import { TimelineCoursePool } from '@/app/views/timeline/components/TimelineCoursePool.comp';
+import { TimelineHeaderActions } from '@/app/views/timeline/components/TimelineHeaderActions.comp';
+import { PageHeader } from '@/app/components/ui/PageHeader.comp';
+import { Panel } from '@/app/components/ui/Panel.comp';
+import { TimelineHero } from '@/app/views/timeline/components/hero/TimelineHero.comp';
+import { todayKey } from '@/app/schedule/time';
+import { getStructureData } from '@/app/api/dataPoints/getStructureData';
+import { getDegreeTarget, getHeroStats } from '@/app/views/timeline/util/heroStats';
+import { TimelineSidebar } from '@/app/views/timeline/components/sidebar/TimelineSidebar.comp';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { getVisibleSemesters } from '@/app/views/timeline/util/getVisibleSemesters';
 import { TimelineBoard } from '@/app/views/timeline/components/TimelineBoard/TimelineBoard.comp';
 import { PageLoader } from '@/app/components/PageLoader.comp';
 import {
-  type TimelineValidationWarning,
-  getValidationWarnings,
   isTimelineCourseDragData,
-  applyDraftToCourses,
-  applyDraftToPlan,
-  getCourseLocators,
   getMoveLocators,
   getTargetPeriodLocators,
   isPeriodVisible,
@@ -31,18 +28,27 @@ import { useSisuQuery } from '@/app/hooks/useSisuQuery';
 import { fetchPlans } from '@/app/api/endpoints/plans';
 import { fetchAttainments } from '@/app/api/endpoints/attainments';
 import { getStudyPeriodMap } from '@/app/api/dataPoints/getStudyPeriodMap';
+import { useTimelineDraft } from '@/app/views/timeline/hooks/useTimelineDraft';
+import { useTimelineValidation } from '@/app/views/timeline/hooks/useTimelineValidation';
+import { useConfirmTimeline } from '@/app/views/timeline/hooks/useConfirmTimeline';
+import { useHeroFold } from '@/app/views/timeline/hooks/useHeroFold';
+
+const FOCUS_FLASH_KEYFRAMES = [
+  { boxShadow: '0 0 0 2px rgba(82,201,137,0.8)' },
+  { boxShadow: '0 0 0 0 rgba(82,201,137,0)' },
+];
 
 const TimelineView: React.FC = () => {
-  const { t, i18n } = useTranslationWithPrefix('views.timeline');
+  const { t } = useTranslationWithPrefix('views.timeline');
   const { planId } = useParams();
-  const queryClient = useQueryClient();
+  const boardRef = useRef<HTMLDivElement>(null);
+  const shouldReduceMotion = useReducedMotion();
   const [activeDragCourseId, setActiveDragCourseId] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [isAutoScheduling, setIsAutoScheduling] = useState(false);
   const [hidePreviousPeriods, setHidePreviousPeriods] = useState(true);
   const [showHiddenSummerPeriods, setShowHiddenSummerPeriods] = useState(false);
-  const [dismissedPrerequisiteWarningIds, setDismissedPrerequisiteWarningIds] = useState<Set<string>>(new Set());
-  const [draftPeriodsByCourseId, setDraftPeriodsByCourseId] = useState<Map<string, string[]>>(new Map());
+  const [pendingFocusCourseId, setPendingFocusCourseId] = useState<string | null>(null);
+  const heroFold = useHeroFold();
   const plansQuery = useSisuQuery(['plans'], fetchPlans);
   const attainmentsQuery = useSisuQuery(['attainments'], fetchAttainments);
   const selectedPlan =
@@ -50,23 +56,42 @@ const TimelineView: React.FC = () => {
     plansQuery.data?.find((plan) => plan.primary) ??
     plansQuery.data?.[0];
   const selectedPlanId = selectedPlan?.id;
+  const isPrimaryPlan = selectedPlan?.primary === true;
   const { timelineCourses, isLoading: coursesLoading } = getTimelineCourses(selectedPlanId);
   const { studyPeriodMap, isLoading: periodsLoading } = getStudyPeriodMap();
+  const { data: structureData } = getStructureData();
   const isLoading = plansQuery.isLoading || attainmentsQuery.isLoading || coursesLoading || periodsLoading;
-  const draftTimelineCourses = useMemo(
-    () => applyDraftToCourses(timelineCourses, draftPeriodsByCourseId, studyPeriodMap),
-    [draftPeriodsByCourseId, studyPeriodMap, timelineCourses],
+  const attainments = useMemo(
+    () => (attainmentsQuery.data ?? []).filter(isCourseUnitAttainment),
+    [attainmentsQuery.data],
   );
-  const draftCourseIds = useMemo(() => new Set(draftPeriodsByCourseId.keys()), [draftPeriodsByCourseId]);
-  const draftOriginalPeriodCounts = useMemo(
-    () =>
-      new Map(
-        timelineCourses
-          .filter((course) => draftPeriodsByCourseId.has(course.courseUnitId) && course.plannedPeriods.length > 0)
-          .map((course) => [course.courseUnitId, course.plannedPeriods.length] as const),
-      ),
-    [draftPeriodsByCourseId, timelineCourses],
-  );
+  const {
+    draftPeriodsByCourseId,
+    draftTimelineCourses,
+    draftCourseIds,
+    draftOriginalPeriodCounts,
+    stageCoursePeriods,
+    resetDraft,
+  } = useTimelineDraft(timelineCourses, studyPeriodMap, selectedPlanId);
+  const { visibleValidationWarnings, validationIssueCount, prerequisitesLoading, dismissWarning, resetDismissed } =
+    useTimelineValidation({
+      planId: selectedPlanId,
+      timelineCourses,
+      draftTimelineCourses,
+      attainments,
+      studyPeriodMap,
+    });
+  const resetAll = useCallback(() => {
+    resetDraft();
+    resetDismissed();
+  }, [resetDismissed, resetDraft]);
+  const confirmTimeline = useConfirmTimeline({
+    plan: selectedPlan,
+    draft: draftPeriodsByCourseId,
+    timelineCourses,
+    studyPeriodMap,
+    onSaved: resetAll,
+  });
   const activeDragCourse = useMemo(
     () => draftTimelineCourses.find((course) => course.courseUnitId === activeDragCourseId) ?? null,
     [activeDragCourseId, draftTimelineCourses],
@@ -91,112 +116,29 @@ const TimelineView: React.FC = () => {
 
     return highlightedLocators;
   }, [activeDragCourse, isDragging, studyPeriodMap]);
-  const prerequisiteQuery = useSisuQuery(
-    ['timeline-prerequisites', selectedPlanId],
-    async () =>
-      new Map(
-        await Promise.all(
-          timelineCourses.map(
-            async (course) => [course.courseUnitId, await resolvePrerequisites(course.courseUnitId)] as const,
-          ),
-        ),
-      ),
-    { enabled: selectedPlanId != null && timelineCourses.length > 0 },
-  );
-  const validationWarnings = useMemo(() => {
-    const warnings = getValidationWarnings(
-      draftTimelineCourses,
-      prerequisiteQuery.data ?? new Map(),
-      (attainmentsQuery.data ?? []).filter(isCourseUnitAttainment),
-    );
-    return new Map(
-      [...warnings].map(([courseUnitId, courseWarnings]) => [
-        courseUnitId,
-        courseWarnings.map((warning) => {
-          if (warning.type === 'period') {
-            const periods = warning.id
-              .split(':')
-              .slice(2)
-              .map((locator) => studyPeriodMap.get(locator)?.name ?? locator)
-              .join(', ');
-            return { ...warning, message: t('validation.missingPeriod', { periods }) };
-          }
-          return {
-            ...warning,
-            message: t('validation.prerequisite', { course: warning.message || t('validation.requiredCourse') }),
-          };
-        }),
-      ]),
-    );
-  }, [attainmentsQuery.data, draftTimelineCourses, prerequisiteQuery.data, studyPeriodMap, t]);
-  const visibleValidationWarnings = useMemo(() => {
-    const visibleWarnings = new Map<string, TimelineValidationWarning[]>();
 
-    for (const [courseUnitId, warnings] of validationWarnings) {
-      const filteredWarnings = warnings.filter(
-        (warning) => warning.type !== 'prerequisite' || !dismissedPrerequisiteWarningIds.has(warning.id),
-      );
-      if (filteredWarnings.length > 0) visibleWarnings.set(courseUnitId, filteredWarnings);
-    }
-
-    return visibleWarnings;
-  }, [dismissedPrerequisiteWarningIds, validationWarnings]);
-  const validationIssueCount = useMemo(
-    () => [...visibleValidationWarnings.values()].reduce((sum, warnings) => sum + warnings.length, 0),
-    [visibleValidationWarnings],
-  );
-  const confirmTimeline = useMutation({
-    mutationFn: async () => {
-      if (!selectedPlan || !selectedPlanId) throw new Error('Plan not found.');
-      return updatePlan(selectedPlanId, applyDraftToPlan(selectedPlan, draftPeriodsByCourseId));
-    },
-    onSuccess: (updatedPlan) => {
-      const lang = i18n.language;
-      queryClient.setQueryData<Plan[]>(
-        ['plans', lang],
-        (plans) => plans?.map((plan) => (plan.id === updatedPlan.id ? updatedPlan : plan)) ?? [updatedPlan],
-      );
-      queryClient.setQueryData<TimelineCourse[]>(
-        ['timeline-courses', selectedPlanId, lang],
-        applyDraftToCourses(timelineCourses, draftPeriodsByCourseId, studyPeriodMap),
-      );
-      setDraftPeriodsByCourseId(new Map());
-      setDismissedPrerequisiteWarningIds(new Set());
-    },
-  });
-
-  useEffect(() => {
-    setDraftPeriodsByCourseId(new Map());
-    setDismissedPrerequisiteWarningIds(new Set());
-  }, [selectedPlanId]);
-
-  const moduleIds = useMemo(
-    () => [
-      ...new Set(
-        draftTimelineCourses
-          .map((course) => course.moduleId)
-          .filter((moduleId): moduleId is string => moduleId != null),
-      ),
-    ],
-    [draftTimelineCourses],
-  );
-
-  const moduleNames = useMemo(
-    () =>
-      moduleIds.map(
-        (moduleId) =>
-          draftTimelineCourses.find((course) => course.moduleId === moduleId)?.moduleName ??
-          t('validation.unknownModule'),
-      ),
-    [draftTimelineCourses, moduleIds, t],
+  const allPeriods = useMemo(
+    () => getCreditsByPeriod(draftTimelineCourses, studyPeriodMap),
+    [draftTimelineCourses, studyPeriodMap],
   );
 
   const semesters = useMemo(() => {
-    const periods = getCreditsByPeriod(draftTimelineCourses, studyPeriodMap).filter((period) =>
+    const periods = allPeriods.filter((period) =>
       isPeriodVisible(period, { hidePreviousPeriods, showHiddenSummerPeriods }),
     );
     return getVisibleSemesters(getCreditsBySemester(periods));
-  }, [draftTimelineCourses, hidePreviousPeriods, showHiddenSummerPeriods, studyPeriodMap]);
+  }, [allPeriods, hidePreviousPeriods, showHiddenSummerPeriods]);
+
+  const heroStats = useMemo(
+    () =>
+      getHeroStats({
+        periods: allPeriods,
+        courses: draftTimelineCourses,
+        target: isPrimaryPlan ? getDegreeTarget(structureData) : null,
+        today: todayKey(),
+      }),
+    [allPeriods, draftTimelineCourses, isPrimaryPlan, structureData],
+  );
 
   const unscheduledCourses = useMemo(
     () =>
@@ -204,25 +146,6 @@ const TimelineView: React.FC = () => {
         (course) => course.plannedPeriods.length === 0 && !course.completionPeriod?.visibleByDefault,
       ),
     [draftTimelineCourses],
-  );
-
-  const stageCoursePeriods = useCallback(
-    (courseUnitId: string, newPeriodLocators: string[]) => {
-      const course = timelineCourses.find((candidate) => candidate.courseUnitId === courseUnitId);
-      if (!course) return;
-
-      const originalLocators = getCourseLocators(course);
-      setDraftPeriodsByCourseId((current) => {
-        const next = new Map(current);
-        if (sameLocators(originalLocators, newPeriodLocators)) {
-          next.delete(courseUnitId);
-        } else {
-          next.set(courseUnitId, newPeriodLocators);
-        }
-        return next;
-      });
-    },
-    [timelineCourses],
   );
 
   const handleDragStart = useCallback((event: DragStartEvent) => {
@@ -250,46 +173,39 @@ const TimelineView: React.FC = () => {
     [selectedPlanId, stageCoursePeriods, studyPeriodMap],
   );
 
-  // TODO: rewrite this, make it smart auto-schedule
-  const handleAutoSchedule = useCallback(() => {
-    if (!selectedPlanId || isAutoScheduling) return;
-
-    const run = async () => {
-      setIsAutoScheduling(true);
-      try {
-        const prereqEntries = await Promise.all(
-          draftTimelineCourses.map(
-            async (course) => [course.courseUnitId, await resolvePrerequisites(course.courseUnitId)] as const,
-          ),
-        );
-        const result = autoSchedule({
-          courses: draftTimelineCourses,
-          periodMap: studyPeriodMap,
-          attainments: (attainmentsQuery.data ?? []).filter(isCourseUnitAttainment),
-          prereqMap: new Map(prereqEntries),
-        });
-
-        for (const [courseUnitId, newPeriodLocators] of result.assignments) {
-          const course = draftTimelineCourses.find((candidate) => candidate.courseUnitId === courseUnitId);
-          const currentLocators = course?.plannedPeriods.map((period) => period.locator) ?? [];
-          if (sameLocators(currentLocators, newPeriodLocators)) continue;
-
-          stageCoursePeriods(courseUnitId, newPeriodLocators);
-        }
-      } finally {
-        setIsAutoScheduling(false);
+  const scrollToCourse = useCallback(
+    (courseUnitId: string) => {
+      const card = boardRef.current?.querySelector<HTMLElement>(`[data-course-id="${courseUnitId}"]`);
+      if (!card) return false;
+      card.scrollIntoView({ block: 'nearest', inline: 'center', behavior: shouldReduceMotion ? 'auto' : 'smooth' });
+      card.focus({ preventScroll: true });
+      if (!shouldReduceMotion) {
+        card.animate(FOCUS_FLASH_KEYFRAMES, { duration: 1200, easing: 'cubic-bezier(0.25,1,0.5,1)' });
       }
-    };
+      return true;
+    },
+    [shouldReduceMotion],
+  );
 
-    void run();
-  }, [
-    attainmentsQuery.data,
-    draftTimelineCourses,
-    isAutoScheduling,
-    selectedPlanId,
-    stageCoursePeriods,
-    studyPeriodMap,
-  ]);
+  const focusCourse = useCallback(
+    (courseUnitId: string) => {
+      if (scrollToCourse(courseUnitId)) return;
+      if (!hidePreviousPeriods && showHiddenSummerPeriods) return;
+      setHidePreviousPeriods(false);
+      setShowHiddenSummerPeriods(true);
+      setPendingFocusCourseId(courseUnitId);
+    },
+    [hidePreviousPeriods, scrollToCourse, showHiddenSummerPeriods],
+  );
+
+  useEffect(() => {
+    if (!pendingFocusCourseId) return;
+    const frame = requestAnimationFrame(() => {
+      scrollToCourse(pendingFocusCourseId);
+      setPendingFocusCourseId(null);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [pendingFocusCourseId, scrollToCourse, semesters]);
 
   if (isLoading) return <PageLoader />;
 
@@ -299,47 +215,57 @@ const TimelineView: React.FC = () => {
 
   return (
     <DragDropProvider onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      <div className="-mx-6 -mt-6 flex h-[calc(100dvh-3rem)] flex-col overflow-hidden bg-background text-offwhite">
-        <TimelineToolbar
-          moduleIds={moduleIds}
-          moduleNames={moduleNames}
-          confirmDisabled={draftPeriodsByCourseId.size === 0 || prerequisiteQuery.isLoading || validationIssueCount > 0}
-          confirmPending={confirmTimeline.isPending}
-          onConfirm={() => confirmTimeline.mutate()}
-          onReset={() => {
-            setDraftPeriodsByCourseId(new Map());
-            setDismissedPrerequisiteWarningIds(new Set());
-          }}
-          pendingChangesCount={draftPeriodsByCourseId.size}
-          resetDisabled={draftPeriodsByCourseId.size === 0}
-          validationIssueCount={validationIssueCount}
+      <div className="-mx-6 -mt-6 flex h-[calc(100dvh-3rem)] flex-col gap-4 overflow-hidden px-6 pt-6 pb-6">
+        <PageHeader
+          title={t('title')}
+          subtitle={selectedPlan?.name}
+          actions={
+            <TimelineHeaderActions
+              confirmDisabled={draftPeriodsByCourseId.size === 0 || prerequisitesLoading || validationIssueCount > 0}
+              confirmPending={confirmTimeline.isPending}
+              onConfirm={() => confirmTimeline.mutate()}
+              onReset={resetAll}
+              pendingChangesCount={draftPeriodsByCourseId.size}
+              resetDisabled={draftPeriodsByCourseId.size === 0}
+              validationIssueCount={validationIssueCount}
+            />
+          }
         />
-        <div className="flex min-h-0 flex-1">
-          <TimelineCoursePool
+        <TimelineHero
+          stats={heroStats}
+          periodsByLocator={studyPeriodMap}
+          showGraduation={isPrimaryPlan}
+          folded={heroFold.folded}
+          ready={heroFold.ready}
+          onToggle={heroFold.toggle}
+        />
+        <div className="grid min-h-0 flex-1 gap-4 max-lg:grid-cols-[minmax(0,1fr)] max-lg:grid-rows-[auto_minmax(0,1fr)] lg:grid-cols-[280px_minmax(0,1fr)]">
+          <TimelineSidebar
+            courses={draftTimelineCourses}
+            onSelectIssue={focusCourse}
             draftCourseIds={draftCourseIds}
             draftOriginalPeriodCounts={draftOriginalPeriodCounts}
             hidePreviousPeriods={hidePreviousPeriods}
             isDragging={isDragging}
             unscheduledCourses={unscheduledCourses}
             onHidePreviousPeriodsChange={setHidePreviousPeriods}
-            onDismissValidationWarning={(warningId) =>
-              setDismissedPrerequisiteWarningIds((current) => new Set(current).add(warningId))
-            }
+            onDismissValidationWarning={dismissWarning}
             onShowHiddenSummerPeriodsChange={setShowHiddenSummerPeriods}
             showHiddenSummerPeriods={showHiddenSummerPeriods}
             validationWarnings={visibleValidationWarnings}
           />
-          <TimelineBoard
-            draftCourseIds={draftCourseIds}
-            highlightedPeriodLocators={highlightedPeriodLocators}
-            isDragging={isDragging}
-            semesters={semesters}
-            onDismissValidationWarning={(warningId) =>
-              setDismissedPrerequisiteWarningIds((current) => new Set(current).add(warningId))
-            }
-            onResizeCourse={stageCoursePeriods}
-            validationWarnings={visibleValidationWarnings}
-          />
+          <Panel>
+            <TimelineBoard
+              draftCourseIds={draftCourseIds}
+              highlightedPeriodLocators={highlightedPeriodLocators}
+              isDragging={isDragging}
+              semesters={semesters}
+              onDismissValidationWarning={dismissWarning}
+              onResizeCourse={stageCoursePeriods}
+              scrollRef={boardRef}
+              validationWarnings={visibleValidationWarnings}
+            />
+          </Panel>
         </div>
       </div>
     </DragDropProvider>

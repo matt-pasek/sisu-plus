@@ -7,13 +7,11 @@ import { DraggableTimelineCourseCard } from '@/app/views/timeline/components/Dra
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { sortCourses } from '@/app/views/timeline/util/sortCourses';
 import { PeriodDropCell } from '@/app/views/timeline/components/TimelineBoard/components/PeriodDropCell.comp';
-import { CreditChip } from '@/app/views/timeline/components/TimelineBoard/components/CreditChip.comp';
-import { formatCredits } from '@/app/helpers/formatCredits';
+import { BoardSemesterHeader } from '@/app/views/timeline/components/TimelineBoard/components/BoardSemesterHeader.comp';
+import { BoardPeriodHeader } from '@/app/views/timeline/components/TimelineBoard/components/BoardPeriodHeader.comp';
+import { getCourseLocators, getResizedLocators } from '@/app/views/timeline/util/courseLocators';
 import { TimelineValidationWarning } from '@/app/views/timeline/util/timelineValidation';
 import { getCourseKey } from '@/app/views/timeline/util/getCourseKey';
-import { isCurrentPeriod, isCurrentSemester } from '@/app/views/timeline/util/getVisibleSemesters';
-import { formatPeriodRange } from '@/app/views/timeline/util/formatPeriodRange';
-import { getSemesterTitle } from '@/app/helpers/getSemesterTitle';
 import { getModuleColor } from '@/app/theme/moduleColors';
 import type { TimelineCourseDragData, TimelinePeriodDropData } from '@/app/views/timeline/util/dndHandlers';
 
@@ -23,6 +21,7 @@ interface Props {
   isDragging?: boolean;
   onDismissValidationWarning?: (warningId: string) => void;
   onResizeCourse?: (courseUnitId: string, newPeriodLocators: string[]) => void;
+  scrollRef?: React.Ref<HTMLDivElement>;
   semesters: SemesterCreditSummary[];
   validationWarnings?: Map<string, TimelineValidationWarning[]>;
 }
@@ -116,6 +115,7 @@ export const TimelineBoard: React.FC<Props> = ({
   isDragging = false,
   onDismissValidationWarning,
   onResizeCourse,
+  scrollRef,
   semesters,
   validationWarnings = new Map(),
 }) => {
@@ -125,6 +125,8 @@ export const TimelineBoard: React.FC<Props> = ({
   const rowCount = Math.max(courseBlocks.length > 0 ? Math.max(...courseBlocks.map((block) => block.row)) + 1 : 1, 3);
   const columnWidth = `${PERIOD_WIDTH}px`;
   const gridTemplateColumns = visiblePeriods.map(() => columnWidth).join(' ');
+  const visibleLocators = visiblePeriods.map(({ period }) => period.periodLocator);
+  const maxPeriodCredits = Math.max(0, ...visiblePeriods.map(({ period }) => getTotalCredits(period)));
   const hasHighlightedDropPeriods = highlightedPeriodLocators.size > 0;
   const flipKey = visiblePeriods.map(({ period }) => period.periodLocator).join(':');
   const flipRef = useGridFlip<HTMLDivElement>(flipKey);
@@ -147,74 +149,31 @@ export const TimelineBoard: React.FC<Props> = ({
   let periodOffset = 0;
 
   return (
-    <main className="min-w-0 flex-1 overflow-auto bg-background">
-      <div className="min-h-full w-max py-5">
+    <div ref={scrollRef} className="min-h-0 min-w-0 flex-1 overflow-auto">
+      <div className="min-h-full w-max px-4 py-5">
         {semesters.length > 0 ? (
           <div ref={flipRef}>
             <div className="grid gap-2" style={{ gridTemplateColumns }}>
               {semesters.map((semester) => {
                 const startColumn = periodOffset + 1;
-                const isCompactSemesterHeader = semester.periods.length === 1;
                 periodOffset += semester.periods.length;
-
                 return (
-                  <div
+                  <BoardSemesterHeader
                     key={`${semester.studyYear}:${semester.termName}`}
-                    data-flip-id={`semester:${semester.studyYear}:${semester.termName}`}
-                    className={`overflow-hidden rounded-lg border px-4 py-2 ${
-                      isCurrentSemester(semester)
-                        ? 'border-accent/70 bg-accent/10 shadow-[0_0_0_1px_rgba(65,150,72,0.2)]'
-                        : 'border-border bg-container'
-                    }`}
-                    style={{ gridColumn: `${startColumn} / span ${semester.periods.length}` }}
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="min-w-0">
-                        <h2 className="truncate text-base font-semibold text-offwhite">{getSemesterTitle(semester)}</h2>
-                      </div>
-                      <div className="flex shrink-0 flex-wrap justify-end gap-1.5">
-                        {semester.completedCredits > 0 && (
-                          <CreditChip label={t('board.done')} credits={semester.completedCredits} variant="completed" />
-                        )}
-                        {semester.plannedCredits > 0 && (
-                          <CreditChip
-                            label={t('board.planned')}
-                            credits={semester.plannedCredits}
-                            hideLabel={isCompactSemesterHeader}
-                            variant="planned"
-                          />
-                        )}
-                      </div>
-                    </div>
-                  </div>
+                    semester={semester}
+                    startColumn={startColumn}
+                  />
                 );
               })}
             </div>
 
             <div className="mt-2 grid gap-2" style={{ gridTemplateColumns }}>
               {visiblePeriods.map(({ period }) => (
-                <div
+                <BoardPeriodHeader
                   key={period.periodLocator}
-                  title={t('board.workloadTitle', {
-                    period: period.period.name,
-                    credits: formatCredits(getTotalCredits(period)),
-                  })}
-                  className={`rounded-lg border px-3 py-2 ${
-                    isCurrentPeriod(period) ? 'border-accent/70 bg-accent/10' : 'border-border bg-container'
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-offwhite">{period.period.name}</p>
-                      <p className="mt-0.5 truncate text-xs text-lightGrey">
-                        {formatPeriodRange(period.period.startDate, period.period.endDate)}
-                      </p>
-                    </div>
-                    <span className="shrink-0 font-mono text-xs text-lightGrey tabular-nums">
-                      {formatCredits(getTotalCredits(period))}
-                    </span>
-                  </div>
-                </div>
+                  period={period}
+                  loadShare={maxPeriodCredits > 0 ? getTotalCredits(period) / maxPeriodCredits : 0}
+                />
               ))}
             </div>
 
@@ -222,7 +181,7 @@ export const TimelineBoard: React.FC<Props> = ({
               className="mt-2 grid gap-2"
               style={{
                 gridTemplateColumns,
-                gridTemplateRows: `repeat(${rowCount}, minmax(74px, auto))`,
+                gridTemplateRows: `repeat(${rowCount}, minmax(52px, auto))`,
               }}
             >
               {visiblePeriods.map(({ period }, index) => (
@@ -255,36 +214,15 @@ export const TimelineBoard: React.FC<Props> = ({
                       }}
                       course={block.course}
                       color={getModuleColor(block.course.moduleId)}
-                      compact={courseBlocks.some(
-                        (otherBlock) =>
-                          otherBlock.course.courseUnitId !== block.course.courseUnitId &&
-                          otherBlock.row === block.row &&
-                          ((otherBlock.startColumn >= block.startColumn && otherBlock.startColumn < block.endColumn) ||
-                            (otherBlock.endColumn > block.startColumn && otherBlock.endColumn <= block.endColumn)),
-                      )}
                       disabled={block.course.isPassed}
                       isDraft={draftCourseIds.has(block.course.courseUnitId)}
-                      className="h-full min-h-18.5"
+                      className="h-full min-h-13"
                       onDismissValidationWarning={onDismissValidationWarning}
                       validationWarnings={validationWarnings.get(block.course.courseUnitId)}
                       onResizeRight={(delta) => {
                         if (!onResizeCourse) return;
-                        const currentPeriodLocators = block.course.plannedPeriods.map((p) => p.locator);
-                        if (currentPeriodLocators.length === 0) return;
-
-                        const startLocator = currentPeriodLocators[0];
-                        const startIndex = visiblePeriods.findIndex((p) => p.period.periodLocator === startLocator);
-                        if (startIndex === -1) return;
-
-                        const newLength = Math.max(1, currentPeriodLocators.length + delta);
-                        const newPeriodLocators: string[] = [];
-
-                        for (let i = 0; i < newLength; i++) {
-                          const p = visiblePeriods[startIndex + i];
-                          if (p) newPeriodLocators.push(p.period.periodLocator);
-                        }
-
-                        onResizeCourse(block.course.courseUnitId, newPeriodLocators);
+                        const newLocators = getResizedLocators(getCourseLocators(block.course), visibleLocators, delta);
+                        if (newLocators) onResizeCourse(block.course.courseUnitId, newLocators);
                       }}
                     />
                   </div>
@@ -305,6 +243,6 @@ export const TimelineBoard: React.FC<Props> = ({
           </div>
         )}
       </div>
-    </main>
+    </div>
   );
 };

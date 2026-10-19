@@ -30,6 +30,7 @@ export interface SisuPrefs {
   calendarShowNotes: boolean;
   calendarShowDeadlines: boolean;
   calendarView: CalendarView;
+  timelineHeroFolded: boolean | null;
   lastSeenChangelogVersion: string | null;
   notificationNudgeDismissed: boolean;
   notificationPrefs: NotificationPrefs;
@@ -49,6 +50,7 @@ export const DEFAULT_PREFS: SisuPrefs = {
   calendarShowNotes: true,
   calendarShowDeadlines: true,
   calendarView: 'week',
+  timelineHeroFolded: null,
   lastSeenChangelogVersion: null,
   notificationNudgeDismissed: false,
   notificationPrefs: DEFAULT_NOTIFICATION_PREFS,

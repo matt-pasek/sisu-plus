@@ -5,6 +5,7 @@ export * from './formatPeriodRange';
 export * from './getCourseKey';
 export * from './getStatusLabel';
 export * from './getVisibleSemesters';
+export * from './sidebarLists';
 export * from './sortCourses';
 export * from './timelineCourseDate';
 export * from './timelinePeriods';

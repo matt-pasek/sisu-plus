@@ -1,6 +1,22 @@
 import type { TimelineCourse } from '@/app/api/dataPoints/getTimelineCourses';
 import type { StudyPeriodInfo } from '@/app/api/dataPoints/getStudyPeriodMap';
 import type { Plan } from '@/app/api/generated/OsuvaApi';
+import { sameLocators } from './courseLocators';
+
+export const stageDraft = (
+  current: Map<string, string[]>,
+  originalLocators: string[],
+  courseUnitId: string,
+  newLocators: string[],
+) => {
+  const next = new Map(current);
+  if (sameLocators(originalLocators, newLocators)) {
+    next.delete(courseUnitId);
+  } else {
+    next.set(courseUnitId, newLocators);
+  }
+  return next;
+};
 
 export const applyDraftToCourses = (
   courses: TimelineCourse[],

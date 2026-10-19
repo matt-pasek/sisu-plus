@@ -125,15 +125,9 @@ export function HeroShowcase() {
         <div className="grid grid-cols-2 gap-[0.75rem]">
           <div className="relative min-h-[250px] min-w-0 rounded-2xl bg-[rgba(13,13,17,0.5)] p-3 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.055)]">
             <span className="mb-[0.55rem] block text-[0.72rem] font-bold text-offwhite/50">Period III</span>
-            <TimelineCourseCard
-              compact
-              className="min-h-[90px]"
-              color={MODULE_COLOR_VALUES[2]}
-              course={timelineCourses[0]}
-            />
+            <TimelineCourseCard className="min-h-[90px]" color={MODULE_COLOR_VALUES[2]} course={timelineCourses[0]} />
             <div className="absolute top-[8.15rem] right-3 left-3 z-[3] animate-[appTimelineMove_1700ms_1000ms_cubic-bezier(0.2,0,0,1)_both]">
               <TimelineCourseCard
-                compact
                 className="min-h-[90px]"
                 color={MODULE_COLOR_VALUES[0]}
                 course={timelineCourses[1]}

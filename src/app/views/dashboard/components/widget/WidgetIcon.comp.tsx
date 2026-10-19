@@ -17,6 +17,7 @@ const PATHS: Record<string, string> = {
   exam: 'M7 3.75h7.5L18 7.25v13H7v-16.5Zm7.5 0v3.5H18M9.5 11.25h5M9.5 15h4',
   registration: 'M7 4.5h10v15H7v-15Zm3 4h4M10 12h4m-4 3.5 1.5 1.5 3-3',
   map: 'M9 4.5 4.5 6v13.5L9 18l6 1.5 4.5-1.5V4.5L15 6 9 4.5Zm0 0v13.5m6-12v13.5',
+  clock: 'M12 20.25a8.25 8.25 0 1 0 0-16.5 8.25 8.25 0 0 0 0 16.5ZM12 7.5V12l3 1.75',
 };
 
 interface WidgetIconProps {

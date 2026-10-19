@@ -35,6 +35,13 @@ export type OnboardingTranslation = {
     openSisu: string;
     close: string;
   };
+  grant: {
+    headline: string;
+    body: string;
+    cta: string;
+    done: string;
+    denied: string;
+  };
 };
 
 export const onboardingTranslation: OnboardingTranslation = {
@@ -73,5 +80,12 @@ export const onboardingTranslation: OnboardingTranslation = {
     body: 'Head to your Sisu portal. Sisu+ will activate automatically once you log in.',
     openSisu: 'Open Sisu',
     close: 'Close',
+  },
+  grant: {
+    headline: 'Allow timetable access',
+    body: 'Sisu+ needs permission to read your timetable from {{host}}. It only reads the link you pasted.',
+    cta: 'Allow',
+    done: 'Done. You can close this tab.',
+    denied: 'Permission was denied. Try again.',
   },
 };

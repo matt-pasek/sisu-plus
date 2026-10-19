@@ -45,6 +45,12 @@ export type ControlCenterTranslation = {
       body: string;
       title: string;
     };
+    classReminders: {
+      leadTitle: string;
+      leadOptions: Record<5 | 10 | 15 | 30, string>;
+      scopeTitle: string;
+      scope: { all: string; exams: string };
+    };
     eyebrow: string;
     lead: {
       body: string;
@@ -65,6 +71,8 @@ export type ControlCenterTranslation = {
       sisuValue: string;
       unread: string;
       unreadCount: string;
+      remindersValue: string;
+      remindersNone: string;
     };
     title: string;
     types: {
@@ -72,6 +80,7 @@ export type ControlCenterTranslation = {
       'registration-close': { body: string; title: string };
       'registration-open': { body: string; title: string };
       'sisu-sync': { body: string; title: string };
+      'class-reminder': { body: string; title: string };
     };
     unread: {
       empty: string;
@@ -220,6 +229,12 @@ export const controlCenterTranslation: ControlCenterTranslation = {
       body: 'Delivery modes, unread items, and sync status',
       title: 'Notification settings',
     },
+    classReminders: {
+      leadTitle: 'Remind me',
+      leadOptions: { 5: '5 min before', 10: '10 min before', 15: '15 min before', 30: '30 min before' },
+      scopeTitle: 'For',
+      scope: { all: 'All classes', exams: 'Exams only' },
+    },
     eyebrow: 'Notifications',
     lead: {
       body: 'How early SISU+ should warn before a registration window opens.',
@@ -247,6 +262,8 @@ export const controlCenterTranslation: ControlCenterTranslation = {
       sisuValue: 'Sisu: {{value}}',
       unread: 'Unread',
       unreadCount: '{{count}} unread',
+      remindersValue: 'Class reminders: {{count}} scheduled until {{date}}',
+      remindersNone: 'Class reminders: open the calendar or dashboard to schedule',
     },
     title: 'Notification dashboard',
     types: {
@@ -265,6 +282,10 @@ export const controlCenterTranslation: ControlCenterTranslation = {
       'sisu-sync': {
         body: 'A quiet reminder to open Sisu when cached registration data is more than five days old.',
         title: 'Sisu sync nudge',
+      },
+      'class-reminder': {
+        body: 'A heads-up before each class or exam in your calendar.',
+        title: 'Class reminders',
       },
     },
     unread: {

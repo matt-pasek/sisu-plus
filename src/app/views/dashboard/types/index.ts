@@ -5,3 +5,5 @@ export type { WidgetSize } from './WidgetSize.type';
 export type { DashboardCompletedCourse } from './DashboardCompletedCourse.type';
 export type { HeroPanelId } from './HeroPanelId.type';
 export type { HeroStatId } from './HeroStatId.type';
+export type { NextClassModel } from './NextClassModel.type';
+export type { NextClassView } from './NextClassView.type';

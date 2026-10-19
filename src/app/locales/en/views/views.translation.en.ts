@@ -1,3 +1,4 @@
+import { CalendarTranslation, calendarTranslation } from '@/app/locales/en/views/calendar/calendar.translation.en';
 import { DashboardTranslation, dashboardTranslation } from '@/app/locales/en/views/dashboard/dashboard.translation.en';
 import {
   RegistrationTranslation,
@@ -7,6 +8,7 @@ import { StructureTranslation, structureTranslation } from '@/app/locales/en/vie
 import { TimelineTranslation, timelineTranslation } from '@/app/locales/en/views/timeline/timeline.translation.en';
 
 export type ViewsTranslation = {
+  calendar: CalendarTranslation;
   dashboard: DashboardTranslation;
   registration: RegistrationTranslation;
   structure: StructureTranslation;
@@ -14,6 +16,7 @@ export type ViewsTranslation = {
 };
 
 export const viewsTranslation: ViewsTranslation = {
+  calendar: calendarTranslation,
   dashboard: dashboardTranslation,
   registration: registrationTranslation,
   structure: structureTranslation,

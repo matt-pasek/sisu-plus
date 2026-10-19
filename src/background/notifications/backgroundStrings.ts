@@ -13,6 +13,10 @@ export interface NotificationStrings {
   registrationCloseBody: (name: string) => string;
   sisuSyncTitle: string;
   sisuSyncBody: string;
+  classReminderTitle: (course: string, lead: string) => string;
+  classReminderBody: (kind: string, room: string) => string;
+  reminderHorizonTitle: (date: string) => string;
+  reminderHorizonBody: string;
 }
 
 const EN: NotificationStrings = {
@@ -22,7 +26,7 @@ const EN: NotificationStrings = {
     if (m >= 1440) return 'in 1 day';
     const h = m / 60;
     if (m >= 60) return `in ${h} hour${h === 1 ? '' : 's'}`;
-    return `in ${m} minutes`;
+    return `in ${m} minute${m === 1 ? '' : 's'}`;
   },
   registrationOpenTitleSingle: (lead) => (lead ? `Registration opens ${lead}` : 'Registration opens'),
   registrationOpenTitleMulti: (lead) => (lead ? `Registrations open ${lead}` : 'Registrations open'),
@@ -32,6 +36,10 @@ const EN: NotificationStrings = {
   registrationCloseBody: (name) => `${name} closes for registration tomorrow.`,
   sisuSyncTitle: 'Sisu+ needs a fresh sync',
   sisuSyncBody: 'Open Sisu to refresh registration windows and course data.',
+  classReminderTitle: (course, lead) => `${course} ${lead}`,
+  classReminderBody: (kind, room) => `${kind} · ${room}`,
+  reminderHorizonTitle: (date) => `Class reminders stop after ${date}`,
+  reminderHorizonBody: 'Open Sisu to keep them going.',
 };
 
 const FI: NotificationStrings = {
@@ -53,6 +61,10 @@ const FI: NotificationStrings = {
   registrationCloseBody: (name) => `${name} sulkeutuu ilmoittautumiselle huomenna.`,
   sisuSyncTitle: 'Sisu+ tarvitsee päivityksen',
   sisuSyncBody: 'Avaa Sisu päivittääksesi ilmoittautumisikkunat ja kurssitiedot.',
+  classReminderTitle: (course, lead) => `${course} ${lead}`,
+  classReminderBody: (kind, room) => `${kind} · ${room}`,
+  reminderHorizonTitle: (date) => `Tuntimuistutukset loppuvat ${date} jälkeen`,
+  reminderHorizonBody: 'Avaa Sisu, niin muistutukset jatkuvat.',
 };
 
 const STRINGS: Record<Locale, NotificationStrings> = { en: EN, fi: FI };

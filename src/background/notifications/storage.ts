@@ -1,3 +1,4 @@
+import { isClassReminderSnapshot } from '@/background/notifications/classReminders';
 import type { NotificationCache, QueuedInAppNotification } from '@/background/notifications/types';
 
 export const NOTIFICATION_CACHE_KEY = 'sisuPlusNotifications';
@@ -13,26 +14,26 @@ export const EMPTY_NOTIFICATION_CACHE: NotificationCache = {
     registrations: [],
   },
   unread: [],
+  calendar: null,
+};
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+export const normalizeNotificationCache = (stored: unknown): NotificationCache => {
+  const partial = (isRecord(stored) ? stored : {}) as Partial<NotificationCache>;
+  return {
+    ...EMPTY_NOTIFICATION_CACHE,
+    ...partial,
+    moodle: { ...EMPTY_NOTIFICATION_CACHE.moodle, ...(partial.moodle ?? {}) },
+    sisu: { ...EMPTY_NOTIFICATION_CACHE.sisu, ...(partial.sisu ?? {}) },
+    calendar: isClassReminderSnapshot(partial.calendar) ? partial.calendar : null,
+  };
 };
 
 export const getNotificationCache = async (): Promise<NotificationCache> => {
   const stored = await chrome.storage.local.get(NOTIFICATION_CACHE_KEY);
-  return {
-    ...EMPTY_NOTIFICATION_CACHE,
-    ...((stored[NOTIFICATION_CACHE_KEY] as Partial<NotificationCache> | undefined) ?? {}),
-    moodle: {
-      ...EMPTY_NOTIFICATION_CACHE.moodle,
-      ...(((stored[NOTIFICATION_CACHE_KEY] as Partial<NotificationCache> | undefined)?.moodle ?? {}) as Partial<
-        NotificationCache['moodle']
-      >),
-    },
-    sisu: {
-      ...EMPTY_NOTIFICATION_CACHE.sisu,
-      ...(((stored[NOTIFICATION_CACHE_KEY] as Partial<NotificationCache> | undefined)?.sisu ?? {}) as Partial<
-        NotificationCache['sisu']
-      >),
-    },
-  };
+  return normalizeNotificationCache(stored[NOTIFICATION_CACHE_KEY]);
 };
 
 export const setNotificationCache = async (cache: NotificationCache) => {

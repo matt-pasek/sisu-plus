@@ -18,7 +18,8 @@ export const AppLayout: React.FC = () => {
   const isNavigating = Boolean(navigation.location);
   const isTimeline = location.pathname.startsWith('/student/plan');
   const isDashboard = location.pathname === '/student/frontpage';
-  const isFullWidth = isTimeline || isDashboard;
+  const isCalendar = location.pathname.startsWith('/student/calendar');
+  const isFullWidth = isTimeline || isDashboard || isCalendar;
   const changelogRelease = useChangelogRelease();
   const showChangelog = shouldShowInAppChangelog(prefs, prefsLoaded, CHANGELOG_V2.version);
 

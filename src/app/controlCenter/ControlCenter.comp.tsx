@@ -8,7 +8,7 @@ import { NotificationSettingsPanel } from '@/app/controlCenter/NotificationSetti
 import { OPEN_NOTIFICATION_SETTINGS_EVENT } from '@/app/controlCenter/notificationSettingsEvents';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { getControlTip } from '@/app/controlCenter/controlTips';
-import { DEFAULT_NOTIFICATION_PREFS } from '@/app/types/prefs';
+import { normalizeNotificationPrefs } from '@/shared/notifications/normalizeNotificationPrefs';
 import { notify } from '@/app/components/ui/notify';
 import type { NotificationPayload } from '@/background/notifications/types';
 
@@ -82,14 +82,7 @@ export function ControlCenter() {
   const [prefs, setPrefs, prefsLoaded] = useChromeStorage();
   const isActive = prefs.sisuPlusActive;
   const moodleToken = prefs.moodleToken ?? '';
-  const notificationPrefs = {
-    delivery: {
-      ...DEFAULT_NOTIFICATION_PREFS.delivery,
-      ...(prefs.notificationPrefs?.delivery ?? {}),
-    },
-    registrationOpenLeadMinutes:
-      prefs.notificationPrefs?.registrationOpenLeadMinutes ?? DEFAULT_NOTIFICATION_PREFS.registrationOpenLeadMinutes,
-  };
+  const notificationPrefs = normalizeNotificationPrefs(prefs.notificationPrefs);
   const validMoodleUrl = isValidMoodleUrl(moodleToken);
   const moodleCalendarPlaceholder = prefs.universityConfig
     ? `${getMoodleCalendarExportUrlFromConfig(prefs.universityConfig).replace('/export.php?', '/export_execute.php?')}...`

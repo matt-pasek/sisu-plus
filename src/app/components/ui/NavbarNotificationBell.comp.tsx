@@ -25,6 +25,21 @@ function BellIcon({ className = 'size-4' }: { className?: string }) {
 }
 
 function TypeIcon({ type }: { type: NotificationType }) {
+  if (type === 'class-reminder') {
+    return (
+      <svg
+        aria-hidden="true"
+        className="size-4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        viewBox="0 0 24 24"
+      >
+        <rect height="15" rx="2" width="16" x="4" y="5.5" />
+        <path d="M4 10h16M8.5 3.5v4M15.5 3.5v4" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    );
+  }
   if (type === 'moodle-deadline') {
     return (
       <svg
@@ -87,6 +102,11 @@ function TypeIcon({ type }: { type: NotificationType }) {
 }
 
 const TYPE_STYLES: Record<NotificationType, { accent: string; glow: string; label: string }> = {
+  'class-reminder': {
+    accent: 'bg-teal-400 text-background shadow-[0_0_16px_rgba(45,212,191,0.35)]',
+    glow: 'from-teal-400/12 via-teal-400/4',
+    label: 'Calendar',
+  },
   'moodle-deadline': {
     accent: 'bg-blue-500 text-background shadow-[0_0_16px_rgba(59,130,246,0.35)]',
     glow: 'from-blue-500/12 via-blue-500/4',

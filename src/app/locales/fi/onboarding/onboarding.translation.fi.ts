@@ -39,4 +39,11 @@ export const onboardingTranslation: OnboardingTranslation = {
     openSisu: 'Avaa Sisu',
     close: 'Sulje',
   },
+  grant: {
+    headline: 'Salli lukujärjestyksen lukeminen',
+    body: 'Sisu+ tarvitsee luvan lukea lukujärjestyksesi sivustolta {{host}}. Se lukee vain liittämäsi linkin.',
+    cta: 'Salli',
+    done: 'Valmis. Voit sulkea tämän välilehden.',
+    denied: 'Lupaa ei myönnetty. Yritä uudelleen.',
+  },
 };

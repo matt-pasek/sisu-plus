@@ -1,5 +1,6 @@
 export type DashboardTranslation = {
   title: string;
+  weekLabel: string;
   periodLabel: {
     autumn: string;
     spring: string;
@@ -75,6 +76,7 @@ export type DashboardTranslation = {
       closeEditor: string;
       grow: string;
       noSpace: string;
+      openCalendar: string;
       openRegistration: string;
       openTimeline: string;
       remove: string;
@@ -113,6 +115,7 @@ export type DashboardTranslation = {
       gradeTrend: string;
       moodleDeadlines: string;
       nextExam: string;
+      nextClass: string;
       recentAchievements: string;
       semesterStats: string;
       timelinePeek: string;
@@ -133,6 +136,7 @@ export type DashboardTranslation = {
       gradeDonut: string;
       creditPace: string;
       nextExam: string;
+      nextClass: string;
       upcomingRegistrations: string;
     };
     descriptions: {
@@ -149,6 +153,7 @@ export type DashboardTranslation = {
       gradeDonut: string;
       creditPace: string;
       nextExam: string;
+      nextClass: string;
       upcomingRegistrations: string;
     };
     courseMap: {
@@ -199,6 +204,14 @@ export type DashboardTranslation = {
       creditsPerDayValue: string;
       degreePercent: string;
     };
+    nextClass: {
+      comingUp: string;
+      failed: string;
+      retry: string;
+      noneLeft: string;
+      noCourses: string;
+      openRegistration: string;
+    };
     registration: {
       closesIn: string;
       daysAway: string;
@@ -235,6 +248,7 @@ export type DashboardTranslation = {
 
 export const dashboardTranslation: DashboardTranslation = {
   title: 'Dashboard',
+  weekLabel: 'Week {{week}}',
   periodLabel: {
     autumn: 'Autumn',
     spring: 'Spring',
@@ -310,6 +324,7 @@ export const dashboardTranslation: DashboardTranslation = {
       closeEditor: 'Close dashboard editor',
       grow: 'Grow {{title}}',
       noSpace: 'No space',
+      openCalendar: 'Calendar',
       openRegistration: 'Registration',
       openTimeline: 'Timeline',
       remove: 'Remove {{title}}',
@@ -348,6 +363,7 @@ export const dashboardTranslation: DashboardTranslation = {
       gradeTrend: 'Performance',
       moodleDeadlines: 'Moodle',
       nextExam: 'Examinations',
+      nextClass: 'Schedule',
       recentAchievements: 'Completed',
       semesterStats: 'At a glance',
       timelinePeek: 'Ahead',
@@ -368,6 +384,7 @@ export const dashboardTranslation: DashboardTranslation = {
       gradeDonut: 'Grade Distribution',
       creditPace: 'Credit Pace',
       nextExam: 'Next Exam',
+      nextClass: 'Next Class',
       upcomingRegistrations: 'Upcoming Registrations',
     },
     descriptions: {
@@ -384,6 +401,7 @@ export const dashboardTranslation: DashboardTranslation = {
       gradeDonut: 'Numeric grade distribution and average.',
       creditPace: 'Credits left and daily pace needed.',
       nextExam: 'Nearest upcoming exam sitting and the next two dates.',
+      nextClass: 'Your next class with its room, a countdown and any clash.',
       upcomingRegistrations: 'Open and upcoming course registrations from the current Study Plan.',
     },
     courseMap: {
@@ -433,6 +451,14 @@ export const dashboardTranslation: DashboardTranslation = {
       creditsPerDay: 'Credits/day needed',
       creditsPerDayValue: '{{value}} {{unit}}/day',
       degreePercent: '{{percent}}% of degree',
+    },
+    nextClass: {
+      comingUp: 'Coming up',
+      failed: "Couldn't load your timetable",
+      retry: 'Retry',
+      noneLeft: 'No more classes this term',
+      noCourses: 'No classes in your calendar',
+      openRegistration: 'Open Registration',
     },
     registration: {
       closesIn: 'Closes in {{count}}d',

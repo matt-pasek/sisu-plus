@@ -6,6 +6,7 @@ import type { RegistrationCourse } from '@/app/api/dataPoints/getRegistrationCou
 import { getCourseDisplayName, getUpcomingExamItems } from '@/app/views/dashboard/util/registrationWidgetData';
 import { useChromeStorage } from '@/app/hooks/useChromeStorage';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
+import { isoWeekNumber, todayKey } from '@/app/schedule';
 import { getCurrentPeriodLabel } from '@/app/views/dashboard/util';
 import GradientBlinds from '@/app/views/dashboard/components/hero/GradientBlinds.comp';
 import { DashboardControlButton } from '@/app/views/dashboard/components/DashboardControlButton.comp';
@@ -274,6 +275,8 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
                 </>
               )}
               {getCurrentPeriodLabel(t)}
+              <span className="mx-2 text-lightGrey/30">·</span>
+              {t('weekLabel', { week: isoWeekNumber(todayKey()) })}
             </p>
           </div>
 

@@ -14,6 +14,7 @@ export const router = createBrowserRouter([
       { path: 'plan/:planId/timing', Component: lazy(() => import('@/app/views/timeline/Timeline.view')) },
       { path: 'structure', Component: lazy(() => import('@/app/views/structure/Structure.view')) },
       { path: 'enrolments', Component: lazy(() => import('@/app/views/registration/Registration.view')) },
+      { path: 'calendar/*', Component: lazy(() => import('@/app/views/calendar/Calendar.view')) },
       { path: '*', element: <Navigate to="/student/frontpage" replace /> },
     ],
     ErrorBoundary: RootErrorBoundary,

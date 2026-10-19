@@ -6,11 +6,16 @@ import {
   getNotificationCache,
   queueUnreadNotification,
 } from '@/background/notifications/storage';
-import { scheduleNotificationAlarms, syncSisuNotificationCache } from '@/background/notifications/scheduler';
+import {
+  scheduleNotificationAlarms,
+  syncClassReminders,
+  syncSisuNotificationCache,
+} from '@/background/notifications/scheduler';
 import type { SisuNotificationSyncPayload } from '@/background/notifications/types';
 import { clearSessionForOrigin, syncRuntimeForConfig } from '@/background/runtime/sisuRuntime';
 import { stashResume, takeResume } from '@/background/session/resumeStore';
 import { getSisuTokenForOrigin } from '@/background/session/sessionStore';
+import { fetchTimetable, openOriginGrant } from '@/background/timetables/fetchTimetable';
 import { getOrigin } from '@/background/util/origin';
 import { DEV_TEST_NOTIFICATION_PAYLOADS, isNotificationType } from '@/shared/notifications/devTestPayloads';
 
@@ -138,6 +143,14 @@ export const createMessageRouter =
       return true;
     }
 
+    if (message.type === 'SYNC_CLASS_REMINDERS') {
+      syncClassReminders(message.payload)
+        .then((ok) => sendResponse({ ok }))
+        .catch((err) => sendResponse({ ok: false, err }));
+
+      return true;
+    }
+
     if (message.type === 'RESCHEDULE_NOTIFICATIONS') {
       scheduleNotificationAlarms()
         .then(() => sendResponse({ ok: true }))
@@ -186,6 +199,22 @@ export const createMessageRouter =
       })
         .then(() => sendResponse({ ok: true }))
         .catch((err) => sendResponse({ ok: false, err }));
+
+      return true;
+    }
+
+    if (message.type === 'FETCH_TIMETABLE') {
+      fetchTimetable(message.url)
+        .then(sendResponse)
+        .catch(() => sendResponse({ ok: false, reason: 'network' }));
+
+      return true;
+    }
+
+    if (message.type === 'OPEN_ORIGIN_GRANT') {
+      openOriginGrant(message.origin)
+        .then((ok) => sendResponse({ ok }))
+        .catch(() => sendResponse({ ok: false }));
 
       return true;
     }

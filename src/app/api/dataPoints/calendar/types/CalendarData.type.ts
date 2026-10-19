@@ -1,0 +1,42 @@
+import type { AttendancePlan, AttendanceStatus, Clash, DateRange, GroupRef, Session } from '@/app/schedule';
+import type { CalendarCourse } from './CalendarCourse.type';
+import type { CourseUnitInfo } from './CourseUnitInfo.type';
+import type { LinkedTimetableState } from './LinkedTimetableState.type';
+import type { RoomInfo } from './RoomInfo.type';
+import type { TimetableLink } from './TimetableLink.type';
+
+export interface CalendarData {
+  range: DateRange;
+  sessions: Session[];
+  courses: CalendarCourse[];
+  clashes: Clash[];
+  clashesBySession: Map<string, Clash[]>;
+  rooms: Record<string, RoomInfo>;
+  courseUnits: Record<string, CourseUnitInfo>;
+  attended: Session[];
+  alternatives: Session[];
+  skipped: Session[];
+  statusById: Map<string, AttendanceStatus>;
+  swappedIn: Set<string>;
+  unavailableSwaps: Set<string>;
+  candidates: Session[];
+  candidatesLoading: boolean;
+  candidatesFailed: boolean;
+  retryCandidates: () => void;
+  pool: Session[];
+  groups: Map<string, GroupRef>;
+  plans: Record<string, AttendancePlan>;
+  remindersReady: boolean;
+  namesReady: boolean;
+  updatePlan: (courseKey: string, update: (plan: AttendancePlan) => AttendancePlan) => void;
+  linked: Record<string, LinkedTimetableState>;
+  noTimesCourseKeys: Set<string>;
+  saveTimetable: (courseKey: string, link: TimetableLink) => void;
+  removeTimetable: (courseKey: string) => void;
+  refreshTimetable: (courseKey: string) => void;
+  isLoading: boolean;
+  isFetching: boolean;
+  error: Error | null;
+  updatedAt: number;
+  refetch: () => void;
+}

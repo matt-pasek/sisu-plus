@@ -1,18 +1,20 @@
 import { parseIcsCalendar } from '@ts-ics/schema-zod';
-import { useSisuQuery } from '@/app/hooks/useSisuQuery';
-import { IcsCalendar } from 'ts-ics';
+import type { IcsCalendar } from 'ts-ics';
 import { useChromeStorage } from '@/app/hooks/useChromeStorage';
+import { useSisuQuery } from '@/app/hooks/useSisuQuery';
 
 interface MoodleDeadlinesResponse {
   deadlines?: IcsCalendar;
   deadlinesLoading: boolean;
   missingToken?: boolean;
+  deadlinesError: boolean;
+  refetchDeadlines: () => void;
 }
 
 export const getMoodleDeadlines = (): MoodleDeadlinesResponse => {
-  const [prefs] = useChromeStorage();
+  const [prefs, , isLoaded] = useChromeStorage();
 
-  const { data: deadlines, isLoading: deadlinesLoading } = useSisuQuery(
+  const query = useSisuQuery(
     ['moodle-deadlines', prefs.moodleToken],
     async () => {
       if (!prefs.moodleToken) return false;
@@ -23,8 +25,20 @@ export const getMoodleDeadlines = (): MoodleDeadlinesResponse => {
 
       return parseIcsCalendar(moodleDeadlines);
     },
+    { enabled: isLoaded },
   );
+  const refetchDeadlines = () => {
+    void query.refetch();
+  };
 
-  if (deadlines === false) return { deadlinesLoading: false, missingToken: true };
-  return { deadlines: deadlines, deadlinesLoading, missingToken: false };
+  if (query.data === false) {
+    return { deadlinesLoading: false, missingToken: true, deadlinesError: false, refetchDeadlines };
+  }
+  return {
+    deadlines: query.data,
+    deadlinesLoading: !isLoaded || query.isLoading,
+    missingToken: false,
+    deadlinesError: query.isError,
+    refetchDeadlines,
+  };
 };

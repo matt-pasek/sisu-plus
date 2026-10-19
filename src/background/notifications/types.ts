@@ -30,6 +30,7 @@ export interface NotificationCache {
     registrations: CachedRegistrationEvent[];
   };
   unread: QueuedInAppNotification[];
+  calendar: ClassReminderSnapshot | null;
 }
 
 export interface NotificationPayload {
@@ -55,4 +56,23 @@ export interface NotificationDeliveryDecision {
 export interface SisuNotificationSyncPayload {
   registrations: CachedRegistrationEvent[];
   syncedAt?: number;
+}
+
+export interface CachedClassSession {
+  id: string;
+  startsAt: string;
+  endsAt: string;
+  courseName: string;
+  kindLabel: string;
+  room: string;
+  isExam: boolean;
+}
+
+export interface ClassReminderSnapshot {
+  sessions: CachedClassSession[];
+  horizonKey: string;
+  horizonLabel: string;
+  hasMoreAfter: boolean;
+  hasExamsAfter?: boolean;
+  syncedAt: number;
 }

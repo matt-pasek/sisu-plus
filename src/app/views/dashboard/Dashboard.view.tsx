@@ -7,6 +7,7 @@ import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { DashboardGridIcon } from './components/icons/DashboardGridIcon.comp';
 import { DashboardHero } from './components/hero/DashboardHero.comp';
 import { DashboardControlButton } from './components/DashboardControlButton.comp';
+import { ClassReminderSync } from './components/ClassReminderSync.comp';
 import { DashboardCell } from './components/DashboardCell.comp';
 import { isDashboardWidgetDragData } from './util/dndHandlers';
 import { formatStudyRightEnd } from './util/attainmentHelpers';
@@ -26,6 +27,7 @@ import {
 } from '@/app/views/dashboard/util';
 import { DashboardWidgetId, DashboardWidgetLayout } from '@/app/views/dashboard/types';
 import { DASHBOARD_COLUMNS, DASHBOARD_ROWS } from '@/app/views/dashboard/constants/widgetDefinitions.const';
+import { normalizeNotificationPrefs } from '@/shared/notifications/normalizeNotificationPrefs';
 
 interface DragTransform {
   x: number;
@@ -41,6 +43,9 @@ const DashboardView: React.FC = () => {
   const [layout, setLayout] = useState<DashboardWidgetLayout[]>(sanitizeDashboardLayout(prefs.dashboardLayout));
   const [previewLayout, setPreviewLayout] = useState<DashboardWidgetLayout | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
+  const syncRemindersHere =
+    normalizeNotificationPrefs(prefs.notificationPrefs).delivery['class-reminder'] !== 'off' &&
+    !layout.some((item) => item.id === 'next-class');
 
   const {
     activeCourses,
@@ -178,6 +183,7 @@ const DashboardView: React.FC = () => {
   return (
     <DragDropProvider onDragMove={handleDragMove} onDragEnd={handleDragEnd}>
       <div className="mx-auto flex w-full flex-col gap-5 pb-8">
+        {syncRemindersHere && <ClassReminderSync />}
         <DashboardHero
           activeCoursesCount={activeCourses.length}
           completedCourses={completedCourses}

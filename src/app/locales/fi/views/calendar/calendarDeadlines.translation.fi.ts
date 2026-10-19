@@ -1,0 +1,28 @@
+import type { CalendarDeadlinesTranslation } from '@/app/locales/en/views/calendar/calendarDeadlines.translation.en';
+
+export const calendarDeadlinesTranslation: CalendarDeadlinesTranslation = {
+  layer: 'Moodlen määräajat',
+  legend: 'Määräaika',
+  connect: 'Yhdistä Moodle',
+  connectHint: 'Vie Moodlen kalenterilinkki ja liitä se Sisu+-ponnahdusikkunaan.',
+  unavailable: 'Moodlea ei tavoitettu',
+  retry: 'Yritä uudelleen',
+  allDay: 'Koko päivä',
+  more: '+{{count}}',
+  moreAria: '{{count}} lisää päivänä {{date}}',
+  chip: '{{time}} {{title}}',
+  chipAria: 'Määräaika: {{title}}, {{course}}, {{date}} klo {{time}}',
+  due: 'Määräaika {{date}} klo {{time}}',
+  past: 'Määräaika mennyt',
+  openInMoodle: 'Avaa Moodlessa',
+  noCourse: 'Moodle',
+  monthLine: '{{time}} {{title}}',
+  yearDots_one: '{{count}} määräaika',
+  yearDots_other: '{{count}} määräaikaa',
+  dueSoon: 'Pian erääntyvät',
+  dueWeek: 'Erääntyy viikon sisällä',
+  dueToday: 'tänään',
+  dueTomorrow: 'huomenna',
+  dueInDays: '{{count}} päivän päästä',
+  dueRow: '{{date}} {{time}} · {{relative}}',
+};

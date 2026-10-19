@@ -35,6 +35,7 @@ export const Navbar: React.FC = () => {
         <NaviLink to={planId ? `/student/plan/${planId}/timing` : '/student/plan'} name={t('links.timeline')} />
         <NaviLink to={'/student/structure'} name={t('links.structure')} />
         <NaviLink to={'/student/enrolments'} name={t('links.registration')} />
+        <NaviLink to={'/student/calendar'} name={t('links.calendar')} />
       </div>
       <div className="ml-auto flex items-center gap-3 text-sm font-medium">
         {!isLoading && (

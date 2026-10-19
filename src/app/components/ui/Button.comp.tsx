@@ -43,7 +43,7 @@ export const Button: React.FC<Props> = ({
       onClick={onClick}
       disabled={disabled}
       title={title}
-      className={`flex min-h-10 cursor-pointer items-center justify-center gap-1 rounded-lg border border-solid px-3 py-2 text-xs font-medium transition-[background-color,border-color,color,box-shadow,transform,opacity] duration-200 select-none active:scale-[0.96] ${disabledClass} ${variantClass} ${className}`}
+      className={`flex min-h-10 cursor-pointer items-center justify-center gap-1 rounded-lg border border-solid px-3 py-2 text-xs font-medium transition-[background-color,border-color,color,box-shadow,transform,opacity] duration-200 select-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lighterGreen active:scale-[0.96] ${disabledClass} ${variantClass} ${className}`}
     >
       {icon && <div className="flex items-center justify-center">{icon}</div>}
       {children}

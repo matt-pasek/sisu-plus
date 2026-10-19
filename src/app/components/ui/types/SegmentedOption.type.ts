@@ -5,4 +5,5 @@ export interface SegmentedOption<T extends string> {
   label: string;
   badge?: ReactNode;
   disabled?: boolean;
+  keyShortcut?: string;
 }

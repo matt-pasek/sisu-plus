@@ -1,4 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  findCachedPlan,
+  restorePlans,
+  snapshotPlans,
+  updateCachedPlan,
+  type PlansSnapshot,
+} from '@/app/api/dataPoints/planCache';
 import { updatePlan } from '@/app/api/endpoints/updatePlan';
 import type { Plan } from '@/app/api/generated/OsuvaApi';
 
@@ -9,7 +16,7 @@ export interface MoveCourseArgs {
 }
 
 interface MoveCourseContext {
-  previousPlans: Plan[] | undefined;
+  snapshot: PlansSnapshot;
 }
 
 function updateCoursePeriods(plan: Plan, courseUnitId: string, newPeriodLocators: string[]): Plan {
@@ -26,8 +33,7 @@ export function useMoveCourse() {
 
   return useMutation<Plan, Error, MoveCourseArgs, MoveCourseContext>({
     mutationFn: async ({ courseUnitId, newPeriodLocators, planId }) => {
-      const plans = queryClient.getQueryData<Plan[]>(['plans']);
-      const plan = plans?.find((candidate) => candidate.id === planId);
+      const plan = findCachedPlan(queryClient, planId);
       if (!plan) throw new Error('Plan not found.');
 
       return updatePlan(planId, updateCoursePeriods(plan, courseUnitId, newPeriodLocators));
@@ -36,15 +42,13 @@ export function useMoveCourse() {
       await queryClient.cancelQueries({ queryKey: ['plans'] });
       await queryClient.cancelQueries({ queryKey: ['timeline-courses', planId] });
 
-      const previousPlans = queryClient.getQueryData<Plan[]>(['plans']);
-      queryClient.setQueryData<Plan[]>(['plans'], (plans) =>
-        plans?.map((plan) => (plan.id === planId ? updateCoursePeriods(plan, courseUnitId, newPeriodLocators) : plan)),
-      );
+      const snapshot = snapshotPlans(queryClient);
+      updateCachedPlan(queryClient, planId, (plan) => updateCoursePeriods(plan, courseUnitId, newPeriodLocators));
 
-      return { previousPlans };
+      return { snapshot };
     },
     onError: (_error, _args, context) => {
-      queryClient.setQueryData(['plans'], context?.previousPlans);
+      if (context) restorePlans(queryClient, context.snapshot);
     },
     onSettled: async (_data, _error, args) => {
       await queryClient.invalidateQueries({ queryKey: ['plans'] });

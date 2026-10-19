@@ -1,9 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restorePlans, snapshotPlans, updateCachedPlan, type PlansSnapshot } from '@/app/api/dataPoints/planCache';
 import { updatePlan } from '@/app/api/endpoints/updatePlan';
 import type { Plan } from '@/app/api/generated/OsuvaApi';
 
 type StructurePlanContext = {
-  previousPlans: Plan[] | undefined;
+  snapshot: PlansSnapshot;
 };
 
 export const useStructurePlanMutation = () => {
@@ -18,15 +19,13 @@ export const useStructurePlanMutation = () => {
       await queryClient.cancelQueries({ queryKey: ['plans'] });
       await queryClient.cancelQueries({ queryKey: ['structure-data'] });
 
-      const previousPlans = queryClient.getQueryData<Plan[]>(['plans']);
-      queryClient.setQueryData<Plan[]>(['plans'], (plans) =>
-        plans?.map((candidate) => (candidate.id === plan.id ? plan : candidate)),
-      );
+      const snapshot = snapshotPlans(queryClient);
+      if (plan.id) updateCachedPlan(queryClient, plan.id, () => plan);
 
-      return { previousPlans };
+      return { snapshot };
     },
     onError: (_error, _plan, context) => {
-      queryClient.setQueryData(['plans'], context?.previousPlans);
+      if (context) restorePlans(queryClient, context.snapshot);
     },
     onSettled: async () => {
       await queryClient.invalidateQueries({ queryKey: ['plans'] });

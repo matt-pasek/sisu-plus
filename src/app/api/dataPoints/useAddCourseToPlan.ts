@@ -1,4 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  findCachedPlan,
+  restorePlans,
+  snapshotPlans,
+  updateCachedPlan,
+  type PlansSnapshot,
+} from '@/app/api/dataPoints/planCache';
 import { updatePlan } from '@/app/api/endpoints/updatePlan';
 import type { CourseUnitSelection, Plan } from '@/app/api/generated/OsuvaApi';
 
@@ -10,7 +17,7 @@ export interface AddCourseArgs {
 }
 
 interface AddCourseContext {
-  previousPlans: Plan[] | undefined;
+  snapshot: PlansSnapshot;
 }
 
 function addCourseSelection(plan: Plan, args: AddCourseArgs): Plan {
@@ -34,8 +41,7 @@ export function useAddCourseToPlan() {
 
   return useMutation<Plan, Error, AddCourseArgs, AddCourseContext>({
     mutationFn: async (args) => {
-      const plans = queryClient.getQueryData<Plan[]>(['plans']);
-      const plan = plans?.find((candidate) => candidate.id === args.planId);
+      const plan = findCachedPlan(queryClient, args.planId);
       if (!plan) throw new Error('Plan not found.');
 
       return updatePlan(args.planId, addCourseSelection(plan, args));
@@ -44,15 +50,13 @@ export function useAddCourseToPlan() {
       await queryClient.cancelQueries({ queryKey: ['plans'] });
       await queryClient.cancelQueries({ queryKey: ['timeline-courses', args.planId] });
 
-      const previousPlans = queryClient.getQueryData<Plan[]>(['plans']);
-      queryClient.setQueryData<Plan[]>(['plans'], (plans) =>
-        plans?.map((plan) => (plan.id === args.planId ? addCourseSelection(plan, args) : plan)),
-      );
+      const snapshot = snapshotPlans(queryClient);
+      updateCachedPlan(queryClient, args.planId, (plan) => addCourseSelection(plan, args));
 
-      return { previousPlans };
+      return { snapshot };
     },
     onError: (_error, _args, context) => {
-      queryClient.setQueryData(['plans'], context?.previousPlans);
+      if (context) restorePlans(queryClient, context.snapshot);
     },
     onSettled: async (_data, _error, args) => {
       await queryClient.invalidateQueries({ queryKey: ['plans'] });

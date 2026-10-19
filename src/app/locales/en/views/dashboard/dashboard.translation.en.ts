@@ -205,7 +205,7 @@ export type DashboardTranslation = {
       degreePercent: string;
     };
     nextClass: {
-      laterToday: string;
+      comingUp: string;
       failed: string;
       retry: string;
       noneLeft: string;
@@ -363,7 +363,7 @@ export const dashboardTranslation: DashboardTranslation = {
       gradeTrend: 'Performance',
       moodleDeadlines: 'Moodle',
       nextExam: 'Examinations',
-      nextClass: 'Next class',
+      nextClass: 'Schedule',
       recentAchievements: 'Completed',
       semesterStats: 'At a glance',
       timelinePeek: 'Ahead',
@@ -453,7 +453,7 @@ export const dashboardTranslation: DashboardTranslation = {
       degreePercent: '{{percent}}% of degree',
     },
     nextClass: {
-      laterToday: 'Later today',
+      comingUp: 'Coming up',
       failed: "Couldn't load your timetable",
       retry: 'Retry',
       noneLeft: 'No more classes this term',

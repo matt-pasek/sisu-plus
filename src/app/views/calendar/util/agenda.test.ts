@@ -5,7 +5,7 @@ import { describe, expect, test } from 'bun:test';
 import { helsinkiWallTimeToInstant } from '@/app/schedule';
 import { buildNote } from '@/app/schedule/__fixtures__/buildNote';
 import { buildSession } from '@/app/schedule/__fixtures__/buildSession';
-import { agendaFor, countdownTo, mergeDay } from './agenda';
+import { agendaFor, countdownKey, countdownTo, mergeDay } from './agenda';
 
 const at = (dateKey: string, hour: number): Date => helsinkiWallTimeToInstant(dateKey, hour * 60);
 const AUTUMN = { startKey: '2026-08-01', endKey: '2027-01-01' };
@@ -37,11 +37,41 @@ describe('agendaFor', () => {
     expect(agenda.day.map((session) => session.id)).toEqual(['morning', 'noon', 'gone']);
   });
 
-  test('another viewed day keeps next about now', () => {
+  test('another viewed day has no next class, so the panel stays about that day', () => {
     const agenda = agendaFor(attended, [], '2026-10-29', at('2026-10-27', 9), AUTUMN);
-    expect(agenda.next?.id).toBe('morning');
+    expect(agenda.next).toBeNull();
     expect(agenda.day.map((session) => session.id)).toEqual(['thursday']);
     expect(agenda.following).toBeNull();
+  });
+
+  test('on an empty today, the following class is not repeated under the next-class card', () => {
+    const agenda = agendaFor(attended, [], '2026-10-28', at('2026-10-28', 9), AUTUMN);
+    expect(agenda.next?.id).toBe('thursday');
+    expect(agenda.following).toBeNull();
+  });
+
+  test('cancelled classes leave the day list when the Cancelled layer is off', () => {
+    const agenda = agendaFor(attended, skipped, '2026-10-27', at('2026-10-27', 13), AUTUMN, false);
+    expect(agenda.day.map((session) => session.id)).toEqual(['morning', 'noon', 'skip']);
+  });
+});
+
+describe('countdownKey', () => {
+  test('whole hours drop the zero minutes', () => {
+    expect(countdownKey({ kind: 'soon', minutes: 120 })).toEqual({ key: 'agenda.inWholeHours', params: { hours: 2 } });
+  });
+
+  test('hours and minutes, or minutes alone under an hour', () => {
+    expect(countdownKey({ kind: 'soon', minutes: 125 })).toEqual({
+      key: 'agenda.inHours',
+      params: { hours: 2, minutes: 5 },
+    });
+    expect(countdownKey({ kind: 'soon', minutes: 45 })).toEqual({ key: 'agenda.inMinutes', params: { minutes: 45 } });
+  });
+
+  test('later classes read tomorrow or a day count', () => {
+    expect(countdownKey({ kind: 'later', days: 1 })).toEqual({ key: 'agenda.tomorrow', params: {} });
+    expect(countdownKey({ kind: 'later', days: 7 })).toEqual({ key: 'agenda.inDays', params: { count: 7 } });
   });
 });
 
@@ -54,7 +84,7 @@ describe('countdownTo', () => {
 
   test('counts minutes within a day, later beyond', () => {
     expect(countdownTo(session, at('2026-10-27', 13.25))).toEqual({ kind: 'soon', minutes: 45 });
-    expect(countdownTo(session, at('2026-10-25', 9))).toEqual({ kind: 'later' });
+    expect(countdownTo(session, at('2026-10-25', 9))).toEqual({ kind: 'later', days: 2 });
   });
 });
 

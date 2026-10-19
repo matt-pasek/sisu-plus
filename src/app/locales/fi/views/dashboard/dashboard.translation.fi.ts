@@ -117,7 +117,7 @@ export const dashboardTranslation: DashboardTranslation = {
       gradeTrend: 'Suoriutuminen',
       moodleDeadlines: 'Moodle',
       nextExam: 'Tentit',
-      nextClass: 'Seuraava opetus',
+      nextClass: 'Lukujärjestys',
       recentAchievements: 'Suoritettu',
       semesterStats: 'Yhteenveto',
       timelinePeek: 'Tulossa',
@@ -207,7 +207,7 @@ export const dashboardTranslation: DashboardTranslation = {
       degreePercent: '{{percent}} % tutkinnosta',
     },
     nextClass: {
-      laterToday: 'Myöhemmin tänään',
+      comingUp: 'Tulossa',
       failed: 'Lukujärjestystä ei voitu ladata',
       retry: 'Yritä uudelleen',
       noneLeft: 'Ei enää opetusta tällä lukukaudella',

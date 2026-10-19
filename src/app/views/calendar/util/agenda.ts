@@ -1,8 +1,10 @@
-import { helsinkiDateKey, type DateRange, type NoteOccurrence, type Session } from '@/app/schedule';
+import { daysBetween, helsinkiDateKey, type DateRange, type NoteOccurrence, type Session } from '@/app/schedule';
 import type { AgendaEntry, AgendaModel, Countdown } from '../types';
+import { formatClock } from './format';
 
 const MINUTE_MS = 60_000;
-const DAY_MINUTES = 24 * 60;
+const HOUR_MINUTES = 60;
+const DAY_MINUTES = 24 * HOUR_MINUTES;
 
 const byStart = (a: Session, b: Session): number => a.start.getTime() - b.start.getTime();
 
@@ -13,22 +15,44 @@ export const agendaFor = (
   viewedKey: string,
   now: Date,
   range: DateRange,
+  showCancelled = true,
 ): AgendaModel => {
   const live = attended.filter((session) => !session.cancelled).sort(byStart);
   const todayKey = helsinkiDateKey(now);
   const nextKnown = todayKey >= range.startKey && todayKey < range.endKey;
+  const next = nextKnown && viewedKey === todayKey ? (live.find((session) => session.end > now) ?? null) : null;
+  const following = live.find((session) => session.dateKey > viewedKey) ?? null;
   return {
-    next: nextKnown ? (live.find((session) => session.end > now) ?? null) : null,
+    next,
     nextKnown,
-    day: [...attended, ...skipped].filter((session) => session.dateKey === viewedKey).sort(byStart),
-    following: live.find((session) => session.dateKey > viewedKey) ?? null,
+    day: [...attended, ...skipped]
+      .filter((session) => session.dateKey === viewedKey && (showCancelled || !session.cancelled))
+      .sort(byStart),
+    following: following && following.id !== next?.id ? following : null,
   };
 };
 
 export const countdownTo = (session: Session, now: Date): Countdown => {
   if (session.start <= now) return { kind: 'now', until: session.end };
   const minutes = Math.ceil((session.start.getTime() - now.getTime()) / MINUTE_MS);
-  return minutes < DAY_MINUTES ? { kind: 'soon', minutes } : { kind: 'later' };
+  return minutes < DAY_MINUTES
+    ? { kind: 'soon', minutes }
+    : { kind: 'later', days: daysBetween(helsinkiDateKey(now), session.dateKey) };
+};
+
+export const countdownKey = (countdown: Countdown): { key: string; params: Record<string, string | number> } => {
+  if (countdown.kind === 'now') return { key: 'agenda.until', params: { time: formatClock(countdown.until) } };
+  if (countdown.kind === 'later') {
+    return countdown.days <= 1
+      ? { key: 'agenda.tomorrow', params: {} }
+      : { key: 'agenda.inDays', params: { count: countdown.days } };
+  }
+  if (countdown.minutes < HOUR_MINUTES) return { key: 'agenda.inMinutes', params: { minutes: countdown.minutes } };
+  const hours = Math.floor(countdown.minutes / HOUR_MINUTES);
+  const minutes = countdown.minutes % HOUR_MINUTES;
+  return minutes === 0
+    ? { key: 'agenda.inWholeHours', params: { hours } }
+    : { key: 'agenda.inHours', params: { hours, minutes } };
 };
 
 const entryStart = (entry: AgendaEntry): number =>

@@ -19,10 +19,16 @@ const attended = [
 ];
 
 describe('pickNextClass', () => {
-  test('a class in progress comes first, with up to two more today', () => {
+  test('a class in progress comes first, with up to three after it', () => {
     const model = pickNextClass(attended, at(TUESDAY, 11));
     expect(model?.session.id).toBe('morning');
-    expect(model?.laterToday.map((session) => session.id)).toEqual(['noon', 'afternoon']);
+    expect(model?.following.map((session) => session.id)).toEqual(['noon', 'afternoon', 'evening']);
+  });
+
+  test('the classes after it can be on later days', () => {
+    const model = pickNextClass(attended, at(TUESDAY, 17.5));
+    expect(model?.session.id).toBe('evening');
+    expect(model?.following.map((session) => session.id)).toEqual(['late', 'wednesday']);
   });
 
   test('otherwise the next class later today', () => {
@@ -33,17 +39,24 @@ describe('pickNextClass', () => {
     expect(pickNextClass(attended, at(TUESDAY, 14.2))?.session.id).toBe('afternoon');
   });
 
-  test('after the last class of the day, the next day with nothing listed for today', () => {
+  test('after the last class of the day, the next day with nothing after it', () => {
     const model = pickNextClass(attended, at(TUESDAY, 19.5));
     expect(model?.session.id).toBe('wednesday');
-    expect(model?.laterToday).toEqual([]);
+    expect(model?.following).toEqual([]);
   });
 
-  test('a clashing class starting at the same time is listed later today', () => {
+  test('a shorter class that already ended inside a longer one is not coming up', () => {
+    const nested = [buildSession('long', TUESDAY, 9, 12), buildSession('short', TUESDAY, 10, 11)];
+    const model = pickNextClass(nested, at(TUESDAY, 11.5));
+    expect(model?.session.id).toBe('long');
+    expect(model?.following).toEqual([]);
+  });
+
+  test('a clashing class starting at the same time comes right after', () => {
     const clash = [buildSession('a', TUESDAY, 10, 12), buildSession('b', TUESDAY, 10, 11)];
     const model = pickNextClass(clash, at(TUESDAY, 9));
     expect(model?.session.id).toBe('a');
-    expect(model?.laterToday.map((session) => session.id)).toEqual(['b']);
+    expect(model?.following.map((session) => session.id)).toEqual(['b']);
   });
 
   test('nothing left this term', () => {

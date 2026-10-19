@@ -5,7 +5,7 @@ import { describe, expect, test } from 'bun:test';
 import { buildSession } from '@/app/schedule/__fixtures__/buildSession';
 import { nextClassView } from './nextClassView';
 
-const model = { session: buildSession('a', '2026-10-13', 10, 12), laterToday: [] };
+const model = { session: buildSession('a', '2026-10-13', 10, 12), following: [] };
 const loaded = { error: null, updatedAt: 1, courseCount: 2, model };
 
 describe('nextClassView', () => {

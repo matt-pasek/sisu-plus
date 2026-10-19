@@ -3,7 +3,14 @@ import type { CalendarDeadline, RoomInfo } from '@/app/api/dataPoints/calendar/t
 import { Panel } from '@/app/components/ui/Panel.comp';
 import { PanelEyebrow } from '@/app/components/ui/PanelEyebrow.comp';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
-import { addDaysToDateKey, type Clash, type DateRange, type NoteOccurrence, type Session } from '@/app/schedule';
+import {
+  addDaysToDateKey,
+  helsinkiWallTimeToInstant,
+  type Clash,
+  type DateRange,
+  type NoteOccurrence,
+  type Session,
+} from '@/app/schedule';
 import { agendaFor, dueSoon, formatSessionDate, joinNames, mergeDay, sessionRoom } from '../util';
 import { AgendaNoteRow } from './AgendaNoteRow.comp';
 import { AgendaRow } from './AgendaRow.comp';
@@ -22,6 +29,7 @@ interface Props {
   range: DateRange;
   notes: NoteOccurrence[];
   deadlines: CalendarDeadline[];
+  showCancelled: boolean;
   locale: string;
 }
 
@@ -37,13 +45,14 @@ export const DayAgenda: React.FC<Props> = ({
   range,
   notes,
   deadlines,
+  showCancelled,
   locale,
 }) => {
   const { t } = useTranslationWithPrefix('views.calendar');
   const roomLabels = { noRoom: t('event.noRoom'), unavailable: t('event.roomUnavailable') };
   const agenda = useMemo(
-    () => agendaFor(attended, skipped, dateKey, now, range),
-    [attended, skipped, dateKey, now, range],
+    () => agendaFor(attended, skipped, dateKey, now, range, showCancelled),
+    [attended, skipped, dateKey, now, range, showCancelled],
   );
   const skippedIds = useMemo(() => new Set(skipped.map((session) => session.id)), [skipped]);
   const entries = useMemo(
@@ -54,8 +63,11 @@ export const DayAgenda: React.FC<Props> = ({
       ),
     [agenda.day, notes, dateKey],
   );
-  const soon = useMemo(() => dueSoon(deadlines, now), [deadlines, now]);
   const isToday = dateKey === todayKey;
+  const soon = useMemo(() => {
+    const dayStart = helsinkiWallTimeToInstant(dateKey, 0);
+    return dueSoon(deadlines, dayStart > now ? dayStart : now);
+  }, [deadlines, now, dateKey]);
   const clashNamesOf = (session: Session): string | null => {
     const names = (clashesBySession.get(session.id) ?? [])
       .flatMap((clash) => clash.sessionIds.filter((id) => id !== session.id))
@@ -95,16 +107,13 @@ export const DayAgenda: React.FC<Props> = ({
             locale={locale}
           />
         ) : (
-          agenda.nextKnown && <p className="text-[12.5px] text-lightGrey">{t('agenda.noUpcoming')}</p>
+          isToday && agenda.nextKnown && <p className="text-[12.5px] text-lightGrey">{t('agenda.noUpcoming')}</p>
         )}
         <section>
-          <PanelEyebrow>
-            {isToday ? t('agenda.restOfToday') : t('agenda.onDay', { date: formatSessionDate(dateKey, locale) })}
-          </PanelEyebrow>
           {entries.length === 0 ? (
-            <p className="mt-1.5 text-[12.5px] text-lightGrey">{t('states.emptyDay')}</p>
+            <p className="text-[12.5px] text-lightGrey">{t('states.emptyDay')}</p>
           ) : (
-            <div className="mt-1">
+            <div>
               {entries.map((entry) =>
                 entry.type === 'session' ? (
                   <AgendaRow
@@ -125,7 +134,12 @@ export const DayAgenda: React.FC<Props> = ({
             </div>
           )}
         </section>
-        <DueSoonList deadlines={soon} todayKey={todayKey} locale={locale} />
+        <DueSoonList
+          title={isToday ? t('deadlines.dueSoon') : t('deadlines.dueWeek')}
+          deadlines={soon}
+          todayKey={todayKey}
+          locale={locale}
+        />
         {agenda.following && followingLabel && (
           <section>
             <PanelEyebrow>{followingLabel}</PanelEyebrow>

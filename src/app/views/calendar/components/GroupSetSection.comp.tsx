@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import type { CalendarCourse, CalendarGroupSet, RoomInfo } from '@/app/api/dataPoints/calendar/types';
+import type { CalendarCourse, CalendarGroup, CalendarGroupSet, RoomInfo } from '@/app/api/dataPoints/calendar/types';
 import { PanelEyebrow } from '@/app/components/ui/PanelEyebrow.comp';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import {
@@ -10,11 +10,13 @@ import {
   type SharedRelation,
   type Session,
 } from '@/app/schedule';
-import type { CalendarActions } from '../types';
-import { describeRoomShort, sortGroups, weeklyPattern } from '../util';
+import type { CalendarActions, GroupRowModel } from '../types';
+import { alternativeGroups, describeRoomShort, groupKind, sortGroups, weeklyPattern } from '../util';
 import { GroupCard } from './GroupCard.comp';
+import { GroupChoiceList } from './GroupChoiceList.comp';
+import { GroupVisibilityList } from './GroupVisibilityList.comp';
 
-const EMPTY_STATS: GroupStats = { total: 0, clashing: 0, perSession: [], clashCourseNames: [] };
+const EMPTY_STATS: GroupStats = { total: 0, clashing: 0, perSession: [], clashWith: [] };
 
 interface Props {
   course: CalendarCourse;
@@ -29,7 +31,6 @@ interface Props {
   locale: string;
   actions: CalendarActions;
   onPreview: (groupId: string | null) => void;
-  onDone: () => void;
 }
 
 export const GroupSetSection: React.FC<Props> = ({
@@ -45,7 +46,6 @@ export const GroupSetSection: React.FC<Props> = ({
   locale,
   actions,
   onPreview,
-  onDone,
 }) => {
   const { t } = useTranslationWithPrefix('views.calendar');
   const roomLabels = { noRoom: t('event.noRoom'), unavailable: t('event.roomUnavailable') };
@@ -60,10 +60,35 @@ export const GroupSetSection: React.FC<Props> = ({
     stats,
     sessionsByGroup,
   );
-  const showUsual = set.groups.filter((group) => group.isInCalendar).length >= 2;
-  const withEntry = set.groups.filter((group) => group.hasEntry);
+  const isActive = set.groups.some((group) => group.isInCalendar);
   const hasEntry = (id: string): boolean =>
     course.groupSets.some((item) => item.groups.some((group) => group.id === id && group.hasEntry));
+  const rowOf = (group: CalendarGroup): GroupRowModel => {
+    const sessions = sessionsByGroup.get(group.id) ?? [];
+    const groupStats = stats.get(group.id) ?? EMPTY_STATS;
+    return {
+      group,
+      name: groupNames.get(group.id) ?? group.id,
+      details: [
+        weeklyPattern(sessions, locale),
+        t('groups.sessions', { count: groupStats.total }),
+        sessions[0] ? describeRoomShort(sessions[0].locationIds, rooms, roomLabels) : null,
+      ]
+        .filter((part): part is string => Boolean(part))
+        .join(' · '),
+      stats: groupStats,
+      shownThrough: group.isInCalendar ? [] : stillShownThrough(group.id, groupEvents),
+    };
+  };
+  const rows = groups.map(rowOf);
+  const alternativeIds = new Set(alternativeGroups(set).map((group) => group.id));
+  const choiceRows = isActive
+    ? rows.filter(({ group }) => alternativeIds.has(group.id) && (group.isInCalendar || group.hasEntry))
+    : [];
+  const showChoice = choiceRows.length >= 2;
+  const infoRows = rows.filter(
+    ({ group }) => group.isInCalendar && !(showChoice && choiceRows.some((row) => row.group.id === group.id)),
+  );
 
   return (
     <section className="border-t border-border py-3 first-of-type:border-t-0 first-of-type:pt-0">
@@ -75,54 +100,58 @@ export const GroupSetSection: React.FC<Props> = ({
             : t('groups.count', { count: groups.length })}
         </span>
       </div>
-      {showUsual && <p className="mb-2 text-[11.5px] text-lightGrey">{t('groups.usualHint')}</p>}
-      <ul className="flex flex-col gap-2">
-        {groups.map((group) => {
-          const sessions = sessionsByGroup.get(group.id) ?? [];
-          const groupStats = stats.get(group.id) ?? EMPTY_STATS;
-          const details = [
-            weeklyPattern(sessions, locale),
-            t('groups.sessions', { count: groupStats.total }),
-            sessions[0] ? describeRoomShort(sessions[0].locationIds, rooms, roomLabels) : null,
-          ]
-            .filter((part): part is string => Boolean(part))
-            .join(' · ');
-          const shownThrough = group.isInCalendar ? [] : stillShownThrough(group.id, groupEvents);
-          return (
+      {!isActive && <p className="text-[12px] text-lightGrey">{t('groups.notInCalendar')}</p>}
+      {showChoice && (
+        <GroupChoiceList
+          setId={set.id}
+          question={t(`groups.question.${groupKind(choiceRows[0].group)}`)}
+          rows={choiceRows}
+          usual={usual}
+          locale={locale}
+          onChoose={(group) => {
+            if (!group.isInCalendar && group.hasEntry) {
+              actions.setGroups(course, [{ groupId: group.id, visible: true }]);
+            }
+            actions.makeUsual(course.realisationId, set.id, group.id);
+          }}
+          onVaries={() => actions.makeUsual(course.realisationId, set.id, null)}
+          onPreview={onPreview}
+        />
+      )}
+      {infoRows.length > 0 && (
+        <ul className={showChoice ? 'mt-3 border-t border-white/[0.06] pt-2.5' : ''}>
+          {infoRows.map(({ group, name, details, stats: groupStats }) => (
             <GroupCard
               key={group.id}
               group={group}
+              name={name}
               stats={groupStats}
               relations={relations.get(group.id) ?? []}
               groupNames={groupNames}
-              shownThrough={shownThrough}
-              canUse={groups.length > 1}
-              showUsual={showUsual}
-              isUsual={usual === group.id}
               details={details}
               locale={locale}
-              onToggle={(visible) => actions.setGroups(course, [{ groupId: group.id, visible }])}
-              onUse={() => {
-                actions.setGroups(
-                  course,
-                  withEntry
-                    .filter((other) => other.isInCalendar !== (other.id === group.id))
-                    .map((other) => ({ groupId: other.id, visible: other.id === group.id })),
-                );
-                onDone();
-              }}
-              onHideToo={() =>
-                actions.setGroups(
-                  course,
-                  shownThrough.filter(hasEntry).map((id) => ({ groupId: id, visible: false })),
-                )
-              }
-              onUsual={() => actions.makeUsual(course.realisationId, set.id, usual === group.id ? null : group.id)}
               onPreview={onPreview}
             />
-          );
+          ))}
+        </ul>
+      )}
+      <GroupVisibilityList
+        summary={t('groups.visibility', {
+          on: groups.filter((group) => group.isInCalendar).length,
+          total: groups.length,
         })}
-      </ul>
+        defaultOpen={!isActive}
+        rows={rows}
+        groupNames={groupNames}
+        onToggle={(group, visible) => actions.setGroups(course, [{ groupId: group.id, visible }])}
+        onHideToo={(row) =>
+          actions.setGroups(
+            course,
+            row.shownThrough.filter(hasEntry).map((id) => ({ groupId: id, visible: false })),
+          )
+        }
+        onPreview={onPreview}
+      />
     </section>
   );
 };

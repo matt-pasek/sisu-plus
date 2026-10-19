@@ -19,6 +19,7 @@ import {
   formatSessionDate,
   joinNames,
   placePopover,
+  shortGroupName,
 } from '../util';
 import { ClashBox } from './ClashBox.comp';
 import { CalendarIcon, ClockIcon, CloseIcon, PinIcon } from './icons';
@@ -69,6 +70,9 @@ export const EventPopover: React.FC<Props> = ({
   const next = position >= 0 ? series[position + 1] : undefined;
   const nextMoves = next != null && next.locationIds.join() !== session.locationIds.join();
   const kindLabel = t(`kinds.${session.kind}`);
+  const teachingLine = [shortGroupName(session.groupName, courseUnit?.code ?? null), course?.realisationName]
+    .filter(Boolean)
+    .join(' · ');
   const isLinked = session.source === 'linked';
   const otherNames = joinNames(
     summary.otherSessions.map((other) => `${other.courseName} ${t(`kinds.${other.kind}`).toLowerCase()}`),
@@ -162,7 +166,7 @@ export const EventPopover: React.FC<Props> = ({
         </dt>
         <dd className="min-w-0">
           <span className="flex items-center gap-2 font-medium text-offwhite">
-            <span className="truncate">{course?.realisationName ?? kindLabel}</span>
+            <span className="truncate">{kindLabel}</span>
             {session.cancelled && <StatusChip tone="neutral">{t('sessions.chips.cancelled')}</StatusChip>}
             {model.status === 'alternative' && <StatusChip tone="neutral">{t('event.alternativeChip')}</StatusChip>}
             {model.badge && <SessionChipBadge chip={{ type: model.badge }} />}
@@ -175,9 +179,7 @@ export const EventPopover: React.FC<Props> = ({
                     time: formatClock(new Date(linkedState.fetchedAt)),
                   })
                 : t('event.fromSourcePlain', { source: linkedState.label })
-              : session.groupName
-                ? `${kindLabel} · ${session.groupName}`
-                : kindLabel}
+              : teachingLine}
           </span>
         </dd>
         <dt className="pt-px text-darkishGrey">

@@ -4,9 +4,26 @@ import { describe, expect, test } from 'bun:test';
 
 import { buildNote } from './__fixtures__/buildNote';
 import { buildSession } from './__fixtures__/buildSession';
-import { layoutDay, visibleHourRange } from './layout';
+import { clusterBlocks, layoutDay, visibleHourRange } from './layout';
 
 const DAY = '2026-10-27';
+
+describe('clusterBlocks', () => {
+  test('groups blocks that overlap, directly or through a chain', () => {
+    const clusters = clusterBlocks([
+      buildSession('c', DAY, 12, 14),
+      buildSession('a', DAY, 10, 12),
+      buildSession('b', DAY, 11, 13),
+      buildSession('d', DAY, 15, 16),
+    ]);
+    expect(clusters.map((cluster) => cluster.map((block) => block.id))).toEqual([['a', 'b', 'c'], ['d']]);
+  });
+
+  test('keeps back-to-back blocks apart', () => {
+    const clusters = clusterBlocks([buildSession('a', DAY, 8, 10), buildSession('b', DAY, 10, 12)]);
+    expect(clusters).toHaveLength(2);
+  });
+});
 
 describe('layoutDay', () => {
   test('puts overlapping sessions side by side', () => {

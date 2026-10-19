@@ -5,12 +5,13 @@ import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { deadlineColor, dueRelative, formatClock, formatSessionDate } from '../util';
 
 interface Props {
+  title: string;
   deadlines: CalendarDeadline[];
   todayKey: string;
   locale: string;
 }
 
-export const DueSoonList: React.FC<Props> = ({ deadlines, todayKey, locale }) => {
+export const DueSoonList: React.FC<Props> = ({ title, deadlines, todayKey, locale }) => {
   const { t } = useTranslationWithPrefix('views.calendar');
   if (deadlines.length === 0) return null;
   const relativeText = (deadline: CalendarDeadline): string => {
@@ -21,7 +22,7 @@ export const DueSoonList: React.FC<Props> = ({ deadlines, todayKey, locale }) =>
   };
   return (
     <section>
-      <PanelEyebrow>{t('deadlines.dueSoon')}</PanelEyebrow>
+      <PanelEyebrow>{title}</PanelEyebrow>
       <div className="mt-1">
         {deadlines.map((deadline) => (
           <div

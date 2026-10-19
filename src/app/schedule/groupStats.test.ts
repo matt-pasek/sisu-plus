@@ -28,7 +28,18 @@ describe('statsForCandidate', () => {
       { sessionId: 't1-mon', clashes: false },
       { sessionId: 't1-thu', clashes: true },
     ]);
-    expect(stats.clashCourseNames).toEqual(['Course lab-thu']);
+    expect(stats.clashWith).toEqual([{ courseName: 'Course lab-thu', kind: 'lecture' }]);
+  });
+
+  test("names the kind, so a tutorial clashing with its own course's exam is clear", () => {
+    const exam = buildSession('exam', '2026-10-05', 15, 18, {
+      courseKey: 'cur-hdd-exam',
+      courseName: 'Course t1-mon',
+      kind: 'exam',
+    });
+    expect(statsForCandidate([t1Mon], [exam], SIBLINGS).clashWith).toEqual([
+      { courseName: 'Course t1-mon', kind: 'exam' },
+    ]);
   });
 
   test('a shared session still counts when a group outside the set owns it', () => {

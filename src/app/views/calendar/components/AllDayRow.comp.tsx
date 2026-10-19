@@ -8,6 +8,7 @@ import { AllDayChip } from './AllDayChip.comp';
 interface Props {
   dayKeys: string[];
   weekendCollapsed: boolean;
+  weekendDue: { count: number; firstDateKey: string | null } | null;
   itemsByDay: Record<string, AllDayItem[]>;
   now: Date;
   locale: string;
@@ -18,6 +19,7 @@ interface Props {
 export const AllDayRow: React.FC<Props> = ({
   dayKeys,
   weekendCollapsed,
+  weekendDue,
   itemsByDay,
   now,
   locale,
@@ -25,6 +27,10 @@ export const AllDayRow: React.FC<Props> = ({
   onSelectDeadline,
 }) => {
   const { t } = useTranslationWithPrefix('views.calendar');
+  const weekendFirst = weekendDue?.firstDateKey ?? null;
+  const weekendLabel = weekendFirst
+    ? t('weekendDueAria', { count: weekendDue?.count ?? 0, date: formatSessionDate(weekendFirst, locale) })
+    : undefined;
   return (
     <>
       <div className="flex justify-end border-t border-border pt-1.5 pr-2 font-mono text-[9px] whitespace-nowrap text-darkishGrey uppercase">
@@ -56,7 +62,22 @@ export const AllDayRow: React.FC<Props> = ({
           </div>
         );
       })}
-      {weekendCollapsed && <div className="border-t border-l border-border" />}
+      {weekendCollapsed && (
+        <div className="flex justify-center border-t border-l border-border py-1">
+          {weekendDue && weekendDue.count > 0 && weekendFirst && (
+            <button
+              type="button"
+              onClick={() => onOpenDay(weekendFirst)}
+              aria-label={weekendLabel}
+              title={weekendLabel}
+              className="flex h-fit cursor-pointer items-center gap-1 rounded-md px-1 py-0.5 font-mono text-[10.5px] text-offwhite transition-colors duration-150 hover:bg-offwhite/10 focus-visible:outline-2 focus-visible:outline-lighterGreen"
+            >
+              <span aria-hidden="true" className="size-1.5 rounded-full bg-offwhite/60" />
+              {weekendDue.count}
+            </button>
+          )}
+        </div>
+      )}
     </>
   );
 };

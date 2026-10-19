@@ -13,6 +13,7 @@ const DANGER_CLASS = `${ACTION_CLASS} text-warn`;
 interface Props {
   state: NotePopoverState;
   event: CalendarEvent | undefined;
+  fallbackFocus: React.RefObject<HTMLElement>;
   locale: string;
   onEdit?: () => void;
   onDeleteDay: () => void;
@@ -23,6 +24,7 @@ interface Props {
 export const NotePopover: React.FC<Props> = ({
   state,
   event,
+  fallbackFocus,
   locale,
   onEdit,
   onDeleteDay,
@@ -38,6 +40,7 @@ export const NotePopover: React.FC<Props> = ({
     <CalendarPopover
       anchor={state.anchor}
       returnFocus={state.element}
+      fallbackFocus={fallbackFocus}
       ariaLabel={note.name}
       width={320}
       closeOnOutside

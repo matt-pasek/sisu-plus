@@ -7,4 +7,5 @@ export interface PruneReadiness {
   extraCoursesSettled: boolean;
   linksLoaded: boolean;
   linkedStates: LinkedTimetableState[];
+  visibilityIdle: boolean;
 }

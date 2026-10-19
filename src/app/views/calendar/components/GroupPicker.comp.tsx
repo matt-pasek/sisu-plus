@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import type { CalendarCourse, RoomInfo } from '@/app/api/dataPoints/calendar/types';
+import type { CalendarCourse, CalendarGroupSet, RoomInfo } from '@/app/api/dataPoints/calendar/types';
 import { Button } from '@/app/components/ui/Button.comp';
 import { Panel } from '@/app/components/ui/Panel.comp';
 import { PanelEyebrow } from '@/app/components/ui/PanelEyebrow.comp';
@@ -7,12 +7,13 @@ import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { sharedRelations, type AttendancePlan, type Session } from '@/app/schedule';
 import { getModuleColorValueByIndex } from '@/app/theme/moduleColors';
 import type { CalendarActions } from '../types';
-import { sessionsByGroup } from '../util';
+import { sessionsByGroup, shortGroupName } from '../util';
 import { GroupSetSection } from './GroupSetSection.comp';
 import { CloseIcon } from './icons';
 
 interface Props {
   course: CalendarCourse;
+  courseCode: string | null;
   focusSetId: string | null;
   candidates: Session[];
   attended: Session[];
@@ -29,6 +30,7 @@ interface Props {
 
 export const GroupPicker: React.FC<Props> = ({
   course,
+  courseCode,
   focusSetId,
   candidates,
   attended,
@@ -53,12 +55,19 @@ export const GroupPicker: React.FC<Props> = ({
   );
   const relations = useMemo(() => sharedRelations(groupEvents), [groupEvents]);
   const groupNames = useMemo(
-    () => new Map(course.groupSets.flatMap((set) => set.groups.map((group) => [group.id, group.name ?? group.id]))),
-    [course.groupSets],
+    () =>
+      new Map(
+        course.groupSets.flatMap((set) =>
+          set.groups.map((group) => [group.id, shortGroupName(group.name, courseCode) ?? group.id]),
+        ),
+      ),
+    [course.groupSets, courseCode],
   );
   const sets = useMemo(() => {
     const withEvents = course.groupSets.filter((set) => set.groups.some((group) => group.eventIds.length > 0));
-    return [...withEvents.filter((set) => set.id === focusSetId), ...withEvents.filter((set) => set.id !== focusSetId)];
+    const rank = (set: CalendarGroupSet): number =>
+      set.id === focusSetId ? 0 : set.groups.some((group) => group.isInCalendar) ? 1 : 2;
+    return [...withEvents].sort((a, b) => rank(a) - rank(b));
   }, [course.groupSets, focusSetId]);
 
   return (
@@ -114,7 +123,6 @@ export const GroupPicker: React.FC<Props> = ({
               locale={locale}
               actions={actions}
               onPreview={onPreview}
-              onDone={onClose}
             />
           ))
         )}

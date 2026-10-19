@@ -19,6 +19,7 @@ interface Props {
   sessionsById: Map<string, Session>;
   notes: NoteOccurrence[];
   deadlines: CalendarDeadline[];
+  showCancelled: boolean;
   actions: CalendarActions;
   anchorKey: string;
   todayKey: string;
@@ -41,6 +42,7 @@ export const CalendarInspector: React.FC<Props> = ({
   sessionsById,
   notes,
   deadlines,
+  showCancelled,
   actions,
   anchorKey,
   todayKey,
@@ -66,6 +68,7 @@ export const CalendarInspector: React.FC<Props> = ({
     {pickerCourse && inspector?.type === 'groups' && (
       <GroupPicker
         course={pickerCourse}
+        courseCode={pickerCourse.courseUnitId ? (data.courseUnits[pickerCourse.courseUnitId]?.code ?? null) : null}
         focusSetId={inspector.setId}
         candidates={data.candidates}
         attended={data.attended}
@@ -111,6 +114,7 @@ export const CalendarInspector: React.FC<Props> = ({
         range={data.range}
         notes={notes}
         deadlines={deadlines}
+        showCancelled={showCancelled}
         locale={locale}
       />
     )}

@@ -5,7 +5,7 @@ import type { Placement, Session } from '@/app/schedule';
 import { getModuleColorValueByIndex } from '@/app/theme/moduleColors';
 import type { SessionBadge } from '../types';
 import { formatClock } from '../util';
-import { PinIcon, WarningIcon } from './icons';
+import { PinIcon } from './icons';
 
 const META_HEIGHT = 64;
 const BADGE_TONE: Record<SessionBadge, StatusTone> = { swapped: 'info', skipping: 'neutral', swapUnavailable: 'warn' };
@@ -89,12 +89,7 @@ export const SessionBlock: React.FC<Props> = ({
           <StatusChip tone={BADGE_TONE[badge]}>{badgeLabel}</StatusChip>
         </span>
       )}
-      {!badge && sourceLabel && (
-        <span className="absolute top-1.5 right-1.5">
-          <StatusChip tone="neutral">{sourceLabel}</StatusChip>
-        </span>
-      )}
-      <span className={`flex min-w-0 gap-2.5 pl-3.5 ${badge || sourceLabel ? 'pr-14' : ''}`}>
+      <span className={`flex min-w-0 pl-3.5 ${badge ? 'pr-14' : ''}`}>
         <span className="min-w-0 flex-1">
           <span
             className={`line-clamp-2 block text-[13px] leading-[1.3] font-semibold text-offwhite ${session.cancelled ? 'line-through' : ''}`}
@@ -113,12 +108,11 @@ export const SessionBlock: React.FC<Props> = ({
             </span>
           </span>
         </span>
-        {isClashing && <WarningIcon className="mt-0.5 size-3 shrink-0 text-warn" />}
       </span>
       {showMeta && (
         <span className="mt-2 flex min-w-0 items-center gap-1.5 pl-3.5 text-[11.5px] text-[#a3a3c4]">
           <PinIcon className="size-3 shrink-0 text-lightGrey" />
-          <span className="truncate">{[kindLabel, detail, roomName].filter(Boolean).join(' · ')}</span>
+          <span className="truncate">{[kindLabel, detail, roomName, sourceLabel].filter(Boolean).join(' · ')}</span>
         </span>
       )}
     </button>

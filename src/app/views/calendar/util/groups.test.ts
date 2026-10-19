@@ -73,7 +73,7 @@ describe('sortGroups', () => {
     hasEntry: true,
     cancelled: false,
   });
-  const stats = (clashing: number): GroupStats => ({ total: 3, clashing, perSession: [], clashCourseNames: [] });
+  const stats = (clashing: number): GroupStats => ({ total: 3, clashing, perSession: [], clashWith: [] });
 
   test('orders by fewest clashes, then earliest first session', () => {
     const sessions = new Map([

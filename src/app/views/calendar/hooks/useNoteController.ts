@@ -18,6 +18,7 @@ export const useNoteController = (
   events: CalendarEvent[],
   range: DateRange,
   onFailed: (change: NoteChange) => void,
+  onCreated: () => void,
 ): NoteController => {
   const { mutate } = useNoteMutations(onFailed);
   const [popover, setPopover] = useState<NotePopoverState | null>(null);
@@ -92,8 +93,9 @@ export const useNoteController = (
       return;
     }
     mutate(noteChangeFor(editor.draft, editor.base, `${PENDING_NOTE_PREFIX}${Date.now()}`));
+    if (editor.noteId == null) onCreated();
     setEditor(null);
-  }, [editor, mutate]);
+  }, [editor, mutate, onCreated]);
   const closeOverlay = useCallback(() => {
     setPopover(null);
     setEditor(null);

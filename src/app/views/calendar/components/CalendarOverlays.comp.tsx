@@ -7,12 +7,13 @@ import { NotePopover } from './NotePopover.comp';
 interface Props {
   notes: NoteController;
   deadline: DeadlinePopoverState | null;
+  fallbackFocus: React.RefObject<HTMLElement>;
   now: Date;
   locale: string;
   onCloseDeadline: () => void;
 }
 
-export const CalendarOverlays: React.FC<Props> = ({ notes, deadline, now, locale, onCloseDeadline }) => {
+export const CalendarOverlays: React.FC<Props> = ({ notes, deadline, fallbackFocus, now, locale, onCloseDeadline }) => {
   const { popover, editor } = notes;
   return (
     <>
@@ -21,6 +22,7 @@ export const CalendarOverlays: React.FC<Props> = ({ notes, deadline, now, locale
           key={popover.note.id}
           state={popover}
           event={notes.eventsById.get(popover.note.noteId)}
+          fallbackFocus={fallbackFocus}
           locale={locale}
           onEdit={() => notes.edit(popover.note)}
           onDeleteDay={() => notes.deleteDay(popover.note)}

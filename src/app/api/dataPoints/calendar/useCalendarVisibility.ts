@@ -5,6 +5,7 @@ import { applyVisibilityToEnrolments, applyVisibilityToRows, withCalendarFlags }
 
 const ROWS_KEY = ['calendar-rows'];
 const ENROLMENTS_KEY = ['enrolments'];
+export const VISIBILITY_MUTATION_SCOPE = 'calendar-visibility';
 
 interface Snapshot {
   rows: [QueryKey, CalendarRowsResult | undefined][];
@@ -24,7 +25,7 @@ export const useCalendarVisibility = (onError: () => void) => {
   const queryClient = useQueryClient();
   return useMutation<Enrolment, Error, VisibilityChange, Snapshot>({
     mutationFn: writeVisibility,
-    scope: { id: 'calendar-visibility' },
+    scope: { id: VISIBILITY_MUTATION_SCOPE },
     onMutate: async (change) => {
       await Promise.all([
         queryClient.cancelQueries({ queryKey: ROWS_KEY }),

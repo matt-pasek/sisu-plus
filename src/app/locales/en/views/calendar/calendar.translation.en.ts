@@ -9,7 +9,14 @@ export type CalendarTranslation = {
   weekShort: string;
   weekendShort: string;
   weekendFree: string;
+  weekendDueAria_one: string;
+  weekendDueAria_other: string;
   timeZoneNote: string;
+  clashGroup: {
+    clash: string;
+    overlap: string;
+    aria: string;
+  };
   actions: {
     today: string;
     previous: string;
@@ -48,8 +55,6 @@ export type CalendarTranslation = {
     addTimetable: string;
   };
   prompt: {
-    question: string;
-    pick: string;
     notNow: string;
   };
   kinds: {
@@ -159,10 +164,17 @@ export type CalendarTranslation = {
     choose: string;
     count_one: string;
     count_other: string;
-    usualHint: string;
-    usual: string;
+    question: { lecture: string; exercise: string; lab: string; seminar: string; exam: string; other: string };
+    varies: string;
+    variesDetail: string;
+    swapHint: string;
+    visibility: string;
+    visibilityHint: string;
+    notInCalendar: string;
+    nowShown: string;
+    nowHidden: string;
+    undo: string;
     showInCalendar: string;
-    useGroup: string;
     sessions_one: string;
     sessions_other: string;
     fitsAll: string;
@@ -195,8 +207,13 @@ export type CalendarTranslation = {
     today: string;
     next: string;
     now: string;
+    until: string;
     inMinutes: string;
     inHours: string;
+    inWholeHours: string;
+    tomorrow: string;
+    inDays_one: string;
+    inDays_other: string;
     restOfToday: string;
     onDay: string;
     tomorrowFirst: string;
@@ -214,6 +231,8 @@ export type CalendarTranslation = {
     periodStarts: string;
     noTeaching: string;
     openWeek: string;
+    moreDeadlines_one: string;
+    moreDeadlines_other: string;
   };
   holidays: {
     newYear: string;
@@ -264,7 +283,14 @@ export const calendarTranslation: CalendarTranslation = {
   weekShort: 'WK {{week}}',
   weekendShort: 'S–S',
   weekendFree: 'Weekend free',
+  weekendDueAria_one: '{{count}} deadline this weekend. Open {{date}}',
+  weekendDueAria_other: '{{count}} deadlines this weekend. Open {{date}}',
   timeZoneNote: 'Times shown in Finnish time',
+  clashGroup: {
+    clash: 'Clash',
+    overlap: '{{count}} classes',
+    aria: '{{count}} classes at the same time, {{start}} to {{end}}',
+  },
   actions: {
     today: 'Today',
     previous: 'Previous week',
@@ -277,7 +303,7 @@ export const calendarTranslation: CalendarTranslation = {
     goToThis: 'Go to this one',
     goInstead: 'Go to this one instead',
     swapWeek: 'Swap the whole week',
-    makeUsual: 'Make {{group}} my usual',
+    makeUsual: 'Go to {{group}} every week',
     undoSwap: 'Undo swap',
     switchGroup: 'Switch group',
     hideGroup: 'Hide this group',
@@ -303,8 +329,6 @@ export const calendarTranslation: CalendarTranslation = {
     addTimetable: 'Add timetable link',
   },
   prompt: {
-    question: 'Go to one of these each week?',
-    pick: 'Pick usual group',
     notNow: 'Not now',
   },
   kinds: {
@@ -414,10 +438,24 @@ export const calendarTranslation: CalendarTranslation = {
     choose: 'choose {{max}} of {{count}}',
     count_one: '{{count}} group',
     count_other: '{{count}} groups',
-    usualHint: 'Pick the group you usually go to. The others become alternatives you can swap to.',
-    usual: 'Usual',
+    question: {
+      lecture: 'Which lecture group do you go to?',
+      exercise: 'Which tutorial group do you go to?',
+      lab: 'Which lab group do you go to?',
+      seminar: 'Which seminar group do you go to?',
+      exam: 'Which exam do you take?',
+      other: 'Which group do you go to?',
+    },
+    varies: 'It varies week to week',
+    variesDetail: 'Every group shown in your calendar stays in your timetable',
+    swapHint: 'The other groups stay in the calendar as dashed swap options.',
+    visibility: 'Shown in Sisu calendar · {{on}} of {{total}}',
+    visibilityHint: 'These switches change your Sisu calendar too.',
+    notInCalendar: 'Not in your calendar',
+    nowShown: 'Now shown in your Sisu calendar.',
+    nowHidden: 'Now hidden from your Sisu calendar.',
+    undo: 'Undo',
     showInCalendar: 'Show in calendar',
-    useGroup: 'Use this group',
     sessions_one: '{{count}} session',
     sessions_other: '{{count}} sessions',
     fitsAll: 'Fits all {{count}}',
@@ -449,9 +487,14 @@ export const calendarTranslation: CalendarTranslation = {
     title: 'Agenda',
     today: 'Today',
     next: 'Next',
-    now: 'Now · until {{time}}',
+    now: 'Now',
+    until: 'until {{time}}',
     inMinutes: 'in {{minutes}} min',
     inHours: 'in {{hours}} h {{minutes}} min',
+    inWholeHours: 'in {{hours}} h',
+    tomorrow: 'Tomorrow',
+    inDays_one: 'in {{count}} day',
+    inDays_other: 'in {{count}} days',
     restOfToday: 'Rest of today',
     onDay: 'On {{date}}',
     tomorrowFirst: "Tomorrow's first class",
@@ -469,6 +512,8 @@ export const calendarTranslation: CalendarTranslation = {
     periodStarts: '{{period}} starts',
     noTeaching: 'No teaching',
     openWeek: 'Open week {{week}}',
+    moreDeadlines_one: '+{{count}} deadline',
+    moreDeadlines_other: '+{{count}} deadlines',
   },
   holidays: {
     newYear: "New Year's Day",

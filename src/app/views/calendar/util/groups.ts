@@ -1,4 +1,5 @@
 import type { CalendarCourse, CalendarGroup, CalendarGroupSet } from '@/app/api/dataPoints/calendar/types';
+import { alternativeGroups, choosableGroups } from './groupChoice';
 import {
   helsinkiMinutesOfDay,
   statsForCandidate,
@@ -99,11 +100,8 @@ export const previewModel = (
 
 export const promptId = (setId: string): string => `prompt:${setId}`;
 
-const choosable = (set: CalendarGroupSet): CalendarGroup[] =>
-  set.groups.filter((group) => !group.cancelled && group.eventIds.length > 0);
-
 export const hasGroupChoice = (course: CalendarCourse): boolean =>
-  course.groupSets.some((set) => choosable(set).length > 1);
+  course.groupSets.some((set) => choosableGroups(set).length > 1);
 
 export const requiredSetWithoutGroup = (course: CalendarCourse): string | null =>
   course.groupSets.find((set) => set.min >= 1 && !set.groups.some((group) => group.isInCalendar))?.id ?? null;
@@ -112,7 +110,7 @@ export const promptSets = (course: CalendarCourse, plan: AttendancePlan | undefi
   course.isInCalendar
     ? course.groupSets.filter(
         (set) =>
-          choosable(set).filter((group) => group.isInCalendar).length >= 2 &&
+          alternativeGroups(set).filter((group) => group.isInCalendar).length >= 2 &&
           !plan?.usual[set.id] &&
           !plan?.dismissed.includes(promptId(set.id)),
       )

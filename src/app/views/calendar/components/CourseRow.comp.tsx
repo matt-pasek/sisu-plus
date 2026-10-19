@@ -5,7 +5,7 @@ import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import type { AttendancePlan } from '@/app/schedule';
 import { getModuleColorValueByIndex } from '@/app/theme/moduleColors';
 import type { TimetableControls } from '../types';
-import { hasGroupChoice, promptSets, requiredSetWithoutGroup } from '../util';
+import { alternativeGroups, groupKind, hasGroupChoice, promptSets, requiredSetWithoutGroup } from '../util';
 import { AlternativesPrompt } from './AlternativesPrompt.comp';
 import { LinkedCourseStatus } from './LinkedCourseStatus.comp';
 
@@ -85,7 +85,7 @@ export const CourseRow: React.FC<Props> = ({
       {promptSets(course, plan).map((set) => (
         <AlternativesPrompt
           key={set.id}
-          setName={set.name}
+          question={t(`groups.question.${groupKind(alternativeGroups(set)[0])}`)}
           onPick={() => onOpenGroups(key, set.id)}
           onDismiss={() => onDismissPrompt(key, set.id)}
         />

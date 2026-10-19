@@ -36,8 +36,10 @@ export const pruneBase = (
 export const visibleGroupIdsOf = (course: CalendarCourse): Set<string> =>
   new Set(course.groupSets.flatMap((set) => set.groups.filter((group) => group.isInCalendar).map((group) => group.id)));
 
-// Pruning against a partial picture deletes rules for sessions that simply have not arrived yet.
+// Pruning against a partial picture deletes rules for sessions that simply have not arrived yet, and a usual
+// group picked while its visibility write is in flight still looks switched off.
 export const pruneReady = (readiness: PruneReadiness): boolean =>
+  readiness.visibilityIdle &&
   readiness.plansLoaded &&
   readiness.rowsSettled &&
   readiness.candidatesSettled &&

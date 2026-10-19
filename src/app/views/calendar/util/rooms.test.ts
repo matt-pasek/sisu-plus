@@ -3,7 +3,14 @@
 import { describe, expect, test } from 'bun:test';
 
 import { buildSession } from '@/app/schedule/__fixtures__/buildSession';
-import { describeRoom, describeRoomShort, describeRoomWithBuilding, sessionRoom, shortRoomName } from './rooms';
+import {
+  describeRoom,
+  describeRoomShort,
+  describeRoomWithBuilding,
+  readableRoomName,
+  sessionRoom,
+  shortRoomName,
+} from './rooms';
 
 describe('shortRoomName', () => {
   test('keeps the room code after a building prefix', () => {
@@ -49,9 +56,21 @@ describe('describeRoom', () => {
     expect(describeRoomShort(['loc-unknown'], rooms, labels)).toBe('Room unavailable');
   });
 
-  test('adds the building when known', () => {
-    expect(describeRoomWithBuilding(['loc-aud1b'], rooms, labels)).toBe('M19_AUD1B Auditorio 1 · LAB');
+  test('adds the building when known and drops the building code from the room name', () => {
+    expect(describeRoomWithBuilding(['loc-aud1b'], rooms, labels)).toBe('AUD1B Auditorio 1 · LAB');
     expect(describeRoomWithBuilding(['loc-2310'], rooms, labels)).toBe('2310');
+  });
+});
+
+describe('readableRoomName', () => {
+  test('keeps the room code and its name, without the building prefix', () => {
+    expect(readableRoomName('M19_AUD2B Auditorio 2')).toBe('AUD2B Auditorio 2');
+    expect(readableRoomName('NIE73_B103+B104 Teorialuokka')).toBe('B103+B104 Teorialuokka');
+  });
+
+  test('leaves names without a building prefix alone', () => {
+    expect(readableRoomName('Virtual classroom')).toBe('Virtual classroom');
+    expect(readableRoomName('2310')).toBe('2310');
   });
 });
 
@@ -68,6 +87,6 @@ describe('sessionRoom', () => {
     const sisu = buildSession('s', '2026-10-27', 12, 14, { locationIds: ['r1'] });
     const rooms = { r1: { id: 'r1', name: 'M19_AUD1B Auditorio 1', building: 'LAB' } };
     expect(sessionRoom(sisu, rooms, labels)).toBe('AUD1B');
-    expect(sessionRoom(sisu, rooms, labels, describeRoomWithBuilding)).toBe('M19_AUD1B Auditorio 1 · LAB');
+    expect(sessionRoom(sisu, rooms, labels, describeRoomWithBuilding)).toBe('AUD1B Auditorio 1 · LAB');
   });
 });

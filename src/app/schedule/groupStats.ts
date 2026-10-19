@@ -29,6 +29,9 @@ export const statsForCandidate = (
     total: sessions.length,
     clashing: hits.filter((hit) => hit.clashesWith.length > 0).length,
     perSession: hits.map((hit) => ({ sessionId: hit.session.id, clashes: hit.clashesWith.length > 0 })),
-    clashCourseNames: [...new Set(hits.flatMap((hit) => hit.clashesWith.map((other) => other.courseName)))],
+    clashWith: uniqueBy(
+      hits.flatMap((hit) => hit.clashesWith.map((other) => ({ courseName: other.courseName, kind: other.kind }))),
+      (entry) => `${entry.courseName}|${entry.kind}`,
+    ),
   };
 };

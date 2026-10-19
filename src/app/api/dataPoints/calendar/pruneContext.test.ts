@@ -56,7 +56,12 @@ describe('pruneReady', () => {
     extraCoursesSettled: true,
     linksLoaded: true,
     linkedStates: [linked('ok'), linked('stale')],
+    visibilityIdle: true,
   };
+
+  test('waits while a group visibility change is still being written to Sisu', () => {
+    expect(pruneReady({ ...ready, visibilityIdle: false })).toBe(false);
+  });
 
   test('prunes once every source has loaded', () => {
     expect(pruneReady(ready)).toBe(true);

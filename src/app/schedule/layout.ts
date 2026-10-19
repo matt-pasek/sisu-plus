@@ -6,8 +6,8 @@ export const MAX_COLUMNS = 3;
 const byStartThenLongest = (a: TimedBlock, b: TimedBlock): number =>
   a.start.getTime() - b.start.getTime() || b.end.getTime() - a.end.getTime();
 
-const toClusters = (blocks: TimedBlock[]): TimedBlock[][] =>
-  [...blocks].sort(byStartThenLongest).reduce<{ clusters: TimedBlock[][]; clusterEnd: number }>(
+export const clusterBlocks = <T extends TimedBlock>(blocks: T[]): T[][] =>
+  [...blocks].sort(byStartThenLongest).reduce<{ clusters: T[][]; clusterEnd: number }>(
     (acc, block) => {
       const startsNew = acc.clusters.length === 0 || block.start.getTime() >= acc.clusterEnd;
       return startsNew
@@ -35,7 +35,7 @@ const assignColumns = (cluster: TimedBlock[]): { id: string; col: number }[] =>
   ).assigned;
 
 export const layoutDay = (blocks: TimedBlock[]): DayLayout =>
-  toClusters(blocks).reduce<DayLayout>(
+  clusterBlocks(blocks).reduce<DayLayout>(
     (layout, cluster) => {
       const assigned = assignColumns(cluster);
       const cols = Math.min(Math.max(...assigned.map((entry) => entry.col)) + 1, MAX_COLUMNS);

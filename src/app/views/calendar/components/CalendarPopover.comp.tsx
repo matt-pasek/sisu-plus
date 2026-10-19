@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState, type PropsWithChildren } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import type { AnchorRect } from '../types';
-import { placePopover } from '../util';
+import { placePopover, restoreFocus } from '../util';
 
 const DEFAULT_HEIGHT = 240;
 const POPOVER_EASE = [0.22, 1, 0.36, 1] as const;
@@ -9,6 +9,7 @@ const POPOVER_EASE = [0.22, 1, 0.36, 1] as const;
 interface Props extends PropsWithChildren {
   anchor: AnchorRect;
   returnFocus: HTMLElement | null;
+  fallbackFocus?: React.RefObject<HTMLElement>;
   ariaLabel: string;
   width: number;
   closeOnOutside: boolean;
@@ -18,6 +19,7 @@ interface Props extends PropsWithChildren {
 export const CalendarPopover: React.FC<Props> = ({
   anchor,
   returnFocus,
+  fallbackFocus,
   ariaLabel,
   width,
   closeOnOutside,
@@ -47,7 +49,8 @@ export const CalendarPopover: React.FC<Props> = ({
     focusTarget.current = returnFocus;
   }, [returnFocus]);
 
-  useEffect(() => () => focusTarget.current?.focus({ preventScroll: true }), []);
+  const fallbackTarget = useRef(fallbackFocus);
+  useEffect(() => () => restoreFocus(focusTarget.current, fallbackTarget.current?.current ?? null), []);
 
   // Clicks inside the shadow root reach document retargeted to the host, so containment is read from the path.
   useEffect(() => {

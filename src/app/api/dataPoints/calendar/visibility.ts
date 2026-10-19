@@ -1,6 +1,9 @@
 import type { Enrolment } from '@/app/api/generated/IlmoApi';
 import type { CalendarCourse, CalendarRowsResult, VisibilityChange } from './types';
 
+export const pendingGroupIds = (changes: (VisibilityChange | undefined)[]): Set<string> =>
+  new Set(changes.flatMap((change) => change?.groups.map((group) => group.groupId) ?? []));
+
 export const withCalendarFlags = (enrolment: Enrolment, change: VisibilityChange): Enrolment | null => {
   const entries = enrolment.studySubGroups ?? [];
   const missing = change.groups.some((flag) => !entries.some((entry) => entry.studySubGroupId === flag.groupId));

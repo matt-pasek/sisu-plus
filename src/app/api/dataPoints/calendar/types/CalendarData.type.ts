@@ -27,6 +27,7 @@ export interface CalendarData {
   groups: Map<string, GroupRef>;
   plans: Record<string, AttendancePlan>;
   remindersReady: boolean;
+  namesReady: boolean;
   updatePlan: (courseKey: string, update: (plan: AttendancePlan) => AttendancePlan) => void;
   linked: Record<string, LinkedTimetableState>;
   noTimesCourseKeys: Set<string>;

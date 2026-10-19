@@ -1,18 +1,14 @@
 import React from 'react';
 import { Button } from '@/app/components/ui/Button.comp';
-import { SegmentedControl } from '@/app/components/ui/SegmentedControl.comp';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import type { CalendarView } from '../types';
-import { CALENDAR_VIEWS } from '../util';
 import { ChevronLeftIcon, ChevronRightIcon, WarningIcon } from './icons';
 
 interface Props {
   view: CalendarView;
-  enabledViews: CalendarView[];
   title: string;
   eyebrow: string | null;
   clashCount: number;
-  onViewChange: (view: CalendarView) => void;
   onToday: () => void;
   onPrevious: () => void;
   onNext: () => void;
@@ -21,35 +17,32 @@ interface Props {
 
 export const CalendarToolbar: React.FC<Props> = ({
   view,
-  enabledViews,
   title,
   eyebrow,
   clashCount,
-  onViewChange,
   onToday,
   onPrevious,
   onNext,
   onShowClash,
 }) => {
   const { t } = useTranslationWithPrefix('views.calendar');
-  const options = CALENDAR_VIEWS.map((value) => ({
-    value,
-    label: t(`views.${value}`),
-    disabled: !enabledViews.includes(value),
-  }));
+  const previousLabel = t(`navigation.previous.${view}`);
+  const nextLabel = t(`navigation.next.${view}`);
   return (
     <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-border px-3.5 py-3">
-      <Button onClick={onToday}>{t('actions.today')}</Button>
+      <Button onClick={onToday} title={`${t('actions.today')} (T)`}>
+        {t('actions.today')}
+      </Button>
       <Button
-        ariaLabel={t(`navigation.previous.${view}`)}
-        title={t(`navigation.previous.${view}`)}
+        ariaLabel={previousLabel}
+        title={`${previousLabel} (←)`}
         className="min-w-10 px-2.5"
         onClick={onPrevious}
         icon={<ChevronLeftIcon className="size-4" />}
       />
       <Button
-        ariaLabel={t(`navigation.next.${view}`)}
-        title={t(`navigation.next.${view}`)}
+        ariaLabel={nextLabel}
+        title={`${nextLabel} (→)`}
         className="min-w-10 px-2.5"
         onClick={onNext}
         icon={<ChevronRightIcon className="size-4" />}
@@ -62,26 +55,17 @@ export const CalendarToolbar: React.FC<Props> = ({
           </span>
         )}
       </h2>
-      <div className="ml-auto flex flex-wrap items-center gap-2">
-        <SegmentedControl
-          options={options}
-          value={view}
-          onChange={onViewChange}
-          layoutId="calendar-view"
-          ariaLabel={t('views.label')}
-        />
-        {clashCount > 0 && (
-          <button
-            type="button"
-            onClick={onShowClash}
-            title={t('actions.showClash')}
-            className="inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-lg bg-warn/8 px-2.5 text-xs font-medium text-warn shadow-[inset_0_0_0_1px_rgba(240,168,77,0.22)] transition-[background-color,transform] duration-150 hover:bg-warn/12 active:scale-[0.96]"
-          >
-            <WarningIcon className="size-3" />
-            {t('toolbar.clashes', { count: clashCount })}
-          </button>
-        )}
-      </div>
+      {clashCount > 0 && (
+        <button
+          type="button"
+          onClick={onShowClash}
+          title={t('actions.showClash')}
+          className="ml-1 inline-flex min-h-8 cursor-pointer items-center gap-1.5 rounded-lg bg-warn/8 px-2.5 text-xs font-medium text-warn shadow-[inset_0_0_0_1px_rgba(240,168,77,0.22)] transition-[background-color,transform] duration-150 hover:bg-warn/12 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lighterGreen active:scale-[0.96]"
+        >
+          <WarningIcon className="size-3" />
+          {t('toolbar.clashes', { count: clashCount })}
+        </button>
+      )}
     </div>
   );
 };

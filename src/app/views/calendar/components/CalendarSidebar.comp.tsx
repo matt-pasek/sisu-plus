@@ -12,6 +12,7 @@ interface Props {
   busyDateKeys: Set<string>;
   locale: string;
   courses: CalendarCourse[];
+  coursesLoading: boolean;
   courseUnits: Record<string, CourseUnitInfo>;
   plans: Record<string, AttendancePlan>;
   timetables: TimetableControls;
@@ -28,6 +29,7 @@ export const CalendarSidebar: React.FC<Props> = ({
   busyDateKeys,
   locale,
   courses,
+  coursesLoading,
   courseUnits,
   plans,
   timetables,
@@ -37,7 +39,7 @@ export const CalendarSidebar: React.FC<Props> = ({
   onOpenGroups,
   onDismissPrompt,
 }) => (
-  <aside className="hidden min-h-0 flex-col gap-4 overflow-y-auto pb-1 lg:flex">
+  <aside className="hidden min-h-0 flex-col gap-4 overflow-y-auto pb-1 lg:mr-4 lg:flex">
     <MiniMonth
       anchorKey={anchorKey}
       todayKey={todayKey}
@@ -47,6 +49,7 @@ export const CalendarSidebar: React.FC<Props> = ({
     />
     <CourseList
       courses={courses}
+      isLoading={coursesLoading}
       courseUnits={courseUnits}
       plans={plans}
       timetables={timetables}

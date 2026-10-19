@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getCalendarData } from '@/app/api/dataPoints/calendar/getCalendarData';
 import type { NoteChange } from '@/app/api/dataPoints/calendar/types';
 import { useCalendarDeadlines } from '@/app/api/dataPoints/calendar/useCalendarDeadlines';
@@ -27,28 +27,27 @@ import { CalendarSidebar } from './components/CalendarSidebar.comp';
 import { CalendarState } from './components/CalendarState.comp';
 import { CalendarToolbar } from './components/CalendarToolbar.comp';
 import { EventPopover } from './components/EventPopover.comp';
+import { InspectorSlot } from './components/InspectorSlot.comp';
 import { ProvenanceFooter } from './components/ProvenanceFooter.comp';
 import { useCalendarActions } from './hooks/useCalendarActions';
 import { useClassReminderSync } from './hooks/useClassReminderSync';
 import { useCalendarKeyboard } from './hooks/useCalendarKeyboard';
 import { useCalendarLayers } from './hooks/useCalendarLayers';
 import { useCalendarSelection } from './hooks/useCalendarSelection';
-import { useCalendarNavigation } from './hooks/useCalendarNavigation';
+import { useCalendarViewState } from './hooks/useCalendarViewState';
 import { useNewNote } from './hooks/useNewNote';
 import { useNoteController } from './hooks/useNoteController';
 import { useNow } from './hooks/useNow';
+import { useTimetableControls } from './hooks/useTimetableControls';
 import { usePopoverModel } from './hooks/usePopoverModel';
 import { useWeekModel } from './hooks/useWeekModel';
-import type { CalendarView as CalendarViewMode, InspectorState, PopoverTarget, TimetableControls } from './types';
+import type { InspectorState, PopoverTarget } from './types';
 import {
-  CALENDAR_VIEWS,
   clashesInRange,
   findPeriodName,
-  parseCalendarView,
   previewModel,
   promptId,
   seriesOf,
-  viewChange,
   viewTitle,
   visibleRange,
   weekDateKeys,
@@ -65,35 +64,10 @@ const CalendarView: React.FC = () => {
   const today = todayKey(now);
   const [popover, setPopover] = useState<PopoverTarget | null>(null);
   const closePopover = useCallback(() => setPopover(null), []);
-  const view = parseCalendarView(prefs.calendarView);
-  const { anchorKey, setAnchorKey, goToPrevious, goToNext, goToToday } = useCalendarNavigation(
-    view,
-    today,
-    closePopover,
-  );
-  const setView = useCallback(
-    (next: CalendarViewMode) => {
-      const change = viewChange(view, next);
-      if (!change) return;
-      setPopover(null);
-      setPrefs({ calendarView: change });
-    },
-    [view, setPrefs],
-  );
-  const openWeek = useCallback(
-    (dateKey: string) => {
-      setAnchorKey(dateKey);
-      setView('week');
-    },
-    [setAnchorKey, setView],
-  );
-  const openDay = useCallback(
-    (dateKey: string) => {
-      setAnchorKey(dateKey);
-      setView('day');
-    },
-    [setAnchorKey, setView],
-  );
+  const closeTransientRef = useRef<() => void>(closePopover);
+  const onNavigate = useCallback(() => closeTransientRef.current(), []);
+  const { view, anchorKey, setAnchorKey, goToPrevious, goToNext, goToToday, setView, openWeek, openDay } =
+    useCalendarViewState(prefs, setPrefs, today, onNavigate);
   const [inspector, setInspector] = useState<InspectorState | null>(null);
   const [previewGroupId, setPreviewGroupId] = useState<string | null>(null);
   const inspectorSeriesKey = inspector?.type === 'sessions' ? inspector.seriesKey : null;
@@ -109,7 +83,10 @@ const CalendarView: React.FC = () => {
   useClassReminderSync(data, now);
   const notesData = useCalendarNotes(data.range);
   const onNoteFailed = useCallback((change: NoteChange) => notify.error(t(`notes.failed.${change.type}`)), [t]);
-  const notes = useNoteController(notesData.events, data.range, onNoteFailed);
+  const onNoteCreated = useCallback(() => {
+    if (!prefs.calendarShowNotes) setPrefs({ calendarShowNotes: true });
+  }, [prefs.calendarShowNotes, setPrefs]);
+  const notes = useNoteController(notesData.events, data.range, onNoteFailed, onNoteCreated);
   const deadlinesData = useCalendarDeadlines(data.courses, data.courseUnits, data.range);
   const { layers, shownNotes, shownDeadlines } = useCalendarLayers({
     prefs,
@@ -168,6 +145,9 @@ const CalendarView: React.FC = () => {
 
   const { selectSession, selectNote, selectDeadline, draftNote, closeTransient, deadline, closeDeadline } =
     useCalendarSelection({ notes, setPopover });
+  useEffect(() => {
+    closeTransientRef.current = closeTransient;
+  }, [closeTransient]);
   const closeOverlays = useCallback(() => {
     if (deadline) closeDeadline();
     else if (popover) setPopover(null);
@@ -237,25 +217,7 @@ const CalendarView: React.FC = () => {
     inspector?.type === 'timetable'
       ? data.courses.find((course) => course.realisationId === inspector.courseKey)
       : undefined;
-  const linkedLabels = useMemo(
-    () => Object.fromEntries(Object.entries(data.linked).map(([courseKey, state]) => [courseKey, state.label])),
-    [data.linked],
-  );
-  const sisuCourseKeys = useMemo(
-    () => new Set(data.sessions.filter((session) => session.source === 'sisu').map((session) => session.courseKey)),
-    [data.sessions],
-  );
-  const timetables = useMemo<TimetableControls>(
-    () => ({
-      noTimesCourseKeys: data.noTimesCourseKeys,
-      sisuCourseKeys,
-      linked: data.linked,
-      onAdd: openTimetable,
-      onRefresh: data.refreshTimetable,
-      onRemove: data.removeTimetable,
-    }),
-    [data.noTimesCourseKeys, sisuCourseKeys, data.linked, openTimetable, data.refreshTimetable, data.removeTimetable],
-  );
+  const { linkedLabels, timetables } = useTimetableControls(data, openTimetable);
   const popoverView = useMemo(
     () => ({ showAllSessions, openGroups, close: closePopover }),
     [showAllSessions, openGroups, closePopover],
@@ -278,12 +240,19 @@ const CalendarView: React.FC = () => {
             <span className="font-mono text-[11px] text-lightGrey">{t('timeZoneNote')}</span>
           ) : undefined
         }
-        actions={<CalendarHeaderActions addNoteRef={addNoteRef} onAddNote={openNewNote} onExport={openExport} />}
+        actions={
+          <CalendarHeaderActions
+            view={view}
+            addNoteRef={addNoteRef}
+            onViewChange={setView}
+            onAddNote={openNewNote}
+            onExport={openExport}
+          />
+        }
       />
       <div
-        className={`grid min-h-0 flex-1 gap-4 ${
-          inspectorOpen ? 'lg:grid-cols-[244px_minmax(0,1fr)_316px]' : 'lg:grid-cols-[244px_minmax(0,1fr)]'
-        }`}
+        className="grid min-h-0 flex-1 gap-4 motion-reduce:transition-none lg:grid-cols-[280px_minmax(0,1fr)_var(--inspector-width)] lg:gap-x-0 lg:transition-[grid-template-columns] lg:duration-200 lg:ease-[cubic-bezier(0.25,1,0.5,1)]"
+        style={{ '--inspector-width': inspectorOpen ? '332px' : '0px' } as React.CSSProperties}
       >
         <CalendarSidebar
           anchorKey={anchorKey}
@@ -291,6 +260,7 @@ const CalendarView: React.FC = () => {
           busyDateKeys={busyDateKeys}
           locale={locale}
           courses={data.courses}
+          coursesLoading={data.isLoading}
           courseUnits={data.courseUnits}
           plans={data.plans}
           timetables={timetables}
@@ -312,11 +282,9 @@ const CalendarView: React.FC = () => {
         >
           <CalendarToolbar
             view={view}
-            enabledViews={CALENDAR_VIEWS}
             title={viewTitle(view, anchorKey, locale)}
             eyebrow={eyebrow}
             clashCount={rangeClashes.length}
-            onViewChange={setView}
             onToday={goToToday}
             onPrevious={goToPrevious}
             onNext={goToNext}
@@ -355,27 +323,30 @@ const CalendarView: React.FC = () => {
             </div>
           )}
         </Panel>
-        <CalendarInspector
-          inspector={inspector}
-          inspectorSeries={inspectorSeries}
-          pickerCourse={pickerCourse}
-          timetableCourse={timetableCourse}
-          showAgenda={showAgenda}
-          data={data}
-          badges={badges}
-          sessionsById={sessionsById}
-          notes={shownNotes}
-          deadlines={shownDeadlines}
-          actions={actions}
-          anchorKey={anchorKey}
-          todayKey={today}
-          now={now}
-          locale={locale}
-          moodleUrl={prefs.moodleToken}
-          onConnectMoodle={layers.onConnectMoodle}
-          onPreview={setPreviewGroupId}
-          onClose={closeInspector}
-        />
+        <InspectorSlot slotKey={inspectorOpen ? (explicitInspector ? (inspector?.type ?? null) : 'agenda') : null}>
+          <CalendarInspector
+            inspector={inspector}
+            inspectorSeries={inspectorSeries}
+            pickerCourse={pickerCourse}
+            timetableCourse={timetableCourse}
+            showAgenda={showAgenda}
+            data={data}
+            badges={badges}
+            sessionsById={sessionsById}
+            notes={shownNotes}
+            deadlines={shownDeadlines}
+            showCancelled={prefs.calendarShowCancelled}
+            actions={actions}
+            anchorKey={anchorKey}
+            todayKey={today}
+            now={now}
+            locale={locale}
+            moodleUrl={prefs.moodleToken}
+            onConnectMoodle={layers.onConnectMoodle}
+            onPreview={setPreviewGroupId}
+            onClose={closeInspector}
+          />
+        </InspectorSlot>
       </div>
       {popover && popoverSeriesKey && popoverSummary && popoverModel && (
         <EventPopover
@@ -391,7 +362,14 @@ const CalendarView: React.FC = () => {
           onClose={closePopover}
         />
       )}
-      <CalendarOverlays notes={notes} deadline={deadline} now={now} locale={locale} onCloseDeadline={closeDeadline} />
+      <CalendarOverlays
+        notes={notes}
+        deadline={deadline}
+        fallbackFocus={addNoteRef}
+        now={now}
+        locale={locale}
+        onCloseDeadline={closeDeadline}
+      />
     </div>
   );
 };

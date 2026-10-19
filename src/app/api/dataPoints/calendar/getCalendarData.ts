@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react';
-import { keepPreviousData } from '@tanstack/react-query';
+import { keepPreviousData, useIsMutating, useQueryClient, type MutationFilters } from '@tanstack/react-query';
 import { getUserDetails } from '@/app/api/dataPoints/getUserDetails';
 import { fetchCourseUnit } from '@/app/api/endpoints/courseUnit';
 import { fetchLocations } from '@/app/api/endpoints/locations';
@@ -29,7 +29,12 @@ import type { CalendarData, CalendarDataOptions, CalendarRowsResult, CourseUnitI
 import { useAttendancePlans } from './useAttendancePlans';
 import { useGroupCandidates } from './useGroupCandidates';
 import { useLinkedTimetables } from './useLinkedTimetables';
+import { VISIBILITY_MUTATION_SCOPE } from './useCalendarVisibility';
 import { useOmittedCourses } from './useOmittedCourses';
+
+const VISIBILITY_WRITES: MutationFilters = {
+  predicate: (mutation) => mutation.options.scope?.id === VISIBILITY_MUTATION_SCOPE,
+};
 
 const FIVE_MINUTES = 5 * 60 * 1000;
 const ONE_DAY = 24 * 60 * 60 * 1000;
@@ -41,6 +46,7 @@ export const getCalendarData = (anchorKey: string, options: CalendarDataOptions)
   const { startKey, endKey } =
     options.span === 'academicYear' ? academicYearRangeFor(anchorKey) : termRangeFor(anchorKey);
   const range = useMemo(() => ({ startKey, endKey }), [startKey, endKey]);
+  const queryClient = useQueryClient();
   const { userDetails, loadingDetails, detailsError } = getUserDetails();
   const personId = userDetails?.id ?? null;
 
@@ -72,6 +78,7 @@ export const getCalendarData = (anchorKey: string, options: CalendarDataOptions)
     { enabled: courseUnitIds.length > 0, staleTime: ONE_DAY, placeholderData: keepPreviousData },
   );
   const courseUnits = courseUnitsQuery.data ?? EMPTY_COURSE_UNITS;
+  const namesReady = courseUnitIds.length === 0 || !courseUnitsQuery.isPending;
   const named = useMemo(() => applyCourseUnitNames(rows, courseUnits), [rows, courseUnits]);
   const linked = useLinkedTimetables(named.courses, range);
   const sessions = useMemo(
@@ -118,7 +125,10 @@ export const getCalendarData = (anchorKey: string, options: CalendarDataOptions)
   );
 
   const rowsSettled = rowsQuery.isSuccess && !rowsQuery.isFetching;
+  // The hook re-renders when a write ends; the direct read sees a write started in this same click.
+  const visibilityWrites = useIsMutating(VISIBILITY_WRITES) + queryClient.isMutating(VISIBILITY_WRITES);
   const canPrune = pruneReady({
+    visibilityIdle: visibilityWrites === 0,
     plansLoaded,
     rowsSettled,
     candidatesSettled: !candidates.isFetching && !candidates.failed,
@@ -175,7 +185,8 @@ export const getCalendarData = (anchorKey: string, options: CalendarDataOptions)
     saveTimetable: linked.saveLink,
     removeTimetable: linked.removeLink,
     refreshTimetable: linked.refresh,
-    isLoading: loadingDetails || rowsQuery.isLoading,
+    namesReady,
+    isLoading: loadingDetails || rowsQuery.isLoading || !namesReady,
     isFetching: rowsQuery.isFetching,
     error: rowsQuery.error ?? detailsError ?? null,
     updatedAt: rowsQuery.dataUpdatedAt,

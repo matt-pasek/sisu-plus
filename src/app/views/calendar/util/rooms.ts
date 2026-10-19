@@ -30,12 +30,16 @@ export const shortRoomName = (name: string): string => {
 export const describeRoomShort = (locationIds: string[], rooms: Record<string, RoomInfo>, labels: RoomLabels): string =>
   describe(locationIds, rooms, labels, (room) => shortRoomName(room.name));
 
+export const readableRoomName = (name: string): string => name.trim().replace(BUILDING_PREFIX, '');
+
 export const describeRoomWithBuilding = (
   locationIds: string[],
   rooms: Record<string, RoomInfo>,
   labels: RoomLabels,
 ): string =>
-  describe(locationIds, rooms, labels, (room) => (room.building ? `${room.name} · ${room.building}` : room.name));
+  describe(locationIds, rooms, labels, (room) =>
+    room.building ? `${readableRoomName(room.name)} · ${room.building}` : readableRoomName(room.name),
+  );
 
 export const sessionRoom = (
   session: Session,

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { isPendingNote } from '@/app/api/dataPoints/calendar/notes';
 import type { CourseUnitInfo, RoomInfo } from '@/app/api/dataPoints/calendar/types';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
@@ -11,21 +11,27 @@ import {
   type Session,
   type TimedBlock,
 } from '@/app/schedule';
+import { useElementMeasure } from '../hooks/useElementMeasure';
 import { useNoteDrag } from '../hooks/useNoteDrag';
-import type { AnchorRect, SessionBadge } from '../types';
+import type { AnchorRect, ClashGroupRow, SessionBadge } from '../types';
 import {
   describeRoom,
   describeRoomShort,
   describeRoomWithBuilding,
   formatClock,
   formatSessionDate,
+  groupBlock,
   joinNames,
+  lanesThatFit,
   minutesToOffset,
   sessionBox,
   sessionRoom,
+  shortGroupName,
   slotBlock,
+  splitOverlaps,
 } from '../util';
 import { AlternativeBlock } from './AlternativeBlock.comp';
+import { ClashGroupBlock } from './ClashGroupBlock.comp';
 import { NoteBlock } from './NoteBlock.comp';
 import { NowLine } from './NowLine.comp';
 import { OVERFLOW_STRIP_WIDTH, OverflowChip } from './OverflowChip.comp';
@@ -87,14 +93,34 @@ export const WeekDayColumn: React.FC<Props> = ({
   onDraft,
 }) => {
   const { t } = useTranslationWithPrefix('views.calendar');
+  const columnRef = useRef<HTMLDivElement>(null);
+  const fittingLanes = useElementMeasure(columnRef, lanesThatFit, Infinity);
   const { liveTimes, handlers } = useNoteDrag({ hourRange, hourHeight, inset, onDraft });
   const shownDraft = useMemo(
     () => (liveTimes ? slotBlock({ dateKey, ...liveTimes }) : draft),
     [liveTimes, draft, dateKey],
   );
+  const mergedGroups = useMemo(() => {
+    if (detailed) return [];
+    const lanes = layoutDay(sessions).placements;
+    return splitOverlaps(sessions).groups.filter((group) => (lanes[group[0].id]?.cols ?? group.length) > fittingLanes);
+  }, [sessions, detailed, fittingLanes]);
+  const groups = useMemo(() => mergedGroups.map((group) => ({ block: groupBlock(group), group })), [mergedGroups]);
+  const groupsById = useMemo(() => new Map(groups.map(({ block, group }) => [block.id, group])), [groups]);
+  const singleSessions = useMemo(() => {
+    const merged = new Set(mergedGroups.flat().map((session) => session.id));
+    return sessions.filter((session) => !merged.has(session.id));
+  }, [sessions, mergedGroups]);
   const layout = useMemo(
-    () => layoutDay([...sessions, ...preview, ...notes, ...(shownDraft ? [shownDraft] : [])]),
-    [sessions, preview, notes, shownDraft],
+    () =>
+      layoutDay([
+        ...singleSessions,
+        ...groups.map(({ block }) => block),
+        ...preview,
+        ...notes,
+        ...(shownDraft ? [shownDraft] : []),
+      ]),
+    [singleSessions, groups, preview, notes, shownDraft],
   );
   const notesById = useMemo(() => new Map(notes.map((note) => [note.id, note])), [notes]);
   const alternativeLayout = useMemo(() => layoutDay(alternatives), [alternatives]);
@@ -124,8 +150,26 @@ export const WeekDayColumn: React.FC<Props> = ({
     return `${base}, ${t('aria.clash', { names: joinNames([...new Set(names)], locale) })}`;
   };
 
+  const groupRow = (session: Session): ClashGroupRow => {
+    const badge = badges.get(session.id) ?? null;
+    const linkedLabel = session.source !== 'sisu' ? linkedLabels[session.courseKey] : undefined;
+    return {
+      session,
+      ariaLabel: ariaLabelFor(
+        session,
+        sessionRoom(session, rooms, roomLabels, describeRoom),
+        clashesBySession.get(session.id) ?? [],
+      ),
+      detail: [t(`kinds.${session.kind}`), sessionRoom(session, rooms, roomLabels, describeRoomShort), linkedLabel]
+        .filter(Boolean)
+        .join(' · '),
+      status: badge ? t(`sessions.chips.${badge}`) : session.cancelled ? t('sessions.chips.cancelled') : null,
+    };
+  };
+
   return (
     <div
+      ref={columnRef}
       className={`relative border-l border-border ${isToday ? 'bg-accent/[0.025]' : ''}`}
       style={{
         backgroundImage: `repeating-linear-gradient(to bottom, rgba(34,34,40,0.8) 0, rgba(34,34,40,0.8) 1px, transparent 1px, transparent ${hourHeight}px)`,
@@ -156,7 +200,26 @@ export const WeekDayColumn: React.FC<Props> = ({
           />
         );
       })}
-      {sessions.map((session) => {
+      {groups.map(({ block, group }) => {
+        const placement = layout.placements[block.id];
+        if (!placement) return null;
+        const box = sessionBox(block, hourRange, hourHeight);
+        return (
+          <ClashGroupBlock
+            key={block.id}
+            block={block}
+            rows={group.map(groupRow)}
+            placement={placement}
+            box={{ ...box, top: box.top + inset }}
+            reservedRight={inOverflowCluster(block) ? OVERFLOW_STRIP_WIDTH : 0}
+            isClashing={group.some((session) => (clashesBySession.get(session.id) ?? []).length > 0)}
+            activeSessionId={activeSessionId}
+            now={now}
+            onSelect={onSelect}
+          />
+        );
+      })}
+      {singleSessions.map((session) => {
         const placement = layout.placements[session.id];
         if (!placement) return null;
         const clashes = clashesBySession.get(session.id) ?? [];
@@ -170,6 +233,7 @@ export const WeekDayColumn: React.FC<Props> = ({
           detailed ? describeRoomWithBuilding : describeRoomShort,
         );
         const box = sessionBox(session, hourRange, hourHeight);
+        const code = session.courseUnitId ? (courseUnits[session.courseUnitId]?.code ?? null) : null;
         return (
           <SessionBlock
             key={session.id}
@@ -177,14 +241,14 @@ export const WeekDayColumn: React.FC<Props> = ({
             placement={placement}
             box={{ ...box, top: box.top + inset }}
             reservedRight={inOverflowCluster(session) ? OVERFLOW_STRIP_WIDTH : 0}
-            code={session.courseUnitId ? (courseUnits[session.courseUnitId]?.code ?? null) : null}
+            code={code}
             isClashing={clashes.length > 0}
             isActive={activeSessionId === session.id}
             isDimmed={activeSessionId != null && activeSessionId !== session.id}
             isPast={session.end <= now}
             kindLabel={t(`kinds.${session.kind}`)}
             roomName={roomName}
-            detail={detailed && !isLinked ? session.groupName : null}
+            detail={detailed && !isLinked ? shortGroupName(session.groupName, code) : null}
             ariaLabel={ariaLabelFor(session, room, clashes)}
             badge={badge}
             badgeLabel={badge ? t(`sessions.chips.${badge}`) : null}
@@ -206,12 +270,17 @@ export const WeekDayColumn: React.FC<Props> = ({
             reservedRight={inOverflowCluster(note) ? OVERFLOW_STRIP_WIDTH : 0}
             title={note.name}
             timeLabel={`${formatClock(note.start)}–${formatClock(note.end)}`}
-            ariaLabel={t('notes.aria', {
-              name: note.name,
-              date: formatSessionDate(dateKey, locale),
-              start: formatClock(note.start),
-              end: formatClock(note.end),
-            })}
+            ariaLabel={[
+              t('notes.aria', {
+                name: note.name,
+                date: formatSessionDate(dateKey, locale),
+                start: formatClock(note.start),
+                end: formatClock(note.end),
+              }),
+              pending ? t('notes.pending') : null,
+            ]
+              .filter(Boolean)
+              .join(', ')}
             variant={pending ? 'pending' : 'saved'}
             isPast={note.end <= now}
             onSelect={pending ? undefined : (element) => onSelectNote(note, element)}
@@ -247,9 +316,10 @@ export const WeekDayColumn: React.FC<Props> = ({
         );
       })}
       {layout.overflow.map((slot) => {
-        const hidden = slot.sessionIds
-          .map((id) => sessionsById.get(id))
-          .filter((session): session is Session => session != null);
+        const hidden = slot.sessionIds.flatMap((id) => {
+          const session = sessionsById.get(id);
+          return groupsById.get(id) ?? (session ? [session] : []);
+        });
         const hiddenNotes = slot.sessionIds
           .map((id) => notesById.get(id))
           .filter((note): note is NoteOccurrence => note != null);
@@ -257,7 +327,7 @@ export const WeekDayColumn: React.FC<Props> = ({
           <OverflowChip
             key={slot.sessionIds.join()}
             top={minutesToOffset(helsinkiMinutesOfDay(slot.start), hourRange, hourHeight) + inset}
-            count={slot.sessionIds.length}
+            count={hidden.length + hiddenNotes.length}
             ariaLabel={t('aria.moreSessions', {
               count: hidden.length + hiddenNotes.length,
               names: joinNames(

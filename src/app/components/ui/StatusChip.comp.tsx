@@ -16,7 +16,7 @@ interface Props extends PropsWithChildren {
 
 export const StatusChip: React.FC<Props> = ({ tone, icon, className = '', children }) => (
   <span
-    className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] leading-none font-semibold whitespace-nowrap ${TONE_CLASS[tone]} ${className}`}
+    className={`inline-flex h-4 items-center gap-1 rounded-md border px-1.5 text-[10px] leading-none font-semibold whitespace-nowrap ${TONE_CLASS[tone]} ${className}`}
   >
     {icon}
     {children}

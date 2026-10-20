@@ -1,8 +1,10 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { fetchAttainments } from '@/app/api/endpoints/attainments';
 import { fetchEnrolments } from '@/app/api/endpoints/enrolments';
 import { fetchPlans } from '@/app/api/endpoints/plans';
 import { fetchStudyRights } from '@/app/api/endpoints/studyRights';
 import { koriApi } from '@/app/api/client';
+import { findCachedPrimaryPlan } from '@/app/api/dataPoints/planCache';
 import { isPassingCourseUnitAttainment } from '@/app/api/dataPoints/util';
 import type { CourseUnitAttainmentRestricted } from '@/app/api/generated/OriApi';
 import type {
@@ -13,6 +15,19 @@ import type {
   Module,
 } from '@/app/api/generated/KoriApi';
 import type { Plan } from '@/app/api/generated/OsuvaApi';
+import {
+  fetchModuleChildren,
+  fetchModuleDocument,
+  fetchRuleOptions,
+} from '@/app/api/dataPoints/structure/fetchRuleOptions';
+import {
+  getRuleRange,
+  hasAnyCourseRule,
+  ruleChildren,
+  type EditableRule,
+} from '@/app/api/dataPoints/structure/ruleTree';
+import { stripMarkup } from '@/app/api/dataPoints/structure/markup';
+import { getTopLevelModuleIds } from '@/app/api/dataPoints/structure/topLevelModules';
 import { buildCuToTopModuleMap } from '@/app/api/resolvers/helpers/buildCuToTopModuleMap';
 import {
   getPlacedCourseUnitSelections,
@@ -35,36 +50,6 @@ type StructurePlan = {
   moduleSelections: { moduleId: string; parentModuleId?: string }[];
   courseUnitSelections: (PlacedSelectionShape & { completionMethodId?: string })[];
 };
-
-type EditableRule = {
-  type: string;
-  localId?: string;
-  rules?: EditableRule[];
-  rule?: EditableRule;
-  require?: { min: number; max?: number };
-  count?: { min: number; max?: number };
-  credits?: { min: number; max?: number };
-  description?: LocalizedMarkupString;
-  moduleGroupId?: string;
-  courseUnitGroupId?: string;
-};
-
-function getTopLevelModuleIds(plan: StructurePlan): { topLevelModuleIds: string[]; wrapperModuleId: string | null } {
-  let topLevelModuleIds = plan.moduleSelections
-    .filter((selection) => selection.parentModuleId === plan.rootId)
-    .map((selection) => selection.moduleId);
-
-  let wrapperModuleId: string | null = null;
-  if (topLevelModuleIds.length === 1) {
-    wrapperModuleId = topLevelModuleIds[0];
-    const children = plan.moduleSelections
-      .filter((selection) => selection.parentModuleId === wrapperModuleId)
-      .map((selection) => selection.moduleId);
-    if (children.length > 0) topLevelModuleIds = children;
-  }
-
-  return { topLevelModuleIds, wrapperModuleId };
-}
 
 function getGrade(attainment: CourseUnitAttainmentRestricted | undefined): string | null {
   if (!attainment) return null;
@@ -96,26 +81,8 @@ function pickPlanMetadataValue(plan: StructurePlan, keys: string[]): unknown {
   return null;
 }
 
-function stripMarkup(value: string | null): string | null {
-  return (
-    value
-      ?.replace(/<[^>]*>/g, '')
-      .replace(/\s+/g, ' ')
-      .trim() || null
-  );
-}
-
 function pickMarkup(markup: LocalizedMarkupString | undefined): string | null {
   return stripMarkup(markup ? pickLabel(markup as unknown as LocalizedString) : null);
-}
-
-async function fetchModuleDocument(moduleId: string): Promise<Module | null> {
-  try {
-    const response = await koriApi.api.getModule(moduleId);
-    return response.data as Module;
-  } catch {
-    return null;
-  }
 }
 
 async function fetchCurriculumPeriod(curriculumPeriodId: string): Promise<CurriculumPeriod | null> {
@@ -125,101 +92,6 @@ async function fetchCurriculumPeriod(curriculumPeriodId: string): Promise<Curric
   } catch {
     return null;
   }
-}
-
-async function fetchModuleChildren(
-  moduleId: string,
-  curriculumPeriodId: string,
-): Promise<{
-  modules: Module[];
-  courseUnits: CourseUnit[];
-}> {
-  const [modulesResponse, courseUnitsResponse] = await Promise.all([
-    koriApi.api.getModulesForModule({ moduleId, curriculumPeriodId }).catch(() => ({ data: [] as Module[] })),
-    koriApi.api.getCourseUnitsForModule({ moduleId, curriculumPeriodId }).catch(() => ({ data: [] as CourseUnit[] })),
-  ]);
-
-  return {
-    modules: modulesResponse.data as Module[],
-    courseUnits: courseUnitsResponse.data as CourseUnit[],
-  };
-}
-
-function collectRuleGroupIds(
-  rule: EditableRule,
-  result = { moduleGroupIds: new Set<string>(), courseUnitGroupIds: new Set<string>() },
-) {
-  if (rule.type === 'ModuleRule' && rule.moduleGroupId) result.moduleGroupIds.add(rule.moduleGroupId);
-  if (rule.type === 'CourseUnitRule' && rule.courseUnitGroupId) result.courseUnitGroupIds.add(rule.courseUnitGroupId);
-  for (const child of ruleChildren(rule)) collectRuleGroupIds(child, result);
-  return result;
-}
-
-async function fetchRuleOptions(
-  section: Module,
-  curriculumPeriodId: string,
-): Promise<{
-  modules: Module[];
-  courseUnits: CourseUnit[];
-}> {
-  const rule = section.rule as unknown as EditableRule;
-  const { moduleGroupIds, courseUnitGroupIds } = collectRuleGroupIds(rule);
-  const universityId = section.universityOrgIds[0];
-
-  const [modulesResponse, courseUnitsResponse] = await Promise.all([
-    universityId && moduleGroupIds.size > 0
-      ? koriApi.api
-          .findByGroupIdAndCurriculumPeriodId({
-            groupId: [...moduleGroupIds],
-            universityId,
-            curriculumPeriodId,
-            documentStates: ['ACTIVE'],
-          })
-          .catch(() => ({ data: [] as Module[] }))
-      : Promise.resolve({ data: [] as Module[] }),
-    courseUnitGroupIds.size > 0
-      ? koriApi.api
-          .findByGroupIdsAndCurriculumPeriodIdExact({
-            groupId: [...courseUnitGroupIds],
-            curriculumPeriodId,
-            documentState: ['ACTIVE'],
-          })
-          .catch(() => ({ data: [] as CourseUnit[] }))
-      : Promise.resolve({ data: [] as CourseUnit[] }),
-  ]);
-
-  return {
-    modules: modulesResponse.data as Module[],
-    courseUnits: courseUnitsResponse.data as CourseUnit[],
-  };
-}
-
-function getRuleRange(rule: EditableRule): {
-  min: number | null;
-  max: number | null;
-  creditsMin: number | null;
-  creditsMax: number | null;
-} {
-  if (rule.type === 'CompositeRule')
-    return { min: rule.require?.min ?? null, max: rule.require?.max ?? null, creditsMin: null, creditsMax: null };
-  if (rule.type === 'CourseUnitCountRule') {
-    return { min: rule.count?.min ?? null, max: rule.count?.max ?? null, creditsMin: null, creditsMax: null };
-  }
-  if (rule.type === 'CreditsRule') {
-    return { min: null, max: null, creditsMin: rule.credits?.min ?? null, creditsMax: rule.credits?.max ?? null };
-  }
-  return { min: null, max: null, creditsMin: null, creditsMax: null };
-}
-
-function ruleChildren(rule: EditableRule): EditableRule[] {
-  if (rule.type === 'CompositeRule') return rule.rules ?? [];
-  if (rule.type === 'CourseUnitCountRule') return rule.rule ? [rule.rule] : [];
-  if (rule.type === 'CreditsRule') return rule.rule ? [rule.rule] : [];
-  return [];
-}
-
-function hasAnyCourseRule(rule: EditableRule): boolean {
-  return rule.type === 'AnyCourseUnitRule' || ruleChildren(rule).some(hasAnyCourseRule);
 }
 
 function buildSelectionGroups(args: {
@@ -283,6 +155,7 @@ function buildSelectionGroups(args: {
 }
 
 export const getStructureData = (): { data: StructureData | undefined; isLoading: boolean } => {
+  const queryClient = useQueryClient();
   const plansQuery = useSisuQuery(['plans'], fetchPlans);
   const attainmentsQuery = useSisuQuery(['attainments'], fetchAttainments);
   const studyRightsQuery = useSisuQuery(['study-rights'], fetchStudyRights);
@@ -291,7 +164,7 @@ export const getStructureData = (): { data: StructureData | undefined; isLoading
   const { data, isLoading: structureLoading } = useSisuQuery(
     ['structure-data'],
     async (): Promise<StructureData> => {
-      const plan = (plansQuery.data?.find((p) => p.primary) ?? plansQuery.data?.[0]) as StructurePlan | undefined;
+      const plan = findCachedPrimaryPlan(queryClient) as StructurePlan | undefined;
       if (!plan) {
         return {
           planId: '',

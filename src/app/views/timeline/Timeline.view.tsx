@@ -16,10 +16,15 @@ import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { getVisibleSemesters } from '@/app/views/timeline/util/getVisibleSemesters';
 import { TimelineBoard } from '@/app/views/timeline/components/TimelineBoard/TimelineBoard.comp';
 import { PageLoader } from '@/app/components/PageLoader.comp';
+import { InspectorSlot } from '@/app/components/ui/InspectorSlot.comp';
+import { AddCourseInspector } from '@/app/views/timeline/components/addCourse/AddCourseInspector.comp';
+import { AddCourseSuggestions } from '@/app/views/timeline/components/addCourse/AddCourseSuggestions.comp';
+import { useAddCourseFlow } from '@/app/views/timeline/hooks/useAddCourseFlow';
 import {
   isTimelineCourseDragData,
   getMoveLocators,
   getTargetPeriodLocators,
+  isPastPeriod,
   isPeriodVisible,
   sameLocators,
 } from '@/app/views/timeline/util';
@@ -57,6 +62,7 @@ const TimelineView: React.FC = () => {
     plansQuery.data?.[0];
   const selectedPlanId = selectedPlan?.id;
   const isPrimaryPlan = selectedPlan?.primary === true;
+  const canAddCourses = isPrimaryPlan;
   const { timelineCourses, isLoading: coursesLoading } = getTimelineCourses(selectedPlanId);
   const { studyPeriodMap, isLoading: periodsLoading } = getStudyPeriodMap();
   const { data: structureData } = getStructureData();
@@ -72,7 +78,7 @@ const TimelineView: React.FC = () => {
     draftOriginalPeriodCounts,
     stageCoursePeriods,
     resetDraft,
-  } = useTimelineDraft(timelineCourses, studyPeriodMap, selectedPlanId);
+  } = useTimelineDraft(timelineCourses, studyPeriodMap, selectedPlanId, !coursesLoading);
   const { visibleValidationWarnings, validationIssueCount, prerequisitesLoading, dismissWarning, resetDismissed } =
     useTimelineValidation({
       planId: selectedPlanId,
@@ -85,10 +91,17 @@ const TimelineView: React.FC = () => {
     resetDraft();
     resetDismissed();
   }, [resetDismissed, resetDraft]);
+  const addFlow = useAddCourseFlow({ planId: selectedPlanId, studyPeriodMap });
+  const { dismiss: dismissAddFlow } = addFlow;
+  useEffect(() => {
+    if (!canAddCourses) dismissAddFlow();
+  }, [canAddCourses, dismissAddFlow]);
+  useEffect(() => {
+    dismissAddFlow();
+  }, [dismissAddFlow, selectedPlanId]);
   const confirmTimeline = useConfirmTimeline({
-    plan: selectedPlan,
+    planId: selectedPlanId,
     draft: draftPeriodsByCourseId,
-    timelineCourses,
     studyPeriodMap,
     onSaved: resetAll,
   });
@@ -122,12 +135,29 @@ const TimelineView: React.FC = () => {
     [draftTimelineCourses, studyPeriodMap],
   );
 
-  const semesters = useMemo(() => {
-    const periods = allPeriods.filter((period) =>
-      isPeriodVisible(period, { hidePreviousPeriods, showHiddenSummerPeriods }),
-    );
-    return getVisibleSemesters(getCreditsBySemester(periods));
-  }, [allPeriods, hidePreviousPeriods, showHiddenSummerPeriods]);
+  const visiblePeriods = useMemo(
+    () => allPeriods.filter((period) => isPeriodVisible(period, { hidePreviousPeriods, showHiddenSummerPeriods })),
+    [allPeriods, hidePreviousPeriods, showHiddenSummerPeriods],
+  );
+
+  const semesters = useMemo(() => getVisibleSemesters(getCreditsBySemester(visiblePeriods)), [visiblePeriods]);
+
+  const addablePeriodLocators = useMemo(
+    () =>
+      new Set(
+        canAddCourses
+          ? semesters.flatMap((semester) =>
+              semester.periods.filter((period) => !isPastPeriod(period)).map((period) => period.periodLocator),
+            )
+          : [],
+      ),
+    [canAddCourses, semesters],
+  );
+
+  const addPeriod = useMemo(
+    () => (canAddCourses ? allPeriods.find((period) => period.periodLocator === addFlow.openLocator) : undefined),
+    [addFlow.openLocator, allPeriods, canAddCourses],
+  );
 
   const heroStats = useMemo(
     () =>
@@ -221,7 +251,12 @@ const TimelineView: React.FC = () => {
           subtitle={selectedPlan?.name}
           actions={
             <TimelineHeaderActions
-              confirmDisabled={draftPeriodsByCourseId.size === 0 || prerequisitesLoading || validationIssueCount > 0}
+              confirmDisabled={
+                draftPeriodsByCourseId.size === 0 ||
+                prerequisitesLoading ||
+                validationIssueCount > 0 ||
+                addFlow.isWriting
+              }
               confirmPending={confirmTimeline.isPending}
               onConfirm={() => confirmTimeline.mutate()}
               onReset={resetAll}
@@ -233,13 +268,15 @@ const TimelineView: React.FC = () => {
         />
         <TimelineHero
           stats={heroStats}
-          periodsByLocator={studyPeriodMap}
-          showGraduation={isPrimaryPlan}
+          issueCount={validationIssueCount}
           folded={heroFold.folded}
           ready={heroFold.ready}
           onToggle={heroFold.toggle}
         />
-        <div className="grid min-h-0 flex-1 gap-4 max-lg:grid-cols-[minmax(0,1fr)] max-lg:grid-rows-[auto_minmax(0,1fr)] lg:grid-cols-[280px_minmax(0,1fr)]">
+        <div
+          className="relative grid min-h-0 flex-1 gap-4 motion-reduce:transition-none max-lg:grid-cols-[minmax(0,1fr)] max-lg:grid-rows-[auto_minmax(0,1fr)] lg:grid-cols-[280px_minmax(0,1fr)_var(--inspector-width)] lg:gap-x-0 lg:transition-[grid-template-columns] lg:duration-200 lg:ease-[cubic-bezier(0.25,1,0.5,1)]"
+          style={{ '--inspector-width': addPeriod ? '332px' : '0px' } as React.CSSProperties}
+        >
           <TimelineSidebar
             courses={draftTimelineCourses}
             onSelectIssue={focusCourse}
@@ -254,8 +291,11 @@ const TimelineView: React.FC = () => {
             showHiddenSummerPeriods={showHiddenSummerPeriods}
             validationWarnings={visibleValidationWarnings}
           />
-          <Panel>
+          <Panel footer={canAddCourses ? undefined : t('addCourse.primaryOnly')}>
             <TimelineBoard
+              activeAddLocator={addPeriod?.periodLocator ?? null}
+              addablePeriodLocators={addablePeriodLocators}
+              onAddCourse={addFlow.open}
               draftCourseIds={draftCourseIds}
               highlightedPeriodLocators={highlightedPeriodLocators}
               isDragging={isDragging}
@@ -266,6 +306,28 @@ const TimelineView: React.FC = () => {
               validationWarnings={visibleValidationWarnings}
             />
           </Panel>
+          <InspectorSlot
+            slotKey={addPeriod?.periodLocator ?? null}
+            className="max-lg:absolute max-lg:inset-y-0 max-lg:right-0 max-lg:z-30 max-lg:w-[min(340px,100%)]"
+          >
+            {addPeriod && (
+              <AddCourseInspector period={addPeriod} onClose={addFlow.close}>
+                <AddCourseSuggestions
+                  plan={selectedPlan}
+                  targetLocator={addPeriod.periodLocator}
+                  courses={draftTimelineCourses}
+                  studyPeriodMap={studyPeriodMap}
+                  attainments={attainments}
+                  pendingAddId={addFlow.pendingAddId}
+                  lastAddedId={addFlow.lastAddedId}
+                  keepVisibleId={addFlow.keepVisibleId}
+                  isWriting={addFlow.isWriting}
+                  onAdd={addFlow.add}
+                  onUndo={addFlow.undo}
+                />
+              </AddCourseInspector>
+            )}
+          </InspectorSlot>
         </div>
       </div>
     </DragDropProvider>

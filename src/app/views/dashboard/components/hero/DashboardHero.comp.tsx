@@ -2,6 +2,10 @@ import React, { useMemo, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { type IcsCalendar } from 'ts-ics';
 import { getUserDetails } from '@/app/api/dataPoints/getUserDetails';
+import { HeroEyebrow } from '@/app/components/ui/HeroEyebrow.comp';
+import { HeroFeaturedStat } from '@/app/components/ui/HeroFeaturedStat.comp';
+import { HeroPlainStat } from '@/app/components/ui/HeroPlainStat.comp';
+import { HeroSection } from '@/app/components/ui/HeroSection.comp';
 import type { RegistrationCourse } from '@/app/api/dataPoints/getRegistrationCourses';
 import { getCourseDisplayName, getUpcomingExamItems } from '@/app/views/dashboard/util/registrationWidgetData';
 import { useChromeStorage } from '@/app/hooks/useChromeStorage';
@@ -55,51 +59,6 @@ const getGreetingKey = (): 'hero.greetingMorning' | 'hero.greetingAfternoon' | '
 const formatCredits = (value: number, unit: string): string => {
   const rounded = Math.round(value * 10) / 10;
   return `${Number.isInteger(rounded) ? rounded : rounded.toFixed(1)} ${unit}`;
-};
-
-const FeaturedStatTile: React.FC<{ stat: HeroStat }> = ({ stat }) => {
-  const toneStyles = {
-    accent: 'bg-lighterGreen/7 shadow-[inset_0_0_0_1px_rgba(82,201,137,0.2)]',
-    neutral: 'bg-background/42 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.055)]',
-    warn: 'bg-warn/10 shadow-[inset_0_0_0_1px_rgba(240,168,77,0.22)]',
-  };
-  const valueColor = {
-    accent: 'text-lighterGreen',
-    neutral: 'text-offwhite',
-    warn: 'text-warn',
-  };
-  const subColor = {
-    accent: 'text-lighterGreen/45',
-    neutral: 'text-lightGrey/50',
-    warn: 'text-warn/45',
-  };
-
-  return (
-    <div className={`min-w-28 rounded-xl px-4 py-3.5 backdrop-blur-sm ${toneStyles[stat.tone]}`}>
-      <p className="font-mono text-[9px] font-semibold tracking-[0.12em] text-lightGrey uppercase">{stat.label}</p>
-      <p className={`mt-2 text-[30px] leading-none font-bold tabular-nums ${valueColor[stat.tone]}`}>{stat.value}</p>
-      {stat.sub && <p className={`mt-1.5 text-[11px] ${subColor[stat.tone]}`}>{stat.sub}</p>}
-    </div>
-  );
-};
-
-const PlainStatTile: React.FC<{ stat: HeroStat }> = ({ stat }) => {
-  const valueColor = {
-    accent: 'text-lighterGreen',
-    neutral: 'text-offwhite',
-    warn: 'text-warn',
-  };
-
-  return (
-    <div className="relative px-4 py-3.5">
-      <div className="absolute inset-y-2 left-0 w-px bg-linear-to-b from-transparent via-white/6 to-transparent" />
-      <p className="font-mono text-[9px] font-semibold tracking-[0.12em] text-lightGrey/70 uppercase">{stat.label}</p>
-      <p className={`mt-2 text-[24px] leading-none font-semibold tabular-nums ${valueColor[stat.tone]}`}>
-        {stat.value}
-      </p>
-      {stat.sub && <p className="mt-1.5 text-[11px] text-lightGrey/50">{stat.sub}</p>}
-    </div>
-  );
 };
 
 export const DashboardHero: React.FC<DashboardHeroProps> = ({
@@ -241,11 +200,10 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
   if (loadingDetails) return null;
 
   return (
-    <section
-      className="relative min-h-80 overflow-hidden rounded-2xl bg-container shadow-[0_1px_3px_rgba(0,0,0,0.45),0_0_0_1px_rgba(255,255,255,0.045),0_24px_60px_-34px_rgba(0,0,0,0.9)] md:min-h-90"
+    <HeroSection
+      className="min-h-80 md:min-h-90"
       data-dashboard-hero
-    >
-      <div className="pointer-events-none absolute inset-0 mask-[linear-gradient(90deg,transparent_0%,black_13%,black_88%,transparent_100%)] opacity-95">
+      background={
         <GradientBlinds
           gradientColors={['#1f5f36', '#52c989', '#b7ffd0']}
           angle={18}
@@ -259,25 +217,15 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
           distortAmount={0.12}
           shineDirection="left"
         />
-      </div>
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_72%_48%,rgba(82,201,137,0.16),transparent_30%),linear-gradient(90deg,rgba(21,21,28,0.96)_0%,rgba(21,21,28,0.74)_28%,rgba(21,21,28,0.42)_55%,rgba(21,21,28,0.9)_100%)]" />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-white/10 to-transparent" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-linear-to-t from-background/55 to-transparent" />
-
+      }
+    >
       <div className="relative flex min-h-80 flex-col gap-7 px-7 py-8 md:min-h-90 md:px-10 md:py-10 lg:flex-row lg:items-center lg:justify-between lg:gap-10 xl:px-12">
         <div className="min-w-0 flex-1">
           <div className="flex max-w-4xl flex-wrap items-center gap-3 lg:pr-6">
-            <p className="font-mono text-[13px] font-semibold tracking-[0.02em] text-lightGrey/80 uppercase">
-              {prefs.universityConfig && (
-                <>
-                  <span className="text-lighterGreen/70">{prefs.universityConfig.name}</span>
-                  <span className="mx-2 text-lightGrey/30">·</span>
-                </>
-              )}
-              {getCurrentPeriodLabel(t)}
-              <span className="mx-2 text-lightGrey/30">·</span>
-              {t('weekLabel', { week: isoWeekNumber(todayKey()) })}
-            </p>
+            <HeroEyebrow
+              lead={prefs.universityConfig?.name}
+              items={[getCurrentPeriodLabel(t), t('weekLabel', { week: isoWeekNumber(todayKey()) })]}
+            />
           </div>
 
           <h1 className="mt-6 max-w-5xl text-[2.8rem] leading-[0.98] font-semibold tracking-tight text-balance text-offwhite md:text-[4rem] xl:text-[4.8rem]">
@@ -285,9 +233,9 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
           </h1>
 
           <div className="mt-8 flex w-fit flex-wrap items-stretch gap-1.5 backdrop-blur-[2px]">
-            {featuredStat && <FeaturedStatTile stat={featuredStat} />}
+            {featuredStat && <HeroFeaturedStat stat={featuredStat} />}
             {plainStats.map((stat) => (
-              <PlainStatTile key={stat.id} stat={stat} />
+              <HeroPlainStat key={stat.id} stat={stat} />
             ))}
           </div>
 
@@ -492,6 +440,6 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
           </svg>
         )}
       </DashboardControlButton>
-    </section>
+    </HeroSection>
   );
 };

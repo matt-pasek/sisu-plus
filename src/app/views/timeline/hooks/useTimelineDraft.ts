@@ -1,7 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { StudyPeriodMap } from '@/app/api/dataPoints/getStudyPeriodMap';
 import type { TimelineCourse } from '@/app/api/dataPoints/getTimelineCourses';
-import { applyDraftToCourses, getCourseLocators, stageDraft } from '@/app/views/timeline/util';
+import {
+  applyDraftToCourses,
+  getCourseLocators,
+  keepDraftForCourses,
+  pruneDraft,
+  stageDraft,
+} from '@/app/views/timeline/util';
 
 export interface TimelineDraft {
   draftPeriodsByCourseId: Map<string, string[]>;
@@ -16,8 +22,13 @@ export const useTimelineDraft = (
   timelineCourses: TimelineCourse[],
   studyPeriodMap: StudyPeriodMap,
   planId: string | undefined,
+  coursesReady: boolean,
 ): TimelineDraft => {
-  const [draftPeriodsByCourseId, setDraftPeriodsByCourseId] = useState<Map<string, string[]>>(new Map());
+  const [stagedDraft, setStagedDraft] = useState<Map<string, string[]>>(new Map());
+  const draftPeriodsByCourseId = useMemo(
+    () => keepDraftForCourses(stagedDraft, timelineCourses),
+    [stagedDraft, timelineCourses],
+  );
 
   const draftTimelineCourses = useMemo(
     () => applyDraftToCourses(timelineCourses, draftPeriodsByCourseId, studyPeriodMap),
@@ -40,16 +51,20 @@ export const useTimelineDraft = (
       if (!course) return;
 
       const originalLocators = getCourseLocators(course);
-      setDraftPeriodsByCourseId((current) => stageDraft(current, originalLocators, courseUnitId, locators));
+      setStagedDraft((current) => stageDraft(current, originalLocators, courseUnitId, locators));
     },
     [timelineCourses],
   );
 
-  const resetDraft = useCallback(() => setDraftPeriodsByCourseId(new Map()), []);
+  const resetDraft = useCallback(() => setStagedDraft(new Map()), []);
 
   useEffect(() => {
     resetDraft();
   }, [planId, resetDraft]);
+
+  useEffect(() => {
+    setStagedDraft((current) => pruneDraft(current, timelineCourses, coursesReady));
+  }, [coursesReady, timelineCourses]);
 
   return {
     draftPeriodsByCourseId,

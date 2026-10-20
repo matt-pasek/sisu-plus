@@ -27,7 +27,7 @@ import { CalendarSidebar } from './components/CalendarSidebar.comp';
 import { CalendarState } from './components/CalendarState.comp';
 import { CalendarToolbar } from './components/CalendarToolbar.comp';
 import { EventPopover } from './components/EventPopover.comp';
-import { InspectorSlot } from './components/InspectorSlot.comp';
+import { InspectorSlot } from '@/app/components/ui/InspectorSlot.comp';
 import { ProvenanceFooter } from './components/ProvenanceFooter.comp';
 import { useCalendarActions } from './hooks/useCalendarActions';
 import { useClassReminderSync } from './hooks/useClassReminderSync';

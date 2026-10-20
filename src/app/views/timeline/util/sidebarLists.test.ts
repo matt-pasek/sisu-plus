@@ -1,7 +1,27 @@
 /// <reference types="bun-types" />
 import { describe, expect, test } from 'bun:test';
 import { makeCourse, makePeriod } from './__fixtures__/timeline';
-import { listIssues, listModules } from './sidebarLists';
+import { getShortModuleName, listIssues, listModules } from './sidebarLists';
+
+describe('getShortModuleName', () => {
+  test('drops a trailing generic word', () => {
+    expect(getShortModuleName('General Studies')).toBe('General');
+    expect(getShortModuleName('Elective studies')).toBe('Elective');
+    expect(getShortModuleName('Syventävät opinnot')).toBe('Syventävät');
+  });
+
+  test('falls back to the first word when the name is still long', () => {
+    expect(getShortModuleName('Intermediate Specialisation Studies')).toBe('Intermediate');
+    expect(getShortModuleName('Language and Communication Studies')).toBe('Language');
+    expect(getShortModuleName('Kieli- ja viestintäopinnot')).toBe('Kieli');
+  });
+
+  test('keeps short names and Finnish compounds whole', () => {
+    expect(getShortModuleName('Yleisopinnot')).toBe('Yleisopinnot');
+    expect(getShortModuleName('  Minor  ')).toBe('Minor');
+    expect(getShortModuleName('Studies')).toBe('Studies');
+  });
+});
 
 describe('listModules', () => {
   test('keeps first-seen order, skips null modules, falls back to the unknown label', () => {

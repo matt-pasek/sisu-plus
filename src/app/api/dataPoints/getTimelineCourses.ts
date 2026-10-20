@@ -1,7 +1,9 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { fetchAttainments } from '@/app/api/endpoints/attainments';
 import { fetchEnrolments } from '@/app/api/endpoints/enrolments';
 import { fetchPlans } from '@/app/api/endpoints/plans';
 import { getStudyPeriodMap, type StudyPeriodInfo } from '@/app/api/dataPoints/getStudyPeriodMap';
+import { findCachedPlan, findCachedPrimaryPlan } from '@/app/api/dataPoints/planCache';
 import { isPassingCourseUnitAttainment, rangesOverlap } from '@/app/api/dataPoints/util';
 import { resolveCourseRealisations } from '@/app/api/resolvers/resolveCourseRealisations';
 import { resolveCourseUnit } from '@/app/api/resolvers/resolveCourseUnit';
@@ -62,6 +64,7 @@ function getTeachingPeriodLocators(realisations: RealisationResult[], periods: S
 }
 
 export const getTimelineCourses = (planId?: string): { timelineCourses: TimelineCourse[]; isLoading: boolean } => {
+  const queryClient = useQueryClient();
   const plansQuery = useSisuQuery(['plans'], fetchPlans);
   const attainmentsQuery = useSisuQuery(['attainments'], fetchAttainments);
   const enrolmentsQuery = useSisuQuery(['enrolments'], fetchEnrolments);
@@ -70,10 +73,7 @@ export const getTimelineCourses = (planId?: string): { timelineCourses: Timeline
   const { data: timelineCourses, isLoading } = useSisuQuery(
     ['timeline-courses', planId],
     async () => {
-      const plan =
-        plansQuery.data!.find((candidate) => candidate.id === planId) ??
-        plansQuery.data!.find((candidate) => candidate.primary) ??
-        plansQuery.data![0];
+      const plan = (planId ? findCachedPlan(queryClient, planId) : undefined) ?? findCachedPrimaryPlan(queryClient);
       if (!plan) return [];
 
       const cuToTopModule = buildCuToTopModuleMap(plan);

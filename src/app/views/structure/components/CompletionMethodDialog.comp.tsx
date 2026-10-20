@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { findCachedPlan } from '@/app/api/dataPoints/planCache';
 import { Button } from '@/app/components/ui/Button.comp';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { useCourseUnit } from '@/app/views/structure/hooks/useCourseUnit';
@@ -37,7 +38,8 @@ export const CompletionMethodDialog: React.FC<Props> = ({ course, plan, onClose 
   const handleConfirm = () => {
     const selectedMethod = methods[selectedIndex];
     if (!selectedMethod?.localId) return;
-    mutation.mutate(setCompletionMethod(plan, course.courseUnitId, selectedMethod.localId), {
+    const basePlan = (plan.id ? findCachedPlan(queryClient, plan.id) : undefined) ?? plan;
+    mutation.mutate(setCompletionMethod(basePlan, course.courseUnitId, selectedMethod.localId), {
       onSuccess: async () => {
         await queryClient.invalidateQueries({ queryKey: ['plans'] });
         await queryClient.invalidateQueries({ queryKey: ['structure-data'] });

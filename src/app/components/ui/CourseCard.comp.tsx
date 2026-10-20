@@ -3,78 +3,40 @@ import { motion, type MotionProps } from 'motion/react';
 
 type CourseCardProps = Omit<React.HTMLAttributes<HTMLDivElement>, keyof MotionProps> &
   MotionProps & {
-    stripeClassName?: string;
-    stripeStyle?: React.CSSProperties;
+    edgeColor: string;
     heading: React.ReactNode;
     code?: React.ReactNode;
     credits?: React.ReactNode;
     badge?: React.ReactNode;
-    footer?: React.ReactNode;
-    metaAside?: React.ReactNode;
     children?: React.ReactNode;
-    headerClassName?: string;
-    selected?: boolean;
   };
 
 export const CourseCard = React.forwardRef<HTMLDivElement, CourseCardProps>(
-  (
-    {
-      badge,
-      children,
-      className = '',
-      code,
-      credits,
-      footer,
-      heading,
-      headerClassName = '',
-      metaAside,
-      selected = false,
-      stripeClassName = 'bg-darkishGrey',
-      stripeStyle,
-      ...props
-    },
-    ref,
-  ) => (
+  ({ badge, children, className = '', code, credits, edgeColor, heading, ...props }, ref) => (
     <motion.article
       ref={ref}
-      className={`group relative flex w-full min-w-0 flex-col overflow-hidden rounded-[10px] bg-container shadow-[0_0_0_1px_rgba(255,255,255,0.055)] transition-[box-shadow,background-color,opacity,scale,transform] duration-150 ease-out hover:bg-container/95 hover:shadow-[0_0_0_1px_rgba(255,255,255,0.10),0_10px_28px_rgba(0,0,0,0.18)] ${
-        selected ? 'shadow-[0_0_0_1px_rgba(82,201,137,0.24)]' : ''
-      } ${className}`}
+      className={`group relative flex w-full min-w-0 flex-col justify-between rounded-xl bg-container px-2.5 py-2.5 transition-[box-shadow,opacity,scale] duration-150 ease-out ${className}`}
       {...props}
     >
-      <div className={`flex min-h-24 items-start justify-between gap-3 px-3.5 py-3 ${headerClassName}`}>
-        <div className="flex min-w-0 items-start gap-3">
-          <span className={`mt-0.5 w-1 shrink-0 self-stretch rounded-full ${stripeClassName}`} style={stripeStyle} />
-          <div className="min-w-0">
-            <h3 className="text-sm leading-snug font-semibold text-balance text-offwhite">{heading}</h3>
-            {(code || credits || metaAside) && (
-              <p
-                className={`mt-1 flex ${metaAside ? 'flex-nowrap' : 'flex-wrap'} items-center gap-x-2 gap-y-1 font-mono text-xs text-darkishGrey`}
-              >
-                {code && <span className={metaAside ? 'min-w-0 truncate' : undefined}>{code}</span>}
-                {code && credits && <span aria-hidden="true">·</span>}
-                {credits && (
-                  <span
-                    className={metaAside ? 'shrink-0 font-semibold text-[#7ea0ff]' : 'font-semibold text-[#7ea0ff]'}
-                  >
-                    {credits}
-                  </span>
-                )}
-                {metaAside && <span className="ml-auto flex shrink-0 items-center gap-1.5 font-sans">{metaAside}</span>}
-              </p>
-            )}
-          </div>
-        </div>
-        {badge && <div className="shrink-0">{badge}</div>}
-      </div>
-
-      {children}
-
-      {footer && (
-        <div className="mt-auto border-t border-border/70 bg-container2/55 px-3.5 py-2 text-xs text-lightGrey">
-          {footer}
+      <span
+        aria-hidden="true"
+        className="absolute top-2 bottom-2 left-2.5 w-1 rounded-full"
+        style={{ backgroundColor: edgeColor }}
+      />
+      <h3 className="line-clamp-2 pl-3.5 text-[13px] leading-[1.3] font-semibold text-pretty text-offwhite">
+        {heading}
+      </h3>
+      {(code || credits || badge) && (
+        <div className="flex min-w-0 items-center gap-2 pl-3.5">
+          <p className="flex min-w-0 items-center gap-x-1.5 font-mono text-[11px] leading-4 whitespace-nowrap text-[#a3a3c4]">
+            {code && <span className="min-w-0 truncate">{code}</span>}
+            {code && credits && <span aria-hidden="true">·</span>}
+            {credits && <span className="shrink-0 font-semibold text-[#7ea0ff] tabular-nums">{credits}</span>}
+          </p>
+          {badge && <span className="ml-auto flex shrink-0 items-center">{badge}</span>}
         </div>
       )}
+      {children}
     </motion.article>
   ),
 );

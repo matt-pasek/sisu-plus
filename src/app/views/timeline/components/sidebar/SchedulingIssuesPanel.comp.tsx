@@ -16,10 +16,10 @@ export const SchedulingIssuesPanel: React.FC<Props> = ({ issues, onSelect }) => 
 
   return (
     <Panel
-      className="shrink-0 ring-1 ring-[rgba(240,168,77,0.35)] ring-inset max-lg:max-h-full max-lg:max-w-[360px] max-lg:min-w-[260px]"
+      className="shrink-0 ring-1 ring-[rgba(240,168,77,0.35)] ring-inset max-lg:max-h-full max-lg:max-w-[360px] max-lg:min-w-[260px] lg:max-h-[40%]"
       header={<PanelEyebrow>{t('sidebar.issues', { count: issues.length })}</PanelEyebrow>}
     >
-      <ul className="grid gap-0.5 p-2 max-lg:min-h-0 max-lg:overflow-y-auto">
+      <ul className="grid min-h-0 gap-0.5 overflow-y-auto p-2">
         {issues.map(({ courseUnitId, courseName, warning }) => (
           <li key={`${courseUnitId}:${warning.id}`}>
             <button

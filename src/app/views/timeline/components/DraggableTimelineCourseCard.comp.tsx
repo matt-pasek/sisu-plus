@@ -32,7 +32,9 @@ export const DraggableTimelineCourseCard: React.FC<Props> = ({ disabled = false,
     <TimelineCourseCard
       {...props}
       className={`${disabled ? 'cursor-not-allowed opacity-85' : 'cursor-grab touch-none active:scale-[0.96] active:cursor-grabbing'} ${
-        isDragging ? 'scale-[1.02] opacity-45 shadow-[0_12px_24px_rgba(0,0,0,0.28)]' : ''
+        isDragging
+          ? 'scale-[1.02] opacity-45 shadow-[0_0_0_1px_rgba(255,255,255,0.12),0_12px_24px_rgba(0,0,0,0.28)]!'
+          : ''
       } ${className}`}
       dragBlockedControls={dragBlockedControls}
       onPointerDown={handlePointerDown}

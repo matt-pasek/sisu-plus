@@ -1,108 +1,64 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import type { StudyPeriodInfo } from '@/app/api/dataPoints/getStudyPeriodMap';
-import { Panel } from '@/app/components/ui/Panel.comp';
-import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
-import { HeroStats } from '@/app/views/timeline/components/hero/HeroStats.comp';
-import { TrajectoryChart } from '@/app/views/timeline/components/hero/TrajectoryChart.comp';
-import { TrajectorySparkline } from '@/app/views/timeline/components/hero/TrajectorySparkline.comp';
-import type { HeroStats as HeroStatsData } from '@/app/views/timeline/util/heroStats';
+import { HERO_FADE_SECONDS, HERO_FOLD_SECONDS, HERO_STRIP_HEIGHT } from '@/app/views/timeline/constants/hero.const';
+import { useHeroCopy } from '@/app/views/timeline/hooks/useHeroCopy';
+import type { HeroStats } from '@/app/views/timeline/types';
+import { HeroExpanded } from './HeroExpanded.comp';
+import { HeroStrip } from './HeroStrip.comp';
 
 interface Props {
-  stats: HeroStatsData;
-  periodsByLocator: Map<string, StudyPeriodInfo>;
-  showGraduation: boolean;
+  stats: HeroStats;
+  issueCount: number;
   folded: boolean;
   ready: boolean;
   onToggle: () => void;
 }
 
 const EASE = [0.25, 1, 0.5, 1] as const;
-const STRIP_HEIGHT = 40;
 
-export const TimelineHero: React.FC<Props> = ({ stats, periodsByLocator, showGraduation, folded, ready, onToggle }) => {
-  const { t } = useTranslationWithPrefix('views.timeline');
+/**
+ * Folding swaps two layouts stacked in one grid cell and only clips the wrapper's height.
+ * The canvas inside the expanded layout is never transformed, clipped by clip-path or
+ * resized mid-fold, and it unmounts with the expanded layout, so a folded hero renders nothing.
+ */
+export const TimelineHero: React.FC<Props> = ({ stats, issueCount, folded, ready, onToggle }) => {
+  const copy = useHeroCopy(stats, issueCount);
   const shouldReduceMotion = useReducedMotion();
-  const hasChart = stats.trajectory.length > 0;
+  const [isFolding, setIsFolding] = useState(false);
+  const focusRequest = useRef(false);
+  const fold = shouldReduceMotion ? { duration: 0 } : { duration: HERO_FOLD_SECONDS, ease: EASE };
+  const fade = shouldReduceMotion ? { duration: 0 } : { duration: HERO_FADE_SECONDS, ease: EASE };
 
-  const transition = shouldReduceMotion ? { duration: 0 } : { duration: 0.28, ease: EASE };
-  const fadeProps = {
-    initial: { opacity: 0 },
-    animate: { opacity: 1 },
-    exit: { opacity: 0 },
-    transition,
-  };
+  if (!ready) return <div className="shrink-0" style={{ height: HERO_STRIP_HEIGHT }} />;
 
   return (
-    <Panel className="shrink-0">
-      <div className="relative">
-        {ready ? (
+    <motion.div
+      className="shrink-0"
+      initial={false}
+      animate={{ height: folded ? HERO_STRIP_HEIGHT : 'auto' }}
+      transition={fold}
+      onAnimationStart={() => setIsFolding(true)}
+      onAnimationComplete={() => setIsFolding(false)}
+      style={{ overflow: isFolding ? 'hidden' : 'visible' }}
+    >
+      <div className="grid">
+        <AnimatePresence initial={false}>
           <motion.div
-            className="relative overflow-hidden"
-            initial={false}
-            animate={{ height: folded ? STRIP_HEIGHT : 'auto' }}
-            transition={transition}
+            key={folded ? 'strip' : 'full'}
+            className="self-start [grid-area:1/1]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={fade}
           >
-            <AnimatePresence initial={false} mode="popLayout">
-              {folded ? (
-                <motion.div key="strip" {...fadeProps}>
-                  <div className="flex h-10 items-center gap-5 pr-12 pl-4">
-                    <HeroStats stats={stats} showGraduation={showGraduation} variant="strip" />
-                    {hasChart && (
-                      <div className="ml-auto hidden w-[120px] shrink-0 sm:block">
-                        <TrajectorySparkline points={stats.trajectory} target={stats.target} />
-                      </div>
-                    )}
-                  </div>
-                </motion.div>
-              ) : (
-                <motion.div key="full" {...fadeProps}>
-                  <div className="flex items-center gap-x-10 gap-y-4 py-4 pr-12 pl-5">
-                    <div className="flex min-w-0 flex-col gap-3">
-                      <h2 className="text-lg font-semibold text-offwhite">
-                        {t('hero.title')} <span className="text-lighterGreen">{t('hero.titleAccent')}</span>
-                      </h2>
-                      <HeroStats stats={stats} showGraduation={showGraduation} variant="full" />
-                    </div>
-                    {hasChart && (
-                      <div className="ml-auto self-center max-lg:hidden">
-                        <TrajectoryChart
-                          points={stats.trajectory}
-                          target={stats.target}
-                          periodsByLocator={periodsByLocator}
-                        />
-                      </div>
-                    )}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {folded ? (
+              <HeroStrip copy={copy} onToggle={onToggle} focusRequest={focusRequest} />
+            ) : (
+              <HeroExpanded copy={copy} onToggle={onToggle} focusRequest={focusRequest} />
+            )}
           </motion.div>
-        ) : (
-          <div className="h-10" />
-        )}
-        <button
-          type="button"
-          onClick={onToggle}
-          aria-expanded={!folded}
-          aria-label={folded ? t('hero.unfold') : t('hero.fold')}
-          title={folded ? t('hero.unfold') : t('hero.fold')}
-          className="absolute top-2 right-2 flex size-6 cursor-pointer items-center justify-center rounded-md text-lightGrey transition-colors hover:bg-container2 hover:text-offwhite focus-visible:outline-2 focus-visible:outline-lighterGreen"
-        >
-          <svg
-            viewBox="0 0 16 16"
-            className={`size-4 transition-transform ${folded ? '' : 'rotate-180'}`}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={1.5}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M4 6l4 4 4-4" />
-          </svg>
-        </button>
+        </AnimatePresence>
       </div>
-    </Panel>
+    </motion.div>
   );
 };

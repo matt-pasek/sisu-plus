@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
+  PLAN_WRITE_SCOPE,
   findCachedPlan,
   restorePlans,
   snapshotPlans,
@@ -32,6 +33,7 @@ export function useMoveCourse() {
   const queryClient = useQueryClient();
 
   return useMutation<Plan, Error, MoveCourseArgs, MoveCourseContext>({
+    scope: PLAN_WRITE_SCOPE,
     mutationFn: async ({ courseUnitId, newPeriodLocators, planId }) => {
       const plan = findCachedPlan(queryClient, planId);
       if (!plan) throw new Error('Plan not found.');

@@ -12,6 +12,16 @@ export interface TimelineIssue {
   warning: TimelineValidationWarning;
 }
 
+const GENERIC_TRAILING_WORD = /\s+(studies|study|module|opinnot|moduuli)$/i;
+const SHORT_NAME_MAX = 14;
+
+export const getShortModuleName = (name: string): string => {
+  const trimmed = name.trim();
+  const base = trimmed.replace(GENERIC_TRAILING_WORD, '').trim() || trimmed;
+  if (base.length <= SHORT_NAME_MAX) return base;
+  return base.split(/\s+/)[0].replace(/[-,:;]+$/, '') || base;
+};
+
 export const listModules = (courses: TimelineCourse[], unknownLabel: string): TimelineModule[] => {
   const modules = new Map<string, TimelineModule>();
   for (const course of courses) {

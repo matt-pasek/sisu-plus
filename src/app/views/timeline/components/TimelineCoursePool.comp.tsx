@@ -11,13 +11,17 @@ import { formatCredits } from '@/app/helpers/formatCredits';
 import { TimelineValidationWarning } from '@/app/views/timeline/util/timelineValidation';
 import { TIMELINE_COURSE_DRAG_TYPE } from '@/app/views/timeline/util/dndHandlers';
 import { getCourseKey } from '@/app/views/timeline/util/getCourseKey';
+import type { TimelineModule } from '@/app/views/timeline/util/sidebarLists';
 import { getModuleColor } from '@/app/theme/moduleColors';
+import { ModuleLegend } from '@/app/views/timeline/components/sidebar/ModuleLegend.comp';
+import { PoolFilterToggle } from '@/app/views/timeline/components/sidebar/PoolFilterToggle.comp';
 
 interface Props {
   draftCourseIds?: Set<string>;
   draftOriginalPeriodCounts?: Map<string, number>;
   hidePreviousPeriods?: boolean;
   isDragging?: boolean;
+  modules?: TimelineModule[];
   onHidePreviousPeriodsChange?: (value: boolean) => void;
   onDismissValidationWarning?: (warningId: string) => void;
   onShowHiddenSummerPeriodsChange?: (value: boolean) => void;
@@ -26,27 +30,12 @@ interface Props {
   validationWarnings?: Map<string, TimelineValidationWarning[]>;
 }
 
-const FilterCheckbox: React.FC<{ checked: boolean; label: string; onChange: (value: boolean) => void }> = ({
-  checked,
-  label,
-  onChange,
-}) => (
-  <label className="flex min-h-7 cursor-pointer items-center gap-2 text-xs font-semibold text-lightGrey transition-colors duration-150 hover:text-offwhite">
-    <input
-      type="checkbox"
-      checked={checked}
-      onChange={(event) => onChange(event.target.checked)}
-      className="size-4 rounded accent-accent"
-    />
-    {label}
-  </label>
-);
-
 export const TimelineCoursePool: React.FC<Props> = ({
   draftCourseIds = new Set(),
   draftOriginalPeriodCounts = new Map(),
   hidePreviousPeriods = false,
   isDragging = false,
+  modules = [],
   onHidePreviousPeriodsChange,
   onDismissValidationWarning,
   onShowHiddenSummerPeriodsChange,
@@ -79,20 +68,37 @@ export const TimelineCoursePool: React.FC<Props> = ({
           </PanelEyebrow>
         }
         footer={
-          <div className="grid gap-1">
-            <FilterCheckbox
-              checked={hidePreviousPeriods}
-              label={t('pool.hidePrevious')}
-              onChange={(value) => onHidePreviousPeriodsChange?.(value)}
+          <div role="group" aria-label={t('pool.show')} className="flex flex-wrap items-center gap-1.5 py-1">
+            <span aria-hidden="true" className="mr-0.5 font-semibold">
+              {t('pool.show')}
+            </span>
+            <PoolFilterToggle
+              pressed={!hidePreviousPeriods}
+              label={t('pool.previous')}
+              description={t('pool.showPrevious')}
+              onChange={(pressed) => onHidePreviousPeriodsChange?.(!pressed)}
             />
-            <FilterCheckbox
-              checked={showHiddenSummerPeriods}
-              label={t('pool.showSummer')}
-              onChange={(value) => onShowHiddenSummerPeriodsChange?.(value)}
+            <PoolFilterToggle
+              pressed={showHiddenSummerPeriods}
+              label={t('pool.summer')}
+              description={t('pool.showSummer')}
+              onChange={(pressed) => onShowHiddenSummerPeriodsChange?.(pressed)}
             />
           </div>
         }
       >
+        {modules.length > 0 && <ModuleLegend modules={modules} />}
+        {unscheduledCourses.length > 0 && (
+          <div className="shrink-0 border-b border-border px-4 py-2.5">
+            <div className="flex items-baseline justify-between gap-3 text-xs text-lightGrey">
+              <span>{t('pool.outsideTimeline')}</span>
+              <span className="font-mono font-semibold text-offwhite tabular-nums">{formatCredits(credits)}</span>
+            </div>
+            <p className="mt-0.5 text-[11.5px] leading-snug text-pretty text-darkishGrey">
+              {t('pool.withoutVisiblePeriod', { count: unscheduledCourses.length })}
+            </p>
+          </div>
+        )}
         <AnimatePresence initial={false}>
           {isDropTarget && (
             <motion.div
@@ -132,15 +138,6 @@ export const TimelineCoursePool: React.FC<Props> = ({
               {t('pool.empty')}
             </div>
           )}
-          <div className="shrink-0 pt-1">
-            <div className="flex items-center justify-between text-xs text-lightGrey">
-              <span>{t('pool.outsideTimeline')}</span>
-              <span className="font-mono font-semibold text-offwhite tabular-nums">{formatCredits(credits)}</span>
-            </div>
-            <p className="mt-1 text-xs leading-snug text-pretty text-darkishGrey">
-              {t('pool.withoutVisiblePeriod', { count: unscheduledCourses.length })}
-            </p>
-          </div>
         </div>
       </Panel>
     </div>

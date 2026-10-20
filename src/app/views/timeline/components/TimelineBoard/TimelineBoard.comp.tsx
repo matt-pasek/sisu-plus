@@ -6,6 +6,7 @@ import type { TimelineCourse } from '@/app/api/dataPoints/getTimelineCourses';
 import { DraggableTimelineCourseCard } from '@/app/views/timeline/components/DraggableTimelineCourseCard.comp';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { sortCourses } from '@/app/views/timeline/util/sortCourses';
+import { AddCourseSlot } from '@/app/views/timeline/components/addCourse/AddCourseSlot.comp';
 import { PeriodDropCell } from '@/app/views/timeline/components/TimelineBoard/components/PeriodDropCell.comp';
 import { BoardSemesterHeader } from '@/app/views/timeline/components/TimelineBoard/components/BoardSemesterHeader.comp';
 import { BoardPeriodHeader } from '@/app/views/timeline/components/TimelineBoard/components/BoardPeriodHeader.comp';
@@ -14,11 +15,15 @@ import { TimelineValidationWarning } from '@/app/views/timeline/util/timelineVal
 import { getCourseKey } from '@/app/views/timeline/util/getCourseKey';
 import { getModuleColor } from '@/app/theme/moduleColors';
 import type { TimelineCourseDragData, TimelinePeriodDropData } from '@/app/views/timeline/util/dndHandlers';
+import { BOARD_GAP, COURSE_CARD_HEIGHT, PERIOD_WIDTH } from '@/app/views/timeline/constants/board.const';
 
 interface Props {
+  activeAddLocator?: string | null;
+  addablePeriodLocators?: Set<string>;
   draftCourseIds?: Set<string>;
   highlightedPeriodLocators?: Set<string>;
   isDragging?: boolean;
+  onAddCourse?: (periodLocator: string, trigger: HTMLElement) => void;
   onDismissValidationWarning?: (warningId: string) => void;
   onResizeCourse?: (courseUnitId: string, newPeriodLocators: string[]) => void;
   scrollRef?: React.Ref<HTMLDivElement>;
@@ -43,8 +48,6 @@ interface CourseSpan {
   startColumn: number;
   endColumn: number;
 }
-
-const PERIOD_WIDTH = 210;
 
 function getTotalCredits(
   summary: Pick<PeriodCreditSummary | SemesterCreditSummary, 'plannedCredits' | 'completedCredits'>,
@@ -110,9 +113,12 @@ function getCourseBlocks(semesters: SemesterCreditSummary[], periods: VisiblePer
 }
 
 export const TimelineBoard: React.FC<Props> = ({
+  activeAddLocator = null,
+  addablePeriodLocators = new Set(),
   draftCourseIds = new Set(),
   highlightedPeriodLocators = new Set(),
   isDragging = false,
+  onAddCourse,
   onDismissValidationWarning,
   onResizeCourse,
   scrollRef,
@@ -130,6 +136,8 @@ export const TimelineBoard: React.FC<Props> = ({
   const hasHighlightedDropPeriods = highlightedPeriodLocators.size > 0;
   const flipKey = visiblePeriods.map(({ period }) => period.periodLocator).join(':');
   const flipRef = useGridFlip<HTMLDivElement>(flipKey);
+  const hasAddSlots = addablePeriodLocators.size > 0;
+  const firstCourseRow = hasAddSlots ? 2 : 1;
   const dragOperation = useDragOperation();
   const sourceData = dragOperation.source?.data as TimelineCourseDragData | undefined;
   const targetData = dragOperation.target?.data as TimelinePeriodDropData | undefined;
@@ -147,13 +155,14 @@ export const TimelineBoard: React.FC<Props> = ({
   }
 
   let periodOffset = 0;
+  const gridGap = { gap: BOARD_GAP };
 
   return (
     <div ref={scrollRef} className="min-h-0 min-w-0 flex-1 overflow-auto">
       <div className="min-h-full w-max px-4 py-5">
         {semesters.length > 0 ? (
           <div ref={flipRef}>
-            <div className="grid gap-2" style={{ gridTemplateColumns }}>
+            <div className="grid" style={{ ...gridGap, gridTemplateColumns }}>
               {semesters.map((semester) => {
                 const startColumn = periodOffset + 1;
                 periodOffset += semester.periods.length;
@@ -167,7 +176,7 @@ export const TimelineBoard: React.FC<Props> = ({
               })}
             </div>
 
-            <div className="mt-2 grid gap-2" style={{ gridTemplateColumns }}>
+            <div className="mt-2 grid" style={{ ...gridGap, gridTemplateColumns }}>
               {visiblePeriods.map(({ period }) => (
                 <BoardPeriodHeader
                   key={period.periodLocator}
@@ -178,10 +187,11 @@ export const TimelineBoard: React.FC<Props> = ({
             </div>
 
             <div
-              className="mt-2 grid gap-2"
+              className="mt-2 grid"
               style={{
+                ...gridGap,
                 gridTemplateColumns,
-                gridTemplateRows: `repeat(${rowCount}, minmax(52px, auto))`,
+                gridTemplateRows: `${hasAddSlots ? 'auto ' : ''}repeat(${rowCount}, ${COURSE_CARD_HEIGHT}px)`,
               }}
             >
               {visiblePeriods.map(({ period }, index) => (
@@ -193,7 +203,7 @@ export const TimelineBoard: React.FC<Props> = ({
                   isDragging={isDragging}
                   isActiveDropTarget={activeDropLocators.has(period.periodLocator)}
                   period={period}
-                  rowCount={rowCount}
+                  rowCount={rowCount + (hasAddSlots ? 1 : 0)}
                 />
               ))}
 
@@ -205,18 +215,14 @@ export const TimelineBoard: React.FC<Props> = ({
                     className="z-10"
                     style={{
                       gridColumn: `${block.startColumn + 1} / ${block.endColumn + 1}`,
-                      gridRow: block.row + 1,
+                      gridRow: block.row + firstCourseRow,
                     }}
                   >
                     <DraggableTimelineCourseCard
-                      style={{
-                        height: '100%',
-                      }}
                       course={block.course}
                       color={getModuleColor(block.course.moduleId)}
                       disabled={block.course.isPassed}
                       isDraft={draftCourseIds.has(block.course.courseUnitId)}
-                      className="h-full min-h-13"
                       onDismissValidationWarning={onDismissValidationWarning}
                       validationWarnings={validationWarnings.get(block.course.courseUnitId)}
                       onResizeRight={(delta) => {
@@ -230,10 +236,23 @@ export const TimelineBoard: React.FC<Props> = ({
               ) : (
                 <div
                   className="z-10 flex items-center justify-center text-xs text-darkishGrey"
-                  style={{ gridColumn: '1 / -1' }}
+                  style={{ gridColumn: '1 / -1', gridRow: `${firstCourseRow} / span ${rowCount}` }}
                 >
                   {t('board.noCourses')}
                 </div>
+              )}
+
+              {visiblePeriods.map(({ period }, index) =>
+                addablePeriodLocators.has(period.periodLocator) ? (
+                  <AddCourseSlot
+                    key={`${period.periodLocator}:add`}
+                    column={index + 1}
+                    row={1}
+                    periodName={period.period.name}
+                    revealed={period.courses.length === 0 || activeAddLocator === period.periodLocator}
+                    onOpen={(trigger) => onAddCourse?.(period.periodLocator, trigger)}
+                  />
+                ) : null,
               )}
             </div>
           </div>

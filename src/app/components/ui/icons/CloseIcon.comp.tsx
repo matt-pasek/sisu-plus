@@ -1,5 +1,8 @@
 import React from 'react';
-import type { IconProps } from '../../types';
+
+interface IconProps {
+  className?: string;
+}
 
 export const CloseIcon: React.FC<IconProps> = ({ className = 'size-4' }) => (
   <svg

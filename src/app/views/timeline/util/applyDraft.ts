@@ -18,6 +18,22 @@ export const stageDraft = (
   return next;
 };
 
+export const keepDraftForCourses = (
+  draft: Map<string, string[]>,
+  courses: Pick<TimelineCourse, 'courseUnitId'>[],
+): Map<string, string[]> => {
+  const courseIds = new Set(courses.map((course) => course.courseUnitId));
+  const kept = [...draft].filter(([courseUnitId]) => courseIds.has(courseUnitId));
+  return kept.length === draft.size ? draft : new Map(kept);
+};
+
+// While the courses are loading (e.g. after a language switch) the list is briefly empty; pruning then would wipe the draft.
+export const pruneDraft = (
+  draft: Map<string, string[]>,
+  courses: Pick<TimelineCourse, 'courseUnitId'>[],
+  coursesReady: boolean,
+): Map<string, string[]> => (coursesReady ? keepDraftForCourses(draft, courses) : draft);
+
 export const applyDraftToCourses = (
   courses: TimelineCourse[],
   draft: Map<string, string[]>,

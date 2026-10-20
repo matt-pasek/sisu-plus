@@ -1,11 +1,44 @@
 export type TimelineTranslation = {
+  addCourse: {
+    add: string;
+    addFailed: string;
+    addTo: string;
+    added: string;
+    adding: string;
+    close: string;
+    confirmed: string;
+    empty: string;
+    emptyNoSearch: string;
+    eyebrow: string;
+    groupFull: string;
+    hide: string;
+    likely: string;
+    listedUnder: string;
+    loadFailed: string;
+    loading: string;
+    notTaught_one: string;
+    notTaught_other: string;
+    periods_one: string;
+    periods_other: string;
+    pick: string;
+    planned: string;
+    plannedOnly: string;
+    primaryOnly: string;
+    required: string;
+    search: string;
+    show: string;
+    slot: string;
+    someUnchecked_one: string;
+    someUnchecked_other: string;
+    title: string;
+    undo: string;
+    undoFailed: string;
+    unmet: string;
+  };
   actions: {
-    addCourse: string;
-    autoSchedule: string;
     confirm: string;
     confirming: string;
     reset: string;
-    scheduling: string;
   };
   board: {
     done: string;
@@ -21,31 +54,49 @@ export type TimelineTranslation = {
     dismissPrerequisite: string;
     periodWarning: string;
     prerequisiteWarning: string;
+    resize: string;
     unnamed: string;
     warningCount: string;
   };
   hero: {
-    chartLabel: string;
-    degreeMarker: string;
-    ofDegree: string;
-    pointPlanned: string;
-    targetLine: string;
-    trajectoryLabel: string;
-    trajectoryLabelNoTarget: string;
+    empty: string;
+    emptyHint: string;
+    eyebrow: string;
     fold: string;
-    graduation: string;
+    graduating: string;
     heaviest: string;
+    heaviestSub: string;
+    loadNeeded: string;
+    loadPeriod: string;
+    loadTitle: string;
+    met: string;
+    metAccent: string;
+    needed: string;
+    neededSub: string;
+    pace: string;
+    paceSub: string;
+    periodsLeft_one: string;
+    periodsLeft_other: string;
+    planEnds: string;
+    projected: string;
+    projectedLabel: string;
+    projectedSub: string;
     scheduled: string;
     short: string;
-    title: string;
-    titleAccent: string;
+    shortAccent: string;
+    span: string;
+    termAutumn: string;
+    termSpring: string;
     unfold: string;
   };
   pool: {
     empty: string;
-    hidePrevious: string;
     outsideTimeline: string;
+    previous: string;
+    show: string;
+    showPrevious: string;
     showSummer: string;
+    summer: string;
     title: string;
     unscheduleDrop: string;
     withoutVisiblePeriod: string;
@@ -81,13 +132,46 @@ export type TimelineTranslation = {
 };
 
 export const timelineTranslation: TimelineTranslation = {
+  addCourse: {
+    add: 'Add',
+    addFailed: "Couldn't add {{course}}. Nothing changed.",
+    addTo: 'Add to',
+    added: 'Added',
+    adding: 'Adding…',
+    close: 'Close',
+    confirmed: 'Taught {{term}}',
+    empty: 'Nothing left to choose here. Try searching all courses.',
+    emptyNoSearch: 'Nothing left to choose here.',
+    eyebrow: 'Add course',
+    groupFull: '{{module}} is already full',
+    hide: 'Hide',
+    likely: 'Taught in {{period}} last year',
+    listedUnder: 'Listed under {{module}}',
+    loadFailed: "Couldn't load your study options. Try again later.",
+    loading: 'Finding courses that fit…',
+    notTaught_one: "{{count}} more option isn't taught in this period",
+    notTaught_other: "{{count}} more options aren't taught in this period",
+    periods_one: '1 period',
+    periods_other: '{{count}} periods · {{range}}',
+    pick: 'pick {{pick}} of {{of}}',
+    planned: '{{credits}} planned there so far',
+    plannedOnly: 'Needs {{course}} first, planned for {{period}}',
+    primaryOnly: 'Adding courses works on your primary plan.',
+    required: 'Required',
+    search: 'Search all courses…',
+    show: 'Show',
+    slot: 'Add course to {{period}}',
+    someUnchecked_one: "{{count}} course couldn't be checked for this period",
+    someUnchecked_other: "{{count}} courses couldn't be checked for this period",
+    title: 'Fits in {{period}} · {{term}}',
+    undo: 'Undo',
+    undoFailed: "Couldn't undo. {{course}} is still in your plan.",
+    unmet: 'Needs {{course}} first',
+  },
   actions: {
-    addCourse: 'Add Course',
-    autoSchedule: 'Auto-schedule',
     confirm: 'Confirm',
     confirming: 'Confirming...',
     reset: 'Reset timeline changes',
-    scheduling: 'Scheduling...',
   },
   board: {
     done: 'Done',
@@ -103,31 +187,49 @@ export const timelineTranslation: TimelineTranslation = {
     dismissPrerequisite: 'I have similar prerequisite',
     periodWarning: 'Timing',
     prerequisiteWarning: 'Prereq',
+    resize: 'Resize {{course}}',
     unnamed: 'Unnamed course',
     warningCount: '{{count}} issues',
   },
   hero: {
-    chartLabel: 'Credits over time against your degree target',
-    degreeMarker: 'Degree',
-    ofDegree: '{{pct}}% of degree',
-    pointPlanned: 'planned',
-    targetLine: '{{target}} · degree',
-    trajectoryLabel: 'Credit trajectory → {{target}}',
-    trajectoryLabelNoTarget: 'Credit trajectory',
+    empty: 'No courses scheduled yet',
+    emptyHint: 'Drag a course from the course pool onto a period to schedule it.',
+    eyebrow: 'Plan',
     fold: 'Hide summary',
-    graduation: 'graduation',
-    heaviest: 'heaviest · {{period}}',
-    scheduled: 'scheduled',
-    short: '{{credits}} short',
-    title: 'Plan your path,',
-    titleAccent: 'period by period',
+    graduating: 'Graduating in {{accent}}',
+    heaviest: 'Heaviest period',
+    heaviestSub: '{{period}} · {{term}}',
+    loadNeeded: '{{credits}} needed',
+    loadPeriod: '{{period}} · {{term}}',
+    loadTitle: 'Load per period',
+    met: 'Degree target {{accent}}',
+    metAccent: 'reached',
+    needed: 'Needed / period',
+    neededSub: 'to reach {{target}}',
+    pace: 'Avg. pace',
+    paceSub: 'per period',
+    periodsLeft_one: '{{count}} period left',
+    periodsLeft_other: '{{count}} periods left',
+    planEnds: 'Plan ends in {{accent}}',
+    projected: 'projected cr',
+    projectedLabel: 'Projected',
+    projectedSub: '{{pct}}% of {{target}}',
+    scheduled: '{{credits}} scheduled',
+    short: '{{accent}} of graduating',
+    shortAccent: '{{credits}} short',
+    span: '{{from}} → {{to}}',
+    termAutumn: 'Autumn {{year}}',
+    termSpring: 'Spring {{year}}',
     unfold: 'Show summary',
   },
   pool: {
     empty: 'Every planned course has a study period.',
-    hidePrevious: 'Hide previous periods',
     outsideTimeline: 'Outside shown timeline',
+    previous: 'Previous',
+    show: 'Show',
+    showPrevious: 'Show previous periods',
     showSummer: 'Show summer periods',
+    summer: 'Summer',
     title: 'Course pool',
     unscheduleDrop: 'Drop to unschedule',
     withoutVisiblePeriod: '{{count}} courses have no visible timing period - drag them onto a period to schedule.',

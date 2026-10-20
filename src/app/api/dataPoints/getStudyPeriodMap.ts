@@ -1,6 +1,5 @@
-import { fetchStudyRights } from '@/app/api/endpoints/studyRights';
 import { fetchStudyYears } from '@/app/api/endpoints/studyPeriods';
-import { fetchEducationById } from '@/app/api/endpoints/educations';
+import { getHomeUniversityOrgId } from '@/app/api/dataPoints/getHomeUniversityOrgId';
 import { pickLabel } from '@/app/api/resolvers/helpers/pickLabel';
 import { useSisuQuery } from '@/app/hooks/useSisuQuery';
 import type { StudyYear } from '@/app/api/generated/KoriApi';
@@ -52,16 +51,7 @@ export function buildStudyPeriodMap(studyYears: StudyYear[]): StudyPeriodMap {
 }
 
 export const getStudyPeriodMap = (): { studyPeriodMap: StudyPeriodMap; isLoading: boolean } => {
-  const studyRightsQuery = useSisuQuery(['study-rights'], fetchStudyRights);
-  const studyRight = studyRightsQuery.data?.[0];
-
-  const educationQuery = useSisuQuery(
-    ['study-period-education', studyRight?.educationId],
-    async () => fetchEducationById(studyRight!.educationId),
-    { enabled: studyRight?.educationId != null },
-  );
-
-  const org = educationQuery.data?.universityOrgIds[0] ?? studyRight?.organisationId;
+  const { orgId: org, isLoading: isOrgLoading } = getHomeUniversityOrgId();
 
   const { data: studyPeriodMap, isLoading } = useSisuQuery(
     ['study-period-map', org],
@@ -75,6 +65,6 @@ export const getStudyPeriodMap = (): { studyPeriodMap: StudyPeriodMap; isLoading
 
   return {
     studyPeriodMap: studyPeriodMap ?? new Map(),
-    isLoading: studyRightsQuery.isLoading || educationQuery.isLoading || isLoading,
+    isLoading: isOrgLoading || isLoading,
   };
 };

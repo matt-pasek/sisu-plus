@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { findCachedPlan } from '@/app/api/dataPoints/planCache';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { pickLabel } from '@/app/api/resolvers/helpers/pickLabel';
 import { formatCourseVersion } from '@/app/views/structure/components/CourseDetailsDialog.comp';
@@ -22,6 +24,7 @@ interface Props {
 
 export const BulkVersionUpdateDialog: React.FC<Props> = ({ plan, sections, onClose }) => {
   const { t } = useTranslationWithPrefix('views.structure');
+  const queryClient = useQueryClient();
   const saveStructurePlan = useStructurePlanMutation();
   const { updates, isLoading } = useBulkVersionUpdates(plan, sections);
 
@@ -92,9 +95,10 @@ export const BulkVersionUpdateDialog: React.FC<Props> = ({ plan, sections, onClo
   };
 
   const applyUpdates = () => {
+    const basePlan = (plan.id ? findCachedPlan(queryClient, plan.id) : undefined) ?? plan;
     const nextPlan = selectedUpdates.reduce(
       (candidate, update) => swapCourseVersion(candidate, update.course.courseUnitId, update.latest.id!),
-      plan,
+      basePlan,
     );
     saveStructurePlan.mutate(nextPlan, { onSuccess: onClose });
   };

@@ -3,7 +3,7 @@ export { CalendarIcon } from './CalendarIcon.comp';
 export { ChevronLeftIcon } from './ChevronLeftIcon.comp';
 export { ChevronRightIcon } from './ChevronRightIcon.comp';
 export { ClockIcon } from './ClockIcon.comp';
-export { CloseIcon } from './CloseIcon.comp';
+export { CloseIcon } from '@/app/components/ui/icons/CloseIcon.comp';
 export { CopyIcon } from './CopyIcon.comp';
 export { CrossIcon } from './CrossIcon.comp';
 export { DiamondIcon } from './DiamondIcon.comp';

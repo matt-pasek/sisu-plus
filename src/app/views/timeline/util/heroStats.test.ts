@@ -23,50 +23,60 @@ describe('getHeroStats', () => {
     makeCourse({ courseUnitId: 'p1c', isPassed: true, credits: 5 }),
   ];
 
-  test('scheduled sums planned credits', () => {
-    expect(getHeroStats({ periods, courses: passed, target: 60, today: '2026-11-15' }).scheduledCredits).toBe(28);
+  test('scheduled sums planned credits and projected adds them to what is already passed', () => {
+    const stats = getHeroStats({ periods, courses: passed, target: 60, today: '2026-11-15' });
+    expect(stats.scheduledCredits).toBe(28);
+    expect(stats.projectedCredits).toBe(53);
+    expect(stats.projectedPercent).toBe(88);
   });
 
-  test('heaviest ignores finished periods', () => {
-    expect(getHeroStats({ periods, courses: passed, target: 60, today: '2027-01-05' }).heaviest?.period.locator).toBe(
-      'p3',
-    );
+  test('the span runs over the sorted periods that hold credits', () => {
+    const stats = getHeroStats({ periods, courses: passed, target: 60, today: '2026-11-15' });
+    expect(stats.span?.from.locator).toBe('p1');
+    expect(stats.span?.to.locator).toBe('p3');
   });
 
-  test('heaviest breaks ties toward the earlier period', () => {
-    const tied = [summary(p3, 0, 10), summary(p2, 0, 10)];
-    const heaviest = getHeroStats({ periods: tied, courses: [], target: null, today: '2026-11-15' }).heaviest;
-    expect(heaviest?.credits).toBe(10);
-    expect(heaviest?.period.locator).toBe('p2');
+  test('pace and need use the periods left until the plan ends', () => {
+    const stats = getHeroStats({ periods, courses: passed, target: 60, today: '2026-11-15' });
+    expect(stats.remainingPeriods).toBe(2);
+    expect(stats.averagePace).toBe(14);
+    expect(stats.neededPerPeriod).toBe(17.5);
+    expect(stats.heaviest?.period.locator).toBe('p2');
   });
 
-  test('trajectory is cumulative, sorted, and flags started periods', () => {
-    expect(getHeroStats({ periods, courses: passed, target: 60, today: '2026-11-15' }).trajectory).toEqual([
-      { periodLocator: 'p1', completed: 25, total: 25, hasStarted: true },
-      { periodLocator: 'p2', completed: 25, total: 43, hasStarted: true },
-      { periodLocator: 'p3', completed: 25, total: 53, hasStarted: false },
+  test('loads list each period left in order', () => {
+    const stats = getHeroStats({ periods, courses: passed, target: 60, today: '2026-11-15' });
+    expect(stats.loads.map((load) => [load.period.locator, load.credits])).toEqual([
+      ['p2', 18],
+      ['p3', 10],
     ]);
   });
 
-  test('graduation counts credits earned outside the period map', () => {
-    expect(getHeroStats({ periods, courses: passed, target: 43, today: '2026-11-15' }).graduation).toEqual({
-      kind: 'period',
+  test("a period's load counts what is planned and what is already done there", () => {
+    const stats = getHeroStats({ periods: [summary(p2, 4, 6)], courses: passed, target: 60, today: '2026-11-15' });
+    expect(stats.loads.map((load) => load.credits)).toEqual([10]);
+  });
+
+  test('the outlook counts credits earned outside the period map', () => {
+    expect(getHeroStats({ periods, courses: passed, target: 43, today: '2026-11-15' }).outlook).toEqual({
+      kind: 'graduating',
       period: p2,
     });
-  });
-
-  test('short when the plan never reaches the target', () => {
-    expect(getHeroStats({ periods, courses: passed, target: 60, today: '2026-11-15' }).graduation).toEqual({
+    expect(getHeroStats({ periods, courses: passed, target: 60, today: '2026-11-15' }).outlook).toEqual({
       kind: 'short',
       credits: 7,
+      endsIn: p3,
     });
   });
 
-  test('no target, no estimate', () => {
-    expect(getHeroStats({ periods, courses: passed, target: null, today: '2026-11-15' }).graduation).toBeNull();
+  test('without a target there is no percentage and no need per period', () => {
+    const stats = getHeroStats({ periods, courses: passed, target: null, today: '2026-11-15' });
+    expect(stats.projectedPercent).toBeNull();
+    expect(stats.neededPerPeriod).toBeNull();
+    expect(stats.outlook).toEqual({ kind: 'open', endsIn: p3 });
   });
 
-  test('empty plan and null credits never produce NaN', () => {
+  test('an empty plan and null credits never produce NaN', () => {
     const stats = getHeroStats({
       periods: [summary(p1, 0, 0)],
       courses: [makeCourse({ courseUnitId: 'x', isPassed: true, credits: null })],
@@ -74,10 +84,16 @@ describe('getHeroStats', () => {
       today: '2026-11-15',
     });
     expect(stats).toMatchObject({
+      outlook: { kind: 'empty' },
+      span: null,
       scheduledCredits: 0,
+      projectedCredits: 0,
+      projectedPercent: 0,
+      remainingPeriods: 0,
+      loads: [],
       heaviest: null,
-      graduation: { kind: 'short', credits: 180 },
-      trajectory: [],
+      averagePace: null,
+      neededPerPeriod: null,
     });
   });
 });

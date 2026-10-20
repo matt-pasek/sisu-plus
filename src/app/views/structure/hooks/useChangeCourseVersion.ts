@@ -1,4 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
+import { findCachedPlan } from '@/app/api/dataPoints/planCache';
 import type { Plan } from '@/app/api/generated/OsuvaApi';
 import { useStructurePlanMutation } from './useStructurePlanMutation';
 
@@ -27,8 +28,7 @@ export const useChangeCourseVersion = ({ planId, oldCourseUnitId, newCourseUnitI
   const saveStructurePlan = useStructurePlanMutation();
 
   const buildNextPlan = () => {
-    const plans = queryClient.getQueriesData<Plan[]>({ queryKey: ['plans'] }).flatMap(([, data]) => data ?? []);
-    const plan = plans?.find((candidate) => candidate.id === planId);
+    const plan = findCachedPlan(queryClient, planId);
     if (!plan) throw new Error('Study plan missing from cache.');
     return swapCourseVersion(plan, oldCourseUnitId, newCourseUnitId);
   };

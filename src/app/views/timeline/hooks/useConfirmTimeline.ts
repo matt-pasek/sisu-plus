@@ -1,46 +1,34 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { updatePlan } from '@/app/api/endpoints/updatePlan';
 import type { StudyPeriodMap } from '@/app/api/dataPoints/getStudyPeriodMap';
-import type { TimelineCourse } from '@/app/api/dataPoints/getTimelineCourses';
-import type { Plan } from '@/app/api/generated/OsuvaApi';
-import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
+import { PLAN_WRITE_KEY, PLAN_WRITE_SCOPE, findCachedPlan, updateCachedPlan } from '@/app/api/dataPoints/planCache';
+import { invalidatePlanWrite, updateTimelineCourses } from '@/app/api/dataPoints/timelineCoursesCache';
+import { updatePlan } from '@/app/api/endpoints/updatePlan';
 import { applyDraftToCourses, applyDraftToPlan } from '@/app/views/timeline/util';
 
 interface UseConfirmTimelineArgs {
-  plan: Plan | undefined;
+  planId: string | undefined;
   draft: Map<string, string[]>;
-  timelineCourses: TimelineCourse[];
   studyPeriodMap: StudyPeriodMap;
   onSaved: () => void;
 }
 
-export const useConfirmTimeline = ({
-  plan,
-  draft,
-  timelineCourses,
-  studyPeriodMap,
-  onSaved,
-}: UseConfirmTimelineArgs) => {
-  const { i18n } = useTranslationWithPrefix('views.timeline');
+export const useConfirmTimeline = ({ planId, draft, studyPeriodMap, onSaved }: UseConfirmTimelineArgs) => {
   const queryClient = useQueryClient();
 
   return useMutation({
+    mutationKey: PLAN_WRITE_KEY,
+    scope: PLAN_WRITE_SCOPE,
     mutationFn: async () => {
-      const planId = plan?.id;
+      const plan = planId ? findCachedPlan(queryClient, planId) : undefined;
       if (!plan || !planId) throw new Error('Plan not found.');
       return updatePlan(planId, applyDraftToPlan(plan, draft));
     },
-    onSuccess: (updatedPlan) => {
-      const lang = i18n.language;
-      queryClient.setQueryData<Plan[]>(
-        ['plans', lang],
-        (plans) => plans?.map((existing) => (existing.id === updatedPlan.id ? updatedPlan : existing)) ?? [updatedPlan],
-      );
-      queryClient.setQueryData<TimelineCourse[]>(
-        ['timeline-courses', plan?.id, lang],
-        applyDraftToCourses(timelineCourses, draft, studyPeriodMap),
-      );
+    onSuccess: async (updatedPlan) => {
+      if (!planId) return;
+      updateCachedPlan(queryClient, planId, () => updatedPlan);
+      updateTimelineCourses(queryClient, planId, (courses) => applyDraftToCourses(courses, draft, studyPeriodMap));
       onSaved();
+      await invalidatePlanWrite(queryClient, planId);
     },
   });
 };

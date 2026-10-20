@@ -2,6 +2,7 @@ import { koriApi } from '@/app/api/client';
 import { pickLabel } from '@/app/api/resolvers/helpers/pickLabel';
 import { getCurrentLocale } from '@/app/i18n';
 import { useSisuQuery } from '@/app/hooks/useSisuQuery';
+import { getHomeUniversityOrgId } from './getHomeUniversityOrgId';
 
 export type CourseUnitSearchResult = {
   courseUnitId: string;
@@ -9,16 +10,21 @@ export type CourseUnitSearchResult = {
   code: string | null;
   name: string;
   credits: number | null;
+  creditsMax: number | null;
 };
 
+/** Searches the student's own university, like Sisu's first result group; cross-institutional offering is separate. */
 export function searchCourseUnits(query: string): {
   data: CourseUnitSearchResult[] | undefined;
   isLoading: boolean;
 } {
+  const { orgId } = getHomeUniversityOrgId();
+
   return useSisuQuery(
-    ['course-unit-search', query],
+    ['course-unit-search', orgId, query],
     async () => {
       const response = await koriApi.api.searchCourseUnits({
+        universityOrgId: [orgId!],
         fullTextQuery: query,
         uiLang: getCurrentLocale(),
         limit: 8,
@@ -38,8 +44,9 @@ export function searchCourseUnits(query: string): {
             course.code ??
             course.id!,
           credits: course.credits?.min ?? null,
+          creditsMax: course.credits?.max ?? null,
         }));
     },
-    { enabled: query.trim().length >= 3 },
+    { enabled: orgId != null && query.trim().length >= 3 },
   );
 }

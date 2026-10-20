@@ -5,13 +5,16 @@ const EASE_OUT_QUART = [0.25, 1, 0.5, 1] as const;
 
 interface Props extends PropsWithChildren {
   slotKey: string | null;
+  className?: string;
 }
 
-export const InspectorSlot: React.FC<Props> = ({ slotKey, children }) => {
+export const InspectorSlot: React.FC<Props> = ({ slotKey, className = '', children }) => {
   const shouldReduceMotion = useReducedMotion();
   const offset = shouldReduceMotion ? 0 : 20;
   return (
-    <div className={`relative grid min-h-0 min-w-0 lg:overflow-hidden lg:pl-4 ${slotKey ? '' : 'max-lg:hidden'}`}>
+    <div
+      className={`relative grid min-h-0 min-w-0 lg:overflow-hidden lg:pl-4 ${slotKey ? '' : 'max-lg:hidden'} ${className}`}
+    >
       <AnimatePresence initial={false} mode="popLayout">
         {slotKey && (
           <motion.div

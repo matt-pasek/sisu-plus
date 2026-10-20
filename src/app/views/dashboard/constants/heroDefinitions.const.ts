@@ -1,11 +1,8 @@
+import type { HeroStatTileData } from '@/app/components/ui/types';
 import { HeroPanelId, HeroStatId } from '@/app/views/dashboard/types';
 
-export interface HeroStat {
+export interface HeroStat extends HeroStatTileData {
   id: HeroStatId;
-  label: string;
-  value: string;
-  sub: string;
-  tone: 'accent' | 'neutral' | 'warn';
 }
 
 export const PANEL_MODES: { id: HeroPanelId; labelKey: string }[] = [

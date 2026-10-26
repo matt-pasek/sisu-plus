@@ -2,7 +2,10 @@
 import { describe, expect, mock, test } from 'bun:test';
 import type { CourseUnit, Module } from '@/app/api/generated/KoriApi';
 import type { Plan } from '@/app/api/generated/OsuvaApi';
+import type { PickText } from './buildOptionGroups';
 import { walkPlanOptions } from './walkPlanOptions';
+
+const pickText: PickText = (value) => value.en ?? value.fi ?? value.sv ?? null;
 
 const course = (groupId: string) =>
   ({ id: `${groupId}-id`, groupId, code: groupId.toUpperCase(), name: { en: groupId } }) as unknown as CourseUnit;
@@ -52,7 +55,7 @@ describe('walkPlanOptions', () => {
       { moduleId: 'unfetched', parentModuleId: 'root' },
       { moduleId: 'minor', parentModuleId: 's1' },
     ]);
-    const result = await walkPlanOptions(plan, fakes);
+    const result = await walkPlanOptions(plan, fakes, pickText);
     expect(result.groups.map((g) => [g.moduleId, g.sectionId, g.options[0].courseUnitId])).toEqual([
       ['s1', 's1', 'a-id'],
       ['minor', 's1', 'b-id'],
@@ -66,7 +69,7 @@ describe('walkPlanOptions', () => {
       { moduleId: 'a-wrapper', parentModuleId: 'root' },
       { moduleId: 'free', parentModuleId: 'root' },
     ]);
-    const result = await walkPlanOptions(plan, fakes);
+    const result = await walkPlanOptions(plan, fakes, pickText);
     expect(result.freeSearchModules.map((m) => m.moduleId)).toEqual(['free']);
   });
 
@@ -81,7 +84,7 @@ describe('walkPlanOptions', () => {
       { moduleId: 's1', parentModuleId: 'root' },
       { moduleId: 'free', parentModuleId: 'root' },
     ]);
-    await expect(walkPlanOptions(plan, fakes)).rejects.toThrow('network');
+    await expect(walkPlanOptions(plan, fakes, pickText)).rejects.toThrow('network');
   });
 
   test('a section document that fails to load rejects', async () => {
@@ -95,7 +98,7 @@ describe('walkPlanOptions', () => {
       { moduleId: 's1', parentModuleId: 'root' },
       { moduleId: 'free', parentModuleId: 'root' },
     ]);
-    await expect(walkPlanOptions(plan, fakes)).rejects.toThrow('network');
+    await expect(walkPlanOptions(plan, fakes, pickText)).rejects.toThrow('network');
   });
 
   test('a nested module that fails is skipped', async () => {
@@ -112,7 +115,7 @@ describe('walkPlanOptions', () => {
       { moduleId: 'unfetched', parentModuleId: 'root' },
       { moduleId: 'minor', parentModuleId: 's1' },
     ]);
-    const result = await walkPlanOptions(plan, fakes);
+    const result = await walkPlanOptions(plan, fakes, pickText);
     expect(result.groups.map((g) => g.moduleId)).toEqual(['s1']);
   });
 
@@ -124,7 +127,7 @@ describe('walkPlanOptions', () => {
       { moduleId: 'minor', parentModuleId: 's1' },
       { moduleId: 'minor', parentModuleId: 's1' },
     ]);
-    await walkPlanOptions(plan, fakes);
+    await walkPlanOptions(plan, fakes, pickText);
     expect(fakes.fetchModuleDocument.mock.calls.filter(([id]) => id === 'minor')).toHaveLength(1);
   });
 });

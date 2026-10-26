@@ -3,7 +3,7 @@ import { describe, expect, test } from 'bun:test';
 
 import type { PlanCourseOption, PlanOptionGroup } from '@/app/api/dataPoints/planOptions/buildOptionGroups';
 
-import { isSearchResultPlanned, routeSearchResult } from './searchRouting';
+import { isSearchResultPlanned, resolveSearchGroupId, routeSearchResult } from './searchRouting';
 
 const opt = (id: string, groupId = `g-${id}`): PlanCourseOption => ({
   courseUnitId: id,
@@ -80,5 +80,21 @@ describe('isSearchResultPlanned', () => {
     expect(isSearchResultPlanned({ courseUnitId: 'old-id', groupId: null }, planGroupIds, planCourseUnitIds)).toBe(
       true,
     );
+  });
+});
+
+describe('resolveSearchGroupId', () => {
+  test('keeps the group id the search returned', () => {
+    const known = new Map([['cu1', 'g-teaching']]);
+    expect(resolveSearchGroupId({ courseUnitId: 'cu1', groupId: 'g-search' }, known)).toBe('g-search');
+  });
+
+  test('falls back to the group id found in the teaching data, so a listed course is not offered as free', () => {
+    const known = new Map([['cu1', 'g-teaching']]);
+    expect(resolveSearchGroupId({ courseUnitId: 'cu1', groupId: null }, known)).toBe('g-teaching');
+  });
+
+  test('stays unknown until teaching data arrives', () => {
+    expect(resolveSearchGroupId({ courseUnitId: 'cu1', groupId: null }, new Map())).toBeNull();
   });
 });

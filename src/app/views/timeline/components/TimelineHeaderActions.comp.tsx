@@ -9,6 +9,7 @@ interface Props {
   validationIssueCount: number;
   confirmDisabled: boolean;
   confirmPending: boolean;
+  confirmSaving: boolean;
   resetDisabled: boolean;
   onConfirm: () => void;
   onReset: () => void;
@@ -21,6 +22,7 @@ export const TimelineHeaderActions: React.FC<Props> = ({
   validationIssueCount,
   confirmDisabled,
   confirmPending,
+  confirmSaving,
   resetDisabled,
   onConfirm,
   onReset,
@@ -62,7 +64,7 @@ export const TimelineHeaderActions: React.FC<Props> = ({
         )}
       </AnimatePresence>
       <Button disabled={confirmDisabled || confirmPending} variant="accent" onClick={onConfirm}>
-        {confirmPending ? t('actions.confirming') : t('actions.confirm')}
+        {confirmSaving ? t('actions.confirming') : t('actions.confirm')}
       </Button>
       <Button
         ariaLabel={t('actions.reset')}

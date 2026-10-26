@@ -13,5 +13,6 @@ export interface HeroStats {
   loads: PeriodLoad[];
   heaviest: PeriodLoad | null;
   averagePace: number | null;
+  paceKind: 'earned' | 'planned';
   neededPerPeriod: number | null;
 }

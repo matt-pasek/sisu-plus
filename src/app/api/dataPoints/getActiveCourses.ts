@@ -58,7 +58,7 @@ export const getActiveCourses = (): { activeCourses: ActiveCourse[]; isLoading: 
         let grade: number | string | null = null;
         if (att) {
           if (att.gradeScaleId.includes('hyl-hyv')) {
-            grade = Boolean(att.gradeId) ? 'Pass' : 'Fail';
+            grade = att.gradeId ? 'Pass' : 'Fail';
           } else {
             grade = att.gradeId >= 1 && att.gradeId <= 5 ? att.gradeId : null;
           }

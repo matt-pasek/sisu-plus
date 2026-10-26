@@ -9,6 +9,8 @@ import {
   buildPrerequisitesById,
   countUncheckedCourses,
   formatCreditAmount,
+  isSuggestionLoadFailed,
+  getPendingIds,
   getPlanGroupIds,
   getRemainingOptionIds,
 } from './suggestionDerivation';
@@ -68,6 +70,7 @@ describe('buildPrerequisitesById', () => {
         progress: null,
         taught: [{ option: opt('a'), group: g, fit: { certainty: 'confirmed', periodLocators: ['t'] } }],
         notTaught: [{ option: opt('b'), group: g, fit: null }],
+        pendingCount: 0,
       },
     ];
     const result = buildPrerequisitesById({
@@ -114,5 +117,35 @@ describe('formatCreditAmount', () => {
   test('rounds fractional sums', () => {
     expect(formatCreditAmount(0.1 + 0.2)).toBe('0.3');
     expect(formatCreditAmount(24)).toBe('24');
+  });
+});
+
+describe('isSuggestionLoadFailed', () => {
+  const settled = { optionsFailed: false, teachingLoading: false, uncheckedCount: 0, remainingCount: 3 };
+
+  test('fails when the plan options could not be loaded', () => {
+    expect(isSuggestionLoadFailed({ ...settled, optionsFailed: true })).toBe(true);
+  });
+
+  test('fails when no remaining course could be checked', () => {
+    expect(isSuggestionLoadFailed({ ...settled, uncheckedCount: 3 })).toBe(true);
+  });
+
+  test('stays empty, not failed, when some courses were checked and none fit', () => {
+    expect(isSuggestionLoadFailed({ ...settled, uncheckedCount: 1 })).toBe(false);
+  });
+
+  test('waits for teaching data before deciding', () => {
+    expect(isSuggestionLoadFailed({ ...settled, uncheckedCount: 3, teachingLoading: true })).toBe(false);
+  });
+
+  test('never fails when there was nothing left to check', () => {
+    expect(isSuggestionLoadFailed({ ...settled, remainingCount: 0 })).toBe(false);
+  });
+});
+
+describe('getPendingIds', () => {
+  test('is the remaining ids that have neither teaching nor a failure yet', () => {
+    expect([...getPendingIds(['a', 'b', 'c', 'd'], new Set(['a']), new Set(['c']))]).toEqual(['b', 'd']);
   });
 });

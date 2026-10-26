@@ -3,15 +3,17 @@
   const SPLASH_ID = 'sisu-plus-splash';
   const MAX_VISIBLE_MS = 8000;
 
-  let marker = null;
+  const readMarker = function () {
+    try {
+      const value = sessionStorage.getItem(MARKER);
+      if (value) sessionStorage.removeItem(MARKER);
+      return value;
+    } catch {
+      return null;
+    }
+  };
 
-  try {
-    marker = sessionStorage.getItem(MARKER);
-    if (marker) sessionStorage.removeItem(MARKER);
-  } catch (err) {
-    return;
-  }
-
+  const marker = readMarker();
   if (!marker) return;
   if (document.getElementById(SPLASH_ID)) return;
 

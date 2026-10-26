@@ -4,6 +4,7 @@ export type TimelineTranslation = {
     addFailed: string;
     addTo: string;
     added: string;
+    addedToast: string;
     adding: string;
     close: string;
     confirmed: string;
@@ -13,9 +14,13 @@ export type TimelineTranslation = {
     groupFull: string;
     hide: string;
     likely: string;
+    checking_one: string;
+    checking_other: string;
     listedUnder: string;
     loadFailed: string;
     loading: string;
+    otherUniversities: string;
+    otherUniversitiesSub: string;
     notTaught_one: string;
     notTaught_other: string;
     periods_one: string;
@@ -25,6 +30,8 @@ export type TimelineTranslation = {
     plannedOnly: string;
     primaryOnly: string;
     required: string;
+    teachingDates: string;
+    timingUnknown: string;
     search: string;
     show: string;
     slot: string;
@@ -74,6 +81,7 @@ export type TimelineTranslation = {
     needed: string;
     neededSub: string;
     pace: string;
+    paceEarnedSub: string;
     paceSub: string;
     periodsLeft_one: string;
     periodsLeft_other: string;
@@ -137,6 +145,7 @@ export const timelineTranslation: TimelineTranslation = {
     addFailed: "Couldn't add {{course}}. Nothing changed.",
     addTo: 'Add to',
     added: 'Added',
+    addedToast: 'Added {{course}} to your plan',
     adding: 'Adding…',
     close: 'Close',
     confirmed: 'Taught {{term}}',
@@ -146,11 +155,15 @@ export const timelineTranslation: TimelineTranslation = {
     groupFull: '{{module}} is already full',
     hide: 'Hide',
     likely: 'Taught in {{period}} last year',
+    checking_one: 'Checking {{count}} course…',
+    checking_other: 'Checking {{count}} courses…',
     listedUnder: 'Listed under {{module}}',
     loadFailed: "Couldn't load your study options. Try again later.",
     loading: 'Finding courses that fit…',
     notTaught_one: "{{count}} more option isn't taught in this period",
     notTaught_other: "{{count}} more options aren't taught in this period",
+    otherUniversities: 'Other universities',
+    otherUniversitiesSub: 'Cross-institutional studies open to you',
     periods_one: '1 period',
     periods_other: '{{count}} periods · {{range}}',
     pick: 'pick {{pick}} of {{of}}',
@@ -158,6 +171,8 @@ export const timelineTranslation: TimelineTranslation = {
     plannedOnly: 'Needs {{course}} first, planned for {{period}}',
     primaryOnly: 'Adding courses works on your primary plan.',
     required: 'Required',
+    teachingDates: 'Teaching {{range}}',
+    timingUnknown: 'Timing unknown',
     search: 'Search all courses…',
     show: 'Show',
     slot: 'Add course to {{period}}',
@@ -207,7 +222,8 @@ export const timelineTranslation: TimelineTranslation = {
     needed: 'Needed / period',
     neededSub: 'to reach {{target}}',
     pace: 'Avg. pace',
-    paceSub: 'per period',
+    paceEarnedSub: 'earned per period',
+    paceSub: 'planned per period',
     periodsLeft_one: '{{count}} period left',
     periodsLeft_other: '{{count}} periods left',
     planEnds: 'Plan ends in {{accent}}',

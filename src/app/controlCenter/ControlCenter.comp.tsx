@@ -10,6 +10,7 @@ import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { getControlTip } from '@/app/controlCenter/controlTips';
 import { normalizeNotificationPrefs } from '@/shared/notifications/normalizeNotificationPrefs';
 import { notify } from '@/app/components/ui/notify';
+import { BellIcon } from '@/app/components/ui/icons/BellIcon.comp';
 import type { NotificationPayload } from '@/background/notifications/types';
 
 function Toggle({ checked, onChange }: { checked: boolean; onChange: (val: boolean) => void }) {
@@ -18,8 +19,8 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (val: boole
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className={`relative h-7 w-12 shrink-0 cursor-pointer rounded-full border border-white/5 p-0 transition-[background-color,box-shadow,transform] duration-200 active:scale-[0.96] ${
-        checked ? 'bg-accent/90 shadow-[0_0_18px_rgba(65,150,72,0.28)]' : 'bg-border2'
+      className={`relative h-7 w-12 shrink-0 cursor-pointer rounded-full border border-white/5 p-0 transition-[background-color,transform] duration-200 active:scale-[0.96] ${
+        checked ? 'bg-accent' : 'bg-border2'
       }`}
       type="button"
     >
@@ -39,25 +40,6 @@ function SparkleIcon({ className = 'size-5' }: { className?: string }) {
         clipRule="evenodd"
         d="M9 4.5a.75.75 0 0 1 .721.544l.813 2.846a3.75 3.75 0 0 0 2.576 2.576l2.846.813a.75.75 0 0 1 0 1.442l-2.846.813a3.75 3.75 0 0 0-2.576 2.576l-.813 2.846a.75.75 0 0 1-1.442 0l-.813-2.846a3.75 3.75 0 0 0-2.576-2.576l-2.846-.813a.75.75 0 0 1 0-1.442l2.846-.813A3.75 3.75 0 0 0 7.466 7.89l.813-2.846A.75.75 0 0 1 9 4.5ZM18 1.5a.75.75 0 0 1 .728.568l.258 1.036c.236.94.97 1.674 1.91 1.91l1.036.258a.75.75 0 0 1 0 1.456l-1.036.258c-.94.236-1.674.97-1.91 1.91l-.258 1.036a.75.75 0 0 1-1.456 0l-.258-1.036a2.625 2.625 0 0 0-1.91-1.91l-1.036-.258a.75.75 0 0 1 0-1.456l1.036-.258a2.625 2.625 0 0 0 1.91-1.91l.258-1.036A.75.75 0 0 1 18 1.5ZM16.5 15a.75.75 0 0 1 .712.513l.394 1.183c.15.447.5.799.948.948l1.183.395a.75.75 0 0 1 0 1.422l-1.183.395c-.447.15-.799.5-.948.948l-.395 1.183a.75.75 0 0 1-1.422 0l-.395-1.183a1.5 1.5 0 0 0-.948-.948l-1.183-.395a.75.75 0 0 1 0-1.422l1.183-.395c.447-.15.799-.5.948-.948l.395-1.183A.75.75 0 0 1 16.5 15Z"
         fillRule="evenodd"
-      />
-    </svg>
-  );
-}
-
-function BellIcon({ className = 'size-4' }: { className?: string }) {
-  return (
-    <svg
-      aria-hidden="true"
-      className={className}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      viewBox="0 0 24 24"
-    >
-      <path d="M15.5 18.25a3.5 3.5 0 0 1-7 0" strokeLinecap="round" />
-      <path
-        d="M18.5 16.75h-13c1.15-1.25 1.8-2.75 1.8-4.5V10a4.7 4.7 0 0 1 9.4 0v2.25c0 1.75.65 3.25 1.8 4.5Z"
-        strokeLinejoin="round"
       />
     </svg>
   );
@@ -163,7 +145,7 @@ export function ControlCenter() {
           boxShadow: '0 12px 32px rgba(0,0,0,0.4)',
         }}
       >
-        <p style={{ fontSize: 13, marginBottom: 10, color: 'var(--color-lightGrey)' }}>Sisu+ isn't configured yet.</p>
+        <p style={{ fontSize: 13, marginBottom: 10, color: 'var(--color-lightGrey)' }}>Sisu+ isn’t configured yet.</p>
         <button
           onClick={openOnboarding}
           style={{
@@ -347,6 +329,7 @@ export function ControlCenter() {
                 <a
                   className="text-offwhite/75 transition-colors duration-200 hover:text-offwhite"
                   href="https://matt-pasek.dev"
+                  rel="noreferrer"
                   target="_blank"
                 >
                   matt-pasek

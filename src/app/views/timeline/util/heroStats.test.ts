@@ -36,19 +36,21 @@ describe('getHeroStats', () => {
     expect(stats.span?.to.locator).toBe('p3');
   });
 
-  test('pace and need use the periods left until the plan ends', () => {
+  test('pace is what you earned per finished period; need uses the periods left', () => {
     const stats = getHeroStats({ periods, courses: passed, target: 60, today: '2026-11-15' });
     expect(stats.remainingPeriods).toBe(2);
-    expect(stats.averagePace).toBe(14);
+    expect(stats.averagePace).toBe(5);
+    expect(stats.paceKind).toBe('earned');
     expect(stats.neededPerPeriod).toBe(17.5);
     expect(stats.heaviest?.period.locator).toBe('p2');
   });
 
-  test('loads list each period left in order', () => {
+  test('loads cover the whole plan in order and flag the periods already behind you', () => {
     const stats = getHeroStats({ periods, courses: passed, target: 60, today: '2026-11-15' });
-    expect(stats.loads.map((load) => [load.period.locator, load.credits])).toEqual([
-      ['p2', 18],
-      ['p3', 10],
+    expect(stats.loads.map((load) => [load.period.locator, load.credits, load.isPast])).toEqual([
+      ['p1', 5, true],
+      ['p2', 18, false],
+      ['p3', 10, false],
     ]);
   });
 
@@ -109,5 +111,14 @@ describe('getDegreeTarget', () => {
     ).toBe(180);
     expect(getDegreeTarget({ degreeMinimumCredits: null, sections: [] })).toBeNull();
     expect(getDegreeTarget(undefined)).toBeNull();
+  });
+});
+
+describe('getHeroStats pace fallback', () => {
+  test('before any period has ended, pace falls back to what is planned ahead', () => {
+    const periods = [summary(p1, 0, 10), summary(p2, 0, 20)];
+    const stats = getHeroStats({ periods, courses: [], target: 60, today: '2026-09-10' });
+    expect(stats.averagePace).toBe(15);
+    expect(stats.paceKind).toBe('planned');
   });
 });

@@ -24,20 +24,11 @@ export interface PlanOptionFetchers {
 
 type WalkablePlan = Pick<Plan, 'rootId' | 'curriculumPeriodId' | 'moduleSelections'>;
 
-const fallbackPickText: PickText = (value) => value.en ?? value.fi ?? value.sv ?? null;
-
-const loadDefaults = async () => {
-  const defaults = await import('./planOptionDefaults');
-  return { fetchers: defaults.defaultFetchers, pickText: defaults.localizedPickText };
-};
-
 export const walkPlanOptions = async (
   plan: WalkablePlan,
-  providedFetchers?: PlanOptionFetchers,
+  fetchers: PlanOptionFetchers,
+  pickText: PickText,
 ): Promise<PlanOptions> => {
-  const { fetchers, pickText } = providedFetchers
-    ? { fetchers: providedFetchers, pickText: fallbackPickText }
-    : await loadDefaults();
   const visited = new Set<string>();
 
   const loadModule = async (moduleId: string, isSection: boolean) => {

@@ -68,7 +68,7 @@ const getTiles = (t: Translate, stats: HeroStats): HeroTile[] => {
           id: 'pace',
           label: t('hero.pace'),
           value: formatCredits(averagePace),
-          sub: t('hero.paceSub'),
+          sub: t(stats.paceKind === 'earned' ? 'hero.paceEarnedSub' : 'hero.paceSub'),
           tone: 'neutral',
         }
       : null,

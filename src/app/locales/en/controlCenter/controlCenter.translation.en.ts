@@ -53,7 +53,6 @@ export type ControlCenterTranslation = {
     };
     eyebrow: string;
     lead: {
-      body: string;
       options: Record<0 | 15 | 30 | 60 | 120 | 1440, string>;
       title: string;
     };
@@ -237,7 +236,6 @@ export const controlCenterTranslation: ControlCenterTranslation = {
     },
     eyebrow: 'Notifications',
     lead: {
-      body: 'How early SISU+ should warn before a registration window opens.',
       options: {
         0: 'At opening',
         15: '15 min before',
@@ -246,7 +244,7 @@ export const controlCenterTranslation: ControlCenterTranslation = {
         120: '2 hours before',
         1440: '1 day before',
       },
-      title: 'Registration-open lead time',
+      title: 'Warn me',
     },
     never: 'Never',
     nudge: {

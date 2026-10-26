@@ -32,7 +32,7 @@ export const SuggestionGroupSection: React.FC<Props> = ({
 }) => {
   const { t } = useTranslationWithPrefix('views.timeline');
   const [showNotTaught, setShowNotTaught] = useState(false);
-  const { group, progress, taught, notTaught } = suggestionGroup;
+  const { group, progress, taught, notTaught, pendingCount } = suggestionGroup;
   const targetPeriodName = studyPeriodMap.get(targetLocator)?.name ?? '';
 
   const progressLabel =
@@ -86,6 +86,14 @@ export const SuggestionGroupSection: React.FC<Props> = ({
         {progressLabel && <span className="shrink-0 text-xs text-lightGrey tabular-nums">{progressLabel}</span>}
       </header>
       <ul className="flex flex-col gap-2">{taught.map(renderRow)}</ul>
+      {pendingCount > 0 && (
+        <div role="status" className={taught.length > 0 ? 'mt-2' : undefined}>
+          {taught.length === 0 && (
+            <div className="mb-2 h-16 animate-pulse rounded-lg bg-container2/80 motion-reduce:animate-none" />
+          )}
+          <p className="text-[11px] text-lightGrey">{t('addCourse.checking', { count: pendingCount })}</p>
+        </div>
+      )}
       {notTaught.length > 0 && (
         <div className="mt-2">
           <button

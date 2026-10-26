@@ -1,6 +1,13 @@
 import React, { useSyncExternalStore } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { dismissToast, getToasts, subscribeToToasts, type AppToast, type ToastTone } from '@/app/components/ui/notify';
+import {
+  dismissToast,
+  getToasts,
+  runToastAction,
+  subscribeToToasts,
+  type AppToast,
+  type ToastTone,
+} from '@/app/components/ui/notify';
 
 interface ToastToneStyle {
   accent: string;
@@ -74,6 +81,16 @@ const ToastItem: React.FC<{ toast: AppToast }> = ({ toast }) => {
           <p className="mt-1.5 text-sm leading-snug font-semibold text-pretty text-offwhite">{toast.message}</p>
           {toast.subtitle && <p className="mt-1 text-xs leading-relaxed text-lightGrey">{toast.subtitle}</p>}
         </div>
+        {toast.action && (
+          <motion.button
+            type="button"
+            whileTap={prefersReducedMotion ? undefined : { scale: 0.96 }}
+            className="relative -mt-0.5 flex h-9 shrink-0 cursor-pointer items-center rounded-[10px] border border-offwhite/12 bg-offwhite/6 px-3.5 text-xs font-semibold text-offwhite transition-[background-color,border-color] duration-150 ease-[cubic-bezier(0.2,0,0,1)] hover:border-offwhite/20 hover:bg-offwhite/12"
+            onClick={() => runToastAction(toast.id)}
+          >
+            {toast.action.label}
+          </motion.button>
+        )}
         <motion.button
           type="button"
           aria-label="Dismiss notification"

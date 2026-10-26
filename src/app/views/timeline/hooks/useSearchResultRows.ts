@@ -11,8 +11,15 @@ import {
   getCandidatePrerequisites,
   type CandidatePrerequisites,
 } from '@/app/views/timeline/util/candidatePrerequisites';
+import { todayKey } from '@/app/schedule/time';
+import { getNextTeachingWindow, type DatedTeachingWindow } from '@/app/views/timeline/util/nextTeaching';
 import { getPeriodFit, type PeriodFit } from '@/app/views/timeline/util/periodFit';
-import { isSearchResultPlanned, routeSearchResult, type SearchRoute } from '@/app/views/timeline/util/searchRouting';
+import {
+  isSearchResultPlanned,
+  resolveSearchGroupId,
+  routeSearchResult,
+  type SearchRoute,
+} from '@/app/views/timeline/util/searchRouting';
 
 export interface SearchPlacement {
   moduleId: string;
@@ -31,6 +38,8 @@ export interface SearchResultRowModel {
   prerequisites: CandidatePrerequisites | undefined;
   pending: boolean;
   creditsMax: number | null;
+  universityOrgId: string | null;
+  nextTeaching: DatedTeachingWindow | null;
 }
 
 interface Args {
@@ -74,8 +83,19 @@ export const useSearchResultRows = ({
   periods,
   targetLocator,
 }: Args): SearchResultRowModel[] => {
+  const ungroupedIds = useMemo(
+    () => (results ?? []).filter((result) => !result.groupId).map((result) => result.courseUnitId),
+    [results],
+  );
+  const { byId: ungroupedTeaching } = useCourseTeaching(ungroupedIds, true);
+  const teachingGroupIds = useMemo(
+    () => new Map([...ungroupedTeaching].map(([id, teaching]) => [id, teaching.courseUnitGroupId] as const)),
+    [ungroupedTeaching],
+  );
+
   const routedRows = useMemo(() => {
-    const rows = (results ?? []).map((result) => {
+    const rows = (results ?? []).map((searchResult) => {
+      const result = { ...searchResult, groupId: resolveSearchGroupId(searchResult, teachingGroupIds) };
       const route = routeSearchResult({ groupId: result.groupId, groups: optionGroups, planGroupIds, keepVisibleId });
       const option = route.kind === 'listed' ? route.option : toOption(result);
       const freeModule =
@@ -89,10 +109,20 @@ export const useSearchResultRows = ({
           row.option.courseUnitId === keepVisibleId) &&
         rows.findIndex((other) => other.option.courseUnitId === row.option.courseUnitId) === index,
     );
-  }, [freeSearchModules, keepVisibleId, moduleChoices, optionGroups, planCourseUnitIds, planGroupIds, results]);
+  }, [
+    freeSearchModules,
+    keepVisibleId,
+    moduleChoices,
+    optionGroups,
+    planCourseUnitIds,
+    planGroupIds,
+    results,
+    teachingGroupIds,
+  ]);
 
   const teachingIds = useMemo(() => routedRows.map((row) => row.option.courseUnitId), [routedRows]);
   const { byId, isLoading: teachingLoading, failedIds } = useCourseTeaching(teachingIds, true);
+  const today = todayKey();
 
   return useMemo(
     () =>
@@ -120,9 +150,21 @@ export const useSearchResultRows = ({
               })
             : undefined;
         const pending = !teaching && teachingLoading && !failedIds.has(option.courseUnitId);
-        const creditsMax = row.result.creditsMax;
-        return { key, route, option, placement, fit, periodLocators, fitPeriods, prerequisites, pending, creditsMax };
+        return {
+          key,
+          route,
+          option,
+          placement,
+          fit,
+          periodLocators,
+          fitPeriods,
+          prerequisites,
+          pending,
+          creditsMax: row.result.creditsMax,
+          universityOrgId: row.result.universityOrgId,
+          nextTeaching: teaching ? getNextTeachingWindow(teaching.realisations, today) : null,
+        };
       }),
-    [attainments, byId, courses, failedIds, periods, routedRows, targetLocator, teachingLoading],
+    [attainments, byId, courses, failedIds, periods, routedRows, targetLocator, teachingLoading, today],
   );
 };

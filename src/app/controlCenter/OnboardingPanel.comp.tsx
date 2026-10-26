@@ -3,8 +3,12 @@ import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { useChromeStorage } from '@/app/hooks/useChromeStorage';
 import { DEFAULT_NOTIFICATION_PREFS } from '@/app/types/prefs';
 import { notify } from '@/app/components/ui/notify';
+import { NotificationTypeIcon } from '@/app/components/ui/notifications/NotificationTypeIcon.comp';
+import { NOTIFICATION_TONE } from '@/app/components/ui/notifications/notificationTone.const';
 
 const ONBOARDING_STEP_COUNT = 6;
+const STEP_ICON_TILE =
+  'flex size-11 shrink-0 items-center justify-center rounded-2xl bg-offwhite/5 text-offwhite/80 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]';
 
 interface OnboardingPanelProps {
   active: boolean;
@@ -147,7 +151,7 @@ export function OnboardingPanel({
             aria-current={safeStep === index ? 'step' : undefined}
             className={`h-10 cursor-pointer truncate rounded-xl px-1 text-[10px] font-semibold transition-[background-color,color,transform,box-shadow] duration-200 active:scale-[0.96] ${
               safeStep === index
-                ? 'bg-accent text-background shadow-[0_10px_24px_rgba(65,150,72,0.22)]'
+                ? 'bg-accent text-background'
                 : index < safeStep
                   ? 'bg-accent/15 text-accent'
                   : 'bg-container2 text-lightGrey hover:bg-offwhite/10 hover:text-offwhite'
@@ -166,7 +170,7 @@ export function OnboardingPanel({
         animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
         exit={{ opacity: 0, y: 6, filter: 'blur(4px)' }}
         transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
-        className="min-h-0 flex-1 overflow-y-auto rounded-[26px] bg-container p-4 shadow-[0_18px_42px_rgba(0,0,0,0.24),inset_0_0_0_1px_rgba(255,255,255,0.05)]"
+        className="min-h-0 flex-1 overflow-y-auto rounded-[26px] bg-container p-4 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)]"
       >
         {safeStep === 0 && (
           <div className="flex h-full flex-col justify-between gap-5">
@@ -186,7 +190,7 @@ export function OnboardingPanel({
         {safeStep === 1 && (
           <div className="space-y-4">
             <div className="flex items-start gap-3">
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-blue-400/15 text-blue-300 shadow-[inset_0_0_0_1px_rgba(102,142,255,0.18)]">
+              <span className={STEP_ICON_TILE}>
                 <OnboardingIcon path={ICONS.control} />
               </span>
               <div>
@@ -214,7 +218,7 @@ export function OnboardingPanel({
         {safeStep === 2 && (
           <div className="space-y-4">
             <div className="flex items-start gap-3">
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-accent/15 text-accent shadow-[inset_0_0_0_1px_rgba(65,150,72,0.18)]">
+              <span className={STEP_ICON_TILE}>
                 <OnboardingIcon path={ICONS.power} />
               </span>
               <div>
@@ -238,7 +242,7 @@ export function OnboardingPanel({
         {safeStep === 3 && (
           <div className="space-y-4">
             <div className="flex items-start gap-3">
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-accent/15 text-accent shadow-[inset_0_0_0_1px_rgba(65,150,72,0.18)]">
+              <span className={STEP_ICON_TILE}>
                 <OnboardingIcon path={ICONS.bell} />
               </span>
               <div>
@@ -271,19 +275,15 @@ export function OnboardingPanel({
                 >
                   <div className="flex min-w-0 items-center gap-2.5">
                     <span
-                      className={`size-2.5 shrink-0 rounded-full ${
-                        type === 'moodle-deadline'
-                          ? 'bg-blue-400'
-                          : type === 'registration-close'
-                            ? 'bg-danger'
-                            : 'bg-lighterGreen'
-                      }`}
-                    />
-                    <p className="truncate text-sm font-semibold text-offwhite">
+                      className={`flex size-7 shrink-0 items-center justify-center rounded-md bg-offwhite/5 ${NOTIFICATION_TONE[type]}`}
+                    >
+                      <NotificationTypeIcon type={type} className="size-3.5" />
+                    </span>
+                    <p className="truncate text-sm font-medium text-offwhite">
                       {t(`notifications.types.${type}.title`)}
                     </p>
                   </div>
-                  <span className="rounded-full bg-accent/15 px-2.5 py-1 text-xs font-semibold text-accent">
+                  <span className="rounded-full bg-offwhite/5 px-2.5 py-1 text-xs font-medium text-lightGrey">
                     {t('notifications.delivery.desktop')}
                   </span>
                 </div>
@@ -298,18 +298,18 @@ export function OnboardingPanel({
             <div className="grid gap-2">
               {(
                 [
-                  { key: 'dashboard', icon: ICONS.dashboard, color: 'bg-accent/15 text-accent' },
-                  { key: 'timeline', icon: ICONS.timeline, color: 'bg-blue-400/15 text-blue-300' },
-                  { key: 'structure', icon: ICONS.structure, color: 'bg-purple-400/15 text-purple-300' },
-                  { key: 'registration', icon: ICONS.registration, color: 'bg-warn/15 text-warn' },
+                  { key: 'dashboard', icon: ICONS.dashboard },
+                  { key: 'timeline', icon: ICONS.timeline },
+                  { key: 'structure', icon: ICONS.structure },
+                  { key: 'registration', icon: ICONS.registration },
                 ] as const
-              ).map(({ key, icon, color }) => (
+              ).map(({ key, icon }) => (
                 <article
                   key={key}
                   className="rounded-2xl bg-container2 p-3 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)]"
                 >
                   <div className="flex gap-3">
-                    <span className={`flex size-9 shrink-0 items-center justify-center rounded-xl ${color}`}>
+                    <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-offwhite/5 text-offwhite/80">
                       <OnboardingIcon className="size-4" path={icon} />
                     </span>
                     <div>
@@ -326,7 +326,7 @@ export function OnboardingPanel({
         {safeStep === 5 && (
           <div className="space-y-4">
             <div className="flex items-start gap-3">
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-warn/15 text-warn shadow-[inset_0_0_0_1px_rgba(240,168,77,0.18)]">
+              <span className={STEP_ICON_TILE}>
                 <OnboardingIcon path={ICONS.link} />
               </span>
               <div>
@@ -387,7 +387,7 @@ export function OnboardingPanel({
           {t('back')}
         </button>
         <button
-          className="min-h-11 cursor-pointer rounded-xl bg-accent px-5 text-sm font-semibold text-background shadow-[0_12px_26px_rgba(65,150,72,0.24)] transition-[background-color,transform,box-shadow,opacity] duration-200 hover:bg-lighterGreen active:scale-[0.96] disabled:cursor-not-allowed disabled:opacity-50"
+          className="min-h-11 cursor-pointer rounded-xl bg-accent px-5 text-sm font-semibold text-background transition-[background-color,transform,opacity] duration-200 hover:bg-lighterGreen active:scale-[0.96] disabled:cursor-not-allowed disabled:opacity-50"
           onClick={goNext}
           type="button"
         >

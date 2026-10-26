@@ -20,10 +20,12 @@ const appendBar = (groups: LoadTermGroup[], load: PeriodLoad, bar: LoadBar): Loa
 export const getLoadChart = (loads: PeriodLoad[], needed: number | null): LoadChart => {
   if (loads.length === 0) return { groups: [], neededRatio: null };
 
-  const heaviest = Math.max(...loads.map((load) => load.credits));
-  const scale = Math.max(heaviest, needed ?? 0) / HEADROOM;
+  const tallest = Math.max(...loads.map((load) => load.credits));
+  const scale = Math.max(tallest, needed ?? 0) / HEADROOM;
   const toRatio = (credits: number) => (scale > 0 ? credits / scale : 0);
-  const heaviestIndex = heaviest > 0 ? loads.findIndex((load) => load.credits === heaviest) : -1;
+  const heaviestAhead = Math.max(0, ...loads.filter((load) => !load.isPast).map((load) => load.credits));
+  const heaviestIndex =
+    heaviestAhead > 0 ? loads.findIndex((load) => !load.isPast && load.credits === heaviestAhead) : -1;
 
   const groups = loads.reduce<LoadTermGroup[]>(
     (acc, load, index) =>
@@ -34,6 +36,7 @@ export const getLoadChart = (loads: PeriodLoad[], needed: number | null): LoadCh
         credits: load.credits,
         ratio: toRatio(load.credits),
         isHeaviest: index === heaviestIndex,
+        isPast: load.isPast,
       }),
     [],
   );

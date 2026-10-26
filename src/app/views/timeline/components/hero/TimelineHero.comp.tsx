@@ -1,6 +1,11 @@
 import React, { useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { HERO_FADE_SECONDS, HERO_FOLD_SECONDS, HERO_STRIP_HEIGHT } from '@/app/views/timeline/constants/hero.const';
+import {
+  HERO_FADE_SECONDS,
+  HERO_FOLD_SECONDS,
+  HERO_STRIP_HEIGHT,
+  TIMELINE_HERO_ID,
+} from '@/app/views/timeline/constants/hero.const';
 import { useHeroCopy } from '@/app/views/timeline/hooks/useHeroCopy';
 import type { HeroStats } from '@/app/views/timeline/types';
 import { HeroExpanded } from './HeroExpanded.comp';
@@ -33,6 +38,7 @@ export const TimelineHero: React.FC<Props> = ({ stats, issueCount, folded, ready
 
   return (
     <motion.div
+      id={TIMELINE_HERO_ID}
       className="shrink-0"
       initial={false}
       animate={{ height: folded ? HERO_STRIP_HEIGHT : 'auto' }}

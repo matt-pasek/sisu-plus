@@ -65,6 +65,24 @@ describe('buildPeriodSuggestions', () => {
     expect(run([group('g1', [opt('a'), opt('b')], { max: 1 })], ['g-a'], {})).toEqual([]);
   });
 
+  test('a min-only rule stays open after its minimum and closes once every option is planned', () => {
+    const minOnly = group('g1', [opt('a'), opt('b'), opt('c')], { min: 2 });
+    const [g] = run([minOnly], ['g-a', 'g-b'], {});
+    expect(g.progress).toEqual({ kind: 'count', pick: 2, of: 3 });
+    expect([...g.taught, ...g.notTaught].map((s) => s.option.courseUnitId)).toEqual(['c']);
+    expect(run([minOnly], ['g-a', 'g-b', 'g-c'], {})).toEqual([]);
+  });
+
+  test('a max rule that is not reached yet keeps offering the rest', () => {
+    const [g] = run([group('g1', [opt('a'), opt('b'), opt('c')], { max: 2 })], ['g-a'], {});
+    expect(g.progress).toEqual({ kind: 'count', pick: 2, of: 3 });
+    expect([...g.taught, ...g.notTaught].map((s) => s.option.courseUnitId)).toEqual(['b', 'c']);
+  });
+
+  test('a rule with only a credit maximum shows no progress', () => {
+    expect(run([group('g1', [opt('a'), opt('b')], { creditsMax: 10 })], [], {})[0].progress).toBeNull();
+  });
+
   test('another version of a planned course is hidden and counts toward progress', () => {
     const [g] = run([group('g1', [opt('a-2026', 6, 'g-a'), opt('b')], { creditsMin: 30 })], ['g-a'], {});
     expect([...g.taught, ...g.notTaught].map((s) => s.option.courseUnitId)).toEqual(['b']);
@@ -147,6 +165,26 @@ describe('keepVisibleId and skipIds', () => {
       groups: [group('g1', [opt('a'), opt('b')])],
     });
     expect([...g.taught, ...g.notTaught].map((s) => s.option.courseUnitId)).toEqual(['a']);
+  });
+
+  test('pendingIds stay out of both lists and are counted on their group', () => {
+    const [g] = buildPeriodSuggestions({
+      ...base({ planGroupIds: new Set(), pendingIds: new Set(['b']) }),
+      groups: [group('g1', [opt('a'), opt('b')])],
+    });
+    expect([...g.taught, ...g.notTaught].map((s) => s.option.courseUnitId)).toEqual(['a']);
+    expect(g.pendingCount).toBe(1);
+  });
+
+  test('a group still checking every course keeps its place', () => {
+    const result = buildPeriodSuggestions({
+      ...base({ planGroupIds: new Set(), pendingIds: new Set(['a', 'b']) }),
+      groups: [group('g1', [opt('a'), opt('b')]), group('g2', [opt('c')])],
+    });
+    expect(result.map((g) => [g.group.id, g.taught.length + g.notTaught.length, g.pendingCount])).toEqual([
+      ['g1', 0, 2],
+      ['g2', 1, 0],
+    ]);
   });
 
   test('isGroupVisible matches the build rules', () => {

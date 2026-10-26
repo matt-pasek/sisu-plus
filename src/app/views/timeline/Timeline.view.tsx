@@ -37,6 +37,7 @@ import { useTimelineDraft } from '@/app/views/timeline/hooks/useTimelineDraft';
 import { useTimelineValidation } from '@/app/views/timeline/hooks/useTimelineValidation';
 import { useConfirmTimeline } from '@/app/views/timeline/hooks/useConfirmTimeline';
 import { useHeroFold } from '@/app/views/timeline/hooks/useHeroFold';
+import { useSuggestionWarmup } from '@/app/views/timeline/hooks/useSuggestionWarmup';
 
 const FOCUS_FLASH_KEYFRAMES = [
   { boxShadow: '0 0 0 2px rgba(82,201,137,0.8)' },
@@ -63,7 +64,7 @@ const TimelineView: React.FC = () => {
   const selectedPlanId = selectedPlan?.id;
   const isPrimaryPlan = selectedPlan?.primary === true;
   const canAddCourses = isPrimaryPlan;
-  const { timelineCourses, isLoading: coursesLoading } = getTimelineCourses(selectedPlanId);
+  const { timelineCourses, isLoading: coursesLoading, isSettled: coursesSettled } = getTimelineCourses(selectedPlanId);
   const { studyPeriodMap, isLoading: periodsLoading } = getStudyPeriodMap();
   const { data: structureData } = getStructureData();
   const isLoading = plansQuery.isLoading || attainmentsQuery.isLoading || coursesLoading || periodsLoading;
@@ -78,7 +79,7 @@ const TimelineView: React.FC = () => {
     draftOriginalPeriodCounts,
     stageCoursePeriods,
     resetDraft,
-  } = useTimelineDraft(timelineCourses, studyPeriodMap, selectedPlanId, !coursesLoading);
+  } = useTimelineDraft(timelineCourses, studyPeriodMap, selectedPlanId, coursesSettled);
   const { visibleValidationWarnings, validationIssueCount, prerequisitesLoading, dismissWarning, resetDismissed } =
     useTimelineValidation({
       planId: selectedPlanId,
@@ -91,6 +92,12 @@ const TimelineView: React.FC = () => {
     resetDraft();
     resetDismissed();
   }, [resetDismissed, resetDraft]);
+  useSuggestionWarmup({
+    plan: selectedPlan,
+    enabled: canAddCourses && !isLoading,
+    courses: timelineCourses,
+    attainments,
+  });
   const addFlow = useAddCourseFlow({ planId: selectedPlanId, studyPeriodMap });
   const { dismiss: dismissAddFlow } = addFlow;
   useEffect(() => {
@@ -258,6 +265,7 @@ const TimelineView: React.FC = () => {
                 addFlow.isWriting
               }
               confirmPending={confirmTimeline.isPending}
+              confirmSaving={confirmTimeline.isSaving}
               onConfirm={() => confirmTimeline.mutate()}
               onReset={resetAll}
               pendingChangesCount={draftPeriodsByCourseId.size}

@@ -10,7 +10,7 @@ const roundCreditsUp = (value: number): number => Math.ceil(Number((value * 10).
 const hasCredits = (summary: PeriodCreditSummary): boolean =>
   summary.completedCredits > 0 || summary.plannedCredits > 0;
 
-const hasEnded = (summary: PeriodCreditSummary, today: string): boolean => summary.period.endDate <= today;
+export const hasEnded = (summary: PeriodCreditSummary, today: string): boolean => summary.period.endDate <= today;
 
 export const getPlanSpan = (sorted: PeriodCreditSummary[]): PlanSpan | null => {
   const withCredits = sorted.filter(hasCredits);
@@ -35,7 +35,7 @@ export const getHeaviestPeriod = (sorted: PeriodCreditSummary[], today: string):
   sorted.reduce<PeriodLoad | null>(
     (best, summary) =>
       !hasEnded(summary, today) && summary.plannedCredits > (best?.credits ?? 0)
-        ? { period: summary.period, credits: roundCredits(summary.plannedCredits) }
+        ? { period: summary.period, credits: roundCredits(summary.plannedCredits), isPast: false }
         : best,
     null,
   );
@@ -48,4 +48,21 @@ export const getAveragePace = (remaining: PeriodCreditSummary[]): number | null 
 export const getNeededPerPeriod = (target: number | null, earned: number, remainingCount: number): number | null => {
   if (target === null || remainingCount === 0 || earned >= target) return null;
   return roundCreditsUp((target - earned) / remainingCount);
+};
+
+const isOnChart = (summary: PeriodCreditSummary): boolean => summary.period.visibleByDefault || hasCredits(summary);
+
+export const getChartPeriods = (sorted: PeriodCreditSummary[], span: PlanSpan | null): PeriodCreditSummary[] => {
+  if (!span) return [];
+  const fromIndex = sorted.findIndex((summary) => summary.periodLocator === span.from.locator);
+  const toIndex = sorted.findIndex((summary) => summary.periodLocator === span.to.locator);
+  if (fromIndex === -1 || toIndex === -1) return [];
+  return sorted.slice(fromIndex, toIndex + 1).filter(isOnChart);
+};
+
+export const getEarnedPace = (chartPeriods: PeriodCreditSummary[], today: string): number | null => {
+  const ended = chartPeriods.filter((summary) => hasEnded(summary, today));
+  return ended.length === 0
+    ? null
+    : roundCredits(sumCredits(ended.map((summary) => summary.completedCredits)) / ended.length);
 };

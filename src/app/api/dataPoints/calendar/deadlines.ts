@@ -1,5 +1,6 @@
 import type { IcsEvent } from 'ts-ics';
 import { helsinkiDateKey, type DateRange } from '@/app/schedule';
+import { decodeHtmlEntities, getCategoryLabel, getFirstIcsCategory } from '@/shared/icsCategory';
 import type { CalendarCourse, CalendarDeadline, CourseUnitInfo, DeadlineCourse } from './types';
 
 const SAFE_PROTOCOLS = new Set(['https:', 'http:']);
@@ -47,15 +48,15 @@ export const toCalendarDeadlines = (
       if (!(dueAt instanceof Date) || Number.isNaN(dueAt.getTime())) return [];
       const dateKey = helsinkiDateKey(dueAt);
       if (dateKey < range.startKey || dateKey >= range.endKey) return [];
-      const category = event.categories?.[0] ?? null;
+      const category = getFirstIcsCategory(event.categories);
       const course = matchDeadlineCourse(category, courses);
       return [
         {
           id: event.uid,
-          title: event.summary,
+          title: decodeHtmlEntities(event.summary),
           dueAt,
           dateKey,
-          courseLabel: course?.name ?? category,
+          courseLabel: course?.name ?? (category ? getCategoryLabel(category) : null),
           colorIndex: course?.colorIndex ?? null,
           url: safeHttpUrl(event.url),
         },

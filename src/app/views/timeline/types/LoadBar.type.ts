@@ -7,4 +7,5 @@ export interface LoadBar {
   credits: number;
   ratio: number;
   isHeaviest: boolean;
+  isPast: boolean;
 }

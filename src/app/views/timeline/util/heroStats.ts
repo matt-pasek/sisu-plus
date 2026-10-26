@@ -5,7 +5,10 @@ import type { HeroStats } from '@/app/views/timeline/types';
 import { getGraduationOutlook } from './heroOutlook';
 import {
   getAveragePace,
+  getChartPeriods,
+  getEarnedPace,
   getHeaviestPeriod,
+  hasEnded,
   getNeededPerPeriod,
   getPlanSpan,
   getRemainingPeriods,
@@ -28,6 +31,8 @@ export const getHeroStats = ({ periods, courses, target, today }: HeroStatsArgs)
   const projectedCredits = roundCredits(passedCredits + scheduledCredits);
   const span = getPlanSpan(sorted);
   const remaining = getRemainingPeriods(sorted, today, span?.to.locator ?? null);
+  const chartPeriods = getChartPeriods(sorted, span);
+  const earnedPace = getEarnedPace(chartPeriods, today);
 
   return {
     outlook: getGraduationOutlook({ sorted, baseline, target, today }),
@@ -37,12 +42,14 @@ export const getHeroStats = ({ periods, courses, target, today }: HeroStatsArgs)
     projectedPercent: target === null ? null : Math.round((projectedCredits / target) * 100),
     target,
     remainingPeriods: remaining.length,
-    loads: remaining.map((summary) => ({
+    loads: chartPeriods.map((summary) => ({
       period: summary.period,
       credits: roundCredits(summary.plannedCredits + summary.completedCredits),
+      isPast: hasEnded(summary, today),
     })),
     heaviest: getHeaviestPeriod(sorted, today),
-    averagePace: getAveragePace(remaining),
+    averagePace: earnedPace ?? getAveragePace(remaining),
+    paceKind: earnedPace === null ? 'planned' : 'earned',
     neededPerPeriod: getNeededPerPeriod(target, passedCredits, remaining.length),
   };
 };

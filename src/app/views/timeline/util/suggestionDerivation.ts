@@ -90,4 +90,18 @@ export const buildPrerequisitesById = ({
 export const countUncheckedCourses = (args: RemainingIdsArgs & { failedIds: Set<string> }): number =>
   getRemainingOptionIds(args).filter((id) => args.failedIds.has(id)).length;
 
+interface SuggestionLoadState {
+  optionsFailed: boolean;
+  teachingLoading: boolean;
+  uncheckedCount: number;
+  remainingCount: number;
+}
+
+export const isSuggestionLoadFailed = (state: SuggestionLoadState): boolean =>
+  state.optionsFailed ||
+  (!state.teachingLoading && state.remainingCount > 0 && state.uncheckedCount === state.remainingCount);
+
 export const formatCreditAmount = (credits: number): string => String(Math.round(credits * 100) / 100);
+
+export const getPendingIds = (remainingIds: string[], loadedIds: Set<string>, failedIds: Set<string>): Set<string> =>
+  new Set(remainingIds.filter((id) => !loadedIds.has(id) && !failedIds.has(id)));

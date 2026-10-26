@@ -25,17 +25,22 @@ export const fetchCourseTeaching = (courseUnitId: string): Promise<CourseTeachin
     return { courseUnitGroupId: unit.groupId, realisations, prerequisites };
   });
 
+const TEACHING_CACHE_MS = 30 * 60_000;
+
+// gcTime matches staleTime so data warmed by a prefetch survives until the panel opens.
+export const courseTeachingQuery = (courseUnitId: string, language: string) => ({
+  queryKey: ['course-teaching', courseUnitId, language],
+  queryFn: () => fetchCourseTeaching(courseUnitId),
+  staleTime: TEACHING_CACHE_MS,
+  gcTime: TEACHING_CACHE_MS,
+  retry: 1,
+});
+
 export const useCourseTeaching = (courseUnitIds: string[], enabled: boolean) => {
   const { i18n } = useTranslation();
 
   const results = useQueries({
-    queries: courseUnitIds.map((id) => ({
-      queryKey: ['course-teaching', id, i18n.language],
-      queryFn: () => fetchCourseTeaching(id),
-      enabled,
-      staleTime: 30 * 60_000,
-      retry: 1,
-    })),
+    queries: courseUnitIds.map((id) => ({ ...courseTeachingQuery(id, i18n.language), enabled })),
   });
 
   const dataKey = results.map((result) => result.dataUpdatedAt).join(',');
@@ -49,7 +54,7 @@ export const useCourseTeaching = (courseUnitIds: string[], enabled: boolean) => 
     });
     return map;
     // The joined id key is deliberate: a new array with the same ids must not rebuild byId.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // A failed refetch keeps the last good data on purpose, so a network blip never blanks the panel.
   }, [courseUnitIds.join(','), dataKey]);
 
   const failedKey = courseUnitIds.filter((_, index) => results[index]?.isError && !results[index]?.data).join(',');

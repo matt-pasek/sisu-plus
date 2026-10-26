@@ -10,6 +10,7 @@ import { resolveCourseUnit } from '@/app/api/resolvers/resolveCourseUnit';
 import { resolveModule } from '@/app/api/resolvers/resolveModule';
 import { buildCuToTopModuleMap } from '@/app/api/resolvers/helpers/buildCuToTopModuleMap';
 import { getPlacedCourseUnitSelections } from '@/app/api/resolvers/helpers/placedCourseUnitSelections';
+import { isQuerySettled } from '@/app/api/querySettled';
 import { useSisuQuery } from '@/app/hooks/useSisuQuery';
 import type { CourseUnitAttainmentRestricted } from '@/app/api/generated/OriApi';
 import type { RealisationResult } from '@/app/api/resolvers/resolveRealization';
@@ -63,14 +64,16 @@ function getTeachingPeriodLocators(realisations: RealisationResult[], periods: S
   return [...new Set(periods.filter((period) => offeredPeriodNames.has(period.name)).map((period) => period.locator))];
 }
 
-export const getTimelineCourses = (planId?: string): { timelineCourses: TimelineCourse[]; isLoading: boolean } => {
+export const getTimelineCourses = (
+  planId?: string,
+): { timelineCourses: TimelineCourse[]; isLoading: boolean; isSettled: boolean } => {
   const queryClient = useQueryClient();
   const plansQuery = useSisuQuery(['plans'], fetchPlans);
   const attainmentsQuery = useSisuQuery(['attainments'], fetchAttainments);
   const enrolmentsQuery = useSisuQuery(['enrolments'], fetchEnrolments);
   const { studyPeriodMap, isLoading: studyPeriodMapLoading } = getStudyPeriodMap();
 
-  const { data: timelineCourses, isLoading } = useSisuQuery(
+  const timelineCoursesQuery = useSisuQuery(
     ['timeline-courses', planId],
     async () => {
       const plan = (planId ? findCachedPlan(queryClient, planId) : undefined) ?? findCachedPrimaryPlan(queryClient);
@@ -158,12 +161,13 @@ export const getTimelineCourses = (planId?: string): { timelineCourses: Timeline
   );
 
   return {
-    timelineCourses: timelineCourses ?? [],
+    timelineCourses: timelineCoursesQuery.data ?? [],
     isLoading:
       plansQuery.isLoading ||
       attainmentsQuery.isLoading ||
       enrolmentsQuery.isLoading ||
       studyPeriodMapLoading ||
-      isLoading,
+      timelineCoursesQuery.isLoading,
+    isSettled: isQuerySettled(timelineCoursesQuery),
   };
 };

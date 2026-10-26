@@ -47,10 +47,13 @@ export const restorePlans = (queryClient: QueryClient, snapshot: PlansSnapshot):
   for (const { queryKey, plans, updatedAt } of snapshot) queryClient.setQueryData(queryKey, plans, { updatedAt });
 };
 
+// Only the freshest copy moves to now: it stays first in line and stops looking stale to a panel
+// mounted mid-write, while older language copies keep their timestamps and still refetch.
 export const updateCachedPlan = (queryClient: QueryClient, planId: string, update: (plan: Plan) => Plan): void => {
-  for (const { queryKey, plans, updatedAt } of getPlanCopies(queryClient)) {
-    if (!plans?.some((plan) => plan.id === planId)) continue;
-    const next = plans.map((plan) => (plan.id === planId ? update(plan) : plan));
-    queryClient.setQueryData(queryKey, next, { updatedAt });
+  const copies = getPlanCopies(queryClient).filter((copy) => copy.plans?.some((plan) => plan.id === planId));
+  const freshest = getFreshestCopy(copies);
+  for (const copy of copies) {
+    const next = copy.plans?.map((plan) => (plan.id === planId ? update(plan) : plan));
+    queryClient.setQueryData(copy.queryKey, next, { updatedAt: copy === freshest ? Date.now() : copy.updatedAt });
   }
 };

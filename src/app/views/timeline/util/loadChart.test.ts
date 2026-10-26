@@ -17,9 +17,9 @@ describe('getPeriodTick', () => {
 
 describe('getLoadChart', () => {
   const loads = [
-    { period: autumn1, credits: 14.5 },
-    { period: autumn2, credits: 23.5 },
-    { period: spring3, credits: 13 },
+    { period: autumn1, credits: 14.5, isPast: false },
+    { period: autumn2, credits: 23.5, isPast: false },
+    { period: spring3, credits: 13, isPast: false },
   ];
 
   test('groups consecutive periods by term, in order', () => {
@@ -50,5 +50,25 @@ describe('getLoadChart', () => {
   test('has no needed line without a target, and an empty plan draws nothing', () => {
     expect(getLoadChart(loads, null).neededRatio).toBeNull();
     expect(getLoadChart([], 10)).toEqual({ groups: [], neededRatio: null });
+  });
+});
+
+describe('getLoadChart with past periods', () => {
+  const past = makePeriod({ locator: 'past', name: '4. period', startDate: '2026-03-01', studyYear: 2025 });
+  const loads = [
+    { period: past, credits: 30, isPast: true },
+    { period: autumn1, credits: 14.5, isPast: false },
+    { period: autumn2, credits: 23.5, isPast: false },
+  ];
+
+  test('marks past bars and keeps the heaviest highlight on what is still ahead', () => {
+    const bars = getLoadChart(loads, null).groups.flatMap((group) => group.bars);
+    expect(bars.map((bar) => bar.isPast)).toEqual([true, false, false]);
+    expect(bars.find((bar) => bar.isHeaviest)?.locator).toBe('a2');
+  });
+
+  test('still scales every bar to the tallest one, past included', () => {
+    const bars = getLoadChart(loads, null).groups.flatMap((group) => group.bars);
+    expect(bars[0].ratio).toBeGreaterThan(bars[2].ratio);
   });
 });

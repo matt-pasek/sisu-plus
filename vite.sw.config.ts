@@ -24,6 +24,10 @@ export default defineConfig({
         copyFileSync(resolve(__dirname, 'manifest.json'), resolve(__dirname, 'dist/manifest.json'));
         copyFileSync(resolve(__dirname, 'favicon.png'), resolve(__dirname, 'dist/favicon.png'));
         cpSync(resolve(__dirname, '_locales'), resolve(__dirname, 'dist/_locales'), { recursive: true });
+        cpSync(resolve(__dirname, 'icons'), resolve(__dirname, 'dist/icons'), {
+          recursive: true,
+          filter: (source) => !source.endsWith('.svg'),
+        });
       },
     },
   ],

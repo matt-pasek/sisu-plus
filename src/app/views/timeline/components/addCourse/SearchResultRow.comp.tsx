@@ -5,6 +5,7 @@ import { SuggestionRow } from '@/app/views/timeline/components/addCourse/Suggest
 import type { AddCourseInput } from '@/app/views/timeline/hooks/useAddCourseFlow';
 import type { SearchResultRowModel } from '@/app/views/timeline/hooks/useSearchResultRows';
 import { getAddRowState, type AddProgress } from '@/app/views/timeline/util/addRowState';
+import { formatPeriodRange } from '@/app/views/timeline/util/formatPeriodRange';
 
 interface Props {
   row: SearchResultRowModel;
@@ -15,6 +16,8 @@ interface Props {
   onChooseModule: (moduleId: string) => void;
   onAdd: (input: AddCourseInput) => void;
   onUndo: () => void;
+  /** Set for the cross-institutional group: the note names the school and its teaching dates instead. */
+  crossInstitutional?: { universityName: string | undefined };
 }
 
 export const SearchResultRow: React.FC<Props> = ({
@@ -26,11 +29,23 @@ export const SearchResultRow: React.FC<Props> = ({
   onChooseModule,
   onAdd,
   onUndo,
+  crossInstitutional,
 }) => {
   const { t } = useTranslationWithPrefix('views.timeline');
   const { route, option, placement, fit, fitPeriods, periodLocators, prerequisites, pending } = row;
-  const note =
-    route.kind === 'listed'
+  const crossNote = () => {
+    const timing = row.nextTeaching
+      ? t('addCourse.teachingDates', {
+          range: formatPeriodRange(row.nextTeaching.startDate, row.nextTeaching.endDate),
+        })
+      : pending
+        ? null
+        : t('addCourse.timingUnknown');
+    return [crossInstitutional?.universityName, timing].filter(Boolean).join(' · ') || undefined;
+  };
+  const note = crossInstitutional
+    ? crossNote()
+    : route.kind === 'listed'
       ? t('addCourse.listedUnder', { module: route.group.moduleName })
       : route.kind === 'full'
         ? t('addCourse.groupFull', { module: route.group.moduleName })

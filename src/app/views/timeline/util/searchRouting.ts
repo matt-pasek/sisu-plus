@@ -30,3 +30,8 @@ export const isSearchResultPlanned = (
   planGroupIds: Set<string>,
   planCourseUnitIds: Set<string>,
 ): boolean => (!!result.groupId && planGroupIds.has(result.groupId)) || planCourseUnitIds.has(result.courseUnitId);
+
+export const resolveSearchGroupId = (
+  result: { courseUnitId: string; groupId: string | null },
+  groupIdsByCourseUnitId: Map<string, string | null>,
+): string | null => result.groupId ?? groupIdsByCourseUnitId.get(result.courseUnitId) ?? null;

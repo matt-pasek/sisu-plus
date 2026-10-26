@@ -88,7 +88,9 @@ export const InAppChangelog: React.FC<Props> = ({ release, onClose }) => {
         setCopied(true);
         setTimeout(() => setCopied(false), 2200);
       }
-    } catch (_) {}
+    } catch {
+      // Closing the share sheet rejects too, so a failure here is not worth surfacing.
+    }
   };
 
   return (

@@ -64,9 +64,14 @@ export const AddCourseSuggestions: React.FC<Props> = ({
   return (
     <>
       {!isLoading && !loadFailed && groups.length === 0 && (
-        <p className="text-xs text-lightGrey">
-          {t(freeSearchModules.length > 0 ? 'addCourse.empty' : 'addCourse.emptyNoSearch')}
-        </p>
+        <div className="mb-3 flex flex-col gap-1">
+          <p className="text-xs text-pretty text-lightGrey">
+            {t(freeSearchModules.length > 0 ? 'addCourse.empty' : 'addCourse.emptyNoSearch')}
+          </p>
+          {uncheckedCount > 0 && (
+            <p className="text-[11px] text-lightGrey">{t('addCourse.someUnchecked', { count: uncheckedCount })}</p>
+          )}
+        </div>
       )}
       <CourseSearchSection
         freeSearchModules={freeSearchModules}

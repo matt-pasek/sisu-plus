@@ -52,7 +52,15 @@ describe('plan cache', () => {
     const client = diverged();
     updateCachedPlan(client, 'a', (plan) => ({ ...plan, name: `${plan.name} + course` }));
     expect(findCachedPlan(client, 'a')?.name).toBe('Fresh + course');
-    expect(client.getQueryState(['plans', 'en'])?.dataUpdatedAt).toBe(2_000);
+    expect(client.getQueryState(['plans', 'fi'])?.dataUpdatedAt).toBe(1_000);
+  });
+
+  test('an optimistic update marks the freshest copy as fresh, so a panel opened mid-write does not refetch it', () => {
+    const now = new Date('2026-10-19T12:00:00Z');
+    setSystemTime(now);
+    const client = diverged();
+    updateCachedPlan(client, 'a', (plan) => ({ ...plan, name: 'Changed' }));
+    expect(client.getQueryState(['plans', 'en'])?.dataUpdatedAt).toBe(now.getTime());
     expect(client.getQueryState(['plans', 'fi'])?.dataUpdatedAt).toBe(1_000);
   });
 

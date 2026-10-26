@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
+import { TIMELINE_HERO_ID } from '@/app/views/timeline/constants/hero.const';
 
 interface Props {
   folded: boolean;
@@ -29,6 +30,7 @@ export const HeroFoldToggle: React.FC<Props> = ({ folded, onToggle, focusRequest
         onToggle();
       }}
       aria-expanded={!folded}
+      aria-controls={TIMELINE_HERO_ID}
       aria-label={label}
       title={label}
       className={`grid size-10 shrink-0 cursor-pointer place-items-center rounded-xl border border-white/8 bg-background/60 text-lightGrey transition-[background-color,color,scale] duration-150 ease-out hover:bg-offwhite/10 hover:text-offwhite focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lighterGreen/75 active:scale-[0.96] motion-reduce:transition-none ${className}`}

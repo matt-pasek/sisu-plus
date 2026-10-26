@@ -1,5 +1,5 @@
 import React from 'react';
-import { Kynnos } from '@/app/components/atmospheres/kynnos/Kynnos.comp';
+import { Kynnos } from '@usva-ui/react/atmospheres/kynnos';
 import { HeroEyebrow } from '@/app/components/ui/HeroEyebrow.comp';
 import { HeroFeaturedStat } from '@/app/components/ui/HeroFeaturedStat.comp';
 import { HeroPlainStat } from '@/app/components/ui/HeroPlainStat.comp';

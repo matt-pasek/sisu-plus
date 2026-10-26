@@ -20,6 +20,7 @@ export interface SuggestionGroup {
   progress: GroupProgress;
   taught: PeriodSuggestion[];
   notTaught: PeriodSuggestion[];
+  pendingCount: number;
 }
 
 interface BuildPeriodSuggestionsArgs {
@@ -30,6 +31,7 @@ interface BuildPeriodSuggestionsArgs {
   targetLocator: string;
   keepVisibleId?: string | null;
   skipIds?: Set<string>;
+  pendingIds?: Set<string>;
 }
 
 export const isOptionPlanned = (option: PlanCourseOption, planGroupIds: Set<string>): boolean =>
@@ -65,6 +67,7 @@ export const buildPeriodSuggestions = ({
   targetLocator,
   keepVisibleId = null,
   skipIds,
+  pendingIds,
 }: BuildPeriodSuggestionsArgs): SuggestionGroup[] =>
   groups.flatMap((group) => {
     const planned = group.options.filter((option) => isOptionPlanned(option, planGroupIds));
@@ -76,7 +79,8 @@ export const buildPeriodSuggestions = ({
     );
     if (remaining.length === 0) return [];
 
-    const suggestions = remaining.map(
+    const checked = remaining.filter((option) => !pendingIds?.has(option.courseUnitId));
+    const suggestions = checked.map(
       (option): PeriodSuggestion => ({
         option,
         group,
@@ -93,6 +97,7 @@ export const buildPeriodSuggestions = ({
         progress: getProgress(group, planned),
         taught,
         notTaught: suggestions.filter((suggestion) => !suggestion.fit),
+        pendingCount: remaining.length - checked.length,
       },
     ];
   });

@@ -2,6 +2,7 @@ import { koriApi } from '@/app/api/client';
 import { pickLabel } from '@/app/api/resolvers/helpers/pickLabel';
 import { getCurrentLocale } from '@/app/i18n';
 import { useSisuQuery } from '@/app/hooks/useSisuQuery';
+import { buildCourseSearchQuery, type CourseSearchScope } from './courseSearchQuery';
 import { getHomeUniversityOrgId } from './getHomeUniversityOrgId';
 
 export type CourseUnitSearchResult = {
@@ -11,26 +12,25 @@ export type CourseUnitSearchResult = {
   name: string;
   credits: number | null;
   creditsMax: number | null;
+  universityOrgId: string | null;
 };
 
-/** Searches the student's own university, like Sisu's first result group; cross-institutional offering is separate. */
-export function searchCourseUnits(query: string): {
+/** 'home' matches Sisu's first result group; 'network' is its cross-institutional studies offering. */
+export function searchCourseUnits(
+  query: string,
+  scope: CourseSearchScope = 'home',
+): {
   data: CourseUnitSearchResult[] | undefined;
   isLoading: boolean;
 } {
   const { orgId } = getHomeUniversityOrgId();
 
   return useSisuQuery(
-    ['course-unit-search', orgId, query],
+    ['course-unit-search', scope, orgId, query],
     async () => {
-      const response = await koriApi.api.searchCourseUnits({
-        universityOrgId: [orgId!],
-        fullTextQuery: query,
-        uiLang: getCurrentLocale(),
-        limit: 8,
-        validity: 'ONGOING_AND_FUTURE',
-        studyType: 'DEGREE_STUDIES',
-      });
+      const response = await koriApi.api.searchCourseUnits(
+        buildCourseSearchQuery({ scope, orgId: orgId!, query, uiLang: getCurrentLocale() }),
+      );
 
       return (response.data.searchResults ?? [])
         .filter((course) => course.id != null)
@@ -45,6 +45,7 @@ export function searchCourseUnits(query: string): {
             course.id!,
           credits: course.credits?.min ?? null,
           creditsMax: course.credits?.max ?? null,
+          universityOrgId: course.universityOrgIds?.[0] ?? null,
         }));
     },
     { enabled: orgId != null && query.trim().length >= 3 },

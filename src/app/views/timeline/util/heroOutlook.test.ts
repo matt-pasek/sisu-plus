@@ -39,6 +39,18 @@ describe('getGraduationOutlook', () => {
     expect(getGraduationOutlook({ sorted: [], baseline: 200, target: 180, today })).toEqual({ kind: 'met' });
   });
 
+  test('a target period ending today counts as met, the day before it is still ahead', () => {
+    expect(getGraduationOutlook({ sorted, baseline: 20, target: 25, today: '2026-10-25' })).toEqual({ kind: 'met' });
+    expect(getGraduationOutlook({ sorted, baseline: 20, target: 25, today: '2026-10-24' })).toEqual({
+      kind: 'graduating',
+      period: p1,
+    });
+  });
+
+  test('a baseline exactly at the target is met without looking at the plan', () => {
+    expect(getGraduationOutlook({ sorted, baseline: 180, target: 180, today })).toEqual({ kind: 'met' });
+  });
+
   test('open-ended without a target', () => {
     expect(getGraduationOutlook({ sorted, baseline: 20, target: null, today })).toEqual({ kind: 'open', endsIn: p3 });
   });

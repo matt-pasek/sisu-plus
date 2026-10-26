@@ -4,6 +4,8 @@ import type { StudyPeriodInfo } from '@/app/api/dataPoints/getStudyPeriodMap';
 import { makePeriod } from './__fixtures__/timeline';
 import {
   getAveragePace,
+  getChartPeriods,
+  getEarnedPace,
   getHeaviestPeriod,
   getNeededPerPeriod,
   getPlanSpan,
@@ -108,5 +110,34 @@ describe('getNeededPerPeriod', () => {
     expect(getNeededPerPeriod(null, 82, 9)).toBeNull();
     expect(getNeededPerPeriod(180, 82, 0)).toBeNull();
     expect(getNeededPerPeriod(180, 180, 3)).toBeNull();
+  });
+});
+
+describe('getChartPeriods', () => {
+  const sorted = [summary(p1, 6, 0), summary(p2, 0, 10), summary(summer, 0, 0), summary(p3, 0, 5), summary(p4, 0, 0)];
+  const span = { from: p1, to: p3 };
+
+  test('runs over the whole plan, past included, and skips empty hidden summers', () => {
+    expect(getChartPeriods(sorted, span).map((entry) => entry.periodLocator)).toEqual(['p1', 'p2', 'p3']);
+  });
+
+  test('keeps a hidden summer that holds credits', () => {
+    const withSummer = sorted.map((entry) => (entry.periodLocator === 'summer' ? summary(summer, 3, 0) : entry));
+    expect(getChartPeriods(withSummer, span).map((entry) => entry.periodLocator)).toContain('summer');
+  });
+
+  test('is empty without a plan span', () => {
+    expect(getChartPeriods(sorted, null)).toEqual([]);
+  });
+});
+
+describe('getEarnedPace', () => {
+  test('averages what was completed over the periods already behind you', () => {
+    const chartPeriods = [summary(p1, 14, 0), summary(p2, 18, 0), summary(p3, 0, 5)];
+    expect(getEarnedPace(chartPeriods, '2027-01-10')).toBe(16);
+  });
+
+  test('is null before any period of the plan has ended', () => {
+    expect(getEarnedPace([summary(p1, 0, 5)], '2026-09-10')).toBeNull();
   });
 });

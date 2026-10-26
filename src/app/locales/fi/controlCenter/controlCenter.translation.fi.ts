@@ -55,7 +55,6 @@ export const controlCenterTranslation: ControlCenterTranslation = {
     },
     eyebrow: 'Ilmoitukset',
     lead: {
-      body: 'Kuinka aikaisin SISU+ muistuttaa ennen ilmoittautumisikkunan avautumista.',
       options: {
         0: 'Avautuessa',
         15: '15 min ennen',
@@ -64,7 +63,7 @@ export const controlCenterTranslation: ControlCenterTranslation = {
         120: '2 h ennen',
         1440: '1 päivä ennen',
       },
-      title: 'Ilmoittautumisen ennakkomuistutus',
+      title: 'Muistuta',
     },
     never: 'Ei koskaan',
     nudge: {

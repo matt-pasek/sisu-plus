@@ -7,7 +7,7 @@ import { useAddCourseToPlan } from '@/app/api/dataPoints/useAddCourseToPlan';
 import { useRemoveCourseFromPlan } from '@/app/api/dataPoints/useRemoveCourseFromPlan';
 import { notify } from '@/app/components/ui/notify';
 import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
-import { ADD_UNDO_MS } from '@/app/views/timeline/constants/addCourse.const';
+import { ADD_UNDO_MS, MIN_TOAST_UNDO_MS } from '@/app/views/timeline/constants/addCourse.const';
 import { toCandidateCourse } from '@/app/views/timeline/util/candidateCourse';
 
 export interface AddCourseInput {
@@ -40,6 +40,7 @@ export const useAddCourseFlow = ({ planId, studyPeriodMap }: Args) => {
   const [undoing, setUndoing] = useState<AddedCourse | null>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
   const undoTimerRef = useRef<number | undefined>(undefined);
+  const undoableRef = useRef<{ course: AddedCourse; until: number } | null>(null);
   const sessionRef = useRef(0);
   const { mutate: addMutate } = useAddCourseToPlan();
   const { mutate: removeMutate } = useRemoveCourseFromPlan();
@@ -52,6 +53,51 @@ export const useAddCourseFlow = ({ planId, studyPeriodMap }: Args) => {
 
   useEffect(() => clearUndoTimer, [clearUndoTimer]);
 
+  const startUndoWindow = useCallback(
+    (course: AddedCourse) => {
+      clearUndoTimer();
+      setLastAdded(course);
+      undoableRef.current = { course, until: Date.now() + ADD_UNDO_MS };
+      undoTimerRef.current = window.setTimeout(() => {
+        setLastAdded(null);
+        undoableRef.current = null;
+      }, ADD_UNDO_MS);
+    },
+    [clearUndoTimer],
+  );
+
+  const endUndoWindow = useCallback(() => {
+    clearUndoTimer();
+    setLastAdded(null);
+    undoableRef.current = null;
+  }, [clearUndoTimer]);
+
+  const removeAdded = useCallback(
+    (course: AddedCourse) => {
+      removeMutate(
+        { courseUnitId: course.id, planId: course.planId },
+        {
+          onError: () => notify.error(t('addCourse.undoFailed', { course: course.name })),
+          onSettled: () => setUndoing(null),
+        },
+      );
+      setUndoing(course);
+    },
+    [removeMutate, t],
+  );
+
+  const handOffUndo = useCallback(
+    (course: AddedCourse, durationMs: number) => {
+      if (durationMs < MIN_TOAST_UNDO_MS) return;
+      notify.undoable(t('addCourse.addedToast', { course: course.name }), {
+        label: t('addCourse.undo'),
+        onAction: () => removeAdded(course),
+        durationMs,
+      });
+    },
+    [removeAdded, t],
+  );
+
   const open = useCallback((periodLocator: string, trigger: HTMLElement) => {
     triggerRef.current = trigger;
     setOpenLocator(periodLocator);
@@ -59,11 +105,12 @@ export const useAddCourseFlow = ({ planId, studyPeriodMap }: Args) => {
 
   const dismiss = useCallback(() => {
     sessionRef.current += 1;
-    clearUndoTimer();
-    setLastAdded(null);
+    const undoable = undoableRef.current;
+    if (undoable) handOffUndo(undoable.course, undoable.until - Date.now());
+    endUndoWindow();
     setOpenLocator(null);
     triggerRef.current = null;
-  }, [clearUndoTimer]);
+  }, [endUndoWindow, handOffUndo]);
 
   const close = useCallback(() => {
     triggerRef.current?.focus({ preventScroll: true });
@@ -80,8 +127,7 @@ export const useAddCourseFlow = ({ planId, studyPeriodMap }: Args) => {
       const { courseUnitId, courseUnitGroupId, name } = input.option;
       const course = { id: courseUnitId, name, planId };
       const session = sessionRef.current;
-      clearUndoTimer();
-      setLastAdded(null);
+      endUndoWindow();
       setPendingAdd(course);
       addMutate(
         {
@@ -100,32 +146,22 @@ export const useAddCourseFlow = ({ planId, studyPeriodMap }: Args) => {
         },
         {
           onSuccess: () => {
-            if (sessionRef.current !== session) return;
-            clearUndoTimer();
-            setLastAdded(course);
-            undoTimerRef.current = window.setTimeout(() => setLastAdded(null), ADD_UNDO_MS);
+            if (sessionRef.current === session) startUndoWindow(course);
+            else handOffUndo(course, ADD_UNDO_MS);
           },
           onError: () => notify.error(t('addCourse.addFailed', { course: name })),
           onSettled: () => setPendingAdd((current) => (current?.id === courseUnitId ? null : current)),
         },
       );
     },
-    [addMutate, clearUndoTimer, isWriting, planId, studyPeriodMap, t],
+    [addMutate, endUndoWindow, handOffUndo, isWriting, planId, startUndoWindow, studyPeriodMap, t],
   );
 
   const undo = useCallback(() => {
     if (!lastAdded || lastAdded.planId !== planId || isWriting) return;
-    clearUndoTimer();
-    removeMutate(
-      { courseUnitId: lastAdded.id, planId: lastAdded.planId },
-      {
-        onError: () => notify.error(t('addCourse.undoFailed', { course: lastAdded.name })),
-        onSettled: () => setUndoing(null),
-      },
-    );
-    setUndoing(lastAdded);
-    setLastAdded(null);
-  }, [clearUndoTimer, isWriting, lastAdded, planId, removeMutate, t]);
+    endUndoWindow();
+    removeAdded(lastAdded);
+  }, [endUndoWindow, isWriting, lastAdded, planId, removeAdded]);
 
   const pendingAddId = idInPlan(pendingAdd, planId);
   const lastAddedId = idInPlan(lastAdded, planId);

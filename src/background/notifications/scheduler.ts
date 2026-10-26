@@ -1,6 +1,7 @@
 import { parseIcsCalendar } from '@ts-ics/schema-zod';
 import type { IcsEvent } from 'ts-ics';
 import { fetchMoodleCalendar } from '@/background/moodle/moodleFetch';
+import { decodeHtmlEntities, getCategoryLabel, getFirstIcsCategory } from '@/shared/icsCategory';
 import { classReminderPayload } from '@/background/notifications/classReminderPayload';
 import {
   classReminderAlarms,
@@ -65,10 +66,10 @@ const toMoodleDeadline = (event: IcsEvent): CachedMoodleDeadline | null => {
   if (!date) return null;
 
   return {
-    course: event.categories?.[0] ?? null,
+    course: getFirstIcsCategory(event.categories),
     dueAt: date.toISOString(),
     id: event.uid,
-    title: event.summary,
+    title: decodeHtmlEntities(event.summary),
   };
 };
 
@@ -199,7 +200,7 @@ const getMoodlePayload = (
   if (!deadline) return null;
 
   return {
-    body: `${deadline.title}${deadline.course ? ` (${deadline.course})` : ''}`,
+    body: `${deadline.title}${deadline.course ? ` (${getCategoryLabel(deadline.course)})` : ''}`,
     eventId: `${deadline.id}:${trigger}`,
     source: 'moodle',
     title: trigger === '1h' ? s.moodleTitleHour : s.moodleTitleTomorrow,

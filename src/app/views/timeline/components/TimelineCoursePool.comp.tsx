@@ -99,45 +99,47 @@ export const TimelineCoursePool: React.FC<Props> = ({
             </p>
           </div>
         )}
-        <AnimatePresence initial={false}>
-          {isDropTarget && (
-            <motion.div
-              key="unschedule-drop-overlay"
-              animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
-              className="pointer-events-none absolute inset-x-4 top-14 z-30 rounded-md border border-accent/60 bg-accent px-2 py-1.5 text-center text-xs font-semibold text-offwhite shadow-[0_8px_20px_rgba(0,0,0,0.28)]"
-              exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: -4, filter: 'blur(2px)' }}
-              initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: -4, filter: 'blur(2px)' }}
-              transition={{ duration: shouldReduceMotion ? 0.01 : 0.18, ease: [0.25, 1, 0.5, 1] }}
-            >
-              {t('pool.unscheduleDrop')}
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <div className="relative flex min-h-0 flex-1 flex-col">
+          <AnimatePresence initial={false}>
+            {isDropTarget && (
+              <motion.div
+                key="unschedule-drop-overlay"
+                animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
+                className="pointer-events-none absolute inset-x-4 top-3 z-30 rounded-md border border-accent/60 bg-accent px-2 py-1.5 text-center text-xs font-semibold text-offwhite shadow-[0_8px_20px_rgba(0,0,0,0.28)]"
+                exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: -4, filter: 'blur(2px)' }}
+                initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: -4, filter: 'blur(2px)' }}
+                transition={{ duration: shouldReduceMotion ? 0.01 : 0.18, ease: [0.25, 1, 0.5, 1] }}
+              >
+                {t('pool.unscheduleDrop')}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-        <div
-          className={`flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto p-3 transition-colors duration-200 [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border2 ${
-            isDropTarget ? 'bg-accent/10' : isDragging ? 'bg-container2/40' : ''
-          }`}
-        >
-          {unscheduledCourses.length > 0 ? (
-            unscheduledCourses.map((course) => (
-              <DraggableTimelineCourseCard
-                key={getCourseKey(course)}
-                course={course}
-                color={getModuleColor(course.moduleId)}
-                disabled={course.isPassed}
-                dragPeriodCount={draftOriginalPeriodCounts.get(course.courseUnitId)}
-                isDraft={draftCourseIds.has(course.courseUnitId)}
-                className="shrink-0"
-                onDismissValidationWarning={onDismissValidationWarning}
-                validationWarnings={validationWarnings.get(course.courseUnitId)}
-              />
-            ))
-          ) : (
-            <div className="rounded-lg border border-dashed border-border p-4 text-sm text-lightGrey">
-              {t('pool.empty')}
-            </div>
-          )}
+          <div
+            className={`flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto p-3 transition-colors duration-200 [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border2 ${
+              isDropTarget ? 'bg-accent/10' : isDragging ? 'bg-container2/40' : ''
+            }`}
+          >
+            {unscheduledCourses.length > 0 ? (
+              unscheduledCourses.map((course) => (
+                <DraggableTimelineCourseCard
+                  key={getCourseKey(course)}
+                  course={course}
+                  color={getModuleColor(course.moduleId)}
+                  disabled={course.isPassed}
+                  dragPeriodCount={draftOriginalPeriodCounts.get(course.courseUnitId)}
+                  isDraft={draftCourseIds.has(course.courseUnitId)}
+                  className="shrink-0"
+                  onDismissValidationWarning={onDismissValidationWarning}
+                  validationWarnings={validationWarnings.get(course.courseUnitId)}
+                />
+              ))
+            ) : (
+              <div className="rounded-lg border border-dashed border-border p-4 text-sm text-lightGrey">
+                {t('pool.empty')}
+              </div>
+            )}
+          </div>
         </div>
       </Panel>
     </div>

@@ -1,6 +1,5 @@
 import type React from 'react';
-import type { KynnosLight } from '@/app/components/atmospheres/kynnos/Kynnos.comp';
-import type { KynnosParams } from '@/app/components/atmospheres/kynnos/kynnos-field';
+import type { KynnosLight, KynnosParams } from '@usva-ui/react/atmospheres/kynnos';
 
 /** The roles Kynnös reads, at the values of usva's own sisu theme. */
 export const HERO_GROUND_TOKENS = {

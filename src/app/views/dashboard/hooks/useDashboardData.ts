@@ -17,7 +17,7 @@ import { resolveCourseUnit } from '@/app/api/resolvers/resolveCourseUnit';
 import { t } from 'i18next';
 import { daysUntil } from '@/app/helpers/daysUntilToday';
 import { getUpcomingDeadlines } from '@/app/views/dashboard/util/upcomingDeadlines';
-import { isCourseUnitAttainment } from '@/app/helpers/isCourseUnitAttainment';
+import { getRecentCompletions } from '@/app/views/dashboard/util/recentCompletions';
 
 export const useDashboardData = () => {
   const { deadlines, deadlinesLoading, missingToken } = getMoodleDeadlines();
@@ -29,30 +29,31 @@ export const useDashboardData = () => {
   const selectedPlanId = plansQuery?.find((plan) => plan.primary)?.id ?? plansQuery?.[0].id;
   const { timelineCourses, isLoading: timelineLoading } = getTimelineCourses(selectedPlanId);
   const { studyPeriodMap, isLoading: periodsLoading } = getStudyPeriodMap();
-  const { data: completedCourses, isLoading: completedCoursesLoading } = useSisuQuery(
+  const { data: recentCompletions, isLoading: completedCoursesLoading } = useSisuQuery(
     ['dashboard-completed-courses'],
-    async () => {
-      const attainments = (await fetchAttainments())
-        .filter(isCourseUnitAttainment)
-        .filter((attainment) => attainment.primary && attainment.state !== 'FAILED')
-        .sort((a, b) => b.attainmentDate.localeCompare(a.attainmentDate));
-
-      return Promise.all(
-        attainments.map(async (attainment): Promise<DashboardCompletedCourse> => {
-          const courseUnit = await resolveCourseUnit(attainment.courseUnitId);
-          return {
-            id: attainment.id ?? attainment.courseUnitId,
-            courseUnitId: attainment.courseUnitId,
-            name: courseUnit.name ?? courseUnit.code ?? t('courses.completedCourse'),
-            code: courseUnit.code,
-            credits: attainment.credits,
-            grade: getGrade(attainment),
-            registrationDate: attainment.registrationDate,
-            attainmentDate: attainment.attainmentDate,
-          };
-        }),
-      );
-    },
+    async () =>
+      Promise.all(
+        getRecentCompletions(await fetchAttainments()).map(
+          async ({ attainment, kind }): Promise<DashboardCompletedCourse> => {
+            const courseUnit = await resolveCourseUnit(attainment.courseUnitId);
+            return {
+              id: attainment.id ?? attainment.courseUnitId,
+              courseUnitId: attainment.courseUnitId,
+              name: courseUnit.name ?? courseUnit.code ?? t('courses.completedCourse'),
+              code: courseUnit.code,
+              credits: attainment.credits,
+              grade: getGrade(attainment),
+              registrationDate: attainment.registrationDate,
+              attainmentDate: attainment.attainmentDate,
+              kind,
+            };
+          },
+        ),
+      ),
+  );
+  const completedCourses = useMemo(
+    () => recentCompletions?.filter((completion) => completion.kind === 'course'),
+    [recentCompletions],
   );
 
   const semesterCredits = activeCourses.reduce((s, c) => s + (c.credits ?? 0), 0);
@@ -70,6 +71,7 @@ export const useDashboardData = () => {
   return {
     activeCourses,
     completedCourses,
+    recentCompletions,
     completedCoursesLoading,
     coursesLoading,
     creditsDone,

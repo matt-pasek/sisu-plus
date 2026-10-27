@@ -26,7 +26,17 @@ export const RecentAchievementsContent: React.FC<{ courses: DashboardCompletedCo
             </span>
             <div className="min-w-0 flex-1">
               <p className="truncate text-[13px] font-semibold text-offwhite">{course.name}</p>
-              {course.code && <p className="mt-0.5 font-mono text-[10.5px] text-lightGrey">{course.code}</p>}
+              <div className="mt-0.5 flex min-w-0 items-center gap-2">
+                {course.code && <p className="font-mono text-[10.5px] text-lightGrey">{course.code}</p>}
+                {course.kind === 'assessmentItem' && (
+                  <span
+                    className="truncate rounded-full px-1.5 py-px text-[10px] font-medium text-lightGrey shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]"
+                    title={t('widgets.analytics.partialCompletionHint')}
+                  >
+                    {t('widgets.analytics.partialCompletion')}
+                  </span>
+                )}
+              </div>
             </div>
             <span className="font-mono text-[11px] text-lightGrey">{formatCredits(course.credits)}</span>
           </div>

@@ -14,7 +14,9 @@ export const formatStudyRightEnd = (
   };
 };
 
-export const getGrade = (attainment: CourseUnitAttainmentRestricted): number | string | null => {
+export const getGrade = (
+  attainment: Pick<CourseUnitAttainmentRestricted, 'gradeScaleId' | 'gradeId'>,
+): number | string | null => {
   if (attainment.gradeScaleId.includes('hyl-hyv')) return attainment.gradeId != null ? 'pass' : null;
   return attainment.gradeId >= 1 && attainment.gradeId <= 5 ? attainment.gradeId : null;
 };

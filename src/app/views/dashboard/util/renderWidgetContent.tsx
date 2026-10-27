@@ -27,6 +27,7 @@ import { RegistrationCourse } from '@/app/api/dataPoints/getRegistrationCourses'
 export interface WidgetContentContext {
   activeCourses: ActiveCourse[];
   completedCourses: DashboardCompletedCourse[] | undefined;
+  recentCompletions: DashboardCompletedCourse[] | undefined;
   completedCoursesLoading: boolean;
   coursesLoading: boolean;
   creditsDone: number;
@@ -102,7 +103,7 @@ const WIDGETS: Record<
   },
   'recent-achievements': {
     loading: (ctx) => ctx.completedCoursesLoading,
-    render: (ctx) => <RecentAchievementsContent courses={ctx.completedCourses ?? []} />,
+    render: (ctx) => <RecentAchievementsContent courses={ctx.recentCompletions ?? []} />,
   },
   'workload-forecast': {
     loading: (ctx) => ctx.timelineLoading || ctx.periodsLoading,

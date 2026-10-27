@@ -50,6 +50,7 @@ const DashboardView: React.FC = () => {
   const {
     activeCourses,
     completedCourses,
+    recentCompletions,
     completedCoursesLoading,
     coursesLoading,
     creditsDone,
@@ -80,6 +81,7 @@ const DashboardView: React.FC = () => {
   const widgetContentCtx: WidgetContentContext = {
     activeCourses,
     completedCourses,
+    recentCompletions,
     completedCoursesLoading,
     coursesLoading,
     creditsDone,

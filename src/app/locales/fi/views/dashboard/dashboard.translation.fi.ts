@@ -187,6 +187,8 @@ export const dashboardTranslation: DashboardTranslation = {
     },
     analytics: {
       moreGradesNeeded: 'Tarvitaan lisää arvioituja kursseja.',
+      partialCompletion: 'Osasuoritus',
+      partialCompletionHint: 'Osasuoritus on arvioitu; opintojakson suoritusta ei ole vielä kirjattu Sisuun.',
       creditWeightedGrades: 'Opintopistepainotetut arvosanat ajan yli',
       improving: 'Paranee',
       onTrack: 'Tahdissa',

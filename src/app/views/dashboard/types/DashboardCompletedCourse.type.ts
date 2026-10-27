@@ -1,3 +1,5 @@
+import type { CompletionKind } from '@/app/views/dashboard/util/recentCompletions';
+
 export interface DashboardCompletedCourse {
   id: string;
   courseUnitId: string;
@@ -7,4 +9,5 @@ export interface DashboardCompletedCourse {
   grade: number | string | null;
   registrationDate: string;
   attainmentDate: string;
+  kind: CompletionKind;
 }

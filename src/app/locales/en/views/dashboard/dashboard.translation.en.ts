@@ -185,6 +185,8 @@ export type DashboardTranslation = {
     };
     analytics: {
       moreGradesNeeded: string;
+      partialCompletion: string;
+      partialCompletionHint: string;
       creditWeightedGrades: string;
       improving: string;
       onTrack: string;
@@ -433,6 +435,8 @@ export const dashboardTranslation: DashboardTranslation = {
     },
     analytics: {
       moreGradesNeeded: 'More graded courses needed.',
+      partialCompletion: 'Partial completion',
+      partialCompletionHint: 'An assessment item is graded; the course completion isn’t registered in Sisu yet.',
       creditWeightedGrades: 'Credit-weighted grades over time',
       improving: 'Improving',
       onTrack: 'On track',

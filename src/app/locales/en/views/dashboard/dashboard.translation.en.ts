@@ -95,7 +95,7 @@ export type DashboardTranslation = {
       noUrgentItems: string;
       urgentItems: string;
       tone: {
-        overdue: string;
+        pastDue: string;
         urgent: string;
         soon: string;
         later: string;
@@ -343,7 +343,7 @@ export const dashboardTranslation: DashboardTranslation = {
       noUrgentItems: 'No urgent items',
       urgentItems: '{{count}} urgent item(s)',
       tone: {
-        overdue: 'Overdue',
+        pastDue: 'Past due · check Moodle',
         urgent: 'Urgent',
         soon: 'Soon',
         later: 'Later',

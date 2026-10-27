@@ -16,6 +16,7 @@ import { fetchAttainments } from '@/app/api/endpoints/attainments';
 import { resolveCourseUnit } from '@/app/api/resolvers/resolveCourseUnit';
 import { t } from 'i18next';
 import { daysUntil } from '@/app/helpers/daysUntilToday';
+import { getUpcomingDeadlines } from '@/app/views/dashboard/util/upcomingDeadlines';
 import { isCourseUnitAttainment } from '@/app/helpers/isCourseUnitAttainment';
 
 export const useDashboardData = () => {
@@ -62,9 +63,9 @@ export const useDashboardData = () => {
     [studyPeriodMap, timelineCourses],
   );
   const semesterSummaries = useMemo(() => getCreditsBySemester(periodSummaries), [periodSummaries]);
-  const upcomingDeadlines = deadlines?.events
-    ? Object.values(deadlines.events).filter((ev) => ev.end?.date && daysUntil(ev.end?.date) <= 5).length
-    : 0;
+  const upcomingDeadlines = getUpcomingDeadlines(deadlines?.events ?? [], new Date()).filter(
+    (ev) => daysUntil(ev.end?.date ?? ev.start.date) <= 5,
+  ).length;
 
   return {
     activeCourses,

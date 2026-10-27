@@ -5,6 +5,7 @@ import { useTranslationWithPrefix } from '@/app/hooks/useTranslationWithPrefix';
 import { useChromeStorage } from '@/app/hooks/useChromeStorage';
 import { getCurrentLocale } from '@/app/i18n';
 import { hexA } from '@/app/views/dashboard/util/hexA';
+import { getUpcomingDeadlines, getVisibleDeadlines, isPastDue } from '@/app/views/dashboard/util/upcomingDeadlines';
 
 interface Props {
   deadlines?: IcsCalendar;
@@ -18,14 +19,23 @@ interface DeadlineTone {
   label: string;
 }
 
-const getDeadlineTone = (days: number): DeadlineTone => {
+const PAST_DUE_TONE: DeadlineTone = {
+  color: '#7878a0',
+  badgeBg: 'var(--color-container2)',
+  cardBg: 'transparent',
+  cardShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+  label: 'pastDue',
+};
+
+const getDeadlineTone = (days: number, pastDue: boolean): DeadlineTone => {
+  if (pastDue) return PAST_DUE_TONE;
   if (days <= 2) {
     return {
       color: '#f06b6b',
       badgeBg: hexA('#f06b6b', 0.13),
       cardBg: hexA('#f06b6b', 0.08),
       cardShadow: `inset 0 0 0 1px ${hexA('#f06b6b', 0.16)}`,
-      label: days < 0 ? 'overdue' : 'urgent',
+      label: 'urgent',
     };
   }
   if (days <= 5) {
@@ -56,14 +66,10 @@ function getDateLabel(event: IcsEvent): string {
   return new Date(date).toLocaleDateString(getCurrentLocale(), { month: 'short', day: 'numeric' });
 }
 
-function sortEvents(events: IcsEvent[]): IcsEvent[] {
-  return [...events].sort((first, second) => daysUntil(first.end?.date) - daysUntil(second.end?.date));
-}
-
 const DeadlineRow: React.FC<{ event: IcsEvent; isLast: boolean }> = ({ event, isLast }) => {
   const { t } = useTranslationWithPrefix('views.dashboard');
   const days = daysUntil(event.end?.date);
-  const tone = getDeadlineTone(days);
+  const tone = getDeadlineTone(days, isPastDue(event, new Date()));
   const toneLabel = t(`widgets.moodleDeadlines.tone.${tone.label}`);
   const dayLabel = `${days < 0 ? days : days}d`;
 
@@ -111,8 +117,9 @@ const DeadlineRow: React.FC<{ event: IcsEvent; isLast: boolean }> = ({ event, is
 
 export const MoodleDeadlinesContent: React.FC<Props> = ({ deadlines }) => {
   const { t } = useTranslationWithPrefix('views.dashboard');
-  const events = sortEvents(deadlines?.events ?? []);
-  const urgentCount = events.filter((event) => daysUntil(event.end?.date) <= 2).length;
+  const now = new Date();
+  const events = getVisibleDeadlines(deadlines?.events ?? [], now);
+  const urgentCount = getUpcomingDeadlines(events, now).filter((event) => daysUntil(event.end?.date) <= 2).length;
   const [prefs] = useChromeStorage();
   const moodleBaseUrl = prefs.universityConfig?.moodleOrigin ?? '';
 

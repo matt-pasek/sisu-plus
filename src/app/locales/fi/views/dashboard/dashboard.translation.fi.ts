@@ -97,7 +97,7 @@ export const dashboardTranslation: DashboardTranslation = {
       noUrgentItems: 'Ei kiireellisiä tehtäviä',
       urgentItems: '{{count}} kiireellinen tehtävä',
       tone: {
-        overdue: 'Myöhässä',
+        pastDue: 'Määräaika mennyt · tarkista Moodle',
         urgent: 'Kiireellinen',
         soon: 'Pian',
         later: 'Myöhemmin',

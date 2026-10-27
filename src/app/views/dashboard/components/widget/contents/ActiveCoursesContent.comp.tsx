@@ -30,10 +30,11 @@ export const ActiveCoursesContent: React.FC<Props> = ({ activeCourses, moduleCol
             </div>
             {moduleName && (
               <span
-                className="shrink-0 rounded-full px-2.5 py-0.75 text-[10.5px] font-semibold"
+                className="max-w-[45%] truncate rounded-full px-2.5 py-0.75 text-[10.5px] font-semibold"
                 style={{ background: hexA(color, 0.12), color }}
+                title={moduleName}
               >
-                {moduleName.split(' ').slice(0, 2).join(' ')}
+                {moduleName}
               </span>
             )}
             {course.credits != null && (
